@@ -282,6 +282,11 @@ export function createAppTheme(mode: "light" | "dark") {
       MuiTextField: {
         defaultProps: {
           variant: "outlined",
+          slotProps: {
+            inputLabel: {
+              shrink: true,
+            },
+          },
         },
         styleOverrides: {
           root: {

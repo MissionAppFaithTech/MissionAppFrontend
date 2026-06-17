@@ -5,24 +5,59 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
-import { brandColors, brandGradient } from '@/theme/theme';
+import { brandColors } from '@/theme/theme';
+
+export type PageNavbarVariant = 'default' | 'landing';
 
 type PageNavbarProps = {
   children: ReactNode;
   maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+  variant?: PageNavbarVariant;
+  /** Landing only: show delimiter after the user scrolls */
+  scrolled?: boolean;
 };
 
-export default function PageNavbar({ children, maxWidth = 'lg' }: PageNavbarProps) {
+const variantStyles = {
+  default: {
+    background: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'light' ? brandColors.missionary : brandColors.missionaryDark,
+    color: brandColors.white,
+  },
+  landing: {
+    color: brandColors.missionary,
+    backgroundColor: 'transparent',
+    boxShadow: 'none',
+  },
+} as const;
+
+export default function PageNavbar({
+  children,
+  maxWidth = 'lg',
+  variant = 'default',
+  scrolled = false,
+}: PageNavbarProps) {
+  const isLanding = variant === 'landing';
+
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
-        background: (theme) =>
-          theme.palette.mode === 'light' ? brandColors.missionary : brandColors.missionaryDark,
-        color: brandColors.white,
-        borderBottom: '1px solid',
+        top: 0,
+        zIndex: (theme) => theme.zIndex.appBar,
+        ...variantStyles[variant],
+        borderBottom: isLanding
+          ? scrolled
+            ? '1px solid'
+            : 'none'
+          : '1px solid',
         borderColor: 'divider',
+        transition: 'border-color 0.2s ease, background-color 0.2s ease, backdrop-filter 0.2s ease',
+        ...(isLanding &&
+          scrolled && {
+            backgroundColor: 'rgba(247, 249, 252, 0.92)',
+            backdropFilter: 'blur(8px)',
+          }),
       }}
     >
       <Container maxWidth={maxWidth}>

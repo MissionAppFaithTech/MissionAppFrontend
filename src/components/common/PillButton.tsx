@@ -33,10 +33,15 @@ const hoverLightSx = {
 const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
   cta: {
     border: "2px solid",
-    borderColor: "mission.dark",
-    bgcolor: "mission.main",
-    color: "mission.contrastText",
-    "&:hover": hoverLightSx,
+    borderColor: "primary.dark",
+    bgcolor: "primary.main",
+    color: "primary.contrastText",
+    "&:hover": {
+      bgcolor: "connection.main",
+      borderColor: "connection.main",
+      color: "common.white",
+      boxShadow: "none",
+    },
   },
   outline: {
     bgcolor: "transparent",
