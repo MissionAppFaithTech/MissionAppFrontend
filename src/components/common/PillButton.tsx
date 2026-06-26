@@ -4,7 +4,14 @@ import Button, { type ButtonProps } from "@mui/material/Button";
 import type { SxProps, Theme } from "@mui/material/styles";
 import Link from "next/link";
 
-type PillButtonTone = "cta" | "outline" | "ghost";
+type PillButtonTone =
+  | "cta"
+  | "mission"
+  | "missionFlat"
+  | "missionOutline"
+  | "primaryOutline"
+  | "outline"
+  | "ghost";
 
 type PillButtonProps = ButtonProps & {
   href?: string;
@@ -40,6 +47,57 @@ const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
       bgcolor: "connection.main",
       borderColor: "connection.main",
       color: "common.white",
+      boxShadow: "none",
+    },
+  },
+  mission: {
+    border: "2px solid",
+    borderColor: "mission.dark",
+    bgcolor: "mission.main",
+    color: "mission.contrastText",
+    "&:hover": {
+      bgcolor: "connection.main",
+      borderColor: "connection.main",
+      color: "common.white",
+      boxShadow: "none",
+    },
+  },
+  missionFlat: {
+    border: "2px solid",
+    borderColor: "mission.dark",
+    borderRadius: "6px",
+    bgcolor: "mission.main",
+    color: "mission.contrastText",
+    "&:hover": {
+      bgcolor: "connection.main",
+      borderColor: "connection.main",
+      color: "common.white",
+      boxShadow: "none",
+    },
+  },
+  missionOutline: {
+    border: "2px solid",
+    borderColor: "mission.main",
+    borderRadius: "6px",
+    bgcolor: "transparent",
+    color: "mission.main",
+    "&:hover": {
+      bgcolor: "mission.main",
+      borderColor: "mission.dark",
+      color: "mission.contrastText",
+      boxShadow: "none",
+    },
+  },
+  primaryOutline: {
+    border: "2px solid",
+    borderColor: "primary.main",
+    borderRadius: "6px",
+    bgcolor: "transparent",
+    color: "primary.main",
+    "&:hover": {
+      bgcolor: "primary.main",
+      borderColor: "primary.dark",
+      color: "primary.contrastText",
       boxShadow: "none",
     },
   },

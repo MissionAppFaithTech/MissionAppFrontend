@@ -60,7 +60,18 @@ export default function PageNavbar({
           }),
       }}
     >
-      <Container maxWidth={maxWidth}>
+      <Container
+        maxWidth={isLanding ? false : maxWidth}
+        sx={
+          isLanding
+            ? {
+                px: { xs: 2, sm: 3, md: 3, lg: 4 },
+                maxWidth: { md: 1280, lg: 1440, xl: 1600 },
+                mx: "auto",
+              }
+            : undefined
+        }
+      >
         <Toolbar disableGutters sx={{ gap: 2, py: 1 }}>
           {children}
         </Toolbar>
