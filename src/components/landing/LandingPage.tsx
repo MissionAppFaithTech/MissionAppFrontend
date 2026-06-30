@@ -116,7 +116,7 @@ function HeroHeadline() {
           Conectando
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'supporter.main' }}>
+          <Box component="span" sx={{ color: 'mission.main' }}>
             missionários
           </Box>
           <Box component="span" sx={{ color: 'primary.main' }}>
@@ -131,7 +131,7 @@ function HeroHeadline() {
           <Box component="span" sx={{ color: 'primary.main' }}>
             redor do{' '}
           </Box>
-          <Box component="span" sx={{ color: 'supporter.main' }}>
+          <Box component="span" sx={{ color: 'mission.main' }}>
             mundo
           </Box>
         </Box>

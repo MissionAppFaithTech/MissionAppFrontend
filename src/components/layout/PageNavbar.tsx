@@ -5,7 +5,7 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
-import { brandColors } from '@/theme/theme';
+import { colors, roleColors } from '@/theme/theme';
 
 export type PageNavbarVariant = 'default' | 'landing';
 
@@ -20,11 +20,11 @@ type PageNavbarProps = {
 const variantStyles = {
   default: {
     background: (theme: { palette: { mode: string } }) =>
-      theme.palette.mode === 'light' ? brandColors.missionary : brandColors.missionaryDark,
-    color: brandColors.white,
+      theme.palette.mode === 'light' ? roleColors.missionary : colors.textPrimary,
+    color: colors.surface,
   },
   landing: {
-    color: brandColors.missionary,
+    color: roleColors.missionary,
     backgroundColor: 'transparent',
     boxShadow: 'none',
   },
