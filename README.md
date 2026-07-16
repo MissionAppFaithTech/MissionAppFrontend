@@ -37,10 +37,10 @@ Hoje, muito disso se perde em mensagens soltas, grupos dispersos e ferramentas q
 | Framework | [Next.js 16](https://nextjs.org/) (App Router) |
 | UI | [React 19](https://react.dev/) |
 | Linguagem | [TypeScript](https://www.typescriptlang.org/) |
-| Componentes | [MUI (Material UI) 9](https://mui.com/) + Emotion |
+| Componentes | [MUI (Material UI) v6](https://mui.com/) + PIGMENT |
 | Estilos utilitários | [Tailwind CSS 4](https://tailwindcss.com/) |
 | Formulários | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
-| HTTP | [Axios](https://axios-http.com/) |
+| HTTP | [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) |
 | Estado | [Zustand](https://zustand.docs.pmnd.rs/) |
 | Tema | [next-themes](https://github.com/pacocoursey/next-themes) + design system próprio |
 | Tipografia | [DM Sans](https://fonts.google.com/specimen/DM+Sans) via `next/font` |
