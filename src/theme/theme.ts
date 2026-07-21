@@ -1,29 +1,44 @@
 import { createTheme, type ThemeOptions } from "@mui/material/styles";
 
-/** Official MISSION APP brand tokens */
-export const brandColors = {
+/** UI color tokens */
+export const colors = {
+  primary: "#0D2B5C",
+  secondary: "#F97316",
+
+  success: "#22C55E",
+  warning: "#F59E0B",
+  error: "#EF4444",
+
+  background: "#F7F9FC",
+  surface: "#FFFFFF",
+
+  textPrimary: "#081C3A",
+  textSecondary: "#6B7280",
+
+  border: "#D1D5DB",
+} as const;
+
+export const roleColors = {
   missionary: "#0D2B5C",
-  missionaryDark: "#081C3A",
-  missionaryLight: "#1A3D6E",
   supporter: "#6BA6FF",
-  supporterDark: "#4F8FE6",
-  supporterLight: "#93C5FD",
-  mission: "#F97316",
-  missionDark: "#EA580C",
-  missionLight: "#FB923C",
   intermediate: "#2563EB",
-  intermediateDark: "#1D4ED8",
+  mission: "#F97316",
+} as const;
+
+/** Derived shades for MUI palette variants */
+const shades = {
+  primaryLight: "#1A3D6E",
+  supporterLight: "#93C5FD",
+  supporterDark: "#4F8FE6",
   intermediateLight: "#3B82F6",
-  surfaceLight: "#EAF1FA",
-  backgroundLight: "#F7F9FC",
-  backgroundDark: "#081C3A",
-  white: "#FFFFFF",
-  grayMedium: "#6B7280",
-  grayDark: "#374151",
+  intermediateDark: "#1D4ED8",
+  missionLight: "#FB923C",
+  missionDark: "#EA580C",
+  surfaceMuted: "#EAF1FA",
 } as const;
 
 export const brandGradient =
-  "linear-gradient(135deg, #0D2B5C 0%, #2563EB 100%)";
+  `linear-gradient(135deg, ${roleColors.missionary} 0%, ${roleColors.intermediate} 100%)`;
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -131,40 +146,49 @@ function createTypography(): ThemeOptions["typography"] {
 
 const extendedPalette = {
   primary: {
-    main: brandColors.missionary,
-    light: brandColors.missionaryLight,
-    dark: brandColors.missionaryDark,
-    contrastText: brandColors.white,
+    main: colors.primary,
+    light: shades.primaryLight,
+    dark: colors.textPrimary,
+    contrastText: colors.surface,
   },
   secondary: {
-    main: brandColors.supporter,
-    light: brandColors.supporterLight,
-    dark: brandColors.supporterDark,
-    contrastText: brandColors.missionary,
+    main: colors.secondary,
+    light: shades.missionLight,
+    dark: shades.missionDark,
+    contrastText: colors.surface,
   },
   connection: {
-    main: brandColors.intermediate,
-    light: brandColors.intermediateLight,
-    dark: brandColors.intermediateDark,
-    contrastText: brandColors.white,
+    main: roleColors.intermediate,
+    light: shades.intermediateLight,
+    dark: shades.intermediateDark,
+    contrastText: colors.surface,
   },
   supporter: {
-    main: brandColors.supporter,
-    light: brandColors.supporterLight,
-    dark: brandColors.supporterDark,
-    contrastText: brandColors.missionary,
+    main: roleColors.supporter,
+    light: shades.supporterLight,
+    dark: shades.supporterDark,
+    contrastText: roleColors.missionary,
   },
   mission: {
-    main: brandColors.mission,
-    light: brandColors.missionLight,
-    dark: brandColors.missionDark,
-    contrastText: brandColors.white,
+    main: roleColors.mission,
+    light: shades.missionLight,
+    dark: shades.missionDark,
+    contrastText: colors.surface,
   },
   surface: {
-    main: brandColors.surfaceLight,
-    light: brandColors.white,
+    main: shades.surfaceMuted,
+    light: colors.surface,
     dark: "#D5E4F4",
-    contrastText: brandColors.missionary,
+    contrastText: roleColors.missionary,
+  },
+  success: {
+    main: colors.success,
+  },
+  warning: {
+    main: colors.warning,
+  },
+  error: {
+    main: colors.error,
   },
 };
 
@@ -176,17 +200,15 @@ export function createAppTheme(mode: "light" | "dark") {
       mode,
       ...extendedPalette,
       background: {
-        default: isLight
-          ? brandColors.backgroundLight
-          : brandColors.backgroundDark,
-        paper: isLight ? brandColors.white : brandColors.missionaryDark,
+        default: isLight ? colors.background : colors.textPrimary,
+        paper: isLight ? colors.surface : shades.primaryLight,
       },
       text: {
-        primary: isLight ? brandColors.missionary : brandColors.white,
-        secondary: isLight ? brandColors.grayMedium : "#94A3B8",
+        primary: isLight ? colors.textPrimary : colors.surface,
+        secondary: isLight ? colors.textSecondary : "#94A3B8",
       },
       divider: isLight
-        ? "rgba(107, 114, 128, 0.2)"
+        ? `${colors.border}33`
         : "rgba(107, 166, 255, 0.15)",
     },
     typography: createTypography(),
@@ -194,15 +216,13 @@ export function createAppTheme(mode: "light" | "dark") {
       MuiCssBaseline: {
         styleOverrides: {
           body: {
-            backgroundColor: isLight
-              ? brandColors.backgroundLight
-              : brandColors.backgroundDark,
-            color: isLight ? brandColors.missionary : brandColors.white,
+            backgroundColor: isLight ? colors.background : colors.textPrimary,
+            color: isLight ? colors.textPrimary : colors.surface,
           },
           a: {
-            color: brandColors.intermediate,
+            color: roleColors.intermediate,
             "&:hover": {
-              color: brandColors.intermediateDark,
+              color: shades.intermediateDark,
             },
           },
         },
@@ -224,18 +244,18 @@ export function createAppTheme(mode: "light" | "dark") {
             props: { color: "secondary", variant: "contained" },
             style: {
               "&:hover": {
-                backgroundColor: brandColors.intermediate,
-                color: brandColors.white,
+                backgroundColor: roleColors.intermediate,
+                color: colors.surface,
               },
             },
           },
           {
             props: { color: "primary", variant: "outlined" },
             style: {
-              borderColor: brandColors.missionary,
-              color: brandColors.missionary,
+              borderColor: colors.primary,
+              color: colors.primary,
               "&:hover": {
-                borderColor: brandColors.intermediate,
+                borderColor: roleColors.intermediate,
                 backgroundColor: "rgba(37, 99, 235, 0.08)",
               },
             },
@@ -243,21 +263,21 @@ export function createAppTheme(mode: "light" | "dark") {
           {
             props: { color: "supporter", variant: "contained" },
             style: {
-              backgroundColor: brandColors.supporter,
-              color: brandColors.missionary,
+              backgroundColor: roleColors.supporter,
+              color: roleColors.missionary,
               "&:hover": {
-                backgroundColor: brandColors.intermediate,
-                color: brandColors.white,
+                backgroundColor: roleColors.intermediate,
+                color: colors.surface,
               },
             },
           },
           {
             props: { color: "mission", variant: "contained" },
             style: {
-              backgroundColor: brandColors.mission,
-              color: brandColors.white,
+              backgroundColor: roleColors.mission,
+              color: colors.surface,
               "&:hover": {
-                backgroundColor: brandColors.intermediate,
+                backgroundColor: roleColors.intermediate,
               },
             },
           },
@@ -267,7 +287,7 @@ export function createAppTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             "&:hover": {
-              color: brandColors.intermediate,
+              color: roleColors.intermediate,
             },
           },
         },
@@ -291,7 +311,7 @@ export function createAppTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              backgroundColor: isLight ? brandColors.surfaceLight : undefined,
+              backgroundColor: isLight ? shades.surfaceMuted : undefined,
             },
           },
         },

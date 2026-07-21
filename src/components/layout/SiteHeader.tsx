@@ -16,7 +16,7 @@ import Link from "next/link";
 import Logo from "@/components/common/Logo";
 import PillButton from "@/components/common/PillButton";
 import PageNavbar from "@/components/layout/PageNavbar";
-import { brandColors } from "@/theme/theme";
+import { roleColors } from "@/theme/theme";
 
 const navLinks = [
   { label: "Início", href: "/", sectionId: "inicio" },
@@ -31,12 +31,12 @@ const navLinkSx = (isActive: boolean) => ({
   display: "inline-block",
   py: 0.5,
   textDecoration: "none",
-  color: isActive ? brandColors.intermediate : brandColors.missionary,
+  color: isActive ? roleColors.intermediate : roleColors.missionary,
   fontWeight: isActive ? 600 : 400,
   whiteSpace: "nowrap" as const,
   fontSize: { xs: "0.8125rem", sm: "0.875rem", md: "1rem" },
   transition: "color 0.2s ease",
-  "&:hover": { color: brandColors.intermediate },
+  "&:hover": { color: roleColors.intermediate },
   "&::after": {
     content: '""',
     position: "absolute",
@@ -44,7 +44,7 @@ const navLinkSx = (isActive: boolean) => ({
     bottom: 0,
     width: isActive ? "100%" : 0,
     height: 2,
-    bgcolor: brandColors.intermediate,
+    bgcolor: roleColors.intermediate,
     transition: "width 0.2s ease",
   },
   "&:hover::after": {
@@ -56,13 +56,13 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   display: "block",
   py: 1.5,
   textDecoration: "none",
-  color: isActive ? brandColors.intermediate : brandColors.missionary,
+  color: isActive ? roleColors.intermediate : roleColors.missionary,
   fontWeight: isActive ? 600 : 500,
   fontSize: "1.125rem",
   borderBottom: "1px solid",
   borderColor: "divider",
   transition: "color 0.2s ease",
-  "&:hover": { color: brandColors.intermediate },
+  "&:hover": { color: roleColors.intermediate },
 });
 
 export default function SiteHeader() {
@@ -157,7 +157,7 @@ export default function SiteHeader() {
             sx={{
               display: { xs: "inline-flex", md: "none" },
               ml: "auto",
-              color: brandColors.missionary,
+              color: roleColors.missionary,
             }}
           >
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
@@ -184,7 +184,7 @@ export default function SiteHeader() {
           <IconButton
             aria-label="Fechar menu"
             onClick={closeMobileMenu}
-            sx={{ color: brandColors.missionary }}
+            sx={{ color: roleColors.missionary }}
           >
             <CloseIcon />
           </IconButton>
