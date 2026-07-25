@@ -21,7 +21,14 @@ export default function ProfilePageContent() {
       <PageNavbar maxWidth="lg">
         <Logo size="sm" href="/profile" variant="dark" />
 
-        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
           <TextField
             placeholder="Pesquisar missionário"
             size="small"
@@ -39,12 +46,17 @@ export default function ProfilePageContent() {
               },
             }}
             sx={{
-              width: 280,
+              width: '100%',
+              maxWidth: 280,
               '& .MuiOutlinedInput-root': {
-                height: 36,
+                height: { xs: 34, sm: 36 },
                 bgcolor: 'background.paper',
                 borderRadius: 2,
-                fontSize: '0.8rem',
+                fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                px: { xs: 0.5, sm: 1 },
+              },
+              '& .MuiInputAdornment-root': {
+                mr: { xs: 0.25, sm: 1 },
               },
             }}
           />
@@ -53,8 +65,8 @@ export default function ProfilePageContent() {
         <PageNavbarActions>
           <Avatar
             sx={{
-              width: 42,
-              height: 42,
+              width: { xs: 36, sm: 42 },
+              height: { xs: 36, sm: 42 },
               bgcolor: 'supporter.light',
               color: 'common.black',
             }}
@@ -64,7 +76,13 @@ export default function ProfilePageContent() {
         </PageNavbarActions>
       </PageNavbar>
 
-      <Container maxWidth="lg" sx={{ py: 6 }}>
+      <Container
+        maxWidth="lg"
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 2, sm: 4, md: 6 },
+        }}
+      >
         <Stack spacing={2}>
           <ProfileSummaryCard profile={mockProfile} />
           <ProfileNavigation />

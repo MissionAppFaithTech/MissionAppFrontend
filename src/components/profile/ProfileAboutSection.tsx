@@ -21,7 +21,7 @@ type DetailRowProps = {
 
 function DetailRow({ label, value }: DetailRowProps) {
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.25, sm: 1 }}>
       <Typography variant="body2" sx={{ fontWeight: 700, flexShrink: 0 }}>
         {label}:
       </Typography>
@@ -36,14 +36,19 @@ export default function ProfileAboutSection({ data }: ProfileAboutSectionProps) 
       component="section"
       elevation={0}
       sx={{
-        borderRadius: 3,
+        borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
         boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
       }}
     >
-      <CardContent sx={{ p: 4, '&:last-child': { pb: 4 } }}>
-        <Stack spacing={2.5}>
+      <CardContent
+        sx={{
+          p: { xs: 2, sm: 3, md: 4 },
+          '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
+        }}
+      >
+        <Stack spacing={{ xs: 2, sm: 2.5 }}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
             <Typography variant="h6" color="primary.main">
               Sobre
@@ -52,7 +57,10 @@ export default function ProfileAboutSection({ data }: ProfileAboutSectionProps) 
               variant="outlined"
               color="primary"
               startIcon={<EditOutlinedIcon />}
-              sx={{ px: 2.5 }}
+              sx={{
+                px: { xs: 1.5, sm: 2.5 },
+                minWidth: { xs: 0, sm: 96 },
+              }}
             >
               Editar
             </Button>
