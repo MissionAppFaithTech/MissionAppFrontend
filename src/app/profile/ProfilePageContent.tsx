@@ -1,52 +1,92 @@
 'use client';
 
+import PersonIcon from '@mui/icons-material/Person';
+import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
-import ThemeToggle from '@/components/ThemeToggle';
+import InputAdornment from '@mui/material/InputAdornment';
+import Stack from '@mui/material/Stack';
+import TextField from '@mui/material/TextField';
+import SearchIcon from '@mui/icons-material/Search';
 import Logo from '@/components/common/Logo';
+import ProfileAboutSection from '@/components/profile/ProfileAboutSection';
+import ProfileNavigation from '@/components/profile/ProfileNavigation';
+import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
-import { CardContent, Card, Avatar, Stack, Button } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
+import { mockProfile } from '@/mocks/profile';
 
 export default function ProfilePageContent() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
-      <PageNavbar maxWidth="md">
-        <Logo size="sm" href="/profile" onDark />
+      <PageNavbar maxWidth="lg">
+        <Logo size="sm" href="/profile" variant="dark" />
+
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <TextField
+            placeholder="Pesquisar missionário"
+            size="small"
+            aria-label="Pesquisar missionário"
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                  </InputAdornment>
+                ),
+              },
+              htmlInput: {
+                readOnly: true,
+              },
+            }}
+            sx={{
+              width: '100%',
+              maxWidth: 280,
+              '& .MuiOutlinedInput-root': {
+                height: { xs: 34, sm: 36 },
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                fontSize: { xs: '0.7rem', sm: '0.8rem' },
+                px: { xs: 0.5, sm: 1 },
+              },
+              '& .MuiInputAdornment-root': {
+                mr: { xs: 0.25, sm: 1 },
+              },
+            }}
+          />
+        </Box>
+
         <PageNavbarActions>
-          <ThemeToggle />
+          <Avatar
+            sx={{
+              width: { xs: 36, sm: 42 },
+              height: { xs: 36, sm: 42 },
+              bgcolor: 'supporter.light',
+              color: 'common.black',
+            }}
+          >
+            <PersonIcon />
+          </Avatar>
         </PageNavbarActions>
       </PageNavbar>
 
-      <Container maxWidth="md" sx={{ py: 6 }}>
-        <Stack spacing={4}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Stack direction="row" spacing={2} sx={{ alignItems: 'center' }}>
-                <Avatar sx={{ width: 100, height: 100, mb: 2 }}>
-                  <PersonIcon />
-                </Avatar>
-                <Stack direction="column">
-                  <Stack direction="row" spacing={2} sx={{ alignItems: 'space-between' }}>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      @allanaoliveira
-                    </Typography>
-                    <Button variant="contained" color="supporter" size="small">
-                      Seguir
-                    </Button>
-                    <Button variant="contained" color="mission" size="small">
-                      Doar
-                    </Button>
-                  </Stack>
-                  <Typography variant="h6">Allana Oliveira</Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Vivendo sempre uma aventura nova.
-                  </Typography>
-                </Stack>
-              </Stack>
-            </CardContent>
-          </Card>
+      <Container
+        maxWidth="lg"
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 2, sm: 4, md: 6 },
+        }}
+      >
+        <Stack spacing={2}>
+          <ProfileSummaryCard profile={mockProfile} />
+          <ProfileNavigation />
+          <ProfileAboutSection data={mockProfile.about} />
         </Stack>
       </Container>
     </Box>
