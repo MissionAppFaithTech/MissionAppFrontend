@@ -85,7 +85,7 @@ export default function ProfilePageContent() {
           {profileView === 'about' ? (
             <ProfileAboutSection
               data={mockProfile.about}
-              onEdit={() => setProfileView('edit-about')}
+              onEditAction={() => setProfileView('edit-about')}
             />
           ) : (
             <ProfileAboutEditSection

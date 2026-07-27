@@ -12,7 +12,7 @@ import type { ProfileAboutData } from '@/types/profile';
 
 type ProfileAboutSectionProps = {
   data: ProfileAboutData;
-  onEdit: () => void;
+  onEditAction: () => void;
 };
 
 type DetailRowProps = {
@@ -31,7 +31,7 @@ function DetailRow({ label, value }: DetailRowProps) {
   );
 }
 
-export default function ProfileAboutSection({ data, onEdit }: ProfileAboutSectionProps) {
+export default function ProfileAboutSection({ data, onEditAction }: ProfileAboutSectionProps) {
   return (
     <Card
       component="section"
@@ -58,7 +58,7 @@ export default function ProfileAboutSection({ data, onEdit }: ProfileAboutSectio
               variant="outlined"
               color="primary"
               startIcon={<EditOutlinedIcon />}
-              onClick={onEdit}
+              onClick={onEditAction}
               sx={{
                 px: { xs: 1.5, sm: 2.5 },
                 minWidth: { xs: 0, sm: 96 },
