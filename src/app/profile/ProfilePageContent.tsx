@@ -1,7 +1,6 @@
 'use client';
 
-import PersonIcon from '@mui/icons-material/Person';
-import Avatar from '@mui/material/Avatar';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -9,13 +8,19 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import SearchIcon from '@mui/icons-material/Search';
 import Logo from '@/components/common/Logo';
+import ProfileAboutEditSection from '@/components/profile/ProfileAboutEditSection';
 import ProfileAboutSection from '@/components/profile/ProfileAboutSection';
+import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
 import ProfileNavigation from '@/components/profile/ProfileNavigation';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
 import { mockProfile } from '@/mocks/profile';
 
+type ProfileView = 'about' | 'edit-about';
+
 export default function ProfilePageContent() {
+  const [profileView, setProfileView] = useState<ProfileView>('about');
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <PageNavbar maxWidth="lg">
@@ -63,16 +68,7 @@ export default function ProfilePageContent() {
         </Box>
 
         <PageNavbarActions>
-          <Avatar
-            sx={{
-              width: { xs: 36, sm: 42 },
-              height: { xs: 36, sm: 42 },
-              bgcolor: 'supporter.light',
-              color: 'common.black',
-            }}
-          >
-            <PersonIcon />
-          </Avatar>
+          <ProfileAccountMenu profile={mockProfile} />
         </PageNavbarActions>
       </PageNavbar>
 
@@ -86,7 +82,17 @@ export default function ProfilePageContent() {
         <Stack spacing={2}>
           <ProfileSummaryCard profile={mockProfile} />
           <ProfileNavigation />
-          <ProfileAboutSection data={mockProfile.about} />
+          {profileView === 'about' ? (
+            <ProfileAboutSection
+              data={mockProfile.about}
+              onEditAction={() => setProfileView('edit-about')}
+            />
+          ) : (
+            <ProfileAboutEditSection
+              data={mockProfile.about}
+              onBack={() => setProfileView('about')}
+            />
+          )}
         </Stack>
       </Container>
     </Box>
