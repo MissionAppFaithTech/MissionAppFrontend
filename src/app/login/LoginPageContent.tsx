@@ -98,7 +98,7 @@ export default function LoginPageContent() {
                 sx={{ alignItems: 'center', justifyContent: 'center' }}
               >
                 <Typography sx={{ color: 'text.secondary' }}>Ainda não tem uma conta? </Typography>
-                <Link href={role === 'apoiador' ? '/register/supporters' : role === 'missionario' ? '/register/missionaries' : '/register/projects'}>
+                <Link href="/select-role">
                   {' '}
                   <Typography sx={{ color: 'text.primary' }}> Registre-se</Typography>
                 </Link>

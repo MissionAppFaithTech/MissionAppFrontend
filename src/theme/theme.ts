@@ -195,10 +195,26 @@ const extendedPalette = {
 export function createAppTheme(mode: "light" | "dark") {
   const isLight = mode === "light";
 
+  /** Em fundo escuro o navy some — CTAs usam laranja da marca. */
+  const darkFieldBg = "rgba(255, 255, 255, 0.06)";
+  const darkFieldBorder = "rgba(107, 166, 255, 0.35)";
+  const darkFieldBorderHover = "rgba(107, 166, 255, 0.55)";
+  const darkFieldBorderFocus = roleColors.supporter;
+
   return createTheme({
     palette: {
       mode,
       ...extendedPalette,
+      ...(isLight
+        ? {}
+        : {
+            primary: {
+              main: roleColors.supporter,
+              light: shades.supporterLight,
+              dark: shades.supporterDark,
+              contrastText: colors.textPrimary,
+            },
+          }),
       background: {
         default: isLight ? colors.background : colors.textPrimary,
         paper: isLight ? colors.surface : shades.primaryLight,
@@ -220,9 +236,9 @@ export function createAppTheme(mode: "light" | "dark") {
             color: isLight ? colors.textPrimary : colors.surface,
           },
           a: {
-            color: roleColors.intermediate,
+            color: isLight ? roleColors.intermediate : roleColors.supporter,
             "&:hover": {
-              color: shades.intermediateDark,
+              color: isLight ? shades.intermediateDark : shades.supporterLight,
             },
           },
         },
@@ -238,6 +254,37 @@ export function createAppTheme(mode: "light" | "dark") {
             fontWeight: 500,
             borderRadius: 4,
           },
+          containedPrimary: isLight
+            ? undefined
+            : {
+                backgroundColor: roleColors.mission,
+                color: colors.surface,
+                "&:hover": {
+                  backgroundColor: shades.missionDark,
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgba(249, 115, 22, 0.35)",
+                  color: "rgba(255, 255, 255, 0.55)",
+                },
+              },
+          textPrimary: isLight
+            ? undefined
+            : {
+                color: roleColors.supporter,
+                "&:hover": {
+                  backgroundColor: "rgba(107, 166, 255, 0.12)",
+                },
+              },
+          outlinedPrimary: isLight
+            ? undefined
+            : {
+                borderColor: darkFieldBorder,
+                color: colors.surface,
+                "&:hover": {
+                  borderColor: darkFieldBorderHover,
+                  backgroundColor: "rgba(107, 166, 255, 0.1)",
+                },
+              },
         },
         variants: [
           {
@@ -251,14 +298,23 @@ export function createAppTheme(mode: "light" | "dark") {
           },
           {
             props: { color: "primary", variant: "outlined" },
-            style: {
-              borderColor: colors.primary,
-              color: colors.primary,
-              "&:hover": {
-                borderColor: roleColors.intermediate,
-                backgroundColor: "rgba(37, 99, 235, 0.08)",
-              },
-            },
+            style: isLight
+              ? {
+                  borderColor: colors.primary,
+                  color: colors.primary,
+                  "&:hover": {
+                    borderColor: roleColors.intermediate,
+                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                  },
+                }
+              : {
+                  borderColor: darkFieldBorder,
+                  color: colors.surface,
+                  "&:hover": {
+                    borderColor: darkFieldBorderHover,
+                    backgroundColor: "rgba(107, 166, 255, 0.1)",
+                  },
+                },
           },
           {
             props: { color: "supporter", variant: "contained" },
@@ -299,6 +355,61 @@ export function createAppTheme(mode: "light" | "dark") {
           },
         },
       },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: isLight
+            ? undefined
+            : {
+                backgroundColor: darkFieldBg,
+                color: colors.surface,
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: darkFieldBorder,
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: darkFieldBorderHover,
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: darkFieldBorderFocus,
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgba(255, 255, 255, 0.03)",
+                },
+              },
+          input: isLight
+            ? undefined
+            : {
+                color: colors.surface,
+                "&::placeholder": {
+                  color: "#94A3B8",
+                  opacity: 1,
+                },
+              },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: isLight
+            ? undefined
+            : {
+                color: "#94A3B8",
+                "&.Mui-focused": {
+                  color: roleColors.supporter,
+                },
+                "&.Mui-error": {
+                  color: colors.error,
+                },
+              },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: isLight
+            ? undefined
+            : {
+                color: "#94A3B8",
+              },
+        },
+      },
       MuiTextField: {
         defaultProps: {
           variant: "outlined",
@@ -311,9 +422,27 @@ export function createAppTheme(mode: "light" | "dark") {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              backgroundColor: isLight ? shades.surfaceMuted : undefined,
+              backgroundColor: isLight ? shades.surfaceMuted : darkFieldBg,
             },
           },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: isLight
+            ? undefined
+            : {
+                borderColor: "rgba(107, 166, 255, 0.22)",
+              },
+        },
+      },
+      MuiLink: {
+        styleOverrides: {
+          root: isLight
+            ? undefined
+            : {
+                color: roleColors.supporter,
+              },
         },
       },
     },

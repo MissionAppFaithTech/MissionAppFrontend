@@ -144,7 +144,7 @@ export default function SiteHeader() {
           </Box>
 
           <PillButton
-            href="/select-role"
+            href="/login"
             size="small"
             sx={{ flexShrink: 0, display: { xs: "none", md: "inline-flex" } }}
           >
@@ -209,7 +209,7 @@ export default function SiteHeader() {
           ))}
         </Stack>
 
-        <PillButton href="/select-role" fullWidth sx={{ mt: 3 }} onClick={closeMobileMenu}>
+        <PillButton href="/login" fullWidth sx={{ mt: 3 }} onClick={closeMobileMenu}>
           Entrar
         </PillButton>
       </Drawer>

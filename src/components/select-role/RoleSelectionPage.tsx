@@ -10,9 +10,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AppStoreBadges from "@/components/landing/AppStoreBadges";
 
 const roles = [
-  { label: "Sou um apoiador", href: "/login?role=apoiador" },
-  { label: "Sou um missionário", href: "/login?role=missionario" },
-  /*{ label: "Sou um projeto social", href: "/login?role=projeto" },*/
+  { label: "Sou um apoiador", href: "/register/supporters" },
+  { label: "Sou um missionário", href: "/register/missionaries" },
+  /*{ label: "Sou um projeto social", href: "/register/projects" },*/
 ] as const;
 
 export default function RoleSelectionPage() {
@@ -48,21 +48,39 @@ export default function RoleSelectionPage() {
           ))}
         </Stack>
 
-        <Typography
-          component={Link}
-          href="/"
-          sx={{
-            color: "text.secondary",
-            textDecoration: "none",
-            fontSize: "0.65rem",
-            "&:hover": {
-              color: "connection.main",
-              textDecoration: "underline",
-            },
-          }}
-        >
-          Voltar para a página inicial
-        </Typography>
+        <Stack spacing={1.5} sx={{ width: "100%", alignItems: "center" }}>
+          <Typography
+            component={Link}
+            href="/login"
+            sx={{
+              color: "text.secondary",
+              textDecoration: "none",
+              fontSize: "0.875rem",
+              "&:hover": {
+                color: "connection.main",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Já tem uma conta? Entrar
+          </Typography>
+
+          <Typography
+            component={Link}
+            href="/"
+            sx={{
+              color: "text.secondary",
+              textDecoration: "none",
+              fontSize: "0.65rem",
+              "&:hover": {
+                color: "connection.main",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Voltar para a página inicial
+          </Typography>
+        </Stack>
       </Stack>
     </Box>
   );
