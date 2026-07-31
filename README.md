@@ -157,7 +157,9 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 ## ✔️ Pré-requisitos
 
 - **Node.js** 20 ou superior
-- **Yarn** (lockfile: `yarn.lock`)
+- **Yarn** Classic 1.x (lockfile oficial: `yarn.lock`)
+
+> Use **somente Yarn**. Não rode `npm install` / `pnpm install` neste repositório — isso gera outros lockfiles e pode divergir as dependências.
 
 ---
 

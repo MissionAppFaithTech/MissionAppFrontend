@@ -2,6 +2,10 @@
     "name": "missionapp",
     "version": "0.1.0",
     "private": true,
+    "packageManager": "yarn@1.22.22",
+    "engines": {
+        "node": ">=20"
+    },
     "scripts": {
         "dev": "next dev --webpack",
         "dev:turbo": "next dev",

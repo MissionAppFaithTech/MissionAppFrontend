@@ -22,8 +22,9 @@ Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTec
 
 ## 🛠️ Ambiente
 
-Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, Yarn, `yarn install`, `.env.local` a partir de `.env.example`, `yarn dev`.
+Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, **Yarn** (`yarn install`), `.env.local` a partir de `.env.example`, `yarn dev`.
 
+**Gerenciador de pacotes:** apenas Yarn (`packageManager` no `package.json`, lockfile `yarn.lock`). Não use `npm` nem `pnpm` neste repo.
 Antes de abrir um PR, rode:
 
 ```bash
