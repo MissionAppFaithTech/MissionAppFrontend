@@ -11,8 +11,9 @@
 7. [Scripts disponíveis](#scripts-disponiveis)
 8. [Rotas principais](#rotas-principais)
 9. [Identidade visual](#identidade-visual)
-10. [Contribuindo](#contribuindo)
-11. [Licença](#licenca)
+10. [Links externos](#links-externos)
+11. [Contribuindo](#contribuindo)
+12. [Licença](#licenca)
 
 ---
 
@@ -87,9 +88,8 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 | `src/services/` | Chamadas HTTP / orquestração de auth, username, etc. |
 | `src/theme/` | Tema MUI, tokens de cor e `AppThemeProvider`. |
 | `src/types/` | Tipos TypeScript compartilhados. |
-| `.cursor/` | Regras locais do Cursor para agentes. |
 | `AGENTS.md` / `CLAUDE.md` | Orientação para IAs no repositório. |
-| `CONTRIBUTING.md` | Branches, commits e fluxo de PR. |
+| `CONTRIBUTING.md` | Como contribuir (único lugar para branches/commits/PRs). |
 | `CODE_OF_CONDUCT.md` | Código de conduta da comunidade. |
 
 <details>
@@ -158,7 +158,6 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 - **Node.js** 20 ou superior
 - **Yarn** (lockfile: `yarn.lock`)
-- API do [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend) em `http://localhost:3333` (quando não estiver usando mocks de auth)
 
 ---
 
@@ -244,24 +243,26 @@ O design system usa tons que representam os públicos da plataforma:
 
 Tipografia, gradientes e componentes (`PillButton`, `SectionHeader`, `Logo`, etc.) estão centralizados em `src/theme/theme.ts`.
 
+UX, telas e marca (logo, variantes claro/escuro): ver [Links externos](#links-externos).
+
+---
+
+<a name="links-externos"></a>
+
+## Links externos
+
+- [Design no Figma](https://www.figma.com/design/uMAwJPYKaEoN7ScjAmgZ6O/Mission-app?node-id=902-1737&t=hALogHv4YSYnn2VE-1)
+- [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend)
+
 ---
 
 <a name="contribuindo"></a>
 
 ## Contribuindo
 
-Veja o guia completo em [CONTRIBUTING.md](./CONTRIBUTING.md) (branches, Conventional Commits, lint e PRs).
+Como contribuir (branches, Conventional Commits, lint e PRs): [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
-Ao participar, você também concorda com o [Código de Conduta](./CODE_OF_CONDUCT.md).
-
-Resumo rápido:
-
-1. Abra uma issue para discutir mudanças maiores (opcional, mas recomendado)
-2. Crie uma branch a partir da `main` (`feat/…`, `fix/…`, etc.)
-3. Faça suas alterações e rode `yarn lint` e `yarn format:check`
-4. Abra um pull request descrevendo o que mudou e por quê
-
-Bug reports, ideias de features e melhorias de documentação também são muito valiosos.
+Código de Conduta: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md).
 
 ---
 

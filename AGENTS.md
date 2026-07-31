@@ -24,16 +24,19 @@ Do **not** invent alternate commit message styles. Align with the MissionApp Bac
 ### Commit format (summary)
 
 ```
-<tipo>(<escopo opcional>): <descrição imperativa em minúsculas>
+<type>(<optional-scope>): <imperative description in lowercase English>
 ```
 
 Examples:
 
 ```
-feat(auth): adicionar tela de redefinição de senha
-fix(theme): corrigir contraste de botões no modo escuro
-chore(deps): atualizar next para a versão mais recente
+feat(auth): add password reset screen
+fix(theme): fix button contrast in dark mode
+chore(deps): update next to the latest version
+docs: add contributing guide and code of conduct
 ```
+
+Commit messages must be in **English**. Chat replies to the user stay in **pt-BR**.
 
 Only create a git commit when the user explicitly asks.
 
@@ -68,7 +71,9 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 - Forms: `src/forms/`
 - API client / BFF helpers: `src/services/`, `src/app/api/`, `src/lib/api/`
 - Brand colors via theme tokens — avoid hardcoding outside `src/theme/`
-- Identifiers in code: **English**. Commits, PR text, and contributor docs: **pt-BR**
+- Identifiers in code: **English**
+- Commit messages: **English** (Conventional Commits)
+- Contributor docs / PR discussion with the team: **pt-BR** when writing for humans; agent chat: **pt-BR**
 
 ---
 

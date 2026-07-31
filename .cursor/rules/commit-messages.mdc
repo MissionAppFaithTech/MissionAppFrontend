@@ -1,0 +1,29 @@
+---
+description: Commits and branches follow CONTRIBUTING.md / AGENTS.md
+alwaysApply: true
+---
+
+# Commits and contribution (required for AI agents)
+
+Source of truth:
+
+1. [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
+2. [`AGENTS.md`](../../AGENTS.md)
+3. [`CODE_OF_CONDUCT.md`](../../CODE_OF_CONDUCT.md)
+
+Rules:
+
+- Conventional Commits in **English**, imperative mood, lowercase
+- Format: `type(scope): description`
+- Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- Branches: `feat/`, `fix/`, `docs/`, `refactor/`, `test/`, `chore/`
+- Only create a commit when the user explicitly asks
+
+Examples:
+
+```
+docs: add contributing guide and code of conduct
+feat(auth): add password reset screen
+```
+
+Do not invent another message style. Do not write commit subjects in Portuguese.

@@ -1,6 +1,8 @@
 # Contribuindo com o MissionApp Frontend
 
-Obrigado pelo interesse em contribuir. Este guia define o fluxo de trabalho e os padrões de commit do projeto — alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend/blob/main/CONTRIBUTING.md).
+Obrigado pelo interesse em contribuir. Este guia cobre **como contribuir** (branches, commits, PRs e padrões). Para visão do produto, stack, estrutura de pastas e instalação, use o [`README.md`](./README.md).
+
+Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend/blob/main/CONTRIBUTING.md).
 
 > **Agentes de IA:** qualquer assistente (Cursor, Claude, Codex, Copilot, etc.) que atue neste repositório **deve** seguir este documento e o [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md). Ver também [`AGENTS.md`](./AGENTS.md).
 
@@ -8,41 +10,26 @@ Obrigado pelo interesse em contribuir. Este guia define o fluxo de trabalho e os
 
 ## Sumário
 
-1. [Pré-requisitos](#pre-requisitos)
-2. [Configurando o ambiente](#configurando-o-ambiente)
-3. [Fluxo de trabalho](#fluxo-de-trabalho)
-4. [Padrões de código](#padroes-de-codigo)
-5. [Abrindo um Pull Request](#abrindo-um-pull-request)
-6. [Código de Conduta](#codigo-de-conduta)
+1. [Ambiente](#ambiente)
+2. [Fluxo de trabalho](#fluxo-de-trabalho)
+3. [Padrões de código](#padroes-de-codigo)
+4. [Abrindo um Pull Request](#abrindo-um-pull-request)
+5. [Código de Conduta](#codigo-de-conduta)
 
 ---
 
-<a name="pre-requisitos"></a>
+<a name="ambiente"></a>
 
-## Pré-requisitos
+## Ambiente
 
-| Ferramenta | Versão | Obrigatório | Finalidade |
-| ---------- | ------ | ----------- | ---------- |
-| [Node.js](https://nodejs.org/) | 20+ | Sim | Runtime |
-| [Yarn](https://yarnpkg.com/) | 1.x | Sim | Gerenciador de pacotes (lockfile: `yarn.lock`) |
-| [Git](https://git-scm.com/) | 2.x | Sim | Controle de versão |
-| Backend Mission App | — | Recomendado | API em `http://localhost:3333` (quando não estiver em mock) |
+Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, Yarn, `yarn install`, `.env.local` a partir de `.env.example`, `yarn dev`.
 
----
-
-<a name="configurando-o-ambiente"></a>
-
-## Configurando o ambiente
+Antes de abrir um PR, rode:
 
 ```bash
-git clone <url-do-repositorio>
-cd MissionAppFrontend
-yarn install
-cp .env.example .env.local
-yarn dev
+yarn lint
+yarn format:check
 ```
-
-Ajuste `.env.local` conforme `.env.example`. App em [http://localhost:3000](http://localhost:3000).
 
 ---
 
@@ -57,7 +44,7 @@ Crie sempre uma branch a partir de `main`:
 ```bash
 git checkout main
 git pull origin main
-git checkout -b <tipo>/<descricao-curta>
+git checkout -b <type>/<short-description>
 ```
 
 | Prefixo | Quando usar |
@@ -71,10 +58,10 @@ git checkout -b <tipo>/<descricao-curta>
 
 ### Commits
 
-Siga o padrão [Conventional Commits](https://www.conventionalcommits.org/), em português, no imperativo e em minúsculas:
+Siga o padrão [Conventional Commits](https://www.conventionalcommits.org/), em **inglês**, no imperativo e em minúsculas:
 
 ```
-<tipo>(<escopo opcional>): <descrição imperativa em minúsculas>
+<type>(<optional-scope>): <imperative description in lowercase>
 ```
 
 Tipos permitidos (mesmo conjunto do backend):
@@ -98,11 +85,11 @@ Escopos comuns no front (opcional): `auth`, `register`, `landing`, `profile`, `t
 Exemplos:
 
 ```
-feat(auth): adicionar tela de redefinição de senha
-fix(theme): corrigir contraste de botões no modo escuro
-refactor(register): extrair passo de credenciais compartilhadas
-chore(deps): atualizar next para a versão mais recente
-docs: adicionar guia de contribuição
+feat(auth): add password reset screen
+fix(theme): fix button contrast in dark mode
+refactor(register): extract shared credentials step
+chore(deps): update next to the latest version
+docs: add contributing guide and code of conduct
 ```
 
 Evite:
@@ -110,8 +97,9 @@ Evite:
 ```
 Update files
 Ajustes
-feat: Adicionar Tela De Login.
+feat: Add Login Screen.
 fix: bug
+docs: adicionar guia de contribuição
 ```
 
 Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` no mesmo commit.
@@ -122,14 +110,6 @@ Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` n
 
 ## Padrões de código
 
-### Lint e formatação
-
-```bash
-yarn lint
-yarn format
-yarn format:check
-```
-
 ### Convenções do front
 
 - **App Router** (`src/app/`) para rotas e metadata.
@@ -138,9 +118,13 @@ yarn format:check
 - **Tema e tokens** em `src/theme/theme.ts` — não hardcode cores de marca fora do tema.
 - Enquanto o backend não estiver ligado, fluxos de auth podem usar mocks em `src/mocks/` (`USE_AUTH_MOCKS`).
 
+Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
+
 ### Idioma
 
-Código (identificadores) em **inglês**. Commits, PRs e docs de contribuição em **português (pt-BR)**.
+- Código (identificadores): **inglês**
+- Mensagens de commit: **inglês** (Conventional Commits)
+- Docs de contribuição, PRs e conversa com a comunidade: **português (pt-BR)**
 
 ---
 
@@ -154,6 +138,8 @@ Código (identificadores) em **inglês**. Commits, PRs e docs de contribuição 
 4. Abra o PR descrevendo **o que** mudou e **por quê**.
 5. Mantenha o escopo focado: uma mudança por PR.
 
+Ao contribuir, você concorda que as alterações serão licenciadas sob a [MIT](./LICENSE.txt).
+
 ---
 
 <a name="codigo-de-conduta"></a>
@@ -161,9 +147,3 @@ Código (identificadores) em **inglês**. Commits, PRs e docs de contribuição 
 ## Código de Conduta
 
 Ao participar deste projeto, você concorda em seguir o [Código de Conduta](./CODE_OF_CONDUCT.md). Violações podem ser reportadas em **missionapp.faithtech@gmail.com**.
-
----
-
-## Licença
-
-Ao contribuir, você concorda que suas contribuições serão licenciadas sob a [MIT](./LICENSE).
