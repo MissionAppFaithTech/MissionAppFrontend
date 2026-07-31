@@ -116,7 +116,7 @@ export default function SiteHeader() {
             gap: { xs: 1, sm: 2, md: 3 },
           }}
         >
-          <Logo size={isDesktop ? "lg" : "sm"} variant="light" />
+          <Logo size={isDesktop ? "lg" : "md"} variant="light" />
 
           <Box
             component="nav"

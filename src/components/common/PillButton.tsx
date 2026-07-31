@@ -4,6 +4,11 @@ import Button, { type ButtonProps } from "@mui/material/Button";
 import type { SxProps, Theme } from "@mui/material/styles";
 import Link from "next/link";
 
+/**
+ * Branded button — prefer this over raw MUI Button for product CTAs.
+ * Extend with a new `tone` before creating another button component.
+ * See AGENTS.md → UI component reuse.
+ */
 type PillButtonTone =
   | "cta"
   | "mission"
@@ -11,7 +16,10 @@ type PillButtonTone =
   | "missionOutline"
   | "primaryOutline"
   | "outline"
-  | "ghost";
+  | "ghost"
+  | "primarySoftOutline"
+  | "primaryFilled"
+  | "missionFilled";
 
 type PillButtonProps = ButtonProps & {
   href?: string;
@@ -36,6 +44,21 @@ const hoverLightSx = {
   borderColor: "common.white",
   boxShadow: "none",
 };
+
+/** Figma profile actions — um pouco mais compactos que o default do MUI. */
+const figmaActionBase = {
+  borderRadius: "10px",
+  minHeight: 32,
+  py: 0.5,
+  px: 1.75,
+  fontSize: "0.8125rem",
+  fontWeight: 500,
+  lineHeight: 1.25,
+  boxShadow: "none",
+  "&:hover": {
+    boxShadow: "none",
+  },
+} as const;
 
 const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
   cta: {
@@ -118,7 +141,42 @@ const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
     color: "white",
     "&:hover": hoverLightSx,
   },
+  /** Figma profile secondary actions: Contato / Compartilhar / Editar */
+  primarySoftOutline: {
+    ...figmaActionBase,
+    border: "1.5px solid",
+    borderColor: "primary.main",
+    bgcolor: "common.white",
+    color: "primary.main",
+    "&:hover": {
+      ...figmaActionBase["&:hover"],
+      bgcolor: "rgba(13, 43, 92, 0.04)",
+      borderColor: "primary.main",
+    },
+  },
+  primaryFilled: {
+    ...figmaActionBase,
+    border: "none",
+    bgcolor: "primary.main",
+    color: "common.white",
+    "&:hover": {
+      ...figmaActionBase["&:hover"],
+      bgcolor: "primary.dark",
+    },
+  },
+  missionFilled: {
+    ...figmaActionBase,
+    border: "none",
+    bgcolor: "mission.main",
+    color: "common.white",
+    "&:hover": {
+      ...figmaActionBase["&:hover"],
+      bgcolor: "mission.dark",
+    },
+  },
 };
+
+export type { PillButtonTone, PillButtonProps };
 
 export default function PillButton({
   href,

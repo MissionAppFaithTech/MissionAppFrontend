@@ -4,11 +4,11 @@ import AddIcon from '@mui/icons-material/Add';
 import PersonIcon from '@mui/icons-material/Person';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import PillButton from '@/components/common/PillButton';
 import type { ProfileData } from '@/types/profile';
 
 type ProfileSummaryCardProps = {
@@ -96,12 +96,20 @@ export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps)
               {profile.roleDescription}
             </Typography>
             <Stack direction="row" spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-              <Button variant="outlined" color="primary" sx={{ flex: { xs: 1, sm: 'initial' } }}>
+              <PillButton
+                tone="primarySoftOutline"
+                size="small"
+                sx={{ flex: { xs: 1, sm: 'initial' }, whiteSpace: 'nowrap' }}
+              >
                 Contato
-              </Button>
-              <Button variant="outlined" color="primary" sx={{ flex: { xs: 1, sm: 'initial' } }}>
+              </PillButton>
+              <PillButton
+                tone="primarySoftOutline"
+                size="small"
+                sx={{ flex: { xs: 1, sm: 'initial' }, whiteSpace: 'nowrap' }}
+              >
                 Compartilhar perfil
-              </Button>
+              </PillButton>
             </Stack>
           </Stack>
 
@@ -114,24 +122,24 @@ export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps)
               flexShrink: 0,
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ px: { xs: 1.5, md: 2.5 }, flex: { xs: 1, sm: 'initial' } }}
+            <PillButton
+              tone="primaryFilled"
+              size="small"
+              sx={{ flex: { xs: 1, sm: 'initial' }, whiteSpace: 'nowrap' }}
             >
               Editar perfil
-            </Button>
-            <Button
-              variant="contained"
-              color="mission"
+            </PillButton>
+            <PillButton
+              tone="missionFilled"
+              size="small"
               sx={{
-                px: { xs: 1.5, md: 2.5 },
-                minWidth: { sm: 126 },
                 flex: { xs: 1, sm: 'initial' },
+                minWidth: { sm: 110 },
+                whiteSpace: 'nowrap',
               }}
             >
               {profile.followersCount} Seguidores
-            </Button>
+            </PillButton>
           </Stack>
         </Stack>
       </CardContent>

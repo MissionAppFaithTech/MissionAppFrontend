@@ -77,6 +77,84 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 
 ---
 
+## UI component reuse (mandatory)
+
+**Reuse first. Create only when nothing similar exists.**
+
+Before adding a new component or one-off MUI styling for a repeated pattern:
+
+1. Check `src/components/common/`
+2. Check the domain folder (`landing/`, `layout/`, `profile/`, `register/`, …)
+3. Check `src/forms/` for form flows
+4. Prefer extending an existing API (new `tone`, prop, size) over a parallel component
+
+### Shared atoms (`src/components/common/`)
+
+| Component | When to use | Notes |
+|-----------|-------------|--------|
+| `PillButton` | Any branded button / CTA / link-button | Prefer over raw MUI `Button` for product UI. Pick a `tone` — do **not** invent a second button wrapper. |
+| `Logo` | Brand mark | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`. |
+| `SectionHeader` | Section title + optional subtitle | Landing and content blocks. |
+| `PhoneField` | International phone inputs | Also exports `isValidInternationalPhone`. |
+| `PasswordStrengthIndicator` | Password strength meter | Pair with `validateStrongPassword` from `@/lib/passwordStrength`. |
+
+### `PillButton` tones (do not reinvent)
+
+| Tone | Typical use |
+|------|-------------|
+| `cta` | Primary navy CTA (header, select-role) |
+| `mission` / `missionFlat` / `missionOutline` | Orange / landing CTAs |
+| `primaryOutline` / `outline` | Outline on light surfaces |
+| `ghost` | On dark / gradient surfaces |
+| `primarySoftOutline` | Profile secondary actions (Contato, Compartilhar, Editar) |
+| `primaryFilled` / `missionFilled` | Profile primary actions (Editar perfil / Seguidores) — Figma filled |
+
+Landing/header tones must keep their current look when changing profile tones.
+
+### Layout / chrome
+
+| Component | When to use |
+|-----------|-------------|
+| `PageNavbar` (+ `PageNavbarActions`) | Sticky app bar shell |
+| `SiteHeader` | Marketing landing navigation |
+| `ThemeToggle` | Light/dark switch |
+
+### Domain components
+
+Keep page-specific UI in the matching folder; extract to `common/` only when reused in **2+** domains:
+
+- `components/landing/` — landing sections, badges, audience cards
+- `components/profile/` — summary, about, navigation, account menu
+- `components/register/` — wizards / contexts
+- `components/select-role/` — role selection page
+- `components/user/` — public user header
+
+### Forms (`src/forms/`)
+
+| Area | Reuse |
+|------|--------|
+| Auth | `LoginForm`, `ForgotPasswordForm`, `ResetPasswordForm` |
+| Register shared | `AccessCredentialsStep`, `RegistrationEmailConfirmation`, `options.ts` |
+| Missionaries / supporters | Step components under `forms/register/…` |
+
+Do not duplicate password/username/email confirmation UI — extend shared steps.
+
+### Theme
+
+- Tokens and palette: `src/theme/theme.ts` (`colors`, `roleColors`, `createAppTheme`)
+- Never hardcode brand hex (`#0D2B5C`, `#F97316`, …) in new components; use palette keys (`primary`, `mission`, `supporter`, …)
+
+### When a new component is allowed
+
+Create a new file only if:
+
+- No existing component covers the interaction/visual after a reasonable prop/`tone` extension, **and**
+- It is clearly a reusable unit (or you are about to copy-paste the same JSX twice)
+
+Place shared atoms in `src/components/common/`. Name in English, PascalCase.
+
+---
+
 ## Safety
 
 - Do not commit secrets (`.env`, credentials).

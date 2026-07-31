@@ -117,6 +117,7 @@ Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` n
 - **Chamadas à API / BFF** em `src/services/` e `src/app/api/`.
 - **Tema e tokens** em `src/theme/theme.ts` — não hardcode cores de marca fora do tema.
 - Enquanto o backend não estiver ligado, fluxos de auth podem usar mocks em `src/mocks/` (`USE_AUTH_MOCKS`).
+- **Reuso de UI:** preferir componentes existentes (`PillButton`, `Logo`, `SectionHeader`, `PhoneField`, etc.) e só criar novos quando não houver equivalente. Catálogo para agentes: [`AGENTS.md`](./AGENTS.md) (seção *UI component reuse*).
 
 Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 

@@ -38,7 +38,7 @@ export default function LoginPageContent() {
 
       <Box sx={{ width: '100%', maxWidth: 420 }}>
         <Box sx={{ mb: 3 }}>
-          <Logo size="md" />
+          <Logo size="lg" />
         </Box>
 
         {roleLabel && (

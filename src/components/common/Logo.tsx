@@ -23,15 +23,16 @@ type LogoProps = {
   onDark?: boolean;
 };
 
-const heights: Record<LogoSize, number> = {
-  sm: 32,
-  md: 48,
-  lg: 64,
-  xl: 96,
+/** Altura visual + largura máxima — logo empilhada precisa de largura na navbar. */
+const sizes: Record<LogoSize, { height: number; maxWidth: number }> = {
+  sm: { height: 36, maxWidth: 112 },
+  md: { height: 44, maxWidth: 140 },
+  lg: { height: 52, maxWidth: 168 },
+  xl: { height: 80, maxWidth: 240 },
 };
 
 function resolveSize(size?: string): LogoSize {
-  if (size && size in heights) {
+  if (size && size in sizes) {
     return size as LogoSize;
   }
   return "md";
@@ -51,7 +52,7 @@ export default function Logo({
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const resolvedSize = resolveSize(size);
-  const height = heights[resolvedSize];
+  const { height, maxWidth } = sizes[resolvedSize];
   const logoVariant = resolveVariant(variant, onDark);
 
   useEffect(() => {
@@ -74,6 +75,8 @@ export default function Logo({
       style={{
         height,
         width: "auto",
+        maxWidth,
+        objectFit: "contain",
         display: "block",
       }}
     />
@@ -89,6 +92,7 @@ export default function Logo({
           alignItems: "center",
           textDecoration: "none",
           lineHeight: 0,
+          flexShrink: 0,
         }}
       >
         {image}
@@ -97,7 +101,14 @@ export default function Logo({
   }
 
   return (
-    <Box sx={{ display: "inline-flex", alignItems: "center", lineHeight: 0 }}>
+    <Box
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        lineHeight: 0,
+        flexShrink: 0,
+      }}
+    >
       {image}
     </Box>
   );

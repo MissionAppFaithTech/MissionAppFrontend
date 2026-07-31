@@ -24,7 +24,7 @@ export default function ProfilePageContent() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <PageNavbar maxWidth="lg">
-        <Logo size="sm" href="/profile" variant="dark" />
+        <Logo size="lg" href="/profile" variant="dark" />
 
         <Box
           sx={{

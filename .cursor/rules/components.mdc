@@ -1,0 +1,30 @@
+---
+description: Reuse existing UI components before creating new ones
+alwaysApply: true
+---
+
+# Component reuse (required for AI agents)
+
+Before creating a new component, **search and reuse** what already exists. Only create something new when nothing similar covers the need (after checking `src/components/common/`, domain folders, and `src/forms/`).
+
+Full catalog: [`AGENTS.md`](../../AGENTS.md) → **UI component reuse**.
+
+## Prefer these
+
+| Need | Use |
+|------|-----|
+| Buttons / CTAs | `PillButton` + `tone` — do not invent a parallel button |
+| Logo | `Logo` (`sm` \| `md` \| `lg` \| `xl`, `variant`) |
+| Section title + subtitle | `SectionHeader` |
+| Phone input | `PhoneField` |
+| Password strength UI | `PasswordStrengthIndicator` + `validateStrongPassword` |
+| App chrome / navbar | `PageNavbar`, `SiteHeader` |
+| Theme switch | `ThemeToggle` |
+
+## Rules
+
+1. Extend an existing component (new `tone`, prop, size) before adding a sibling file.
+2. Do not wrap MUI `Button` for branded actions when `PillButton` fits.
+3. Colors from `src/theme/theme.ts` only — no hardcoded brand hex in new UI.
+4. Domain UI goes under `src/components/<domain>/`; shared atoms under `src/components/common/`.
+5. Forms live in `src/forms/` — reuse shared register steps when possible.

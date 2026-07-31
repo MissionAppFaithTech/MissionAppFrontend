@@ -2,12 +2,12 @@
 
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import PillButton from '@/components/common/PillButton';
 import type { ProfileAboutData } from '@/types/profile';
 
 type ProfileAboutSectionProps = {
@@ -54,18 +54,21 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
             <Typography variant="h6" color="primary.main">
               Sobre
             </Typography>
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<EditOutlinedIcon />}
+            <PillButton
+              tone="primarySoftOutline"
+              size="small"
+              startIcon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
               onClick={onEditAction}
               sx={{
-                px: { xs: 1.5, sm: 2.5 },
-                minWidth: { xs: 0, sm: 96 },
+                gap: 0.5,
+                '& .MuiButton-startIcon': {
+                  margin: 0,
+                  color: 'primary.main',
+                },
               }}
             >
               Editar
-            </Button>
+            </PillButton>
           </Stack>
 
           <Typography variant="body2">{data.introduction}</Typography>
