@@ -1,22 +1,21 @@
 'use client';
 
-import { Box, Button, Stack, Typography, Link, CardContent, Card } from '@mui/material';
-import { useSearchParams } from 'next/navigation';
+import { Box, Stack, Typography, Link, CardContent, Card } from '@mui/material';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
-import LoginForm from '@/forms/LoginForm';
-import GoogleIcon from '@mui/icons-material/Google';
+import SupportersStep1 from '@/forms/register/supporters/SupportersStep1';
+import SupportersStep2 from '@/forms/register/supporters/SupportersStep2';
+import SupportersStep3 from '@/forms/register/supporters/SupportersStep3';
+import {
+  SupporterRegisterWizardProvider,
+  useSupporterRegisterWizard,
+} from '@/components/register/supporters/SupporterRegisterWizardContext';
 
-const roleLabels: Record<string, string> = {
-  apoiador: 'Apoiador',
-  missionario: 'Missionário',
-  projeto: 'Projeto social',
-};
+const stepLabels = ['Dados pessoais', 'Dados de acesso', 'Confirmação'];
 
-export default function SupportersPageContent() {
-  const searchParams = useSearchParams();
-  const role = searchParams.get('role');
-  const roleLabel = role ? roleLabels[role] : null;
+function SupportersRegisterContent() {
+  const { step } = useSupporterRegisterWizard();
+  const isConfirmation = step === 3;
 
   return (
     <Box
@@ -41,17 +40,17 @@ export default function SupportersPageContent() {
           <Logo size="md" />
         </Box>
 
-        {roleLabel && (
-          <Stack
-            direction="row"
-            sx={{
-              mb: 2,
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <Typography variant="h6">Entrar como {roleLabel}</Typography>
+        <Stack
+          direction="row"
+          sx={{
+            mb: 1,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Typography variant="h6">Cadastro de apoiador</Typography>
 
+          {!isConfirmation ? (
             <Link
               href="/select-role"
               sx={{
@@ -62,7 +61,15 @@ export default function SupportersPageContent() {
             >
               Trocar perfil
             </Link>
-          </Stack>
+          ) : null}
+        </Stack>
+
+        {!isConfirmation ? (
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+            Etapa {step} de 2 · {stepLabels[step - 1]}
+          </Typography>
+        ) : (
+          <Box sx={{ mb: 2 }} />
         )}
 
         <Stack direction="column" spacing={2} sx={{ width: '100%', alignItems: 'stretch' }}>
@@ -76,61 +83,30 @@ export default function SupportersPageContent() {
             }}
           >
             <CardContent>
-              <Stack direction="column" spacing={2} sx={{ width: '100%', alignItems: 'stretch' }}>
-                <LoginForm />
-                <Typography align="center" sx={{ color: 'text.secondary' }}>
-                  ou
-                </Typography>
-                <Button
-                  variant="outlined"
-                  startIcon={<GoogleIcon sx={{ fontSize: 18, color: '#FBD7C6' }} />}
-                  sx={{
-                    alignSelf: 'center',
-                    px: 3,
-                    py: 1,
-                    backgroundColor: '#FAFBFC',
-                    borderColor: '#E5E7EB',
-                    color: '#3C4043',
-                    textTransform: 'none',
-                    borderRadius: 3,
-                    fontWeight: 600,
-                    '&:hover': {
-                      backgroundColor: '#F3F4F6',
-                      borderColor: '#D1D5DB',
-                    },
-                  }}
-                >
-                  Entrar com Google
-                </Button>
-              </Stack>
+              {step === 1 ? <SupportersStep1 /> : null}
+              {step === 2 ? <SupportersStep2 /> : null}
+              {step === 3 ? <SupportersStep3 /> : null}
             </CardContent>
           </Card>
 
-          <Card
-            elevation={0}
-            sx={{
-              borderRadius: 3,
-              border: '1px solid',
-              bgcolor: 'transparent',
-              boxShadow: 'none',
-            }}
-          >
-            <CardContent>
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{ alignItems: 'center', justifyContent: 'center' }}
-              >
-                <Typography sx={{ color: 'text.secondary' }}>Ainda não tem uma conta? </Typography>
-                <Link href="/register">
-                  {' '}
-                  <Typography sx={{ color: 'text.primary' }}> Registre-se</Typography>
-                </Link>
-              </Stack>
-            </CardContent>
-          </Card>
+          {!isConfirmation ? (
+            <Typography align="center" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+              Já tem uma conta?{' '}
+              <Link href="/login?role=apoiador" underline="hover" sx={{ color: 'text.primary' }}>
+                Entrar
+              </Link>
+            </Typography>
+          ) : null}
         </Stack>
       </Box>
     </Box>
+  );
+}
+
+export default function SupportersPageContent() {
+  return (
+    <SupporterRegisterWizardProvider>
+      <SupportersRegisterContent />
+    </SupporterRegisterWizardProvider>
   );
 }

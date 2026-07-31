@@ -16,6 +16,7 @@ const stepLabels = ["Dados pessoais", "Dados de missão", "Dados de acesso", "Co
 
 function RegisterMissionariesWizardContent() {
   const { step } = useMissionaryRegisterWizard();
+  const isConfirmation = step === 4;
 
   return (
     <Box
@@ -50,21 +51,27 @@ function RegisterMissionariesWizardContent() {
         >
           <Typography variant="h6">Cadastro de missionário</Typography>
 
-          <Link
-            href="/select-role"
-            sx={{
-              color: "text.secondary",
-              textDecoration: "none",
-              fontSize: "0.875rem",
-            }}
-          >
-            Trocar perfil
-          </Link>
+          {!isConfirmation ? (
+            <Link
+              href="/select-role"
+              sx={{
+                color: "text.secondary",
+                textDecoration: "none",
+                fontSize: "0.875rem",
+              }}
+            >
+              Trocar perfil
+            </Link>
+          ) : null}
         </Stack>
 
-        <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
-          Etapa {step} de 4 · {stepLabels[step - 1]}
-        </Typography>
+        {!isConfirmation ? (
+          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+            Etapa {step} de 3 · {stepLabels[step - 1]}
+          </Typography>
+        ) : (
+          <Box sx={{ mb: 2 }} />
+        )}
 
         <Stack direction="column" spacing={2} sx={{ width: "100%", alignItems: "stretch" }}>
           <Card

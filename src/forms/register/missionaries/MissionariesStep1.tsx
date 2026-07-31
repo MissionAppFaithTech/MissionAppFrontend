@@ -44,6 +44,7 @@ export default function MissionariesStep1() {
         {...register('fullName', { required: 'Informe seu nome completo' })}
         label="Nome completo"
         fullWidth
+        placeholder="Maria da Silva"
         error={Boolean(errors.fullName)}
         helperText={errors.fullName?.message}
       />
@@ -124,6 +125,7 @@ export default function MissionariesStep1() {
             onChange={field.onChange}
             error={Boolean(errors.phone)}
             helperText={errors.phone?.message}
+            placeholder="(11) 98765-4321"
             defaultCountry="br"
           />
         )}

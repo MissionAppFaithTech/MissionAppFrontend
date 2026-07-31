@@ -12,40 +12,66 @@ import {
   FormControlLabel,
   Radio,
   FormHelperText,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import PhoneField, { isValidInternationalPhone } from '@/components/common/PhoneField';
-import { isValidBirthDate, maskBirthDate, maskCpfOrPassport } from '@/lib/masks';
-import type { MissionariesStep1Values } from '../types';
+import { isValidBirthDate, maskBirthDate } from '@/lib/masks';
+import type { SupportersStep1Values } from '../types';
+import { useSupporterRegisterWizard } from '@/components/register/supporters/SupporterRegisterWizardContext';
+import { SELECT_OTHER, faithCommunities } from '@/forms/register/options';
+
+function phoneRules(message: string, required: boolean) {
+  return {
+    validate: (value: string) => {
+      if (!value.replace(/\D/g, '')) {
+        return required ? message : true;
+      }
+      return isValidInternationalPhone(value) || 'Informe um telefone válido';
+    },
+  };
+}
 
 export default function SupportersStep1() {
+  const { formData, completeStep1 } = useSupporterRegisterWizard();
   const {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
-  } = useForm<MissionariesStep1Values>({
+  } = useForm<SupportersStep1Values>({
     defaultValues: {
       fullName: '',
       birthDate: '',
       gender: '',
-      document: '',
       phone: '',
+      faithCommunity: '',
+      communityPhone: '',
+      pastorName: '',
+      pastorPhone: '',
+      ...formData,
     },
   });
 
-  const onSubmit = (values: MissionariesStep1Values) => {
-    // TODO: wire to supporters registration wizard / API
-    void values;
-  };
+  const faithCommunity = watch('faithCommunity');
+  const showCommunityDetails = faithCommunity === SELECT_OTHER;
 
   return (
-    <Stack component="form" spacing={2.5} onSubmit={handleSubmit(onSubmit)} sx={{ width: '100%' }}>
+    <Stack
+      component="form"
+      spacing={2.5}
+      onSubmit={handleSubmit(completeStep1)}
+      sx={{ width: '100%' }}
+    >
       <Typography variant="body1">Dados pessoais</Typography>
 
       <TextField
         {...register('fullName', { required: 'Informe seu nome completo' })}
         label="Nome completo"
         fullWidth
+        placeholder="Maria da Silva"
         error={Boolean(errors.fullName)}
         helperText={errors.fullName?.message}
       />
@@ -95,23 +121,6 @@ export default function SupportersStep1() {
       />
 
       <Controller
-        name="document"
-        control={control}
-        rules={{ required: 'Informe CPF ou passaporte' }}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="CPF ou passaporte"
-            fullWidth
-            placeholder="000.000.000-00 ou AB1234567"
-            error={Boolean(errors.document)}
-            helperText={errors.document?.message}
-            onChange={(event) => field.onChange(maskCpfOrPassport(event.target.value))}
-          />
-        )}
-      />
-
-      <Controller
         name="phone"
         control={control}
         rules={{
@@ -126,10 +135,81 @@ export default function SupportersStep1() {
             onChange={field.onChange}
             error={Boolean(errors.phone)}
             helperText={errors.phone?.message}
+            placeholder="(11) 98765-4321"
             defaultCountry="br"
           />
         )}
       />
+
+      <Controller
+        name="faithCommunity"
+        control={control}
+        render={({ field }) => (
+          <FormControl fullWidth>
+            <InputLabel shrink>Comunidade de fé (opcional)</InputLabel>
+            <Select {...field} label="Comunidade de fé (opcional)" displayEmpty>
+              <MenuItem value="">
+                <em>Nenhuma</em>
+              </MenuItem>
+              {faithCommunities.map((community) => (
+                <MenuItem key={community.value} value={community.value}>
+                  {community.label}
+                </MenuItem>
+              ))}
+              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
+            </Select>
+          </FormControl>
+        )}
+      />
+
+      {showCommunityDetails ? (
+        <>
+          <Controller
+            name="communityPhone"
+            control={control}
+            rules={phoneRules('Informe o telefone da comunidade de fé', true)}
+            render={({ field }) => (
+              <PhoneField
+                label="Telefone da comunidade de fé"
+                value={field.value}
+                onChange={field.onChange}
+                error={Boolean(errors.communityPhone)}
+                helperText={errors.communityPhone?.message}
+                placeholder="(11) 98765-4321"
+                defaultCountry="br"
+              />
+            )}
+          />
+
+          <TextField
+            {...register('pastorName', {
+              required: showCommunityDetails ? 'Informe o nome do pastor' : false,
+            })}
+            label="Nome do pastor"
+            fullWidth
+            placeholder="Pr. João Souza"
+            error={Boolean(errors.pastorName)}
+            helperText={errors.pastorName?.message}
+          />
+
+          <Controller
+            name="pastorPhone"
+            control={control}
+            rules={phoneRules('Informe o telefone do pastor', true)}
+            render={({ field }) => (
+              <PhoneField
+                label="Telefone do pastor"
+                value={field.value}
+                onChange={field.onChange}
+                error={Boolean(errors.pastorPhone)}
+                helperText={errors.pastorPhone?.message}
+                placeholder="(11) 98765-4321"
+                defaultCountry="br"
+              />
+            )}
+          />
+        </>
+      ) : null}
 
       <Button type="submit" variant="contained" color="primary">
         Continuar

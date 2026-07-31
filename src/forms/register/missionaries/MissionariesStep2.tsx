@@ -15,23 +15,18 @@ import {
 import PhoneField, { isValidInternationalPhone } from '@/components/common/PhoneField';
 import type { MissionariesStep2Values } from '../types';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
+import {
+  SELECT_OTHER,
+  faithCommunities,
+  missionaryAgencies,
+} from '@/forms/register/options';
 
-const missionaryAgencies = [
-  { value: '1', label: 'Agência missionária 1' },
-  { value: '2', label: 'Agência missionária 2' },
-  { value: '3', label: 'Agência missionária 3' },
-];
-
-const faithCommunities = [
-  { value: '1', label: 'Comunidade de fé 1' },
-  { value: '2', label: 'Comunidade de fé 2' },
-  { value: '3', label: 'Comunidade de fé 3' },
-];
-
-function phoneRules(message: string) {
+function phoneRules(message: string, required: boolean) {
   return {
     validate: (value: string) => {
-      if (!value.replace(/\D/g, '')) return message;
+      if (!value.replace(/\D/g, '')) {
+        return required ? message : true;
+      }
       return isValidInternationalPhone(value) || 'Informe um telefone válido';
     },
   };
@@ -43,10 +38,12 @@ export default function MissionariesStep2() {
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<MissionariesStep2Values>({
     defaultValues: {
       missionaryAgency: '',
+      agencyCustomName: '',
       agencyPhone: '',
       missionDescription: '',
       faithCommunity: '',
@@ -56,6 +53,11 @@ export default function MissionariesStep2() {
       ...formData,
     },
   });
+
+  const missionaryAgency = watch('missionaryAgency');
+  const faithCommunity = watch('faithCommunity');
+  const showAgencyDetails = missionaryAgency === SELECT_OTHER;
+  const showCommunityDetails = faithCommunity === SELECT_OTHER;
 
   return (
     <Stack component="form" spacing={2.5} onSubmit={handleSubmit(completeStep2)} sx={{ width: '100%' }}>
@@ -77,6 +79,7 @@ export default function MissionariesStep2() {
                   {agency.label}
                 </MenuItem>
               ))}
+              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
             </Select>
             {errors.missionaryAgency ? (
               <FormHelperText>{errors.missionaryAgency.message}</FormHelperText>
@@ -85,21 +88,37 @@ export default function MissionariesStep2() {
         )}
       />
 
-      <Controller
-        name="agencyPhone"
-        control={control}
-        rules={phoneRules('Informe o telefone da agência missionária')}
-        render={({ field }) => (
-          <PhoneField
-            label="Telefone da agência missionária"
-            value={field.value}
-            onChange={field.onChange}
-            error={Boolean(errors.agencyPhone)}
-            helperText={errors.agencyPhone?.message}
-            defaultCountry="br"
+      {showAgencyDetails ? (
+        <>
+          <TextField
+            {...register('agencyCustomName', {
+              required: showAgencyDetails ? 'Informe o nome da agência' : false,
+            })}
+            label="Nome da agência missionária"
+            fullWidth
+            placeholder="Nome da sua agência"
+            error={Boolean(errors.agencyCustomName)}
+            helperText={errors.agencyCustomName?.message}
           />
-        )}
-      />
+
+          <Controller
+            name="agencyPhone"
+            control={control}
+            rules={phoneRules('Informe o telefone da agência missionária', true)}
+            render={({ field }) => (
+              <PhoneField
+                label="Telefone da agência missionária"
+                value={field.value}
+                onChange={field.onChange}
+                error={Boolean(errors.agencyPhone)}
+                helperText={errors.agencyPhone?.message}
+                placeholder="(11) 98765-4321"
+                defaultCountry="br"
+              />
+            )}
+          />
+        </>
+      ) : null}
 
       <TextField
         {...register('missionDescription', {
@@ -132,6 +151,7 @@ export default function MissionariesStep2() {
                   {community.label}
                 </MenuItem>
               ))}
+              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
             </Select>
             {errors.faithCommunity ? (
               <FormHelperText>{errors.faithCommunity.message}</FormHelperText>
@@ -140,46 +160,54 @@ export default function MissionariesStep2() {
         )}
       />
 
-      <Controller
-        name="communityPhone"
-        control={control}
-        rules={phoneRules('Informe o telefone da comunidade de fé')}
-        render={({ field }) => (
-          <PhoneField
-            label="Telefone da comunidade de fé"
-            value={field.value}
-            onChange={field.onChange}
-            error={Boolean(errors.communityPhone)}
-            helperText={errors.communityPhone?.message}
-            defaultCountry="br"
+      {showCommunityDetails ? (
+        <>
+          <Controller
+            name="communityPhone"
+            control={control}
+            rules={phoneRules('Informe o telefone da comunidade de fé', true)}
+            render={({ field }) => (
+              <PhoneField
+                label="Telefone da comunidade de fé"
+                value={field.value}
+                onChange={field.onChange}
+                error={Boolean(errors.communityPhone)}
+                helperText={errors.communityPhone?.message}
+                placeholder="(11) 98765-4321"
+                defaultCountry="br"
+              />
+            )}
           />
-        )}
-      />
 
-      <TextField
-        {...register('pastorName', { required: 'Informe o nome do pastor' })}
-        label="Nome do pastor"
-        fullWidth
-        placeholder="Nome do pastor"
-        error={Boolean(errors.pastorName)}
-        helperText={errors.pastorName?.message}
-      />
-
-      <Controller
-        name="pastorPhone"
-        control={control}
-        rules={phoneRules('Informe o telefone do pastor')}
-        render={({ field }) => (
-          <PhoneField
-            label="Telefone do pastor"
-            value={field.value}
-            onChange={field.onChange}
-            error={Boolean(errors.pastorPhone)}
-            helperText={errors.pastorPhone?.message}
-            defaultCountry="br"
+          <TextField
+            {...register('pastorName', {
+              required: showCommunityDetails ? 'Informe o nome do pastor' : false,
+            })}
+            label="Nome do pastor"
+            fullWidth
+            placeholder="Pr. João Souza"
+            error={Boolean(errors.pastorName)}
+            helperText={errors.pastorName?.message}
           />
-        )}
-      />
+
+          <Controller
+            name="pastorPhone"
+            control={control}
+            rules={phoneRules('Informe o telefone do pastor', true)}
+            render={({ field }) => (
+              <PhoneField
+                label="Telefone do pastor"
+                value={field.value}
+                onChange={field.onChange}
+                error={Boolean(errors.pastorPhone)}
+                helperText={errors.pastorPhone?.message}
+                placeholder="(11) 98765-4321"
+                defaultCountry="br"
+              />
+            )}
+          />
+        </>
+      ) : null}
 
       <Stack direction="row" spacing={2}>
         <Button type="button" variant="outlined" onClick={goBack} fullWidth>

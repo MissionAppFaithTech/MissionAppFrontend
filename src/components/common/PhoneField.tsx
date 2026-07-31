@@ -10,8 +10,16 @@ type PhoneFieldProps = {
   error?: boolean;
   helperText?: string;
   label?: string;
+  placeholder?: string;
   defaultCountry?: string;
 };
+
+/** Valor só com DDI (ex: +55) — conta como vazio para mostrar o placeholder. */
+function isOnlyDialCode(phone: string): boolean {
+  const trimmed = phone.trim();
+  if (!trimmed) return true;
+  return /^\+\d{1,4}$/.test(trimmed);
+}
 
 export default function PhoneField({
   value,
@@ -19,12 +27,15 @@ export default function PhoneField({
   error,
   helperText,
   label = "Telefone",
+  placeholder = "(11) 98765-4321",
   defaultCountry = "br",
 }: PhoneFieldProps) {
   const theme = useTheme();
   const borderColor = error ? theme.palette.error.main : theme.palette.divider;
   const backgroundColor =
     theme.palette.mode === "light" ? theme.palette.surface?.main ?? "#EAF1FA" : undefined;
+
+  const displayValue = isOnlyDialCode(value) ? "" : value;
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -74,15 +85,18 @@ export default function PhoneField({
             py: 1.25,
             px: 0.5,
             color: theme.palette.text.primary,
+            "&::placeholder": {
+              color: theme.palette.text.secondary,
+              opacity: 1,
+            },
           },
         }}
       >
         <PhoneInput
           defaultCountry={defaultCountry}
-          value={value}
+          value={displayValue}
           onChange={(phone) => onChange(phone)}
-          forceDialCode
-          placeholder="(11) 98765-4321"
+          placeholder={placeholder}
         />
       </Box>
 
@@ -93,5 +107,6 @@ export default function PhoneField({
 
 export function isValidInternationalPhone(value: string): boolean {
   const digits = value.replace(/\D/g, "");
+  // DDI BR (55) + DDD (2) + número (8–9) ≈ 12–13 dígitos no total
   return digits.length >= 10;
 }

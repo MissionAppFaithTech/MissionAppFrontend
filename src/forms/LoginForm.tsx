@@ -22,8 +22,8 @@ export default function LoginForm() {
       onSubmit={handleSubmit}
       sx={{ width: "100%" }}
     >
-      <TextField label="E-mail" type="email" fullWidth />
-      <TextField label="Senha" type="password" fullWidth />
+      <TextField label="E-mail" type="email" fullWidth placeholder="seu@email.com" />
+      <TextField label="Senha" type="password" fullWidth placeholder="Sua senha" />
       <Link href="/forgot-password">Esqueceu sua senha?</Link>
       <Button type="submit" variant="contained" color="primary">
         Entrar
