@@ -144,10 +144,13 @@ const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
   /** Figma profile secondary actions: Contato / Compartilhar / Editar */
   primarySoftOutline: {
     ...figmaActionBase,
-    border: "1.5px solid",
-    borderColor: "primary.main",
-    bgcolor: "common.white",
-    color: "primary.main",
+    // `&&` beats MUI `variant="text"` which sets `border: 0`
+    "&&": {
+      border: "1.5px solid",
+      borderColor: "primary.main",
+      bgcolor: "common.white",
+      color: "primary.main",
+    },
     "&:hover": {
       ...figmaActionBase["&:hover"],
       bgcolor: "rgba(13, 43, 92, 0.04)",

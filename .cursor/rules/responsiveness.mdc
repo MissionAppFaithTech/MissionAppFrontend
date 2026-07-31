@@ -1,0 +1,31 @@
+---
+description: Always design and implement responsive UI (mobile-first)
+alwaysApply: true
+---
+
+# Responsiveness (required for AI agents)
+
+Every UI change must work on **phone, tablet, and desktop**. Do not ship desktop-only layouts.
+
+Full guidance: [`AGENTS.md`](../../AGENTS.md) → **Responsiveness**.
+
+## Checklist before finishing UI work
+
+1. Think **mobile-first**, then enhance with `sm` / `md` / `lg`.
+2. Use MUI breakpoints in `sx` / Stack `direction` (`xs`, `sm`, `md`, `lg`) — avoid fixed pixel widths that break small screens.
+3. Touch targets stay usable (~32px+); on phone, prefer compact controls (icon-only when Figma/UX allows).
+4. Long text: `wordBreak` / truncate / wrap — never overflow horizontally.
+5. Stacks and grids reflow: row on desktop may become column (or a denser row) on `xs`.
+6. Test mentally at ~360px width and ~1280px; call out if you could not verify in the browser.
+
+## Patterns already used in this repo
+
+- Profile header: identity left, primary actions right, secondary actions below on `xs`
+- `PillButton` “Editar”: label hidden on `xs`, icon + `aria-label` kept
+- Navbar / forms: fluid width, `maxWidth`, padding via breakpoints
+
+## Anti-patterns
+
+- Hardcoded `width: 400` without responsive alternative
+- Centering everything on mobile when the product layout is left/right denser
+- Hiding critical actions on small screens without an equivalent (icon, menu, etc.)

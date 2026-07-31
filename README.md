@@ -13,7 +13,8 @@
 9. [Identidade visual](#identidade-visual)
 10. [Links externos](#links-externos)
 11. [Contribuindo](#contribuindo)
-12. [Licença](#licenca)
+12. [Segurança](#seguranca)
+13. [Licença](#licenca)
 
 ---
 
@@ -157,9 +158,14 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 ## ✔️ Pré-requisitos
 
 - **Node.js** 20 ou superior
-- **Yarn** Classic 1.x (lockfile oficial: `yarn.lock`)
+- **pnpm** 11.5+ (lockfile oficial: `pnpm-lock.yaml`) — mesma família do [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend)
 
-> Use **somente Yarn**. Não rode `npm install` / `pnpm install` neste repositório — isso gera outros lockfiles e pode divergir as dependências.
+> Use **somente pnpm** (via Corepack). Não rode `npm install` / `yarn` neste repositório.
+
+```bash
+corepack enable
+corepack prepare pnpm@11.9.0 --activate
+```
 
 ---
 
@@ -177,7 +183,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 2. **📦 Instale as dependências**
 
    ```bash
-   yarn install
+   pnpm install
    ```
 
 3. **🔐 Configure as variáveis de ambiente**
@@ -191,7 +197,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 4. **▶️ Inicie o servidor de desenvolvimento**
 
    ```bash
-   yarn dev
+   pnpm dev
    ```
 
 5. **🌐 Abra no navegador**
@@ -206,12 +212,13 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 | Comando | Descrição |
 |---------|-----------|
-| `yarn dev` | App em desenvolvimento |
-| `yarn build` | Build de produção |
-| `yarn start` | Servidor de produção |
-| `yarn lint` | ESLint |
-| `yarn format` | Formata com Prettier |
-| `yarn format:check` | Verifica formatação sem alterar arquivos |
+| `pnpm dev` | App em desenvolvimento |
+| `pnpm build` | Build de produção |
+| `pnpm start` | Servidor de produção |
+| `pnpm lint` | ESLint |
+| `pnpm format` | Formata com Prettier |
+| `pnpm format:check` | Verifica formatação sem alterar arquivos |
+| `pnpm typecheck` | Verifica tipos TypeScript (`tsc --noEmit`) |
 
 ---
 
@@ -265,6 +272,14 @@ UX, telas e marca (logo, variantes claro/escuro): ver [Links externos](#links-ex
 Como contribuir (branches, Conventional Commits, lint e PRs): [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 Código de Conduta: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md).
+
+---
+
+<a name="seguranca"></a>
+
+## 🔒 Segurança
+
+Para reportar vulnerabilidades de forma responsável, veja [`SECURITY.md`](./SECURITY.md). **Não** abra issue pública sobre falhas de segurança.
 
 ---
 

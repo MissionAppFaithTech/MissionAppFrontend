@@ -15,6 +15,7 @@ Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTec
 3. [Padrões de código](#padroes-de-codigo)
 4. [Abrindo um Pull Request](#abrindo-um-pull-request)
 5. [Código de Conduta](#codigo-de-conduta)
+6. [Segurança](#seguranca)
 
 ---
 
@@ -22,15 +23,19 @@ Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTec
 
 ## 🛠️ Ambiente
 
-Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, **Yarn** (`yarn install`), `.env.local` a partir de `.env.example`, `yarn dev`.
+Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, **pnpm** (`pnpm install`), `.env.local` a partir de `.env.example`, `pnpm dev`.
 
-**Gerenciador de pacotes:** apenas Yarn (`packageManager` no `package.json`, lockfile `yarn.lock`). Não use `npm` nem `pnpm` neste repo.
+**Gerenciador de pacotes:** apenas pnpm (`packageManager` no `package.json`, lockfile `pnpm-lock.yaml`), alinhado ao backend. Não use `npm` nem `yarn` neste repo.
+
 Antes de abrir um PR, rode:
 
 ```bash
-yarn lint
-yarn format:check
+pnpm lint
+pnpm format:check
+pnpm typecheck
 ```
+
+Commits são validados por **Husky + commitlint** (mensagem Conventional Commits em inglês). Se a mensagem for inválida, o `git commit` falha.
 
 ---
 
@@ -105,6 +110,8 @@ docs: adicionar guia de contribuição
 
 Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` no mesmo commit.
 
+O hook `.husky/commit-msg` roda o commitlint automaticamente (mesmas regras do backend em `commitlint.config.mts`).
+
 ---
 
 <a name="padroes-de-codigo"></a>
@@ -119,6 +126,7 @@ Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` n
 - **Tema e tokens** em `src/theme/theme.ts` — não hardcode cores de marca fora do tema.
 - Enquanto o backend não estiver ligado, fluxos de auth podem usar mocks em `src/mocks/` (`USE_AUTH_MOCKS`).
 - **Reuso de UI:** preferir componentes existentes (`PillButton`, `Logo`, `SectionHeader`, `PhoneField`, etc.) e só criar novos quando não houver equivalente. Catálogo para agentes: [`AGENTS.md`](./AGENTS.md) (seção *UI component reuse*).
+- **Responsividade:** toda UI deve funcionar em telefone, tablet e desktop (mobile-first, breakpoints MUI). Ver [`AGENTS.md`](./AGENTS.md) (seção *Responsiveness*) e a regra do Cursor `responsiveness.mdc`.
 
 Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 
@@ -136,7 +144,7 @@ Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 
 1. Abra uma issue para mudanças maiores (recomendado).
 2. Crie a branch com o prefixo correto a partir de `main`.
-3. Rode `yarn lint` e `yarn format:check`.
+3. Rode `pnpm lint`, `pnpm format:check` e `pnpm typecheck`.
 4. Abra o PR descrevendo **o que** mudou e **por quê**.
 5. Mantenha o escopo focado: uma mudança por PR.
 
@@ -149,3 +157,11 @@ Ao contribuir, você concorda que as alterações serão licenciadas sob a [MIT]
 ## 📜 Código de Conduta
 
 Ao participar deste projeto, você concorda em seguir o [Código de Conduta](./CODE_OF_CONDUCT.md). Violações podem ser reportadas em **missionapp.faithtech@gmail.com**.
+
+---
+
+<a name="seguranca"></a>
+
+## 🔒 Segurança
+
+Vulnerabilidades: siga [`SECURITY.md`](./SECURITY.md) e envie para **missionapp.faithtech@gmail.com** com `[SECURITY]` no assunto. Não abra issue pública.

@@ -10,11 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
-# This repo uses Yarn only — do not commit npm/pnpm lockfiles.
-# Keep yarn.lock tracked (do not add it here).
+# This repo uses pnpm only — do not commit npm/yarn lockfiles.
+# Keep pnpm-lock.yaml tracked (do not add it here).
 package-lock.json
 npm-shrinkwrap.json
-pnpm-lock.yaml
+yarn.lock
 
 # testing
 /coverage

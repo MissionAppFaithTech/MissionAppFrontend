@@ -57,17 +57,32 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
             <PillButton
               tone="primarySoftOutline"
               size="small"
-              startIcon={<EditOutlinedIcon sx={{ fontSize: 16 }} />}
+              aria-label="Editar"
               onClick={onEditAction}
               sx={{
+                minWidth: { xs: 32, sm: 'auto' },
+                width: { xs: 32, sm: 'auto' },
+                height: { xs: 32, sm: 'auto' },
+                px: { xs: 0, sm: 1.75 },
+                py: { xs: 0, sm: 0.5 },
                 gap: 0.5,
-                '& .MuiButton-startIcon': {
-                  margin: 0,
-                  color: 'primary.main',
+                // Mobile: só o lápis, sem caixa/borda. sm+: outline + label.
+                '&&': {
+                  border: { xs: 'none', sm: '1.5px solid' },
+                  borderColor: { xs: 'transparent', sm: 'primary.main' },
+                  bgcolor: { xs: 'transparent', sm: 'common.white' },
+                  boxShadow: 'none',
+                },
+                '&:hover': {
+                  bgcolor: { xs: 'transparent', sm: 'rgba(13, 43, 92, 0.04)' },
+                  borderColor: { xs: 'transparent', sm: 'primary.main' },
                 },
               }}
             >
-              Editar
+              <EditOutlinedIcon sx={{ fontSize: { xs: 20, sm: 16 }, color: 'primary.main' }} />
+              <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                Editar
+              </Box>
             </PillButton>
           </Stack>
 

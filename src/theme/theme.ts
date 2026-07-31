@@ -254,39 +254,35 @@ export function createAppTheme(mode: "light" | "dark") {
             fontWeight: 500,
             borderRadius: 4,
           },
-          containedPrimary: isLight
-            ? undefined
-            : {
-                backgroundColor: roleColors.mission,
-                color: colors.surface,
-                "&:hover": {
-                  backgroundColor: shades.missionDark,
-                },
-                "&.Mui-disabled": {
-                  backgroundColor: "rgba(249, 115, 22, 0.35)",
-                  color: "rgba(255, 255, 255, 0.55)",
-                },
-              },
-          textPrimary: isLight
-            ? undefined
-            : {
-                color: roleColors.supporter,
-                "&:hover": {
-                  backgroundColor: "rgba(107, 166, 255, 0.12)",
-                },
-              },
-          outlinedPrimary: isLight
-            ? undefined
-            : {
-                borderColor: darkFieldBorder,
-                color: colors.surface,
-                "&:hover": {
-                  borderColor: darkFieldBorderHover,
-                  backgroundColor: "rgba(107, 166, 255, 0.1)",
-                },
-              },
         },
         variants: [
+          ...(isLight
+            ? []
+            : [
+                {
+                  props: { color: "primary" as const, variant: "contained" as const },
+                  style: {
+                    backgroundColor: roleColors.mission,
+                    color: colors.surface,
+                    "&:hover": {
+                      backgroundColor: shades.missionDark,
+                    },
+                    "&.Mui-disabled": {
+                      backgroundColor: "rgba(249, 115, 22, 0.35)",
+                      color: "rgba(255, 255, 255, 0.55)",
+                    },
+                  },
+                },
+                {
+                  props: { color: "primary" as const, variant: "text" as const },
+                  style: {
+                    color: roleColors.supporter,
+                    "&:hover": {
+                      backgroundColor: "rgba(107, 166, 255, 0.12)",
+                    },
+                  },
+                },
+              ]),
           {
             props: { color: "secondary", variant: "contained" },
             style: {

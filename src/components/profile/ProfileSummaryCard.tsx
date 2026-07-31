@@ -16,6 +16,70 @@ type ProfileSummaryCardProps = {
 };
 
 export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps) {
+  const actionSx = {
+    px: { xs: 1.25, sm: 1.75 },
+    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+    whiteSpace: 'nowrap' as const,
+  };
+
+  /** Mobile: Contato + Compartilhar + Editar na mesma linha. sm+: só Contato/Compartilhar. */
+  const contactActions = (
+    <Stack
+      direction="row"
+      spacing={1}
+      useFlexGap
+      sx={{
+        flexWrap: 'wrap',
+        alignSelf: 'flex-start',
+      }}
+    >
+      <PillButton
+        tone="primaryFilled"
+        size="small"
+        sx={{ ...actionSx, display: { xs: 'inline-flex', sm: 'none' } }}
+      >
+        Editar perfil
+      </PillButton>
+      <PillButton tone="primarySoftOutline" size="small" sx={actionSx}>
+        Contato
+      </PillButton>
+      <PillButton tone="primarySoftOutline" size="small" sx={actionSx}>
+        Compartilhar perfil
+      </PillButton>
+    </Stack>
+  );
+
+  /** sm+: Editar + Seguidores à direita. Mobile: só Seguidores. */
+  const primaryActions = (
+    <Stack
+      direction="row"
+      spacing={1}
+      sx={{
+        flexShrink: 0,
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+      }}
+    >
+      <PillButton
+        tone="primaryFilled"
+        size="small"
+        sx={{ ...actionSx, display: { xs: 'none', sm: 'inline-flex' } }}
+      >
+        Editar perfil
+      </PillButton>
+      <PillButton
+        tone="missionFilled"
+        size="small"
+        sx={{
+          ...actionSx,
+          minWidth: { sm: 110 },
+        }}
+      >
+        {profile.followersCount} Seguidores
+      </PillButton>
+    </Stack>
+  );
+
   return (
     <Card
       elevation={0}
@@ -32,115 +96,106 @@ export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps)
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={{ xs: 2.5, sm: 3, md: 4 }}
-          sx={{ alignItems: 'center' }}
-        >
-          <Box sx={{ position: 'relative', flexShrink: 0 }}>
-            <Avatar
-              sx={{
-                width: { xs: 88, sm: 96, md: 112 },
-                height: { xs: 88, sm: 96, md: 112 },
-                bgcolor: 'supporter.light',
-                color: 'common.black',
-                border: '1px solid',
-                borderColor: 'primary.main',
-                boxShadow: 2,
-              }}
-            >
-              <PersonIcon sx={{ fontSize: { xs: 48, sm: 52, md: 60 } }} />
-            </Avatar>
-            <Box
-              aria-hidden
-              sx={{
-                position: 'absolute',
-                right: 1,
-                bottom: { xs: 2, md: 5 },
-                width: { xs: 26, md: 30 },
-                height: { xs: 26, md: 30 },
-                display: 'grid',
-                placeItems: 'center',
-                borderRadius: '50%',
-                bgcolor: 'primary.main',
-                color: 'common.white',
-                border: '2px solid',
-                borderColor: 'background.paper',
-              }}
-            >
-              <AddIcon sx={{ fontSize: { xs: 18, md: 20 } }} />
-            </Box>
-          </Box>
-
-          <Stack
-            spacing={1.25}
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              width: '100%',
-              alignItems: { xs: 'center', md: 'flex-start' },
-              textAlign: { xs: 'center', md: 'left' },
-            }}
-          >
-            <Typography variant="body2" color="text.secondary">
-              @{profile.username}
-            </Typography>
-            <Typography
-              variant="h4"
-              color="primary.main"
-              sx={{ fontSize: { xs: '1.5rem', md: '1.75rem' } }}
-            >
-              {profile.displayName}
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {profile.roleDescription}
-            </Typography>
-            <Stack direction="row" spacing={1} sx={{ width: { xs: '100%', sm: 'auto' } }}>
-              <PillButton
-                tone="primarySoftOutline"
-                size="small"
-                sx={{ flex: { xs: 1, sm: 'initial' }, whiteSpace: 'nowrap' }}
-              >
-                Contato
-              </PillButton>
-              <PillButton
-                tone="primarySoftOutline"
-                size="small"
-                sx={{ flex: { xs: 1, sm: 'initial' }, whiteSpace: 'nowrap' }}
-              >
-                Compartilhar perfil
-              </PillButton>
-            </Stack>
-          </Stack>
-
+        <Stack spacing={{ xs: 1.75, md: 0 }}>
           <Stack
             direction="row"
-            spacing={1}
+            spacing={{ xs: 1.5, md: 4 }}
             sx={{
-              width: { xs: '100%', sm: 'auto' },
-              alignSelf: { xs: 'stretch', sm: 'center', md: 'flex-start' },
-              flexShrink: 0,
+              alignItems: { xs: 'flex-start', md: 'center' },
+              justifyContent: 'space-between',
             }}
           >
-            <PillButton
-              tone="primaryFilled"
-              size="small"
-              sx={{ flex: { xs: 1, sm: 'initial' }, whiteSpace: 'nowrap' }}
-            >
-              Editar perfil
-            </PillButton>
-            <PillButton
-              tone="missionFilled"
-              size="small"
+            <Stack
+              direction="row"
+              spacing={{ xs: 1.25, sm: 2, md: 3 }}
               sx={{
-                flex: { xs: 1, sm: 'initial' },
-                minWidth: { sm: 110 },
-                whiteSpace: 'nowrap',
+                minWidth: 0,
+                flex: 1,
+                alignItems: { xs: 'flex-start', md: 'center' },
               }}
             >
-              {profile.followersCount} Seguidores
-            </PillButton>
+              <Box sx={{ position: 'relative', flexShrink: 0 }}>
+                <Avatar
+                  sx={{
+                    width: { xs: 64, sm: 88, md: 112 },
+                    height: { xs: 64, sm: 88, md: 112 },
+                    bgcolor: 'supporter.light',
+                    color: 'common.black',
+                    border: '1px solid',
+                    borderColor: 'primary.main',
+                    boxShadow: 2,
+                  }}
+                >
+                  <PersonIcon sx={{ fontSize: { xs: 36, sm: 48, md: 60 } }} />
+                </Avatar>
+                <Box
+                  aria-hidden
+                  sx={{
+                    position: 'absolute',
+                    right: 0,
+                    bottom: { xs: 0, md: 5 },
+                    width: { xs: 22, md: 30 },
+                    height: { xs: 22, md: 30 },
+                    display: 'grid',
+                    placeItems: 'center',
+                    borderRadius: '50%',
+                    bgcolor: 'primary.main',
+                    color: 'common.white',
+                    border: '2px solid',
+                    borderColor: 'background.paper',
+                  }}
+                >
+                  <AddIcon sx={{ fontSize: { xs: 14, md: 20 } }} />
+                </Box>
+              </Box>
+
+              <Stack
+                spacing={{ xs: 0.5, md: 1.25 }}
+                sx={{
+                  flex: 1,
+                  minWidth: 0,
+                  alignItems: 'flex-start',
+                  textAlign: 'left',
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                >
+                  @{profile.username}
+                </Typography>
+                <Typography
+                  variant="h4"
+                  color="primary.main"
+                  sx={{
+                    fontSize: { xs: '1.125rem', sm: '1.5rem', md: '1.75rem' },
+                    lineHeight: 1.25,
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {profile.displayName}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                  }}
+                >
+                  {profile.roleDescription}
+                </Typography>
+
+                <Box sx={{ display: { xs: 'none', md: 'block' }, pt: 0.25 }}>
+                  {contactActions}
+                </Box>
+              </Stack>
+            </Stack>
+
+            {primaryActions}
           </Stack>
+
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>{contactActions}</Box>
         </Stack>
       </CardContent>
     </Card>

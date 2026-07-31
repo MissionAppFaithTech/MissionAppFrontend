@@ -181,7 +181,7 @@ export default function AccessCredentialsStep({
           <Typography variant="caption" color="text.secondary">
             Sugestões disponíveis — toque para usar:
           </Typography>
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+          <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
             {suggestions.map((suggestion) => (
               <Chip
                 key={suggestion}

@@ -12,6 +12,7 @@ Guidance for AI agents operating in this repository (Cursor, Claude Code, Codex,
 
 Also follow the community [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) in all interactions (issues, PRs, reviews, chat). Report concerns to **missionapp.faithtech@gmail.com**.
 
+Security vulnerabilities: follow [`SECURITY.md`](./SECURITY.md) — **do not** open a public GitHub issue. Email **missionapp.faithtech@gmail.com** with `[SECURITY]` in the subject.
 `CONTRIBUTING.md` is the source of truth for:
 
 - Branch prefixes (`feat/`, `fix/`, `docs/`, `refactor/`, `test/`, `chore/`)
@@ -50,7 +51,7 @@ MissionApp Frontend is the **Next.js** web client for Mission App (missionaries 
 |------|--------|
 | Framework | Next.js 16 (App Router) |
 | UI | React 19 + MUI 9 + Tailwind 4 |
-| Package manager | Yarn Classic (`yarn@1.22.22`, lockfile: `yarn.lock`) — never npm/pnpm in this repo |
+| Package manager | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo |
 | Theme / tokens | `src/theme/theme.ts` |
 | Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS` |
 
@@ -71,9 +72,30 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 - Forms: `src/forms/`
 - API client / BFF helpers: `src/services/`, `src/app/api/`, `src/lib/api/`
 - Brand colors via theme tokens — avoid hardcoding outside `src/theme/`
+- **Responsiveness is mandatory** on every UI change (see section below)
 - Identifiers in code: **English**
 - Commit messages: **English** (Conventional Commits)
 - Contributor docs / PR discussion with the team: **pt-BR** when writing for humans; agent chat: **pt-BR**
+
+---
+
+## Responsiveness (mandatory)
+
+**Always implement responsive layouts.** Phone is a first-class target, not an afterthought.
+
+### Rules
+
+1. **Mobile-first:** default styles for small screens; then `sm` / `md` / `lg`.
+2. Prefer MUI breakpoint props (`direction={{ xs: 'column', md: 'row' }}`, `sx={{ fontSize: { xs: …, md: … } }}`) over fixed desktop widths.
+3. Avoid horizontal overflow: wrap, truncate, or reflow; use `minWidth: 0` on flex children that must shrink.
+4. Keep actions reachable on phone — compact or icon-only is OK if `aria-label` (or equivalent) remains.
+5. Touch-friendly controls; do not rely on hover-only affordances for critical actions.
+6. When changing UI, sanity-check ~360px and ~1280px widths (or state if unchecked).
+
+### Examples in this codebase
+
+- `ProfileSummaryCard`: on `xs`, photo/name left, primary buttons right, Contato/Compartilhar below with smaller width.
+- `ProfileAboutSection` edit control: icon-only on `xs`, icon + “Editar” from `sm` up.
 
 ---
 
