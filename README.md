@@ -1,6 +1,6 @@
-# Mission App — Frontend
+# ⛪ Mission App — Frontend
 
-## Sumário
+## 📋 Sumário
 
 1. [Visão geral](#visao-geral)
 2. [Tipos de acesso](#tipos-de-acesso)
@@ -19,7 +19,7 @@
 
 <a name="visao-geral"></a>
 
-## Visão geral
+## 🗺️ Visão geral
 
 > Conectamos missionários e apoiadores em um só lugar.
 
@@ -29,14 +29,14 @@ Este repositório contém o **frontend** (Next.js). A API fica no [MissionApp Ba
 
 Contribuições são bem-vindas: issues, sugestões e pull requests ajudam a tornar a ferramenta melhor para toda a comunidade missionária.
 
-**Para missionários**
+**🙏 Para missionários**
 
 - Compartilhar atualizações com facilidade
 - Receber apoio em oração
 - Fortalecer a rede de mantenedores
 - Manter todos conectados em um só ambiente
 
-**Para apoiadores**
+**💛 Para apoiadores**
 
 - Acompanhar a jornada missionária
 - Receber pedidos de oração
@@ -47,7 +47,7 @@ Contribuições são bem-vindas: issues, sugestões e pull requests ajudam a tor
 
 <a name="tipos-de-acesso"></a>
 
-## Tipos de acesso
+## 👥 Tipos de acesso
 
 A plataforma distingue três papéis (alinhados ao backend). No front, o fluxo público de cadastro cobre **missionário** e **apoiador**; **admin** é interno.
 
@@ -59,7 +59,7 @@ A plataforma distingue três papéis (alinhados ao backend). No front, o fluxo p
 
 **Visitante (não autenticado):** pode ver a landing e rotas públicas de leitura (ex.: perfil público). Cadastro começa em `/select-role`; login em `/login`.
 
-Entrada rápida no app:
+**🚪 Entrada rápida no app:**
 
 | Ação na UI | Destino |
 | ---------- | ------- |
@@ -71,7 +71,7 @@ Entrada rápida no app:
 
 <a name="estrutura-do-projeto"></a>
 
-## Estrutura do projeto
+## 📂 Estrutura do projeto
 
 Pastas **raiz** e **`src/`** (o que cada uma faz):
 
@@ -134,7 +134,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 <a name="stack"></a>
 
-## Stack
+## ⚙️ Stack
 
 | Camada | Tecnologia |
 |--------|------------|
@@ -154,7 +154,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 <a name="pre-requisitos"></a>
 
-## Pré-requisitos
+## ✔️ Pré-requisitos
 
 - **Node.js** 20 ou superior
 - **Yarn** (lockfile: `yarn.lock`)
@@ -163,22 +163,22 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 <a name="instalacao"></a>
 
-## Instalação
+## 🚀 Instalação
 
-1. **Clone o repositório**
+1. **📥 Clone o repositório**
 
    ```bash
    git clone <url-do-repositorio>
    cd MissionAppFrontend
    ```
 
-2. **Instale as dependências**
+2. **📦 Instale as dependências**
 
    ```bash
    yarn install
    ```
 
-3. **Configure as variáveis de ambiente**
+3. **🔐 Configure as variáveis de ambiente**
 
    ```bash
    cp .env.example .env.local
@@ -186,13 +186,13 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
    Valores padrão em `.env.example` (site em `:3000`, API em `:3333`).
 
-4. **Inicie o servidor de desenvolvimento**
+4. **▶️ Inicie o servidor de desenvolvimento**
 
    ```bash
    yarn dev
    ```
 
-5. **Abra no navegador**
+5. **🌐 Abra no navegador**
 
    [http://localhost:3000](http://localhost:3000)
 
@@ -200,7 +200,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 <a name="scripts-disponiveis"></a>
 
-## Scripts disponíveis
+## 💻 Scripts disponíveis
 
 | Comando | Descrição |
 |---------|-----------|
@@ -215,7 +215,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 <a name="rotas-principais"></a>
 
-## Rotas principais
+## 🧭 Rotas principais
 
 | Rota | Descrição |
 |------|-----------|
@@ -233,7 +233,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 <a name="identidade-visual"></a>
 
-## Identidade visual
+## 🎨 Identidade visual
 
 O design system usa tons que representam os públicos da plataforma:
 
@@ -249,7 +249,7 @@ UX, telas e marca (logo, variantes claro/escuro): ver [Links externos](#links-ex
 
 <a name="links-externos"></a>
 
-## Links externos
+## 🔗 Links externos
 
 - [Design no Figma](https://www.figma.com/design/uMAwJPYKaEoN7ScjAmgZ6O/Mission-app?node-id=902-1737&t=hALogHv4YSYnn2VE-1)
 - [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend)
@@ -258,7 +258,7 @@ UX, telas e marca (logo, variantes claro/escuro): ver [Links externos](#links-ex
 
 <a name="contribuindo"></a>
 
-## Contribuindo
+## 🤝 Contribuindo
 
 Como contribuir (branches, Conventional Commits, lint e PRs): [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
@@ -268,6 +268,6 @@ Código de Conduta: [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md).
 
 <a name="licenca"></a>
 
-## Licença
+## 📄 Licença
 
 Distribuído sob a licença [MIT](./LICENSE.txt). Você pode usar, modificar e distribuir o código conforme os termos da licença.

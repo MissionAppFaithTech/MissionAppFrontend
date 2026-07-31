@@ -1,4 +1,4 @@
-# Contribuindo com o MissionApp Frontend
+# 🤝 Contribuindo com o MissionApp Frontend
 
 Obrigado pelo interesse em contribuir. Este guia cobre **como contribuir** (branches, commits, PRs e padrões). Para visão do produto, stack, estrutura de pastas e instalação, use o [`README.md`](./README.md).
 
@@ -8,7 +8,7 @@ Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTec
 
 ---
 
-## Sumário
+## 📋 Sumário
 
 1. [Ambiente](#ambiente)
 2. [Fluxo de trabalho](#fluxo-de-trabalho)
@@ -20,7 +20,7 @@ Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTec
 
 <a name="ambiente"></a>
 
-## Ambiente
+## 🛠️ Ambiente
 
 Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, Yarn, `yarn install`, `.env.local` a partir de `.env.example`, `yarn dev`.
 
@@ -35,9 +35,9 @@ yarn format:check
 
 <a name="fluxo-de-trabalho"></a>
 
-## Fluxo de trabalho
+## 🔄 Fluxo de trabalho
 
-### Branches
+### 🌿 Branches
 
 Crie sempre uma branch a partir de `main`:
 
@@ -56,7 +56,7 @@ git checkout -b <type>/<short-description>
 | `test/` | Adição ou correção de testes |
 | `chore/` | Configuração, CI, dependências |
 
-### Commits
+### ✍️ Commits
 
 Siga o padrão [Conventional Commits](https://www.conventionalcommits.org/), em **inglês**, no imperativo e em minúsculas:
 
@@ -108,9 +108,9 @@ Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` n
 
 <a name="padroes-de-codigo"></a>
 
-## Padrões de código
+## 📐 Padrões de código
 
-### Convenções do front
+### 🧩 Convenções do front
 
 - **App Router** (`src/app/`) para rotas e metadata.
 - **Componentes** em `src/components/`; formulários em `src/forms/`.
@@ -120,7 +120,7 @@ Um commit deve ter **uma intenção** — não misture `feat`, `fix` e `chore` n
 
 Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 
-### Idioma
+### 🌐 Idioma
 
 - Código (identificadores): **inglês**
 - Mensagens de commit: **inglês** (Conventional Commits)
@@ -130,7 +130,7 @@ Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 
 <a name="abrindo-um-pull-request"></a>
 
-## Abrindo um Pull Request
+## 🚀 Abrindo um Pull Request
 
 1. Abra uma issue para mudanças maiores (recomendado).
 2. Crie a branch com o prefixo correto a partir de `main`.
@@ -144,6 +144,6 @@ Ao contribuir, você concorda que as alterações serão licenciadas sob a [MIT]
 
 <a name="codigo-de-conduta"></a>
 
-## Código de Conduta
+## 📜 Código de Conduta
 
 Ao participar deste projeto, você concorda em seguir o [Código de Conduta](./CODE_OF_CONDUCT.md). Violações podem ser reportadas em **missionapp.faithtech@gmail.com**.
