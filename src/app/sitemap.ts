@@ -10,6 +10,7 @@ const publicRoutes: Array<{
   { path: "/", changeFrequency: "weekly", priority: 1 },
   { path: "/select-role", changeFrequency: "monthly", priority: 0.8 },
   { path: "/login", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/forgot-password", changeFrequency: "yearly", priority: 0.3 },
   { path: "/register/missionaries", changeFrequency: "monthly", priority: 0.7 },
   { path: "/register/supporters", changeFrequency: "monthly", priority: 0.7 },
 ];
