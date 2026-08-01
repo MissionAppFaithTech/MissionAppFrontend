@@ -46,11 +46,7 @@ export default function PageNavbar({
         top: 0,
         zIndex: (theme) => theme.zIndex.appBar,
         ...variantStyles[variant],
-        borderBottom: isLanding
-          ? scrolled
-            ? '1px solid'
-            : 'none'
-          : '1px solid',
+        borderBottom: isLanding ? (scrolled ? '1px solid' : 'none') : '1px solid',
         borderColor: 'divider',
         transition: 'border-color 0.2s ease, background-color 0.2s ease, backdrop-filter 0.2s ease',
         ...(isLanding &&
@@ -67,7 +63,7 @@ export default function PageNavbar({
             ? {
                 px: { xs: 2, sm: 3, md: 3, lg: 4 },
                 maxWidth: { md: 1280, lg: 1440, xl: 1600 },
-                mx: "auto",
+                mx: 'auto',
               }
             : undefined
         }

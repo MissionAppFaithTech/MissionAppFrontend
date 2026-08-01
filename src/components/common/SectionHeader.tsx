@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 
 type SectionHeaderProps = {
   eyebrow: string;
   title: string;
   subtitle?: string;
-  align?: "center" | "left";
+  align?: 'center' | 'left';
   maxWidth?: number;
 };
 
@@ -15,10 +15,10 @@ export default function SectionHeader({
   eyebrow,
   title,
   subtitle,
-  align = "center",
+  align = 'center',
   maxWidth = 700,
 }: SectionHeaderProps) {
-  const isCenter = align === "center";
+  const isCenter = align === 'center';
 
   return (
     <Stack
@@ -26,16 +26,16 @@ export default function SectionHeader({
       sx={{
         textAlign: align,
         maxWidth: isCenter ? maxWidth : undefined,
-        mx: isCenter ? "auto" : undefined,
+        mx: isCenter ? 'auto' : undefined,
       }}
     >
       <Typography
         variant="overline"
         sx={{
-          color: "mission.main",
+          color: 'mission.main',
           fontWeight: 700,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
         }}
       >
         {eyebrow}

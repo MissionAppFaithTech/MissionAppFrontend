@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
-import path from "path";
+import type { NextConfig } from 'next';
+import path from 'path';
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig: NextConfig = {
   turbopack: {
@@ -13,12 +13,12 @@ const nextConfig: NextConfig = {
   },
   ...(isDev && {
     async headers() {
-      const noStore = [{ key: "Cache-Control", value: "no-store, must-revalidate" }];
+      const noStore = [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }];
       return [
-        { source: "/landing-page/:path*", headers: noStore },
-        { source: "/icons/:path*", headers: noStore },
-        { source: "/images/:path*", headers: noStore },
-        { source: "/logos/:path*", headers: noStore },
+        { source: '/landing-page/:path*', headers: noStore },
+        { source: '/icons/:path*', headers: noStore },
+        { source: '/images/:path*', headers: noStore },
+        { source: '/logos/:path*', headers: noStore },
       ];
     },
   }),

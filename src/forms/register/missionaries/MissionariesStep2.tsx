@@ -15,11 +15,7 @@ import {
 import PhoneField, { isValidInternationalPhone } from '@/components/common/PhoneField';
 import type { MissionariesStep2Values } from '../types';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
-import {
-  SELECT_OTHER,
-  faithCommunities,
-  missionaryAgencies,
-} from '@/forms/register/options';
+import { SELECT_OTHER, faithCommunities, missionaryAgencies } from '@/forms/register/options';
 
 function phoneRules(message: string, required: boolean) {
   return {
@@ -60,7 +56,12 @@ export default function MissionariesStep2() {
   const showCommunityDetails = faithCommunity === SELECT_OTHER;
 
   return (
-    <Stack component="form" spacing={2.5} onSubmit={handleSubmit(completeStep2)} sx={{ width: '100%' }}>
+    <Stack
+      component="form"
+      spacing={2.5}
+      onSubmit={handleSubmit(completeStep2)}
+      sx={{ width: '100%' }}
+    >
       <Typography variant="body1">Dados de missão</Typography>
 
       <Controller

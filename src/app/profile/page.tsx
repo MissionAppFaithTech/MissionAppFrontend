@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
-import ProfilePageContent from "./ProfilePageContent";
+import type { Metadata } from 'next';
+import ProfilePageContent from './ProfilePageContent';
 
 export const metadata: Metadata = {
-  title: "Meu perfil",
+  title: 'Meu perfil',
   robots: { index: false, follow: false },
 };
 

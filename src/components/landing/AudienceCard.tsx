@@ -67,13 +67,13 @@ function AudienceContent({
   label,
   benefit,
   icon,
-}: Pick<AudienceCardProps, "label" | "benefit" | "icon">) {
+}: Pick<AudienceCardProps, 'label' | 'benefit' | 'icon'>) {
   return (
     <Stack
       direction="row"
       spacing={1.5}
       sx={{
-        alignItems: "flex-start",
+        alignItems: 'flex-start',
         flex: 1,
         minWidth: 0,
         pt: { xs: 0, md: 6, lg: 10 },
@@ -85,7 +85,7 @@ function AudienceContent({
           alt=""
           width={80}
           height={80}
-          style={{ width: 80, height: 80, objectFit: "contain", flexShrink: 0 }}
+          style={{ width: 80, height: 80, objectFit: 'contain', flexShrink: 0 }}
         />
       ) : null}
 
@@ -103,7 +103,6 @@ function AudienceContent({
 
 export default function AudienceCard({
   label,
-  title: _title,
   benefit,
   accentColor,
   mockupVariant,
@@ -119,10 +118,10 @@ export default function AudienceCard({
       <Stack
         spacing={{ xs: 4, md: 6 }}
         sx={{
-          alignItems: { xs: "center", md: "flex-start" },
+          alignItems: { xs: 'center', md: 'flex-start' },
           flexDirection: {
-            xs: "column",
-            md: imageOnLeft ? "row-reverse" : "row",
+            xs: 'column',
+            md: imageOnLeft ? 'row-reverse' : 'row',
           },
         }}
       >

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import type {
   MissionariesStep1Values,
   MissionariesStep2Values,
   MissionariesStep3Values,
   MissionaryRegisterData,
-} from "@/forms/register/types";
+} from '@/forms/register/types';
 
 type MissionaryRegisterWizardContextValue = {
   step: number;
@@ -17,8 +17,9 @@ type MissionaryRegisterWizardContextValue = {
   goBack: () => void;
 };
 
-const MissionaryRegisterWizardContext =
-  createContext<MissionaryRegisterWizardContextValue | null>(null);
+const MissionaryRegisterWizardContext = createContext<MissionaryRegisterWizardContextValue | null>(
+  null
+);
 
 export function MissionaryRegisterWizardProvider({ children }: { children: ReactNode }) {
   const [step, setStep] = useState(1);
@@ -65,7 +66,7 @@ export function useMissionaryRegisterWizard() {
 
   if (!context) {
     throw new Error(
-      "useMissionaryRegisterWizard must be used within MissionaryRegisterWizardProvider"
+      'useMissionaryRegisterWizard must be used within MissionaryRegisterWizardProvider'
     );
   }
 

@@ -1,9 +1,9 @@
-export type Gender = "feminino" | "masculino";
+export type Gender = 'feminino' | 'masculino';
 
 export type MissionariesStep1Values = {
   fullName: string;
   birthDate: string;
-  gender: Gender | "";
+  gender: Gender | '';
   document: string;
   phone: string;
 };
@@ -11,7 +11,7 @@ export type MissionariesStep1Values = {
 export type SupportersStep1Values = {
   fullName: string;
   birthDate: string;
-  gender: Gender | "";
+  gender: Gender | '';
   phone: string;
   /** Opcional — use SELECT_OTHER se não encontrar na lista */
   faithCommunity: string;

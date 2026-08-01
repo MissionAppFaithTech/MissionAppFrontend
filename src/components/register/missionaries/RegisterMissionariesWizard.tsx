@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { Box, Stack, Typography, Link, CardContent, Card } from "@mui/material";
-import ThemeToggle from "@/components/ThemeToggle";
-import Logo from "@/components/common/Logo";
-import MissionariesStep1 from "@/forms/register/missionaries/MissionariesStep1";
-import MissionariesStep2 from "@/forms/register/missionaries/MissionariesStep2";
-import MissionariesStep3 from "@/forms/register/missionaries/MissionariesStep3";
-import MissionariesStep4 from "@/forms/register/missionaries/MissionariesStep4";
+import { Box, Stack, Typography, Link, CardContent, Card } from '@mui/material';
+import ThemeToggle from '@/components/ThemeToggle';
+import Logo from '@/components/common/Logo';
+import MissionariesStep1 from '@/forms/register/missionaries/MissionariesStep1';
+import MissionariesStep2 from '@/forms/register/missionaries/MissionariesStep2';
+import MissionariesStep3 from '@/forms/register/missionaries/MissionariesStep3';
+import MissionariesStep4 from '@/forms/register/missionaries/MissionariesStep4';
 import {
   MissionaryRegisterWizardProvider,
   useMissionaryRegisterWizard,
-} from "@/components/register/missionaries/MissionaryRegisterWizardContext";
+} from '@/components/register/missionaries/MissionaryRegisterWizardContext';
 
-const stepLabels = ["Dados pessoais", "Dados de missão", "Dados de acesso", "Confirmação"];
+const stepLabels = ['Dados pessoais', 'Dados de missão', 'Dados de acesso', 'Confirmação'];
 
 function RegisterMissionariesWizardContent() {
   const { step } = useMissionaryRegisterWizard();
@@ -22,21 +22,21 @@ function RegisterMissionariesWizardContent() {
     <Box
       component="main"
       sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         px: 3,
         py: 6,
-        position: "relative",
+        position: 'relative',
       }}
     >
-      <Box sx={{ position: "absolute", top: 16, right: 16 }}>
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
         <ThemeToggle />
       </Box>
 
-      <Box sx={{ width: "100%", maxWidth: 420 }}>
+      <Box sx={{ width: '100%', maxWidth: 420 }}>
         <Box sx={{ mb: 3 }}>
           <Logo size="lg" />
         </Box>
@@ -45,8 +45,8 @@ function RegisterMissionariesWizardContent() {
           direction="row"
           sx={{
             mb: 1,
-            justifyContent: "space-between",
-            alignItems: "center",
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
           <Typography variant="h6">Cadastro de missionário</Typography>
@@ -55,9 +55,9 @@ function RegisterMissionariesWizardContent() {
             <Link
               href="/select-role"
               sx={{
-                color: "text.secondary",
-                textDecoration: "none",
-                fontSize: "0.875rem",
+                color: 'text.secondary',
+                textDecoration: 'none',
+                fontSize: '0.875rem',
               }}
             >
               Trocar perfil
@@ -66,21 +66,21 @@ function RegisterMissionariesWizardContent() {
         </Stack>
 
         {!isConfirmation ? (
-          <Typography variant="caption" color="text.secondary" sx={{ display: "block", mb: 2 }}>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
             Etapa {step} de 3 · {stepLabels[step - 1]}
           </Typography>
         ) : (
           <Box sx={{ mb: 2 }} />
         )}
 
-        <Stack direction="column" spacing={2} sx={{ width: "100%", alignItems: "stretch" }}>
+        <Stack direction="column" spacing={2} sx={{ width: '100%', alignItems: 'stretch' }}>
           <Card
             elevation={0}
             sx={{
               borderRadius: 3,
-              border: "1px solid",
-              bgcolor: "transparent",
-              boxShadow: "none",
+              border: '1px solid',
+              bgcolor: 'transparent',
+              boxShadow: 'none',
             }}
           >
             <CardContent>

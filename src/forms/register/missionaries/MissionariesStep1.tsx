@@ -37,7 +37,12 @@ export default function MissionariesStep1() {
   });
 
   return (
-    <Stack component="form" spacing={2.5} onSubmit={handleSubmit(completeStep1)} sx={{ width: '100%' }}>
+    <Stack
+      component="form"
+      spacing={2.5}
+      onSubmit={handleSubmit(completeStep1)}
+      sx={{ width: '100%' }}
+    >
       <Typography variant="body1">Dados pessoais</Typography>
 
       <TextField

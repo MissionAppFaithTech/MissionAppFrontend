@@ -1,16 +1,5 @@
 export type PhoneCountryCode =
-  | "BR"
-  | "US"
-  | "PT"
-  | "AR"
-  | "ES"
-  | "GB"
-  | "DE"
-  | "FR"
-  | "MX"
-  | "CO"
-  | "PY"
-  | "OTHER";
+  'BR' | 'US' | 'PT' | 'AR' | 'ES' | 'GB' | 'DE' | 'FR' | 'MX' | 'CO' | 'PY' | 'OTHER';
 
 export type PhoneFieldValue = {
   country: PhoneCountryCode;
@@ -28,28 +17,32 @@ export type PhoneCountry = {
 export function getCountryFlag(isoCode: string): string {
   const code = isoCode.toUpperCase();
 
-  if (code === "OTHER" || code.length !== 2) {
-    return "🌐";
+  if (code === 'OTHER' || code.length !== 2) {
+    return '🌐';
   }
 
-  return String.fromCodePoint(
-    ...[...code].map((char) => 0x1f1e6 - 65 + char.charCodeAt(0))
-  );
+  return String.fromCodePoint(...[...code].map((char) => 0x1f1e6 - 65 + char.charCodeAt(0)));
 }
 
 export const phoneCountries: PhoneCountry[] = [
-  { code: "BR", name: "Brasil", dialCode: "+55", placeholder: "(11) 98765-4321", maxDigits: 11 },
-  { code: "US", name: "Estados Unidos", dialCode: "+1", placeholder: "(555) 123-4567", maxDigits: 10 },
-  { code: "PT", name: "Portugal", dialCode: "+351", placeholder: "912 345 678", maxDigits: 9 },
-  { code: "AR", name: "Argentina", dialCode: "+54", placeholder: "(11) 1234-5678", maxDigits: 10 },
-  { code: "PY", name: "Paraguai", dialCode: "+595", placeholder: "(981) 123-456", maxDigits: 9 },
-  { code: "MX", name: "México", dialCode: "+52", placeholder: "(55) 1234-5678", maxDigits: 10 },
-  { code: "CO", name: "Colômbia", dialCode: "+57", placeholder: "(300) 123-4567", maxDigits: 10 },
-  { code: "ES", name: "Espanha", dialCode: "+34", placeholder: "612 34 56 78", maxDigits: 9 },
-  { code: "GB", name: "Reino Unido", dialCode: "+44", placeholder: "07123 456789", maxDigits: 11 },
-  { code: "DE", name: "Alemanha", dialCode: "+49", placeholder: "1512 3456789", maxDigits: 11 },
-  { code: "FR", name: "França", dialCode: "+33", placeholder: "06 12 34 56 78", maxDigits: 10 },
-  { code: "OTHER", name: "Outro", dialCode: "+", placeholder: "000 000 0000", maxDigits: 15 },
+  { code: 'BR', name: 'Brasil', dialCode: '+55', placeholder: '(11) 98765-4321', maxDigits: 11 },
+  {
+    code: 'US',
+    name: 'Estados Unidos',
+    dialCode: '+1',
+    placeholder: '(555) 123-4567',
+    maxDigits: 10,
+  },
+  { code: 'PT', name: 'Portugal', dialCode: '+351', placeholder: '912 345 678', maxDigits: 9 },
+  { code: 'AR', name: 'Argentina', dialCode: '+54', placeholder: '(11) 1234-5678', maxDigits: 10 },
+  { code: 'PY', name: 'Paraguai', dialCode: '+595', placeholder: '(981) 123-456', maxDigits: 9 },
+  { code: 'MX', name: 'México', dialCode: '+52', placeholder: '(55) 1234-5678', maxDigits: 10 },
+  { code: 'CO', name: 'Colômbia', dialCode: '+57', placeholder: '(300) 123-4567', maxDigits: 10 },
+  { code: 'ES', name: 'Espanha', dialCode: '+34', placeholder: '612 34 56 78', maxDigits: 9 },
+  { code: 'GB', name: 'Reino Unido', dialCode: '+44', placeholder: '07123 456789', maxDigits: 11 },
+  { code: 'DE', name: 'Alemanha', dialCode: '+49', placeholder: '1512 3456789', maxDigits: 11 },
+  { code: 'FR', name: 'França', dialCode: '+33', placeholder: '06 12 34 56 78', maxDigits: 10 },
+  { code: 'OTHER', name: 'Outro', dialCode: '+', placeholder: '000 000 0000', maxDigits: 15 },
 ];
 
 export function getPhoneCountry(code: PhoneCountryCode): PhoneCountry {
@@ -59,7 +52,7 @@ export function getPhoneCountry(code: PhoneCountryCode): PhoneCountry {
 function maskBrazilPhone(digits: string): string {
   const d = digits.slice(0, 11);
 
-  if (d.length <= 2) return d.length ? `(${d}` : "";
+  if (d.length <= 2) return d.length ? `(${d}` : '';
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   if (d.length <= 10) {
     return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
@@ -71,7 +64,7 @@ function maskBrazilPhone(digits: string): string {
 function maskNorthAmericaPhone(digits: string): string {
   const d = digits.slice(0, 10);
 
-  if (d.length <= 3) return d.length ? `(${d}` : "";
+  if (d.length <= 3) return d.length ? `(${d}` : '';
   if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
@@ -87,7 +80,7 @@ function maskPortugalPhone(digits: string): string {
 function maskArgentinaPhone(digits: string): string {
   const d = digits.slice(0, 10);
 
-  if (d.length <= 2) return d.length ? `(${d}` : "";
+  if (d.length <= 2) return d.length ? `(${d}` : '';
   if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
   return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
 }
@@ -95,7 +88,7 @@ function maskArgentinaPhone(digits: string): string {
 function maskParaguayPhone(digits: string): string {
   const d = digits.slice(0, 9);
 
-  if (d.length <= 3) return d.length ? `(${d}` : "";
+  if (d.length <= 3) return d.length ? `(${d}` : '';
   if (d.length <= 6) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
@@ -127,38 +120,38 @@ function maskFrancePhone(digits: string): string {
   const d = digits.slice(0, 10);
 
   if (d.length <= 2) return d;
-  return d.replace(/(\d{2})(?=\d)/g, "$1 ").trim();
+  return d.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
 }
 
 function maskGenericPhone(digits: string, maxDigits: number): string {
   const d = digits.slice(0, maxDigits);
-  return d.replace(/(\d{3})(?=\d)/g, "$1 ").trim();
+  return d.replace(/(\d{3})(?=\d)/g, '$1 ').trim();
 }
 
 export function maskPhoneNumber(value: string, country: PhoneCountryCode): string {
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replace(/\D/g, '');
   const config = getPhoneCountry(country);
 
   switch (country) {
-    case "BR":
+    case 'BR':
       return maskBrazilPhone(digits);
-    case "US":
-    case "MX":
-    case "CO":
+    case 'US':
+    case 'MX':
+    case 'CO':
       return maskNorthAmericaPhone(digits.slice(0, config.maxDigits));
-    case "PT":
+    case 'PT':
       return maskPortugalPhone(digits);
-    case "AR":
+    case 'AR':
       return maskArgentinaPhone(digits);
-    case "PY":
+    case 'PY':
       return maskParaguayPhone(digits);
-    case "ES":
+    case 'ES':
       return maskSpainPhone(digits);
-    case "GB":
+    case 'GB':
       return maskUkPhone(digits);
-    case "DE":
+    case 'DE':
       return maskGermanyPhone(digits);
-    case "FR":
+    case 'FR':
       return maskFrancePhone(digits);
     default:
       return maskGenericPhone(digits, config.maxDigits);
@@ -166,14 +159,14 @@ export function maskPhoneNumber(value: string, country: PhoneCountryCode): strin
 }
 
 export function isValidPhoneNumber(value: string, country: PhoneCountryCode): boolean {
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replace(/\D/g, '');
   const config = getPhoneCountry(country);
 
-  if (country === "BR") {
+  if (country === 'BR') {
     return digits.length === 10 || digits.length === 11;
   }
 
-  if (country === "OTHER") {
+  if (country === 'OTHER') {
     return digits.length >= 8;
   }
 
@@ -182,9 +175,9 @@ export function isValidPhoneNumber(value: string, country: PhoneCountryCode): bo
 
 export function formatPhoneDisplay(value: PhoneFieldValue): string {
   const country = getPhoneCountry(value.country);
-  const digits = value.number.replace(/\D/g, "");
+  const digits = value.number.replace(/\D/g, '');
 
-  if (!digits) return "";
+  if (!digits) return '';
 
   return `${country.dialCode} ${maskPhoneNumber(digits, value.country)}`;
 }

@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import type {
   AccessCredentialsValues,
   SupporterRegisterData,
   SupportersStep1Values,
-} from "@/forms/register/types";
+} from '@/forms/register/types';
 
 type SupporterRegisterWizardContextValue = {
   step: number;
@@ -15,8 +15,9 @@ type SupporterRegisterWizardContextValue = {
   goBack: () => void;
 };
 
-const SupporterRegisterWizardContext =
-  createContext<SupporterRegisterWizardContextValue | null>(null);
+const SupporterRegisterWizardContext = createContext<SupporterRegisterWizardContextValue | null>(
+  null
+);
 
 export function SupporterRegisterWizardProvider({ children }: { children: ReactNode }) {
   const [step, setStep] = useState(1);
@@ -57,7 +58,7 @@ export function useSupporterRegisterWizard() {
 
   if (!context) {
     throw new Error(
-      "useSupporterRegisterWizard must be used within SupporterRegisterWizardProvider",
+      'useSupporterRegisterWizard must be used within SupporterRegisterWizardProvider'
     );
   }
 

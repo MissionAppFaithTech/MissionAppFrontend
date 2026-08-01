@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Image from "next/image";
-import Link from "next/link";
-import { useTheme } from "next-themes";
+import Box from '@mui/material/Box';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useTheme } from 'next-themes';
+import useHasMounted from '@/lib/useHasMounted';
 
 const LOGO_PATHS = {
-  light: "/logos/logo_light.PNG",
-  dark: "/logos/logo_dark.PNG",
+  light: '/logos/logo_light.PNG',
+  dark: '/logos/logo_dark.PNG',
 } as const;
 
-type LogoSize = "sm" | "md" | "lg" | "xl";
-type LogoVariant = "auto" | "light" | "dark";
+type LogoSize = 'sm' | 'md' | 'lg' | 'xl';
+type LogoVariant = 'auto' | 'light' | 'dark';
 
 type LogoProps = {
   href?: string;
@@ -35,33 +35,23 @@ function resolveSize(size?: string): LogoSize {
   if (size && size in sizes) {
     return size as LogoSize;
   }
-  return "md";
+  return 'md';
 }
 
 function resolveVariant(variant: LogoVariant, onDark: boolean): LogoVariant {
-  if (onDark) return "dark";
+  if (onDark) return 'dark';
   return variant;
 }
 
-export default function Logo({
-  href = "/",
-  size,
-  variant = "auto",
-  onDark = false,
-}: LogoProps) {
+export default function Logo({ href = '/', size, variant = 'auto', onDark = false }: LogoProps) {
   const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useHasMounted();
   const resolvedSize = resolveSize(size);
   const { height, maxWidth } = sizes[resolvedSize];
   const logoVariant = resolveVariant(variant, onDark);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const useDarkLogo =
-    logoVariant === "dark" ||
-    (logoVariant === "auto" && mounted && resolvedTheme === "dark");
+    logoVariant === 'dark' || (logoVariant === 'auto' && mounted && resolvedTheme === 'dark');
 
   const src = useDarkLogo ? LOGO_PATHS.dark : LOGO_PATHS.light;
 
@@ -71,13 +61,13 @@ export default function Logo({
       alt="Mission App"
       width={280}
       height={280}
-      priority={resolvedSize !== "sm"}
+      priority={resolvedSize !== 'sm'}
       style={{
         height,
-        width: "auto",
+        width: 'auto',
         maxWidth,
-        objectFit: "contain",
-        display: "block",
+        objectFit: 'contain',
+        display: 'block',
       }}
     />
   );
@@ -88,9 +78,9 @@ export default function Logo({
         component={Link}
         href={href}
         sx={{
-          display: "inline-flex",
-          alignItems: "center",
-          textDecoration: "none",
+          display: 'inline-flex',
+          alignItems: 'center',
+          textDecoration: 'none',
           lineHeight: 0,
           flexShrink: 0,
         }}
@@ -103,8 +93,8 @@ export default function Logo({
   return (
     <Box
       sx={{
-        display: "inline-flex",
-        alignItems: "center",
+        display: 'inline-flex',
+        alignItems: 'center',
         lineHeight: 0,
         flexShrink: 0,
       }}

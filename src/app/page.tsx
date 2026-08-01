@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
-import LandingPage from "@/components/landing/LandingPage";
-import { getSiteUrl, siteConfig } from "@/lib/site";
+import type { Metadata } from 'next';
+import LandingPage from '@/components/landing/LandingPage';
+import { getSiteUrl, siteConfig } from '@/lib/site';
 
 /** Landing is static marketing content — regenerate at most once per hour. */
 export const revalidate = 3600;
@@ -11,29 +11,29 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   alternates: {
-    canonical: "/",
+    canonical: '/',
   },
   openGraph: {
     title: `${siteConfig.name} — Conectamos missionários e apoiadores`,
     description: siteConfig.description,
-    url: "/",
+    url: '/',
   },
 };
 
 function JsonLd() {
   const siteUrl = getSiteUrl();
   const data = {
-    "@context": "https://schema.org",
-    "@graph": [
+    '@context': 'https://schema.org',
+    '@graph': [
       {
-        "@type": "WebSite",
+        '@type': 'WebSite',
         name: siteConfig.name,
         url: siteUrl,
         description: siteConfig.description,
-        inLanguage: "pt-BR",
+        inLanguage: 'pt-BR',
       },
       {
-        "@type": "Organization",
+        '@type': 'Organization',
         name: siteConfig.name,
         url: siteUrl,
         logo: `${siteUrl}/logos/logo_light.PNG`,
@@ -43,10 +43,7 @@ function JsonLd() {
   };
 
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 

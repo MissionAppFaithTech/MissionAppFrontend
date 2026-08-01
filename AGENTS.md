@@ -47,15 +47,17 @@ Only create a git commit when the user explicitly asks.
 
 MissionApp Frontend is the **Next.js** web client for Mission App (missionaries and supporters). Maintained by FaithTech.
 
-| Item | Value |
-|------|--------|
-| Framework | Next.js 16 (App Router) |
-| UI | React 19 + MUI 9 + Tailwind 4 |
-| Package manager | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo |
-| Theme / tokens | `src/theme/theme.ts` |
-| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS` |
+| Item                             | Value                                                                           |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| Framework                        | Next.js 16 (App Router)                                                         |
+| UI                               | React 19 + MUI 9 + Tailwind 4                                                   |
+| Node.js                          | Pin in `.node-version` (align with backend)                                     |
+| Package manager                  | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo  |
+| Theme / tokens                   | `src/theme/theme.ts`                                                            |
+| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                 |
+| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build               |
 
-See `README.md` for setup. Env template: `.env.example`.
+See `README.md` for setup. Env template: `.env.example`. PR/issue templates live under `.github/`.
 
 ---
 
@@ -112,34 +114,34 @@ Before adding a new component or one-off MUI styling for a repeated pattern:
 
 ### Shared atoms (`src/components/common/`)
 
-| Component | When to use | Notes |
-|-----------|-------------|--------|
-| `PillButton` | Any branded button / CTA / link-button | Prefer over raw MUI `Button` for product UI. Pick a `tone` — do **not** invent a second button wrapper. |
-| `Logo` | Brand mark | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`. |
-| `SectionHeader` | Section title + optional subtitle | Landing and content blocks. |
-| `PhoneField` | International phone inputs | Also exports `isValidInternationalPhone`. |
-| `PasswordStrengthIndicator` | Password strength meter | Pair with `validateStrongPassword` from `@/lib/passwordStrength`. |
+| Component                   | When to use                            | Notes                                                                                                   |
+| --------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `PillButton`                | Any branded button / CTA / link-button | Prefer over raw MUI `Button` for product UI. Pick a `tone` — do **not** invent a second button wrapper. |
+| `Logo`                      | Brand mark                             | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`.                            |
+| `SectionHeader`             | Section title + optional subtitle      | Landing and content blocks.                                                                             |
+| `PhoneField`                | International phone inputs             | Also exports `isValidInternationalPhone`.                                                               |
+| `PasswordStrengthIndicator` | Password strength meter                | Pair with `validateStrongPassword` from `@/lib/passwordStrength`.                                       |
 
 ### `PillButton` tones (do not reinvent)
 
-| Tone | Typical use |
-|------|-------------|
-| `cta` | Primary navy CTA (header, select-role) |
-| `mission` / `missionFlat` / `missionOutline` | Orange / landing CTAs |
-| `primaryOutline` / `outline` | Outline on light surfaces |
-| `ghost` | On dark / gradient surfaces |
-| `primarySoftOutline` | Profile secondary actions (Contato, Compartilhar, Editar) |
-| `primaryFilled` / `missionFilled` | Profile primary actions (Editar perfil / Seguidores) — Figma filled |
+| Tone                                         | Typical use                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| `cta`                                        | Primary navy CTA (header, select-role)                              |
+| `mission` / `missionFlat` / `missionOutline` | Orange / landing CTAs                                               |
+| `primaryOutline` / `outline`                 | Outline on light surfaces                                           |
+| `ghost`                                      | On dark / gradient surfaces                                         |
+| `primarySoftOutline`                         | Profile secondary actions (Contato, Compartilhar, Editar)           |
+| `primaryFilled` / `missionFilled`            | Profile primary actions (Editar perfil / Seguidores) — Figma filled |
 
 Landing/header tones must keep their current look when changing profile tones.
 
 ### Layout / chrome
 
-| Component | When to use |
-|-----------|-------------|
-| `PageNavbar` (+ `PageNavbarActions`) | Sticky app bar shell |
-| `SiteHeader` | Marketing landing navigation |
-| `ThemeToggle` | Light/dark switch |
+| Component                            | When to use                  |
+| ------------------------------------ | ---------------------------- |
+| `PageNavbar` (+ `PageNavbarActions`) | Sticky app bar shell         |
+| `SiteHeader`                         | Marketing landing navigation |
+| `ThemeToggle`                        | Light/dark switch            |
 
 ### Domain components
 
@@ -153,11 +155,11 @@ Keep page-specific UI in the matching folder; extract to `common/` only when reu
 
 ### Forms (`src/forms/`)
 
-| Area | Reuse |
-|------|--------|
-| Auth | `LoginForm`, `ForgotPasswordForm`, `ResetPasswordForm` |
-| Register shared | `AccessCredentialsStep`, `RegistrationEmailConfirmation`, `options.ts` |
-| Missionaries / supporters | Step components under `forms/register/…` |
+| Area                      | Reuse                                                                  |
+| ------------------------- | ---------------------------------------------------------------------- |
+| Auth                      | `LoginForm`, `ForgotPasswordForm`, `ResetPasswordForm`                 |
+| Register shared           | `AccessCredentialsStep`, `RegistrationEmailConfirmation`, `options.ts` |
+| Missionaries / supporters | Step components under `forms/register/…`                               |
 
 Do not duplicate password/username/email confirmation UI — extend shared steps.
 

@@ -1,6 +1,17 @@
 'use client';
 
-import { Stack, Divider, Box, Container, Grid, Typography, AccordionDetails, Accordion, AccordionSummary, Avatar } from '@mui/material';
+import {
+  Stack,
+  Divider,
+  Box,
+  Container,
+  Grid,
+  Typography,
+  AccordionDetails,
+  Accordion,
+  AccordionSummary,
+  Avatar,
+} from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Image from 'next/image';
 import SiteHeader from '@/components/layout/SiteHeader';
@@ -70,7 +81,7 @@ const heroCtaButtonSx = {
   flexShrink: 0,
   py: { xs: 0.75, md: 0.875 },
   px: { xs: 2.5, md: 3 },
-  fontSize: { xs: "0.9375rem", md: "1rem" },
+  fontSize: { xs: '0.9375rem', md: '1rem' },
   fontWeight: 600,
   minHeight: 44,
 } as const;
@@ -162,18 +173,10 @@ function HeroHeadline() {
             justifyContent: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <PillButton
-            href="/select-role"
-            tone="missionFlat"
-            sx={heroCtaButtonSx}
-          >
+          <PillButton href="/select-role" tone="missionFlat" sx={heroCtaButtonSx}>
             Comece agora
           </PillButton>
-          <PillButton
-            href="#como-funciona"
-            tone="primaryOutline"
-            sx={heroCtaButtonSx}
-          >
+          <PillButton href="#como-funciona" tone="primaryOutline" sx={heroCtaButtonSx}>
             Saiba mais
           </PillButton>
         </Stack>
@@ -248,7 +251,10 @@ function LandingHero() {
           pointerEvents: { md: 'none' },
         }}
       >
-        <Container maxWidth={false} sx={{ ...landingContainerSx, width: '100%', pr: { md: '38%' } }}>
+        <Container
+          maxWidth={false}
+          sx={{ ...landingContainerSx, width: '100%', pr: { md: '38%' } }}
+        >
           <HeroHeadline />
         </Container>
       </Box>
@@ -452,11 +458,7 @@ export default function LandingPage() {
                     }}
                   />
 
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ textAlign: 'center' }}
-                  >
+                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
                     Continua com dúvida?
                   </Typography>
                   <PillButton

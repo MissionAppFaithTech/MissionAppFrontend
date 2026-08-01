@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { Box, FormHelperText, InputLabel, useTheme } from "@mui/material";
-import { PhoneInput } from "react-international-phone";
-import "react-international-phone/style.css";
+import { Box, FormHelperText, InputLabel, useTheme } from '@mui/material';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 type PhoneFieldProps = {
   value: string;
@@ -26,66 +26,66 @@ export default function PhoneField({
   onChange,
   error,
   helperText,
-  label = "Telefone",
-  placeholder = "(11) 98765-4321",
-  defaultCountry = "br",
+  label = 'Telefone',
+  placeholder = '(11) 98765-4321',
+  defaultCountry = 'br',
 }: PhoneFieldProps) {
   const theme = useTheme();
   const borderColor = error ? theme.palette.error.main : theme.palette.divider;
   const backgroundColor =
-    theme.palette.mode === "light" ? theme.palette.surface?.main ?? "#EAF1FA" : undefined;
+    theme.palette.mode === 'light' ? (theme.palette.surface?.main ?? '#EAF1FA') : undefined;
 
-  const displayValue = isOnlyDialCode(value) ? "" : value;
+  const displayValue = isOnlyDialCode(value) ? '' : value;
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: '100%' }}>
       <InputLabel
         shrink
         error={error}
-        sx={{ typography: "body2", color: "text.primary", mb: 0.75, display: "block" }}
+        sx={{ typography: 'body2', color: 'text.primary', mb: 0.75, display: 'block' }}
       >
         {label}
       </InputLabel>
 
       <Box
         sx={{
-          width: "100%",
-          border: "1px solid",
+          width: '100%',
+          border: '1px solid',
           borderColor,
           borderRadius: 1,
           bgcolor: backgroundColor,
           px: 1,
           py: 0.25,
-          transition: "border-color 0.2s ease",
-          "&:focus-within": {
+          transition: 'border-color 0.2s ease',
+          '&:focus-within': {
             borderColor: error ? theme.palette.error.main : theme.palette.primary.main,
             borderWidth: 2,
-            px: "7px",
-            py: "1px",
+            px: '7px',
+            py: '1px',
           },
-          "& .react-international-phone-input-container": {
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
+          '& .react-international-phone-input-container': {
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
             gap: 1,
           },
-          "& .react-international-phone-country-selector-button": {
-            border: "none",
-            background: "transparent",
-            padding: "8px 4px",
-            height: "auto",
+          '& .react-international-phone-country-selector-button': {
+            border: 'none',
+            background: 'transparent',
+            padding: '8px 4px',
+            height: 'auto',
           },
-          "& .react-international-phone-input": {
+          '& .react-international-phone-input': {
             flex: 1,
-            border: "none",
-            outline: "none",
-            background: "transparent",
-            font: "inherit",
-            fontSize: "1rem",
+            border: 'none',
+            outline: 'none',
+            background: 'transparent',
+            font: 'inherit',
+            fontSize: '1rem',
             py: 1.25,
             px: 0.5,
             color: theme.palette.text.primary,
-            "&::placeholder": {
+            '&::placeholder': {
               color: theme.palette.text.secondary,
               opacity: 1,
             },
@@ -106,7 +106,7 @@ export default function PhoneField({
 }
 
 export function isValidInternationalPhone(value: string): boolean {
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replace(/\D/g, '');
   // DDI BR (55) + DDD (2) + número (8–9) ≈ 12–13 dígitos no total
   return digits.length >= 10;
 }

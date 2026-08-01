@@ -1,30 +1,30 @@
-"use client";
+'use client';
 
-import { Box, Stack, Typography, Link, Card, CardContent } from "@mui/material";
-import ThemeToggle from "@/components/ThemeToggle";
-import Logo from "@/components/common/Logo";
-import ForgotPasswordForm from "@/forms/ForgotPasswordForm";
+import { Box, Stack, Typography, Link, Card, CardContent } from '@mui/material';
+import ThemeToggle from '@/components/ThemeToggle';
+import Logo from '@/components/common/Logo';
+import ForgotPasswordForm from '@/forms/ForgotPasswordForm';
 
 export default function ForgotPasswordPageContent() {
   return (
     <Box
       component="main"
       sx={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         px: 3,
         py: 6,
-        position: "relative",
+        position: 'relative',
       }}
     >
-      <Box sx={{ position: "absolute", top: 16, right: 16 }}>
+      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
         <ThemeToggle />
       </Box>
 
-      <Box sx={{ width: "100%", maxWidth: 420 }}>
+      <Box sx={{ width: '100%', maxWidth: 420 }}>
         <Box sx={{ mb: 3 }}>
           <Logo size="md" />
         </Box>
@@ -33,17 +33,17 @@ export default function ForgotPasswordPageContent() {
           direction="row"
           sx={{
             mb: 2,
-            justifyContent: "space-between",
-            alignItems: "center",
+            justifyContent: 'space-between',
+            alignItems: 'center',
           }}
         >
           <Typography variant="h6">Esqueci minha senha</Typography>
           <Link
             href="/login"
             sx={{
-              color: "text.secondary",
-              textDecoration: "none",
-              fontSize: "0.875rem",
+              color: 'text.secondary',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
             }}
           >
             Voltar
@@ -54,9 +54,9 @@ export default function ForgotPasswordPageContent() {
           elevation={0}
           sx={{
             borderRadius: 3,
-            border: "1px solid",
-            bgcolor: "transparent",
-            boxShadow: "none",
+            border: '1px solid',
+            bgcolor: 'transparent',
+            boxShadow: 'none',
           }}
         >
           <CardContent>

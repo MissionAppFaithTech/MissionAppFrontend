@@ -1,61 +1,60 @@
-import { createTheme, type ThemeOptions } from "@mui/material/styles";
+import { createTheme, type ThemeOptions } from '@mui/material/styles';
 
 /** UI color tokens */
 export const colors = {
-  primary: "#0D2B5C",
-  secondary: "#F97316",
+  primary: '#0D2B5C',
+  secondary: '#F97316',
 
-  success: "#22C55E",
-  warning: "#F59E0B",
-  error: "#EF4444",
+  success: '#22C55E',
+  warning: '#F59E0B',
+  error: '#EF4444',
 
-  background: "#F7F9FC",
-  surface: "#FFFFFF",
+  background: '#F7F9FC',
+  surface: '#FFFFFF',
 
-  textPrimary: "#081C3A",
-  textSecondary: "#6B7280",
+  textPrimary: '#081C3A',
+  textSecondary: '#6B7280',
 
-  border: "#D1D5DB",
+  border: '#D1D5DB',
 } as const;
 
 export const roleColors = {
-  missionary: "#0D2B5C",
-  supporter: "#6BA6FF",
-  intermediate: "#2563EB",
-  mission: "#F97316",
+  missionary: '#0D2B5C',
+  supporter: '#6BA6FF',
+  intermediate: '#2563EB',
+  mission: '#F97316',
 } as const;
 
 /** Derived shades for MUI palette variants */
 const shades = {
-  primaryLight: "#1A3D6E",
-  supporterLight: "#93C5FD",
-  supporterDark: "#4F8FE6",
-  intermediateLight: "#3B82F6",
-  intermediateDark: "#1D4ED8",
-  missionLight: "#FB923C",
-  missionDark: "#EA580C",
-  surfaceMuted: "#EAF1FA",
+  primaryLight: '#1A3D6E',
+  supporterLight: '#93C5FD',
+  supporterDark: '#4F8FE6',
+  intermediateLight: '#3B82F6',
+  intermediateDark: '#1D4ED8',
+  missionLight: '#FB923C',
+  missionDark: '#EA580C',
+  surfaceMuted: '#EAF1FA',
 } as const;
 
-export const brandGradient =
-  `linear-gradient(135deg, ${roleColors.missionary} 0%, ${roleColors.intermediate} 100%)`;
+export const brandGradient = `linear-gradient(135deg, ${roleColors.missionary} 0%, ${roleColors.intermediate} 100%)`;
 
-declare module "@mui/material/styles" {
+declare module '@mui/material/styles' {
   interface Palette {
-    connection: Palette["primary"];
-    supporter: Palette["primary"];
-    mission: Palette["primary"];
-    surface: Palette["primary"];
+    connection: Palette['primary'];
+    supporter: Palette['primary'];
+    mission: Palette['primary'];
+    surface: Palette['primary'];
   }
   interface PaletteOptions {
-    connection?: PaletteOptions["primary"];
-    supporter?: PaletteOptions["primary"];
-    mission?: PaletteOptions["primary"];
-    surface?: PaletteOptions["primary"];
+    connection?: PaletteOptions['primary'];
+    supporter?: PaletteOptions['primary'];
+    mission?: PaletteOptions['primary'];
+    surface?: PaletteOptions['primary'];
   }
 }
 
-declare module "@mui/material/Button" {
+declare module '@mui/material/Button' {
   interface ButtonPropsColorOverrides {
     connection: true;
     supporter: true;
@@ -65,7 +64,7 @@ declare module "@mui/material/Button" {
 
 const fontFamily = 'var(--font-dm-sans), "DM Sans", sans-serif';
 
-function createTypography(): ThemeOptions["typography"] {
+function createTypography(): ThemeOptions['typography'] {
   return {
     fontFamily,
     fontWeightRegular: 400,
@@ -75,71 +74,71 @@ function createTypography(): ThemeOptions["typography"] {
     h1: {
       fontWeight: 700,
       lineHeight: 1.15,
-      fontSize: "2rem",
-      "@media (min-width:600px)": { fontSize: "2.5rem" },
-      "@media (min-width:900px)": { fontSize: "3rem" },
-      "@media (min-width:1200px)": { fontSize: "3.5rem" },
+      fontSize: '2rem',
+      '@media (min-width:600px)': { fontSize: '2.5rem' },
+      '@media (min-width:900px)': { fontSize: '3rem' },
+      '@media (min-width:1200px)': { fontSize: '3.5rem' },
     },
     h2: {
       fontWeight: 700,
       lineHeight: 1.2,
-      fontSize: "2rem",
-      "@media (min-width:900px)": { fontSize: "2.25rem" },
-      "@media (min-width:1200px)": { fontSize: "2.5rem" },
+      fontSize: '2rem',
+      '@media (min-width:900px)': { fontSize: '2.25rem' },
+      '@media (min-width:1200px)': { fontSize: '2.5rem' },
     },
     h3: {
       fontWeight: 600,
       lineHeight: 1.25,
-      fontSize: "1.75rem",
-      "@media (min-width:900px)": { fontSize: "2rem" },
+      fontSize: '1.75rem',
+      '@media (min-width:900px)': { fontSize: '2rem' },
     },
     h4: {
       fontWeight: 600,
       lineHeight: 1.3,
-      fontSize: "1.5rem",
+      fontSize: '1.5rem',
     },
     h5: {
       fontWeight: 600,
       lineHeight: 1.35,
-      fontSize: "1.25rem",
+      fontSize: '1.25rem',
     },
     h6: {
       fontWeight: 600,
       lineHeight: 1.4,
-      fontSize: "1.125rem",
+      fontSize: '1.125rem',
     },
     subtitle1: {
       fontWeight: 400,
       lineHeight: 1.75,
-      fontSize: "1rem",
-      "@media (min-width:900px)": { fontSize: "1.125rem" },
+      fontSize: '1rem',
+      '@media (min-width:900px)': { fontSize: '1.125rem' },
     },
     subtitle2: {
       fontWeight: 600,
       lineHeight: 1.5,
-      fontSize: "1.1rem",
+      fontSize: '1.1rem',
     },
     body1: {
       fontWeight: 400,
-      fontSize: "1rem",
+      fontSize: '1rem',
       lineHeight: 1.7,
     },
     body2: {
       fontWeight: 400,
-      fontSize: "0.875rem",
+      fontSize: '0.875rem',
       lineHeight: 1.6,
     },
     overline: {
       fontWeight: 700,
-      letterSpacing: "0.12em",
-      textTransform: "uppercase",
-      fontSize: "0.75rem",
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      fontSize: '0.75rem',
       lineHeight: 1.5,
     },
     button: {
       fontWeight: 500,
-      fontSize: "0.9375rem",
-      textTransform: "none",
+      fontSize: '0.9375rem',
+      textTransform: 'none',
     },
   };
 }
@@ -178,7 +177,7 @@ const extendedPalette = {
   surface: {
     main: shades.surfaceMuted,
     light: colors.surface,
-    dark: "#D5E4F4",
+    dark: '#D5E4F4',
     contrastText: roleColors.missionary,
   },
   success: {
@@ -192,13 +191,13 @@ const extendedPalette = {
   },
 };
 
-export function createAppTheme(mode: "light" | "dark") {
-  const isLight = mode === "light";
+export function createAppTheme(mode: 'light' | 'dark') {
+  const isLight = mode === 'light';
 
   /** Em fundo escuro o navy some — CTAs usam laranja da marca. */
-  const darkFieldBg = "rgba(255, 255, 255, 0.06)";
-  const darkFieldBorder = "rgba(107, 166, 255, 0.35)";
-  const darkFieldBorderHover = "rgba(107, 166, 255, 0.55)";
+  const darkFieldBg = 'rgba(255, 255, 255, 0.06)';
+  const darkFieldBorder = 'rgba(107, 166, 255, 0.35)';
+  const darkFieldBorderHover = 'rgba(107, 166, 255, 0.55)';
   const darkFieldBorderFocus = roleColors.supporter;
 
   return createTheme({
@@ -221,11 +220,9 @@ export function createAppTheme(mode: "light" | "dark") {
       },
       text: {
         primary: isLight ? colors.textPrimary : colors.surface,
-        secondary: isLight ? colors.textSecondary : "#94A3B8",
+        secondary: isLight ? colors.textSecondary : '#94A3B8',
       },
-      divider: isLight
-        ? `${colors.border}33`
-        : "rgba(107, 166, 255, 0.15)",
+      divider: isLight ? `${colors.border}33` : 'rgba(107, 166, 255, 0.15)',
     },
     typography: createTypography(),
     components: {
@@ -237,7 +234,7 @@ export function createAppTheme(mode: "light" | "dark") {
           },
           a: {
             color: isLight ? roleColors.intermediate : roleColors.supporter,
-            "&:hover": {
+            '&:hover': {
               color: isLight ? shades.intermediateDark : shades.supporterLight,
             },
           },
@@ -246,11 +243,11 @@ export function createAppTheme(mode: "light" | "dark") {
       MuiButton: {
         defaultProps: {
           disableElevation: true,
-          size: "small",
+          size: 'small',
         },
         styleOverrides: {
           root: {
-            textTransform: "none",
+            textTransform: 'none',
             fontWeight: 500,
             borderRadius: 4,
           },
@@ -260,75 +257,75 @@ export function createAppTheme(mode: "light" | "dark") {
             ? []
             : [
                 {
-                  props: { color: "primary" as const, variant: "contained" as const },
+                  props: { color: 'primary' as const, variant: 'contained' as const },
                   style: {
                     backgroundColor: roleColors.mission,
                     color: colors.surface,
-                    "&:hover": {
+                    '&:hover': {
                       backgroundColor: shades.missionDark,
                     },
-                    "&.Mui-disabled": {
-                      backgroundColor: "rgba(249, 115, 22, 0.35)",
-                      color: "rgba(255, 255, 255, 0.55)",
+                    '&.Mui-disabled': {
+                      backgroundColor: 'rgba(249, 115, 22, 0.35)',
+                      color: 'rgba(255, 255, 255, 0.55)',
                     },
                   },
                 },
                 {
-                  props: { color: "primary" as const, variant: "text" as const },
+                  props: { color: 'primary' as const, variant: 'text' as const },
                   style: {
                     color: roleColors.supporter,
-                    "&:hover": {
-                      backgroundColor: "rgba(107, 166, 255, 0.12)",
+                    '&:hover': {
+                      backgroundColor: 'rgba(107, 166, 255, 0.12)',
                     },
                   },
                 },
               ]),
           {
-            props: { color: "secondary", variant: "contained" },
+            props: { color: 'secondary', variant: 'contained' },
             style: {
-              "&:hover": {
+              '&:hover': {
                 backgroundColor: roleColors.intermediate,
                 color: colors.surface,
               },
             },
           },
           {
-            props: { color: "primary", variant: "outlined" },
+            props: { color: 'primary', variant: 'outlined' },
             style: isLight
               ? {
                   borderColor: colors.primary,
                   color: colors.primary,
-                  "&:hover": {
+                  '&:hover': {
                     borderColor: roleColors.intermediate,
-                    backgroundColor: "rgba(37, 99, 235, 0.08)",
+                    backgroundColor: 'rgba(37, 99, 235, 0.08)',
                   },
                 }
               : {
                   borderColor: darkFieldBorder,
                   color: colors.surface,
-                  "&:hover": {
+                  '&:hover': {
                     borderColor: darkFieldBorderHover,
-                    backgroundColor: "rgba(107, 166, 255, 0.1)",
+                    backgroundColor: 'rgba(107, 166, 255, 0.1)',
                   },
                 },
           },
           {
-            props: { color: "supporter", variant: "contained" },
+            props: { color: 'supporter', variant: 'contained' },
             style: {
               backgroundColor: roleColors.supporter,
               color: roleColors.missionary,
-              "&:hover": {
+              '&:hover': {
                 backgroundColor: roleColors.intermediate,
                 color: colors.surface,
               },
             },
           },
           {
-            props: { color: "mission", variant: "contained" },
+            props: { color: 'mission', variant: 'contained' },
             style: {
               backgroundColor: roleColors.mission,
               color: colors.surface,
-              "&:hover": {
+              '&:hover': {
                 backgroundColor: roleColors.intermediate,
               },
             },
@@ -338,7 +335,7 @@ export function createAppTheme(mode: "light" | "dark") {
       MuiIconButton: {
         styleOverrides: {
           root: {
-            "&:hover": {
+            '&:hover': {
               color: roleColors.intermediate,
             },
           },
@@ -347,7 +344,7 @@ export function createAppTheme(mode: "light" | "dark") {
       MuiPaper: {
         styleOverrides: {
           root: {
-            backgroundImage: "none",
+            backgroundImage: 'none',
           },
         },
       },
@@ -358,25 +355,25 @@ export function createAppTheme(mode: "light" | "dark") {
             : {
                 backgroundColor: darkFieldBg,
                 color: colors.surface,
-                "& .MuiOutlinedInput-notchedOutline": {
+                '& .MuiOutlinedInput-notchedOutline': {
                   borderColor: darkFieldBorder,
                 },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
+                '&:hover .MuiOutlinedInput-notchedOutline': {
                   borderColor: darkFieldBorderHover,
                 },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                   borderColor: darkFieldBorderFocus,
                 },
-                "&.Mui-disabled": {
-                  backgroundColor: "rgba(255, 255, 255, 0.03)",
+                '&.Mui-disabled': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
                 },
               },
           input: isLight
             ? undefined
             : {
                 color: colors.surface,
-                "&::placeholder": {
-                  color: "#94A3B8",
+                '&::placeholder': {
+                  color: '#94A3B8',
                   opacity: 1,
                 },
               },
@@ -387,11 +384,11 @@ export function createAppTheme(mode: "light" | "dark") {
           root: isLight
             ? undefined
             : {
-                color: "#94A3B8",
-                "&.Mui-focused": {
+                color: '#94A3B8',
+                '&.Mui-focused': {
                   color: roleColors.supporter,
                 },
-                "&.Mui-error": {
+                '&.Mui-error': {
                   color: colors.error,
                 },
               },
@@ -402,13 +399,13 @@ export function createAppTheme(mode: "light" | "dark") {
           root: isLight
             ? undefined
             : {
-                color: "#94A3B8",
+                color: '#94A3B8',
               },
         },
       },
       MuiTextField: {
         defaultProps: {
-          variant: "outlined",
+          variant: 'outlined',
           slotProps: {
             inputLabel: {
               shrink: true,
@@ -417,7 +414,7 @@ export function createAppTheme(mode: "light" | "dark") {
         },
         styleOverrides: {
           root: {
-            "& .MuiOutlinedInput-root": {
+            '& .MuiOutlinedInput-root': {
               backgroundColor: isLight ? shades.surfaceMuted : darkFieldBg,
             },
           },
@@ -428,7 +425,7 @@ export function createAppTheme(mode: "light" | "dark") {
           root: isLight
             ? undefined
             : {
-                borderColor: "rgba(107, 166, 255, 0.22)",
+                borderColor: 'rgba(107, 166, 255, 0.22)',
               },
         },
       },

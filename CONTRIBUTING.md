@@ -23,7 +23,7 @@ Padrões alinhados ao [MissionApp Backend](https://github.com/MissionAppFaithTec
 
 ## 🛠️ Ambiente
 
-Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js 20+, **pnpm** (`pnpm install`), `.env.local` a partir de `.env.example`, `pnpm dev`.
+Siga a seção **Pré-requisitos** e **Instalação** do [`README.md`](./README.md). Em resumo: Node.js conforme [`.node-version`](./.node-version), **pnpm** (`pnpm install`), `.env.local` a partir de `.env.example`, `pnpm dev`.
 
 **Gerenciador de pacotes:** apenas pnpm (`packageManager` no `package.json`, lockfile `pnpm-lock.yaml`), alinhado ao backend. Não use `npm` nem `yarn` neste repo.
 
@@ -34,6 +34,8 @@ pnpm lint
 pnpm format:check
 pnpm typecheck
 ```
+
+O CI no GitHub (`.github/workflows/ci.yml`) roda `lint`, `format:check`, `typecheck` e `build` em pushes/PRs para `main`.
 
 Commits são validados por **Husky + commitlint** (mensagem Conventional Commits em inglês). Se a mensagem for inválida, o `git commit` falha.
 
@@ -53,14 +55,33 @@ git pull origin main
 git checkout -b <type>/<short-description>
 ```
 
-| Prefixo | Quando usar |
-| ------- | ----------- |
-| `feat/` | Nova funcionalidade |
-| `fix/` | Correção de bug |
-| `docs/` | Documentação |
+| Prefixo     | Quando usar                              |
+| ----------- | ---------------------------------------- |
+| `feat/`     | Nova funcionalidade                      |
+| `fix/`      | Correção de bug                          |
+| `docs/`     | Documentação                             |
 | `refactor/` | Refatoração sem mudança de comportamento |
-| `test/` | Adição ou correção de testes |
-| `chore/` | Configuração, CI, dependências |
+| `test/`     | Adição ou correção de testes             |
+| `chore/`    | Configuração, CI, dependências           |
+
+### 🔒 Proteção da `main`
+
+**Não faça push direto na `main`.** Todo código entra via Pull Request.
+
+Maintainers devem manter a branch `main` protegida no GitHub
+(**Settings → Rules → Rulesets**, ou **Settings → Branches → Branch protection rules**):
+
+| Regra | Valor recomendado |
+| ----- | ----------------- |
+| Target | `main` |
+| Require a pull request before merging | Sim |
+| Require status checks to pass | Sim — check do workflow `CI` |
+| Require branches to be up to date | Opcional (recomendado) |
+| Block force pushes | Sim |
+| Restrict deletions | Sim |
+| Allow bypass | Só admins, se necessário (evitar no dia a dia) |
+
+Push direto na `main` sem PR quebra review e o gate do CI. Se o front publicar em Vercel (ou similar), produção deve seguir só a `main` **após merge de PR**.
 
 ### ✍️ Commits
 
@@ -72,19 +93,19 @@ Siga o padrão [Conventional Commits](https://www.conventionalcommits.org/), em 
 
 Tipos permitidos (mesmo conjunto do backend):
 
-| Tipo | Quando usar |
-| ---- | ----------- |
-| `feat` | Nova funcionalidade |
-| `fix` | Correção de bug |
-| `docs` | Documentação |
-| `style` | Formatação / ajuste visual sem lógica de negócio |
-| `refactor` | Mudança interna sem alterar comportamento |
-| `perf` | Melhoria de performance |
-| `test` | Testes |
-| `build` | Build / bundler / toolchain |
-| `ci` | CI/CD |
-| `chore` | Manutenção, deps, configs |
-| `revert` | Reverter commit anterior |
+| Tipo       | Quando usar                                      |
+| ---------- | ------------------------------------------------ |
+| `feat`     | Nova funcionalidade                              |
+| `fix`      | Correção de bug                                  |
+| `docs`     | Documentação                                     |
+| `style`    | Formatação / ajuste visual sem lógica de negócio |
+| `refactor` | Mudança interna sem alterar comportamento        |
+| `perf`     | Melhoria de performance                          |
+| `test`     | Testes                                           |
+| `build`    | Build / bundler / toolchain                      |
+| `ci`       | CI/CD                                            |
+| `chore`    | Manutenção, deps, configs                        |
+| `revert`   | Reverter commit anterior                         |
 
 Escopos comuns no front (opcional): `auth`, `register`, `landing`, `profile`, `theme`, `api`, `seo`.
 
@@ -125,8 +146,8 @@ O hook `.husky/commit-msg` roda o commitlint automaticamente (mesmas regras do b
 - **Chamadas à API / BFF** em `src/services/` e `src/app/api/`.
 - **Tema e tokens** em `src/theme/theme.ts` — não hardcode cores de marca fora do tema.
 - Enquanto o backend não estiver ligado, fluxos de auth podem usar mocks em `src/mocks/` (`USE_AUTH_MOCKS`).
-- **Reuso de UI:** preferir componentes existentes (`PillButton`, `Logo`, `SectionHeader`, `PhoneField`, etc.) e só criar novos quando não houver equivalente. Catálogo para agentes: [`AGENTS.md`](./AGENTS.md) (seção *UI component reuse*).
-- **Responsividade:** toda UI deve funcionar em telefone, tablet e desktop (mobile-first, breakpoints MUI). Ver [`AGENTS.md`](./AGENTS.md) (seção *Responsiveness*) e a regra do Cursor `responsiveness.mdc`.
+- **Reuso de UI:** preferir componentes existentes (`PillButton`, `Logo`, `SectionHeader`, `PhoneField`, etc.) e só criar novos quando não houver equivalente. Catálogo para agentes: [`AGENTS.md`](./AGENTS.md) (seção _UI component reuse_).
+- **Responsividade:** toda UI deve funcionar em telefone, tablet e desktop (mobile-first, breakpoints MUI). Ver [`AGENTS.md`](./AGENTS.md) (seção _Responsiveness_) e a regra do Cursor `responsiveness.mdc`.
 
 Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 
@@ -142,11 +163,12 @@ Detalhe das pastas: ver **Estrutura do projeto** no [`README.md`](./README.md).
 
 ## 🚀 Abrindo um Pull Request
 
-1. Abra uma issue para mudanças maiores (recomendado).
+1. Abra uma issue para mudanças maiores (recomendado) — use os templates em `.github/ISSUE_TEMPLATE/`.
 2. Crie a branch com o prefixo correto a partir de `main`.
-3. Rode `pnpm lint`, `pnpm format:check` e `pnpm typecheck`.
-4. Abra o PR descrevendo **o que** mudou e **por quê**.
+3. Rode `pnpm lint`, `pnpm format:check` e `pnpm typecheck` (o CI também valida no GitHub).
+4. Abra o PR com o template em `.github/pull-request-template.md` — descreva **o que** mudou e **por quê**.
 5. Mantenha o escopo focado: uma mudança por PR.
+6. Em mudanças de UI, inclua evidência mobile e desktop quando fizer sentido.
 
 Ao contribuir, você concorda que as alterações serão licenciadas sob a [MIT](./LICENSE.txt).
 

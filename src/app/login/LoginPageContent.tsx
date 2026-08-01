@@ -1,11 +1,10 @@
 'use client';
 
-import { Box, Button, Stack, Typography, Link, CardContent, Card } from '@mui/material';
+import { Box, Stack, Typography, Link, CardContent, Card } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
 import LoginForm from '@/forms/LoginForm';
-import GoogleIcon from '@mui/icons-material/Google';
 
 const roleLabels: Record<string, string> = {
   apoiador: 'Apoiador',

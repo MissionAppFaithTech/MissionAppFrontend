@@ -52,21 +52,21 @@ Contribuições são bem-vindas: issues, sugestões e pull requests ajudam a tor
 
 A plataforma distingue três papéis (alinhados ao backend). No front, o fluxo público de cadastro cobre **missionário** e **apoiador**; **admin** é interno.
 
-| Papel | Quem é | Como entra | O que faz na plataforma |
-| ----- | ------ | ---------- | ----------------------- |
+| Papel        | Quem é                              | Como entra                                                                                       | O que faz na plataforma                                                                                      |
+| ------------ | ----------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | `MISSIONARY` | Missionário(a) no campo ou em envio | Auto-cadastro em `/register/missionaries` → confirmação de e-mail → (no back) aprovação de admin | Perfil expandido, agência/comunidade de fé, produção de conteúdo, projetos e campanhas; rede (seguir, feed). |
-| `SUPPORTER` | Apoiador(a) / mantenedor(a) | Auto-cadastro em `/register/supporters` → confirmação de e-mail; comunidade de fé opcional | Seguir missionários, acompanhar atualizações e oração, descobrir projetos e apoiar (doações via back). |
-| `ADMIN` | Equipe / operação | Provisionamento interno (sem auto-cadastro no site) | Aprovação de missionários, curadoria e gestão global (painel admin — fora do fluxo público atual). |
+| `SUPPORTER`  | Apoiador(a) / mantenedor(a)         | Auto-cadastro em `/register/supporters` → confirmação de e-mail; comunidade de fé opcional       | Seguir missionários, acompanhar atualizações e oração, descobrir projetos e apoiar (doações via back).       |
+| `ADMIN`      | Equipe / operação                   | Provisionamento interno (sem auto-cadastro no site)                                              | Aprovação de missionários, curadoria e gestão global (painel admin — fora do fluxo público atual).           |
 
 **Visitante (não autenticado):** pode ver a landing e rotas públicas de leitura (ex.: perfil público). Cadastro começa em `/select-role`; login em `/login`.
 
 **🚪 Entrada rápida no app:**
 
-| Ação na UI | Destino |
-| ---------- | ------- |
-| Entrar | `/login` |
-| Comece agora / escolher perfil | `/select-role` → cadastro do papel |
-| Esqueci a senha | `/forgot-password` → e-mail → `/reset-password?token=…` |
+| Ação na UI                     | Destino                                                 |
+| ------------------------------ | ------------------------------------------------------- |
+| Entrar                         | `/login`                                                |
+| Comece agora / escolher perfil | `/select-role` → cadastro do papel                      |
+| Esqueci a senha                | `/forgot-password` → e-mail → `/reset-password?token=…` |
 
 ---
 
@@ -76,22 +76,22 @@ A plataforma distingue três papéis (alinhados ao backend). No front, o fluxo p
 
 Pastas **raiz** e **`src/`** (o que cada uma faz):
 
-| Pasta / arquivo | Função |
-| --------------- | ------ |
-| `public/` | Assets estáticos servidos na URL (`/images`, logos, badges). |
-| `src/` | Código da aplicação. |
-| `src/app/` | Rotas, layouts, metadata, SEO (`sitemap`, `robots`) e BFF (`app/api`) — App Router do Next.js. |
-| `src/components/` | UI reutilizável e blocos de página (landing, layout, profile, register…). |
-| `src/forms/` | Formulários (login, senha, wizards de cadastro). |
-| `src/lib/` | Utilitários compartilhados (Axios, API/BFF, máscaras, força de senha, site URL). |
-| `src/mocks/` | Dados e flags de mock enquanto o backend não está ligado (ex.: auth). |
-| `src/schemas/` | Schemas Zod de validação. |
-| `src/services/` | Chamadas HTTP / orquestração de auth, username, etc. |
-| `src/theme/` | Tema MUI, tokens de cor e `AppThemeProvider`. |
-| `src/types/` | Tipos TypeScript compartilhados. |
-| `AGENTS.md` / `CLAUDE.md` | Orientação para IAs no repositório. |
-| `CONTRIBUTING.md` | Como contribuir (único lugar para branches/commits/PRs). |
-| `CODE_OF_CONDUCT.md` | Código de conduta da comunidade. |
+| Pasta / arquivo           | Função                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| `public/`                 | Assets estáticos servidos na URL (`/images`, logos, badges).                                   |
+| `src/`                    | Código da aplicação.                                                                           |
+| `src/app/`                | Rotas, layouts, metadata, SEO (`sitemap`, `robots`) e BFF (`app/api`) — App Router do Next.js. |
+| `src/components/`         | UI reutilizável e blocos de página (landing, layout, profile, register…).                      |
+| `src/forms/`              | Formulários (login, senha, wizards de cadastro).                                               |
+| `src/lib/`                | Utilitários compartilhados (Axios, API/BFF, máscaras, força de senha, site URL).               |
+| `src/mocks/`              | Dados e flags de mock enquanto o backend não está ligado (ex.: auth).                          |
+| `src/schemas/`            | Schemas Zod de validação.                                                                      |
+| `src/services/`           | Chamadas HTTP / orquestração de auth, username, etc.                                           |
+| `src/theme/`              | Tema MUI, tokens de cor e `AppThemeProvider`.                                                  |
+| `src/types/`              | Tipos TypeScript compartilhados.                                                               |
+| `AGENTS.md` / `CLAUDE.md` | Orientação para IAs no repositório.                                                            |
+| `CONTRIBUTING.md`         | Como contribuir (único lugar para branches/commits/PRs).                                       |
+| `CODE_OF_CONDUCT.md`      | Código de conduta da comunidade.                                                               |
 
 <details>
   <summary>Árvore (visão geral)</summary>
@@ -137,19 +137,19 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 ## ⚙️ Stack
 
-| Camada | Tecnologia |
-|--------|------------|
-| Framework | [Next.js 16](https://nextjs.org/) (App Router) |
-| UI | [React 19](https://react.dev/) |
-| Linguagem | [TypeScript](https://www.typescriptlang.org/) |
-| Componentes | [MUI (Material UI) 9](https://mui.com/) + Emotion |
-| Estilos utilitários | [Tailwind CSS 4](https://tailwindcss.com/) |
-| Formulários | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/) |
-| HTTP | [Axios](https://axios-http.com/) |
-| Estado | [Zustand](https://zustand.docs.pmnd.rs/) |
-| Tema | [next-themes](https://github.com/pacocoursey/next-themes) + design system próprio |
-| Tipografia | [DM Sans](https://fonts.google.com/specimen/DM+Sans) via `next/font` |
-| Lint / formatação | ESLint + Prettier 3 |
+| Camada              | Tecnologia                                                                        |
+| ------------------- | --------------------------------------------------------------------------------- |
+| Framework           | [Next.js 16](https://nextjs.org/) (App Router)                                    |
+| UI                  | [React 19](https://react.dev/)                                                    |
+| Linguagem           | [TypeScript](https://www.typescriptlang.org/)                                     |
+| Componentes         | [MUI (Material UI) 9](https://mui.com/) + Emotion                                 |
+| Estilos utilitários | [Tailwind CSS 4](https://tailwindcss.com/)                                        |
+| Formulários         | [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)         |
+| HTTP                | [Axios](https://axios-http.com/)                                                  |
+| Estado              | [Zustand](https://zustand.docs.pmnd.rs/)                                          |
+| Tema                | [next-themes](https://github.com/pacocoursey/next-themes) + design system próprio |
+| Tipografia          | [DM Sans](https://fonts.google.com/specimen/DM+Sans) via `next/font`              |
+| Lint / formatação   | ESLint + Prettier 3                                                               |
 
 ---
 
@@ -157,10 +157,12 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 ## ✔️ Pré-requisitos
 
-- **Node.js** 20 ou superior
+- **Node.js** — versão pinada em [`.node-version`](./.node-version) (`24.18.0`, alinhada ao backend). Mínimo suportado: 20+ (`engines` no `package.json`).
 - **pnpm** 11.5+ (lockfile oficial: `pnpm-lock.yaml`) — mesma família do [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend)
 
 > Use **somente pnpm** (via Corepack). Não rode `npm install` / `yarn` neste repositório.
+
+Recomendado: [mise](https://mise.jdx.dev/) (ou outro version manager) para ler `.node-version` automaticamente.
 
 ```bash
 corepack enable
@@ -210,15 +212,15 @@ corepack prepare pnpm@11.9.0 --activate
 
 ## 💻 Scripts disponíveis
 
-| Comando | Descrição |
-|---------|-----------|
-| `pnpm dev` | App em desenvolvimento |
-| `pnpm build` | Build de produção |
-| `pnpm start` | Servidor de produção |
-| `pnpm lint` | ESLint |
-| `pnpm format` | Formata com Prettier |
-| `pnpm format:check` | Verifica formatação sem alterar arquivos |
-| `pnpm typecheck` | Verifica tipos TypeScript (`tsc --noEmit`) |
+| Comando             | Descrição                                  |
+| ------------------- | ------------------------------------------ |
+| `pnpm dev`          | App em desenvolvimento                     |
+| `pnpm build`        | Build de produção                          |
+| `pnpm start`        | Servidor de produção                       |
+| `pnpm lint`         | ESLint                                     |
+| `pnpm format`       | Formata com Prettier                       |
+| `pnpm format:check` | Verifica formatação sem alterar arquivos   |
+| `pnpm typecheck`    | Verifica tipos TypeScript (`tsc --noEmit`) |
 
 ---
 
@@ -226,17 +228,17 @@ corepack prepare pnpm@11.9.0 --activate
 
 ## 🧭 Rotas principais
 
-| Rota | Descrição |
-|------|-----------|
-| `/` | Landing page |
-| `/select-role` | Escolha de perfil para cadastro |
-| `/register/missionaries` | Cadastro de missionário |
-| `/register/supporters` | Cadastro de apoiador |
-| `/login` | Entrada na plataforma |
-| `/forgot-password` | Solicitar link de redefinição |
-| `/reset-password` | Definir nova senha (link do e-mail) |
-| `/profile` | Área logada do usuário |
-| `/user/[username]` | Perfil público |
+| Rota                     | Descrição                           |
+| ------------------------ | ----------------------------------- |
+| `/`                      | Landing page                        |
+| `/select-role`           | Escolha de perfil para cadastro     |
+| `/register/missionaries` | Cadastro de missionário             |
+| `/register/supporters`   | Cadastro de apoiador                |
+| `/login`                 | Entrada na plataforma               |
+| `/forgot-password`       | Solicitar link de redefinição       |
+| `/reset-password`        | Definir nova senha (link do e-mail) |
+| `/profile`               | Área logada do usuário              |
+| `/user/[username]`       | Perfil público                      |
 
 ---
 

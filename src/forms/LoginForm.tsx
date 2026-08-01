@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useRef, useState, type FormEvent, type MouseEvent } from "react";
-import TextField from "@mui/material/TextField";
-import Stack from "@mui/material/Stack";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import { useRouter } from "next/navigation";
-import Button from "@mui/material/Button";
-import Link from "next/link";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useRef, useState, type FormEvent, type MouseEvent } from 'react';
+import TextField from '@mui/material/TextField';
+import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import { useRouter } from 'next/navigation';
+import Button from '@mui/material/Button';
+import Link from 'next/link';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -18,7 +18,7 @@ export default function LoginForm() {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    router.push("/profile");
+    router.push('/profile');
   };
 
   const togglePasswordVisibility = (event: MouseEvent<HTMLButtonElement>) => {
@@ -40,12 +40,7 @@ export default function LoginForm() {
   };
 
   return (
-    <Stack
-      component="form"
-      spacing={2.5}
-      onSubmit={handleSubmit}
-      sx={{ width: "100%" }}
-    >
+    <Stack component="form" spacing={2.5} onSubmit={handleSubmit} sx={{ width: '100%' }}>
       <TextField label="E-mail" type="email" fullWidth placeholder="seu@email.com" />
       <TextField
         label="Senha"
@@ -63,7 +58,7 @@ export default function LoginForm() {
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                   onClick={togglePasswordVisibility}
                   onMouseDown={(event) => event.preventDefault()}
                   edge="end"
@@ -75,10 +70,10 @@ export default function LoginForm() {
           },
         }}
         sx={{
-          "& input": {
+          '& input': {
             ...(!showPassword
               ? {
-                  WebkitTextSecurity: "disc",
+                  WebkitTextSecurity: 'disc',
                 }
               : null),
           },

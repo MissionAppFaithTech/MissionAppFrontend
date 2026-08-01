@@ -1,14 +1,14 @@
-import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
-import "./globals.css";
-import { DM_Sans } from "next/font/google";
-import { Providers } from "./providers";
-import { getSiteUrl, siteConfig } from "@/lib/site";
+import type { Metadata, Viewport } from 'next';
+import type { ReactNode } from 'react';
+import './globals.css';
+import { DM_Sans } from 'next/font/google';
+import { Providers } from './providers';
+import { getSiteUrl, siteConfig } from '@/lib/site';
 
 const dmSans = DM_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-dm-sans",
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-dm-sans',
 });
 
 const siteUrl = getSiteUrl();
@@ -21,22 +21,15 @@ export const metadata: Metadata = {
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  keywords: [
-    "missão",
-    "missionários",
-    "apoiadores",
-    "oração",
-    "projetos sociais",
-    "Mission App",
-  ],
+  keywords: ['missão', 'missionários', 'apoiadores', 'oração', 'projetos sociais', 'Mission App'],
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
   icons: {
-    icon: "/logos/favicon_mission.png",
-    apple: "/logos/favicon_mission.png",
+    icon: '/logos/favicon_mission.png',
+    apple: '/logos/favicon_mission.png',
   },
   openGraph: {
-    type: "website",
+    type: 'website',
     locale: siteConfig.locale,
     url: siteUrl,
     siteName: siteConfig.name,
@@ -52,13 +45,13 @@ export const metadata: Metadata = {
     ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: 'summary_large_image',
     title: siteConfig.name,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
   },
   alternates: {
-    canonical: "/",
+    canonical: '/',
   },
   robots: {
     index: true,
@@ -66,26 +59,22 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
 };
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F7F9FC" },
-    { media: "(prefers-color-scheme: dark)", color: "#081C3A" },
+    { media: '(prefers-color-scheme: light)', color: '#F7F9FC' },
+    { media: '(prefers-color-scheme: dark)', color: '#081C3A' },
   ],
-  width: "device-width",
+  width: 'device-width',
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning className={dmSans.variable}>
       <body className={dmSans.className}>

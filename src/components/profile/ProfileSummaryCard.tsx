@@ -186,9 +186,7 @@ export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps)
                   {profile.roleDescription}
                 </Typography>
 
-                <Box sx={{ display: { xs: 'none', md: 'block' }, pt: 0.25 }}>
-                  {contactActions}
-                </Box>
+                <Box sx={{ display: { xs: 'none', md: 'block' }, pt: 0.25 }}>{contactActions}</Box>
               </Stack>
             </Stack>
 

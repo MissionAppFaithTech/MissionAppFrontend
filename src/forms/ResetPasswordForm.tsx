@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { Alert, Button, Stack, TextField, Typography } from "@mui/material";
-import Link from "next/link";
-import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
-import { validateStrongPassword } from "@/lib/passwordStrength";
+import { useMemo, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import Link from 'next/link';
+import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
+import { validateStrongPassword } from '@/lib/passwordStrength';
 import {
   getResetTokenStatus,
   RESET_PASSWORD_TOKEN_TTL_MINUTES,
   resetPassword,
-} from "@/services/auth.service";
+} from '@/services/auth.service';
 
 type ResetPasswordValues = {
   password: string;
@@ -32,35 +32,35 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     watch,
     formState: { errors, isSubmitting, isValid },
   } = useForm<ResetPasswordValues>({
-    mode: "onChange",
-    defaultValues: { password: "", confirmPassword: "" },
+    mode: 'onChange',
+    defaultValues: { password: '', confirmPassword: '' },
   });
 
-  const password = watch("password");
-  const confirmPassword = watch("confirmPassword");
+  const password = watch('password');
+  const confirmPassword = watch('confirmPassword');
 
   const canSubmit = useMemo(() => {
     const passwordOk = validateStrongPassword(password) === true;
     const confirmOk = confirmPassword.length > 0 && confirmPassword === password;
     return (
       Boolean(token) &&
-      tokenStatus !== "invalid" &&
-      tokenStatus !== "expired" &&
+      tokenStatus !== 'invalid' &&
+      tokenStatus !== 'expired' &&
       isValid &&
       passwordOk &&
       confirmOk
     );
   }, [confirmPassword, isValid, password, token, tokenStatus]);
 
-  if (tokenStatus === "invalid") {
+  if (tokenStatus === 'invalid') {
     return (
-      <Stack spacing={2.5} sx={{ width: "100%" }}>
+      <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Link inválido
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Este link de redefinição é inválido ou está incompleto. Solicite um novo
-          e-mail em “Esqueci minha senha”.
+          Este link de redefinição é inválido ou está incompleto. Solicite um novo e-mail em
+          “Esqueci minha senha”.
         </Typography>
         <Button
           component={Link}
@@ -78,16 +78,15 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     );
   }
 
-  if (tokenStatus === "expired") {
+  if (tokenStatus === 'expired') {
     return (
-      <Stack spacing={2.5} sx={{ width: "100%" }}>
+      <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Link expirado
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Este link de redefinição expirou (válido por{" "}
-          {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos). Solicite um novo e-mail para
-          continuar.
+          Este link de redefinição expirou (válido por {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos).
+          Solicite um novo e-mail para continuar.
         </Typography>
         <Button
           component={Link}
@@ -107,7 +106,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   if (done) {
     return (
-      <Stack spacing={2.5} sx={{ width: "100%" }}>
+      <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Senha atualizada
         </Typography>
@@ -133,9 +132,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       });
       setDone(true);
     } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "Não foi possível redefinir a senha",
-      );
+      setFormError(error instanceof Error ? error.message : 'Não foi possível redefinir a senha');
     }
   };
 
@@ -144,11 +141,11 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       component="form"
       spacing={2.5}
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ width: "100%" }}
+      sx={{ width: '100%' }}
       noValidate
     >
       <Typography variant="body2" color="text.secondary">
-        Escolha uma nova senha forte para a sua conta. Este link expira em{" "}
+        Escolha uma nova senha forte para a sua conta. Este link expira em{' '}
         {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos após o envio do e-mail.
       </Typography>
 
@@ -180,8 +177,8 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         name="confirmPassword"
         control={control}
         rules={{
-          required: "Confirme sua senha",
-          validate: (value) => value === password || "As senhas não coincidem",
+          required: 'Confirme sua senha',
+          validate: (value) => value === password || 'As senhas não coincidem',
         }}
         render={({ field }) => (
           <TextField
@@ -204,7 +201,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         fullWidth
         disabled={!canSubmit || isSubmitting}
       >
-        {isSubmitting ? "Salvando…" : "Salvar nova senha"}
+        {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
       </Button>
 
       <Button component={Link} href="/login" variant="text" fullWidth>

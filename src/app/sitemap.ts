@@ -1,18 +1,18 @@
-import type { MetadataRoute } from "next";
-import { getSiteUrl } from "@/lib/site";
+import type { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/site';
 
 /** Public marketing / entry routes — keep in sync with crawlable pages. */
 const publicRoutes: Array<{
   path: string;
-  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+  changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'];
   priority: number;
 }> = [
-  { path: "/", changeFrequency: "weekly", priority: 1 },
-  { path: "/select-role", changeFrequency: "monthly", priority: 0.8 },
-  { path: "/login", changeFrequency: "monthly", priority: 0.7 },
-  { path: "/forgot-password", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/register/missionaries", changeFrequency: "monthly", priority: 0.7 },
-  { path: "/register/supporters", changeFrequency: "monthly", priority: 0.7 },
+  { path: '/', changeFrequency: 'weekly', priority: 1 },
+  { path: '/select-role', changeFrequency: 'monthly', priority: 0.8 },
+  { path: '/login', changeFrequency: 'monthly', priority: 0.7 },
+  { path: '/forgot-password', changeFrequency: 'yearly', priority: 0.3 },
+  { path: '/register/missionaries', changeFrequency: 'monthly', priority: 0.7 },
+  { path: '/register/supporters', changeFrequency: 'monthly', priority: 0.7 },
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -20,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
 
   return publicRoutes.map(({ path, changeFrequency, priority }) => ({
-    url: path === "/" ? baseUrl : `${baseUrl}${path}`,
+    url: path === '/' ? baseUrl : `${baseUrl}${path}`,
     lastModified,
     changeFrequency,
     priority,

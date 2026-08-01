@@ -1,26 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import { Alert, Button, Stack, TextField, Typography } from "@mui/material";
-import Link from "next/link";
-import { isValidEmail, normalizeEmail } from "@/lib/masks";
-import {
-  requestPasswordReset,
-  RESET_PASSWORD_TOKEN_TTL_MINUTES,
-} from "@/services/auth.service";
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import Link from 'next/link';
+import { isValidEmail, normalizeEmail } from '@/lib/masks';
+import { requestPasswordReset, RESET_PASSWORD_TOKEN_TTL_MINUTES } from '@/services/auth.service';
 
 type ForgotPasswordValues = {
   login: string;
 };
 
 type SubmitState =
-  | { status: "idle" }
-  | { status: "success"; email: string; resetPath?: string }
-  | { status: "not_found"; email: string };
+  | { status: 'idle' }
+  | { status: 'success'; email: string; resetPath?: string }
+  | { status: 'not_found'; email: string };
 
 export default function ForgotPasswordForm() {
-  const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
+  const [submitState, setSubmitState] = useState<SubmitState>({ status: 'idle' });
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -28,8 +25,8 @@ export default function ForgotPasswordForm() {
     handleSubmit,
     formState: { errors, isSubmitting, isValid },
   } = useForm<ForgotPasswordValues>({
-    mode: "onChange",
-    defaultValues: { login: "" },
+    mode: 'onChange',
+    defaultValues: { login: '' },
   });
 
   const onSubmit = async (values: ForgotPasswordValues) => {
@@ -41,32 +38,29 @@ export default function ForgotPasswordForm() {
       setSubmitState(
         result.found
           ? {
-              status: "success",
+              status: 'success',
               email: values.login,
               resetPath: result.resetPath,
             }
-          : { status: "not_found", email: values.login },
+          : { status: 'not_found', email: values.login }
       );
     } catch (error) {
       setFormError(
-        error instanceof Error
-          ? error.message
-          : "Não foi possível enviar o link de redefinição",
+        error instanceof Error ? error.message : 'Não foi possível enviar o link de redefinição'
       );
     }
   };
 
-  if (submitState.status === "success") {
+  if (submitState.status === 'success') {
     return (
-      <Stack spacing={2.5} sx={{ width: "100%" }}>
+      <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Conta encontrada
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          Enviamos um link para redefinir a senha de{" "}
-          <strong>{submitState.email}</strong>. O link expira em{" "}
-          {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos.
+          Enviamos um link para redefinir a senha de <strong>{submitState.email}</strong>. O link
+          expira em {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos.
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
@@ -88,7 +82,7 @@ export default function ForgotPasswordForm() {
         <Button
           component={Link}
           href="/login"
-          variant={submitState.resetPath ? "outlined" : "contained"}
+          variant={submitState.resetPath ? 'outlined' : 'contained'}
           color="primary"
           fullWidth
         >
@@ -98,23 +92,23 @@ export default function ForgotPasswordForm() {
     );
   }
 
-  if (submitState.status === "not_found") {
+  if (submitState.status === 'not_found') {
     return (
-      <Stack spacing={2.5} sx={{ width: "100%" }}>
+      <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Conta não encontrada
         </Typography>
 
         <Typography variant="body2" color="text.secondary">
-          Não encontramos uma conta com o e-mail <strong>{submitState.email}</strong>.
-          Confira se digitou corretamente ou cadastre-se.
+          Não encontramos uma conta com o e-mail <strong>{submitState.email}</strong>. Confira se
+          digitou corretamente ou cadastre-se.
         </Typography>
 
         <Button
           type="button"
           variant="outlined"
           fullWidth
-          onClick={() => setSubmitState({ status: "idle" })}
+          onClick={() => setSubmitState({ status: 'idle' })}
         >
           Tentar outro e-mail
         </Button>
@@ -131,12 +125,11 @@ export default function ForgotPasswordForm() {
       component="form"
       spacing={2.5}
       onSubmit={handleSubmit(onSubmit)}
-      sx={{ width: "100%" }}
+      sx={{ width: '100%' }}
       noValidate
     >
       <Typography variant="body2" color="text.secondary">
-        Informe o e-mail da sua conta. Enviaremos um link para você criar uma nova
-        senha.
+        Informe o e-mail da sua conta. Enviaremos um link para você criar uma nova senha.
       </Typography>
 
       {formError ? <Alert severity="error">{formError}</Alert> : null}
@@ -145,8 +138,8 @@ export default function ForgotPasswordForm() {
         name="login"
         control={control}
         rules={{
-          required: "Informe seu e-mail",
-          validate: (value) => isValidEmail(value) || "E-mail inválido",
+          required: 'Informe seu e-mail',
+          validate: (value) => isValidEmail(value) || 'E-mail inválido',
         }}
         render={({ field }) => (
           <TextField
@@ -170,7 +163,7 @@ export default function ForgotPasswordForm() {
         fullWidth
         disabled={!isValid || isSubmitting}
       >
-        {isSubmitting ? "Verificando…" : "Enviar link"}
+        {isSubmitting ? 'Verificando…' : 'Enviar link'}
       </Button>
 
       <Button component={Link} href="/login" variant="text" fullWidth>

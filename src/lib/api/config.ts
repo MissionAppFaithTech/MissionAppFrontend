@@ -4,14 +4,13 @@
  */
 export function getBackendOrigin(): string {
   const fromEnv =
-    process.env.API_URL?.replace(/\/$/, "") ||
-    process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "");
+    process.env.API_URL?.replace(/\/$/, '') || process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
 
   if (fromEnv) {
-    return fromEnv.replace(/\/api\/v1\/?$/, "");
+    return fromEnv.replace(/\/api\/v1\/?$/, '');
   }
 
-  return "http://localhost:3333";
+  return 'http://localhost:3333';
 }
 
 export function getBackendApiBase(): string {
