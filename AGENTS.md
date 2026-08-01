@@ -47,15 +47,15 @@ Only create a git commit when the user explicitly asks.
 
 MissionApp Frontend is the **Next.js** web client for Mission App (missionaries and supporters). Maintained by FaithTech.
 
-| Item                             | Value                                                                           |
-| -------------------------------- | ------------------------------------------------------------------------------- |
-| Framework                        | Next.js 16 (App Router)                                                         |
-| UI                               | React 19 + MUI 9 + Tailwind 4                                                   |
-| Node.js                          | Pin in `.node-version` (align with backend)                                     |
-| Package manager                  | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo  |
-| Theme / tokens                   | `src/theme/theme.ts`                                                            |
-| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                 |
-| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build               |
+| Item                             | Value                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| Framework                        | Next.js 16 (App Router)                                                        |
+| UI                               | React 19 + MUI 9 + Tailwind 4                                                  |
+| Node.js                          | Pin in `.node-version` (align with backend)                                    |
+| Package manager                  | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo |
+| Theme / tokens                   | `src/theme/theme.ts`                                                           |
+| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                |
+| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build              |
 
 See `README.md` for setup. Env template: `.env.example`. PR/issue templates live under `.github/`.
 

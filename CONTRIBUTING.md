@@ -71,15 +71,15 @@ git checkout -b <type>/<short-description>
 Maintainers devem manter a branch `main` protegida no GitHub
 (**Settings → Rules → Rulesets**, ou **Settings → Branches → Branch protection rules**):
 
-| Regra | Valor recomendado |
-| ----- | ----------------- |
-| Target | `main` |
-| Require a pull request before merging | Sim |
-| Require status checks to pass | Sim — check do workflow `CI` |
-| Require branches to be up to date | Opcional (recomendado) |
-| Block force pushes | Sim |
-| Restrict deletions | Sim |
-| Allow bypass | Só admins, se necessário (evitar no dia a dia) |
+| Regra                                 | Valor recomendado                              |
+| ------------------------------------- | ---------------------------------------------- |
+| Target                                | `main`                                         |
+| Require a pull request before merging | Sim                                            |
+| Require status checks to pass         | Sim — check do workflow `CI`                   |
+| Require branches to be up to date     | Opcional (recomendado)                         |
+| Block force pushes                    | Sim                                            |
+| Restrict deletions                    | Sim                                            |
+| Allow bypass                          | Só admins, se necessário (evitar no dia a dia) |
 
 Push direto na `main` sem PR quebra review e o gate do CI. Se o front publicar em Vercel (ou similar), produção deve seguir só a `main` **após merge de PR**.
 
