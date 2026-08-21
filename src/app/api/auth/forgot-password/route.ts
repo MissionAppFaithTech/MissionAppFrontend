@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
+import type { MessageResponse } from '@/generated/api/models/MessageResponse';
 
 const forgotPasswordSchema = z.object({
   login: z.email(),
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await backendFetch<{ message?: string }>('/auth/forgot-password', {
+    const result = await backendFetch<MessageResponse>('/auth/forgot-password', {
       method: 'POST',
       body: parsed.data,
     });

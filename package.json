@@ -16,7 +16,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "prepare": "husky"
+    "prepare": "husky",
+    "openapi:sync": "node scripts/sync-openapi.mjs",
+    "openapi:generate": "kubb generate",
+    "openapi:build": "pnpm openapi:sync && pnpm openapi:generate"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -37,6 +40,9 @@
   "devDependencies": {
     "@commitlint/config-conventional": "21.2.2",
     "@commitlint/types": "21.2.0",
+    "@kubb/plugin-axios": "5.0.0",
+    "@kubb/plugin-ts": "5.0.0",
+    "@kubb/plugin-zod": "5.0.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.0.0",
     "@types/react": "^19",
@@ -45,6 +51,7 @@
     "eslint": "^10.0.0",
     "eslint-config-next": "16.3.1",
     "husky": "9.1.7",
+    "kubb": "5.0.0",
     "prettier": "^3.8.3",
     "tailwindcss": "^4",
     "typescript": "^5"
