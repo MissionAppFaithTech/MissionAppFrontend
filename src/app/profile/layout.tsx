@@ -17,7 +17,7 @@ import { mockProfile } from '@/mocks/profile';
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isEditProfileRoute = pathname === '/profile/editar-perfil';
+  const isEditProfileRoute = pathname === '/profile/edit-profile';
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>

@@ -118,7 +118,7 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
 
         <Box
           component={Link}
-          href="/profile/editar-perfil"
+          href="/profile/edit-profile"
           onClick={handleClose}
           sx={{
             display: 'block',

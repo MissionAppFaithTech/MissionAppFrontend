@@ -34,7 +34,7 @@ export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps)
       }}
     >
       <PillButton
-        href="/profile/editar-perfil"
+        href="/profile/edit-profile"
         tone="primaryFilled"
         size="small"
         sx={{ ...actionSx, display: { xs: 'inline-flex', sm: 'none' } }}
@@ -62,7 +62,7 @@ export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps)
       }}
     >
       <PillButton
-        href="/profile/editar-perfil"
+        href="/profile/edit-profile"
         tone="primaryFilled"
         size="small"
         sx={{ ...actionSx, display: { xs: 'none', sm: 'inline-flex' } }}
