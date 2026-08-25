@@ -1,5 +1,3 @@
-'use client';
-
 import type { ReactNode } from 'react';
 import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
@@ -7,7 +5,6 @@ import Container from '@mui/material/Container';
 import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import { usePathname } from 'next/navigation';
 import Logo from '@/components/common/Logo';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
 import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
@@ -16,9 +13,6 @@ import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import { mockProfile } from '@/mocks/profile';
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const isEditProfileRoute = pathname === '/profile/edit-profile';
-
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <PageNavbar maxWidth="lg">
@@ -62,7 +56,7 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4, md: 6 } }}>
         <Stack spacing={2}>
           <ProfileSummaryCard profile={mockProfile} />
-          {!isEditProfileRoute && <ProfileNavigation />}
+          <ProfileNavigation />
           {children}
         </Stack>
       </Container>

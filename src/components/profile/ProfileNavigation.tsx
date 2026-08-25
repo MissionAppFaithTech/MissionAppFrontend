@@ -17,6 +17,10 @@ export default function ProfileNavigation() {
   const pathname = usePathname();
   const activePath = profileSections.some(({ href }) => href === pathname) ? pathname : false;
 
+  if (!activePath) {
+    return null;
+  }
+
   return (
     <Paper
       elevation={0}
