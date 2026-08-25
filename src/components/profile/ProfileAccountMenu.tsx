@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, type MouseEvent } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import PersonIcon from '@mui/icons-material/Person';
@@ -115,7 +116,19 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
 
         <Divider />
 
-        <Box sx={{ px: 2.5, py: 2 }}>
+        <Box
+          component={Link}
+          href="/profile/editar-perfil"
+          onClick={handleClose}
+          sx={{
+            display: 'block',
+            px: 2.5,
+            py: 2,
+            color: 'text.primary',
+            textDecoration: 'none',
+            '&:hover': { bgcolor: 'action.hover' },
+          }}
+        >
           <Typography sx={{ fontWeight: 700 }}>Editar perfil</Typography>
         </Box>
 
