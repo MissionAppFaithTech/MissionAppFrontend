@@ -126,7 +126,7 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
             py: 2,
             color: 'text.primary',
             textDecoration: 'none',
-            '&:hover': { bgcolor: 'action.hover' },
+            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
           }}
         >
           <Typography sx={{ fontWeight: 700 }}>Editar perfil</Typography>
