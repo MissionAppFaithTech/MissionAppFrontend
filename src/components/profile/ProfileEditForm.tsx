@@ -13,17 +13,12 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import { profileLocations } from '@/lib/profileOptions';
 import type { ProfileData } from '@/types/profile';
 
 type ProfileEditFormProps = {
   profile: ProfileData;
 };
-
-const locations = [
-  'Rio de Janeiro - Brasil',
-  'São Paulo - Brasil',
-  'Cidade do Cabo - África do Sul',
-] as const;
 
 type ProfileFieldProps = {
   id: string;
@@ -52,7 +47,7 @@ function ProfileField({ id, label, defaultValue, select = false }: ProfileFieldP
         size="small"
       >
         {select
-          ? locations.map((location) => (
+          ? profileLocations.map((location) => (
               <MenuItem key={location} value={location}>
                 {location}
               </MenuItem>
