@@ -15,7 +15,17 @@ const profileSections = [
 
 export default function ProfileNavigation() {
   const pathname = usePathname();
-  const activePath = profileSections.some(({ href }) => href === pathname) ? pathname : false;
+  const isProfileSectionRoute = profileSections.some(({ href }) => href === pathname);
+
+  if (!isProfileSectionRoute) {
+    return null;
+  }
+
+  const activePath = pathname;
+
+  if (!activePath) {
+    return null;
+  }
 
   return (
     <Paper

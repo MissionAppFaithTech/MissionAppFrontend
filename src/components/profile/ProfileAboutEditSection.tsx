@@ -7,6 +7,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import { profileLocations } from '@/lib/profileOptions';
 import type { ReactNode } from 'react';
 import type { ProfileAboutData } from '@/types/profile';
 
@@ -14,12 +15,6 @@ type ProfileAboutEditSectionProps = {
   data: ProfileAboutData;
   onBack: () => void;
 };
-
-const locations = [
-  'Rio de Janeiro - Brasil',
-  'São Paulo - Brasil',
-  'Cidade do Cabo - África do Sul',
-] as const;
 
 const missionaryAgencies = [
   'JOCUM (Jovens com uma Missão)',
@@ -104,7 +99,7 @@ export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEd
               defaultValue={data.originLocation}
               fullWidth
             >
-              {locations.map((location) => (
+              {profileLocations.map((location) => (
                 <MenuItem key={location} value={location}>
                   {location}
                 </MenuItem>
@@ -119,7 +114,7 @@ export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEd
               defaultValue={data.currentLocation}
               fullWidth
             >
-              {locations.map((location) => (
+              {profileLocations.map((location) => (
                 <MenuItem key={location} value={location}>
                   {location}
                 </MenuItem>
