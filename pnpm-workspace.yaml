@@ -3,6 +3,7 @@ allowBuilds:
   unrs-resolver: true
 minimumReleaseAgeExclude:
   - '@types/react-dom'
+  - zod@4.5.4
   - eslint@10.9.1
   - '@next/eslint-plugin-next@16.3.2'
   - '@next/env@16.3.3'
