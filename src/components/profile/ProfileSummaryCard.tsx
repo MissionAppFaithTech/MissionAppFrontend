@@ -1,203 +1,355 @@
 'use client';
 
+import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
+import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Divider from '@mui/material/Divider';
+import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import type { ProfileData } from '@/types/profile';
 
 type ProfileSummaryCardProps = {
-  profile: Pick<ProfileData, 'username' | 'displayName' | 'roleDescription' | 'followersCount'>;
+  profile: ProfileData;
+  isOwnProfile?: boolean;
 };
 
-export default function ProfileSummaryCard({ profile }: ProfileSummaryCardProps) {
-  const actionSx = {
-    px: { xs: 1.25, sm: 1.75 },
-    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-    whiteSpace: 'nowrap' as const,
+export default function ProfileSummaryCard({
+  profile,
+  isOwnProfile = true,
+}: ProfileSummaryCardProps) {
+  const [toastOpen, setToastOpen] = useState(false);
+
+  const {
+    username,
+    displayName,
+    roleDescription,
+    location = 'Cidade do Cabo, África do Sul',
+    projectsCount = 25,
+    postsCount = 3,
+    campaignsCount = 4,
+    supportersCount = '1.2k',
+    followingCount = 12,
+  } = profile;
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setToastOpen(true);
+    }
   };
 
-  /** Mobile: Contato + Compartilhar + Editar na mesma linha. sm+: só Contato/Compartilhar. */
-  const contactActions = (
-    <Stack
-      direction="row"
-      spacing={1}
-      useFlexGap
-      sx={{
-        flexWrap: 'wrap',
-        alignSelf: 'flex-start',
-      }}
-    >
-      <PillButton
-        href="/profile/edit-profile"
-        tone="primaryFilled"
-        size="small"
-        sx={{ ...actionSx, display: { xs: 'inline-flex', sm: 'none' } }}
-      >
-        Editar perfil
-      </PillButton>
-      <PillButton tone="primarySoftOutline" size="small" sx={actionSx}>
-        Contato
-      </PillButton>
-      <PillButton tone="primarySoftOutline" size="small" sx={actionSx}>
-        Compartilhar perfil
-      </PillButton>
-    </Stack>
-  );
+  /** Itens de estatísticas exibidos conforme o tipo de perfil */
+  const statsList = isOwnProfile
+    ? [
+        { label: 'projetos', value: projectsCount },
+        { label: 'postagens', value: postsCount },
+        { label: 'campanhas', value: campaignsCount },
+        { label: 'apoiadores', value: supportersCount },
+        { label: 'seguindo', value: followingCount },
+      ]
+    : [
+        { label: 'projetos', value: projectsCount },
+        { label: 'postagens', value: postsCount },
+        { label: 'campanhas', value: campaignsCount },
+      ];
 
-  /** sm+: Editar + Seguidores à direita. Mobile: só Seguidores. */
-  const primaryActions = (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{
-        flexShrink: 0,
-        alignItems: 'center',
-        alignSelf: 'flex-start',
-      }}
-    >
-      <PillButton
-        href="/profile/edit-profile"
-        tone="primaryFilled"
-        size="small"
-        sx={{ ...actionSx, display: { xs: 'none', sm: 'inline-flex' } }}
-      >
-        Editar perfil
-      </PillButton>
-      <PillButton
-        tone="missionFilled"
-        size="small"
-        sx={{
-          ...actionSx,
-          minWidth: { sm: 110 },
-        }}
-      >
-        {profile.followersCount} Seguidores
-      </PillButton>
-    </Stack>
-  );
+  const actionSx = {
+    px: { xs: 2, sm: 2.5 },
+    py: { xs: 0.75, sm: 1 },
+    fontSize: { xs: '0.8125rem', sm: '0.9375rem' },
+    fontWeight: 600,
+    whiteSpace: 'nowrap' as const,
+    minHeight: 44,
+  };
 
   return (
-    <Card
-      elevation={0}
+    <Box
       sx={{
-        borderRadius: { xs: 2, sm: 3 },
-        border: '1px solid',
-        borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        position: 'relative',
+        borderRadius: '24px',
+        bgcolor: 'primary.main',
+        pt: '10px',
+        pl: '10px',
+        pr: '2px',
+        pb: '2px',
+        boxShadow: '0 8px 24px rgba(13, 43, 92, 0.15)',
       }}
     >
-      <CardContent
+      <Card
+        elevation={0}
         sx={{
-          p: { xs: 2, sm: 3, md: 4 },
-          '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
+          borderRadius: '20px',
+          bgcolor: 'background.paper',
+          border: '1px solid',
+          borderColor: 'divider',
         }}
       >
-        <Stack spacing={{ xs: 1.75, md: 0 }}>
-          <Stack
-            direction="row"
-            spacing={{ xs: 1.5, md: 4 }}
-            sx={{
-              alignItems: { xs: 'flex-start', md: 'center' },
-              justifyContent: 'space-between',
-            }}
-          >
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 3, md: 3.5 },
+            '&:last-child': { pb: { xs: 2, sm: 3, md: 3.5 } },
+          }}
+        >
+          <Stack spacing={{ xs: 2, sm: 2.5 }}>
+            {/* Seção Superior: Avatar e Identificação do Usuário */}
             <Stack
-              direction="row"
-              spacing={{ xs: 1.25, sm: 2, md: 3 }}
-              sx={{
-                minWidth: 0,
-                flex: 1,
-                alignItems: { xs: 'flex-start', md: 'center' },
-              }}
+              direction={{ xs: 'row', sm: 'row' }}
+              spacing={{ xs: 1.75, sm: 2.5, md: 3 }}
+              sx={{ alignItems: 'flex-start', minWidth: 0 }}
             >
+              {/* Avatar com Badge Plus Azul em Fundo Branco */}
               <Box sx={{ position: 'relative', flexShrink: 0 }}>
                 <Avatar
                   sx={{
-                    width: { xs: 64, sm: 88, md: 112 },
-                    height: { xs: 64, sm: 88, md: 112 },
+                    width: { xs: 72, sm: 88, md: 100 },
+                    height: { xs: 72, sm: 88, md: 100 },
                     bgcolor: 'supporter.light',
                     color: 'common.black',
-                    border: '1px solid',
-                    borderColor: 'primary.main',
-                    boxShadow: 2,
+                    border: '1.5px solid',
+                    borderColor: 'divider',
                   }}
                 >
-                  <PersonIcon sx={{ fontSize: { xs: 36, sm: 48, md: 60 } }} />
+                  <PersonIcon sx={{ fontSize: { xs: 44, sm: 54, md: 64 } }} />
                 </Avatar>
                 <Box
-                  aria-hidden
+                  aria-label="Adicionar foto de perfil"
                   sx={{
                     position: 'absolute',
-                    right: 0,
-                    bottom: { xs: 0, md: 5 },
-                    width: { xs: 22, md: 30 },
-                    height: { xs: 22, md: 30 },
+                    right: -2,
+                    bottom: 2,
+                    width: { xs: 24, sm: 28 },
+                    height: { xs: 24, sm: 28 },
                     display: 'grid',
                     placeItems: 'center',
                     borderRadius: '50%',
-                    bgcolor: 'primary.main',
-                    color: 'common.white',
-                    border: '2px solid',
-                    borderColor: 'background.paper',
+                    bgcolor: 'background.paper',
+                    color: 'primary.main',
+                    border: '1.5px solid',
+                    borderColor: 'divider',
+                    boxShadow: 1,
                   }}
                 >
-                  <AddIcon sx={{ fontSize: { xs: 14, md: 20 } }} />
+                  <AddIcon sx={{ fontSize: { xs: 16, sm: 18 }, color: 'primary.main' }} />
                 </Box>
               </Box>
 
-              <Stack
-                spacing={{ xs: 0.5, md: 1.25 }}
-                sx={{
-                  flex: 1,
-                  minWidth: 0,
-                  alignItems: 'flex-start',
-                  textAlign: 'left',
-                }}
-              >
+              {/* Informações Textuais */}
+              <Stack spacing={0.5} sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                  sx={{ fontSize: { xs: '0.8125rem', sm: '0.875rem' } }}
                 >
-                  @{profile.username}
+                  @{username}
                 </Typography>
                 <Typography
-                  variant="h4"
-                  color="primary.main"
+                  variant="h5"
+                  component="h1"
+                  color="text.primary"
                   sx={{
-                    fontSize: { xs: '1.125rem', sm: '1.5rem', md: '1.75rem' },
-                    lineHeight: 1.25,
+                    fontWeight: 700,
+                    fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.625rem' },
+                    lineHeight: 1.2,
                     wordBreak: 'break-word',
                   }}
                 >
-                  {profile.displayName}
+                  {displayName}
                 </Typography>
                 <Typography
-                  variant="body2"
+                  variant="body1"
+                  color="primary.main"
                   sx={{
-                    fontWeight: 600,
-                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    fontWeight: 700,
+                    fontSize: { xs: '0.875rem', sm: '1rem' },
+                    pt: 0.25,
                   }}
                 >
-                  {profile.roleDescription}
+                  {roleDescription}
                 </Typography>
 
-                <Box sx={{ display: { xs: 'none', md: 'block' }, pt: 0.25 }}>{contactActions}</Box>
+                {/* Localização com ícone de pin */}
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  sx={{ alignItems: 'center', pt: 0.25, color: 'primary.main' }}
+                >
+                  <PlaceOutlinedIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
+                  <Typography
+                    variant="body2"
+                    color="primary.main"
+                    sx={{
+                      fontWeight: 500,
+                      fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                    }}
+                  >
+                    {location}
+                  </Typography>
+                </Stack>
               </Stack>
             </Stack>
 
-            {primaryActions}
-          </Stack>
+            {/* Linha Divisora Superior */}
+            <Divider />
 
-          <Box sx={{ display: { xs: 'block', md: 'none' } }}>{contactActions}</Box>
-        </Stack>
-      </CardContent>
-    </Card>
+            {/* Seção Central de Estatísticas (Centralizada em Celular e Tablet) */}
+            <Stack
+              direction="row"
+              spacing={{ xs: 1.5, sm: 2.5, md: 4 }}
+              useFlexGap
+              sx={{
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                alignItems: 'center',
+                py: 0.5,
+                width: '100%',
+              }}
+            >
+              {statsList.map((stat) => (
+                <Stack
+                  key={stat.label}
+                  spacing={0.25}
+                  sx={{
+                    alignItems: 'center',
+                    minWidth: { xs: 60, sm: 80, md: 90 },
+                    textAlign: 'center',
+                    flex: { xs: '1 1 calc(33.333% - 16px)', sm: '1 1 auto' },
+                    maxWidth: { xs: 'calc(50% - 12px)', sm: 'none' },
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    color="primary.main"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.375rem' },
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {stat.value}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                      fontWeight: 500,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {stat.label}
+                  </Typography>
+                </Stack>
+              ))}
+            </Stack>
+
+            {/* Linha Divisora Inferior */}
+            <Divider />
+
+            {/* Seção Inferior: Botões de Ação */}
+            <Stack
+              direction="row"
+              spacing={{ xs: 1, sm: 1.5 }}
+              useFlexGap
+              sx={{
+                flexWrap: 'wrap',
+                alignItems: 'center',
+              }}
+            >
+              {isOwnProfile ? (
+                <>
+                  <PillButton
+                    href="/profile/edit-profile"
+                    tone="missionFilled"
+                    size="medium"
+                    sx={{
+                      ...actionSx,
+                      bgcolor: '#F97316',
+                      color: 'common.white',
+                      '&:hover': { bgcolor: '#EA580C' },
+                    }}
+                  >
+                    Editar perfil
+                  </PillButton>
+                  <PillButton tone="primarySoftOutline" size="medium" sx={actionSx}>
+                    Contato
+                  </PillButton>
+                </>
+              ) : (
+                <>
+                  <PillButton
+                    tone="missionFilled"
+                    size="medium"
+                    sx={{
+                      ...actionSx,
+                      bgcolor: '#F97316',
+                      color: 'common.white',
+                      '&:hover': { bgcolor: '#EA580C' },
+                    }}
+                  >
+                    Seguir
+                  </PillButton>
+                  <PillButton tone="cta" size="medium" sx={actionSx}>
+                    Apoiar
+                  </PillButton>
+                  <PillButton tone="primarySoftOutline" size="medium" sx={actionSx}>
+                    Contato
+                  </PillButton>
+                </>
+              )}
+
+              {/* Botão de Compartilhar com Ícone e Copiar URL */}
+              <PillButton
+                tone="primarySoftOutline"
+                size="medium"
+                aria-label="Compartilhar perfil"
+                onClick={handleShare}
+                sx={{
+                  ...actionSx,
+                  px: { xs: 1.5, sm: 1.75 },
+                  minWidth: 44,
+                }}
+              >
+                <ShareOutlinedIcon sx={{ fontSize: 20 }} />
+              </PillButton>
+            </Stack>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* Toast Notification no Padrão de Cores do Sistema */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'common.white',
+            fontWeight: 600,
+            borderRadius: 2,
+            boxShadow: 3,
+            '& .MuiAlert-icon': {
+              color: 'common.white',
+            },
+          }}
+        >
+          Link do perfil copiado para compartilhamento
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
