@@ -83,21 +83,21 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 
 ## Responsiveness (mandatory)
 
-**Always implement responsive layouts.** Phone is a first-class target, not an afterthought.
+**Always implement responsive layouts.** Phone is a first-class target, not an afterthought. Every single component must be designed and built **mobile-first**.
 
 ### Rules
 
-1. **Mobile-first:** default styles for small screens; then `sm` / `md` / `lg`.
-2. Prefer MUI breakpoint props (`direction={{ xs: 'column', md: 'row' }}`, `sx={{ fontSize: { xs: …, md: … } }}`) over fixed desktop widths.
-3. Avoid horizontal overflow: wrap, truncate, or reflow; use `minWidth: 0` on flex children that must shrink.
-4. Keep actions reachable on phone — compact or icon-only is OK if `aria-label` (or equivalent) remains.
-5. Touch-friendly controls; do not rely on hover-only affordances for critical actions.
-6. When changing UI, sanity-check ~360px and ~1280px widths (or state if unchecked).
+1. **Mobile-first approach:** Write default base styles targeting small mobile screens (`xs: ~360px`) first, then layer breakpoint overrides progressively for larger viewports (`sm: 600px`, `md: 900px`, `lg: 1200px`).
+2. **MUI Breakpoint Props over Fixed Units:** Always use object syntax for MUI breakpoint props (`direction={{ xs: 'column', md: 'row' }}`, `sx={{ fontSize: { xs: '0.875rem', md: '1.25rem' } }}`) instead of hardcoded desktop pixel widths or fixed flex sizes.
+3. **Prevent Horizontal Overflow:** Ensure all container boxes wrap, truncate text, or reflow cleanly. Apply `minWidth: 0` on flex children that need to truncate (`textOverflow: 'ellipsis'`) or shrink without overflowing.
+4. **Fluid Stats & Action Grids:** On mobile screens, multi-column statistics or button groups must automatically wrap or scale (e.g., flex-wrap or auto-fit grids) rather than squeeze or overflow horizontally.
+5. **Touch-Friendly Controls:** Interactive elements (buttons, icons, chips) must have adequate tap targets (minimum 44x44px touch area) and accessible labels (`aria-label`). Never rely on hover-only affordances for critical interactions.
+6. **Double-Viewport Sanity Check:** Verify all UI changes at both small mobile width (~360px) and standard desktop width (~1280px).
 
 ### Examples in this codebase
 
-- `ProfileSummaryCard`: on `xs`, photo/name left, primary buttons right, Contato/Compartilhar below with smaller width.
-- `ProfileAboutSection` edit control: icon-only on `xs`, icon + “Editar” from `sm` up.
+- `ProfileSummaryCard`: on `xs`, avatar/info stack vertically or wrap cleanly; stats reflow onto mobile-friendly grids; primary action buttons wrap smoothly without clipping.
+- `ProfileAboutSection` edit control: icon-only on `xs`, icon + “Editar” text label from `sm` up.
 
 ---
 

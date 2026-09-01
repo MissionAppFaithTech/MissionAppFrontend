@@ -1,40 +1,52 @@
 'use client';
 
-import { Avatar, Button, Stack, Typography } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
+import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
+import type { ProfileData } from '@/types/profile';
 
 type UserHeaderProps = {
   username: string;
   displayName: string;
   bio?: string;
+  roleDescription?: string;
+  location?: string;
+  projectsCount?: number;
+  postsCount?: number;
+  campaignsCount?: number;
+  supportersCount?: number | string;
 };
 
-export default function UserHeader({ username, displayName, bio }: UserHeaderProps) {
-  return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: 'center' }}>
-      <Avatar sx={{ width: 96, height: 96 }}>
-        <PersonIcon sx={{ fontSize: 48 }} />
-      </Avatar>
+export default function UserHeader({
+  username,
+  displayName,
+  bio,
+  roleDescription = 'Missionário (a)(s)',
+  location = 'África do Sul',
+  projectsCount = 0,
+  postsCount = 0,
+  campaignsCount = 0,
+  supportersCount = 0,
+}: UserHeaderProps) {
+  const profileData: ProfileData = {
+    username,
+    displayName,
+    roleDescription,
+    location,
+    followersCount: 0,
+    projectsCount,
+    postsCount,
+    campaignsCount,
+    supportersCount,
+    about: {
+      introduction: bio || '',
+      missionHistory: '',
+      originLocation: '',
+      currentLocation: location,
+      missionaryAgency: '',
+      faithCommunity: '',
+      prayerRequests: '',
+      lifeVerse: '',
+    },
+  };
 
-      <Stack spacing={1} sx={{ flex: 1, alignItems: { xs: 'center', sm: 'flex-start' } }}>
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
-          <Typography variant="body2" color="text.secondary">
-            @{username}
-          </Typography>
-          <Button variant="contained" color="supporter" size="small">
-            Seguir
-          </Button>
-          <Button variant="contained" color="mission" size="small">
-            Doar
-          </Button>
-        </Stack>
-        <Typography variant="h5">{displayName}</Typography>
-        {bio ? (
-          <Typography variant="body2" color="text.secondary">
-            {bio}
-          </Typography>
-        ) : null}
-      </Stack>
-    </Stack>
-  );
+  return <ProfileSummaryCard profile={profileData} isOwnProfile={false} />;
 }

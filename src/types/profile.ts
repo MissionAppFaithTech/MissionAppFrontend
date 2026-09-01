@@ -14,5 +14,11 @@ export type ProfileData = {
   displayName: string;
   roleDescription: string;
   followersCount: number;
+  location?: string;
+  projectsCount?: number;
+  postsCount?: number;
+  campaignsCount?: number;
+  supportersCount?: number | string;
+  followingCount?: number;
   about: ProfileAboutData;
 };
