@@ -14,10 +14,7 @@ test.describe('Landing Page E2E', () => {
     const startCta = page.getByRole('link', { name: /comece agora/i }).first();
     await expect(startCta).toBeVisible();
 
-    await Promise.all([
-      page.waitForURL('**/select-role'),
-      startCta.click(),
-    ]);
+    await Promise.all([page.waitForURL('**/select-role'), startCta.click()]);
 
     await expect(page).toHaveURL(/.*select-role/);
   });

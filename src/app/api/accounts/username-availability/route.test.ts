@@ -12,7 +12,9 @@ describe('GET /api/accounts/username-availability', () => {
   });
 
   it('handles valid username pattern format checking', async () => {
-    const req = new Request('http://localhost:3000/api/accounts/username-availability?username=valid_user_123');
+    const req = new Request(
+      'http://localhost:3000/api/accounts/username-availability?username=valid_user_123'
+    );
     const res = await GET(req);
     // Even if backend is not up, it should respond with status (502 when backend down)
     expect([200, 502]).toContain(res.status);

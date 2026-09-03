@@ -20,10 +20,7 @@ test.describe('Auth Flow E2E', () => {
     const forgotLink = page.getByRole('link', { name: /esqueceu sua senha/i });
     await expect(forgotLink).toBeVisible();
 
-    await Promise.all([
-      page.waitForURL('**/forgot-password'),
-      forgotLink.click(),
-    ]);
+    await Promise.all([page.waitForURL('**/forgot-password'), forgotLink.click()]);
 
     await expect(page).toHaveURL(/.*forgot-password/);
   });

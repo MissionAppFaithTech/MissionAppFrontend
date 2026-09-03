@@ -1,10 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  login,
-  requestPasswordReset,
-  getResetTokenStatus,
-  resetPassword,
-} from './auth.service';
+import { login, requestPasswordReset, getResetTokenStatus, resetPassword } from './auth.service';
 import { MOCK_RESET_TOKEN, MOCK_EXPIRED_RESET_TOKEN } from '@/mocks/auth';
 
 describe('auth.service', () => {
@@ -19,9 +14,7 @@ describe('auth.service', () => {
     });
 
     it('rejects invalid password or user', async () => {
-      await expect(
-        login({ login: 'nonexistent@domain.com', password: 'wrong' })
-      ).rejects.toThrow();
+      await expect(login({ login: 'nonexistent@domain.com', password: 'wrong' })).rejects.toThrow();
     });
   });
 

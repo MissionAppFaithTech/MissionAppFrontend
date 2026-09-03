@@ -43,12 +43,7 @@ async function run() {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/google-chrome',
     headless: 'new',
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-    ],
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
   });
 
   const report = [];
@@ -123,7 +118,9 @@ async function run() {
         );
         if (evaluation.overflowingElements.length > 0) {
           evaluation.overflowingElements.forEach((el) => {
-            console.log(`     -> Element: ${el.selector} (right: ${el.right}px, overflow: +${el.overflowAmount}px)`);
+            console.log(
+              `     -> Element: ${el.selector} (right: ${el.right}px, overflow: +${el.overflowAmount}px)`
+            );
           });
         }
       } else {
@@ -149,10 +146,7 @@ async function run() {
   console.log(`Total overflow issues: ${totalIssues}`);
   console.log('=======================================');
 
-  fs.writeFileSync(
-    path.join(__dirname, 'responsive-report.json'),
-    JSON.stringify(report, null, 2)
-  );
+  fs.writeFileSync(path.join(__dirname, 'responsive-report.json'), JSON.stringify(report, null, 2));
 }
 
 run().catch((err) => {

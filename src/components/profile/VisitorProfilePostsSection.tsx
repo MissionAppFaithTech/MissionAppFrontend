@@ -83,7 +83,13 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                 </Stack>
 
                 <Chip
-                  label={post.type === 'prayer' ? 'ORAÇÃO' : post.type === 'campaign' ? 'CAMPANHA' : 'ATUALIZAÇÃO'}
+                  label={
+                    post.type === 'prayer'
+                      ? 'ORAÇÃO'
+                      : post.type === 'campaign'
+                        ? 'CAMPANHA'
+                        : 'ATUALIZAÇÃO'
+                  }
                   size="small"
                   sx={{
                     bgcolor: 'rgba(234, 241, 250, 0.85)',

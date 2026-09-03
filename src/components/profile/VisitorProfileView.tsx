@@ -122,7 +122,8 @@ export default function VisitorProfileView({
                 Projetos de Impacto ({profile.projectsCount ?? 25})
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Iniciativas de desenvolvimento comunitário, plantação de igrejas e alfabetização na África do Sul.
+                Iniciativas de desenvolvimento comunitário, plantação de igrejas e alfabetização na
+                África do Sul.
               </Typography>
               <LockedContentNotice
                 title="Acesse relatórios e fotos de projetos"
@@ -150,7 +151,8 @@ export default function VisitorProfileView({
                 Campanhas Ativas ({profile.campaignsCount ?? 4})
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Apoie as necessidades emergenciais e contínuas de sustentação e estrutura missionária.
+                Apoie as necessidades emergenciais e contínuas de sustentação e estrutura
+                missionária.
               </Typography>
               <LockedContentNotice
                 title="Contribua com esta missão"

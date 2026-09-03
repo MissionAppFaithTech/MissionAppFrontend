@@ -305,7 +305,12 @@ export default function ProfileSummaryCard({
                 <PillButton href={supportHref} tone="cta" size="medium" sx={actionSx}>
                   Apoiar
                 </PillButton>
-                <PillButton href={contactHref} tone="primarySoftOutline" size="medium" sx={actionSx}>
+                <PillButton
+                  href={contactHref}
+                  tone="primarySoftOutline"
+                  size="medium"
+                  sx={actionSx}
+                >
                   Contato
                 </PillButton>
               </>

@@ -5,10 +5,7 @@
   "vitest": {
     "configFile": "vitest.config.mts"
   },
-  "mutate": [
-    "src/lib/masks.ts",
-    "src/lib/passwordStrength.ts"
-  ],
+  "mutate": ["src/lib/masks.ts", "src/lib/passwordStrength.ts"],
   "reporters": ["clear-text", "progress", "html"],
   "htmlReporter": {
     "fileName": "reports/mutation/mutation.html"
