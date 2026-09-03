@@ -82,5 +82,8 @@ export function getMockResetTokenStatus(token: string): MockResetTokenStatus {
 
 /** Simula latência de rede nos mocks. */
 export function mockDelay(ms = 400) {
+  if (process.env.NODE_ENV === 'test') {
+    return Promise.resolve();
+  }
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

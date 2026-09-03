@@ -6,15 +6,27 @@ import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 
-const profileSections = [
+const missionarySections = [
   { label: 'Sobre', href: '/profile/sobre' },
   { label: 'Projetos de Impacto', href: '/profile/projetos-de-impacto' },
   { label: 'Postagens', href: '/profile/postagens' },
   { label: 'Campanha', href: '/profile/campanha' },
 ] as const;
 
-export default function ProfileNavigation() {
+const supporterSections = [
+  { label: 'Seguindo', href: '/profile/supporter/missionarios' },
+  { label: 'Salvos', href: '/profile/supporter/postagens-salvas' },
+] as const;
+
+type ProfileNavigationProps = {
+  role?: 'missionary' | 'supporter';
+};
+
+export default function ProfileNavigation({ role }: ProfileNavigationProps) {
   const pathname = usePathname();
+
+  const isSupporterRoute = role === 'supporter' || pathname?.startsWith('/profile/supporter');
+  const profileSections = isSupporterRoute ? supporterSections : missionarySections;
   const isProfileSectionRoute = profileSections.some(({ href }) => href === pathname);
 
   if (!isProfileSectionRoute) {
@@ -40,7 +52,7 @@ export default function ProfileNavigation() {
     >
       <Tabs
         value={activePath}
-        variant="scrollable"
+        variant={isSupporterRoute ? 'fullWidth' : 'scrollable'}
         scrollButtons={false}
         aria-label="Seções do perfil"
         sx={{
@@ -51,12 +63,13 @@ export default function ProfileNavigation() {
           },
           '& .MuiTab-root': {
             minHeight: { xs: 48, sm: 52 },
-            minWidth: { xs: 'max-content', md: 0 },
+            minWidth: isSupporterRoute ? 0 : { xs: 'max-content', md: 0 },
             px: { xs: 2, sm: 3 },
             color: 'primary.main',
-            fontSize: { xs: '0.78rem', sm: '0.875rem' },
+            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
             fontWeight: 700,
-            flex: { md: 1 },
+            flex: isSupporterRoute ? 1 : { md: 1 },
+            maxWidth: 'none',
           },
           '& .Mui-selected': {
             color: 'mission.main',

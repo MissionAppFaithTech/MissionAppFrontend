@@ -16,8 +16,15 @@ package-lock.json
 npm-shrinkwrap.json
 yarn.lock
 
-# testing
+# testing & local CI
 /coverage
+/.ci-local/
+/.stryker-tmp/
+/reports/
+/playwright-report/
+/test-results/
+scripts/ci-local.mjs
+scripts/responsive-report.json
 
 # next.js
 /.next/

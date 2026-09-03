@@ -4,8 +4,8 @@ import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import type { ProfileData } from '@/types/profile';
 
 type UserHeaderProps = {
-  username: string;
-  displayName: string;
+  username?: string;
+  displayName?: string;
   bio?: string;
   roleDescription?: string;
   location?: string;
@@ -13,20 +13,22 @@ type UserHeaderProps = {
   postsCount?: number;
   campaignsCount?: number;
   supportersCount?: number | string;
+  profile?: ProfileData;
 };
 
 export default function UserHeader({
-  username,
-  displayName,
+  username = '_SamiMendonca',
+  displayName = 'Samuel Mendonça',
   bio,
   roleDescription = 'Missionário (a)(s)',
-  location = 'África do Sul',
-  projectsCount = 0,
-  postsCount = 0,
-  campaignsCount = 0,
-  supportersCount = 0,
+  location = 'Cidade do Cabo, África do Sul',
+  projectsCount = 25,
+  postsCount = 3,
+  campaignsCount = 4,
+  supportersCount = '1.2k',
+  profile,
 }: UserHeaderProps) {
-  const profileData: ProfileData = {
+  const profileData: ProfileData = profile || {
     username,
     displayName,
     roleDescription,
