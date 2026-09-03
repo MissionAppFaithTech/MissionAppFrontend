@@ -20,11 +20,17 @@ import type { ProfileData } from '@/types/profile';
 type ProfileSummaryCardProps = {
   profile: ProfileData;
   isOwnProfile?: boolean;
+  followHref?: string;
+  supportHref?: string;
+  contactHref?: string;
 };
 
 export default function ProfileSummaryCard({
   profile,
   isOwnProfile = true,
+  followHref = '/select-role',
+  supportHref = '/select-role',
+  contactHref = '/login',
 }: ProfileSummaryCardProps) {
   const [toastOpen, setToastOpen] = useState(false);
 
@@ -38,7 +44,11 @@ export default function ProfileSummaryCard({
     campaignsCount = 4,
     supportersCount = '1.2k',
     followingCount = 12,
+    supportedCampaignsCount = 4,
+    role = 'missionary',
   } = profile;
+
+  const isSupporter = role === 'supporter';
 
   const handleShare = () => {
     if (typeof window !== 'undefined') {
@@ -48,19 +58,24 @@ export default function ProfileSummaryCard({
   };
 
   /** Itens de estatísticas exibidos conforme o tipo de perfil */
-  const statsList = isOwnProfile
+  const statsList = isSupporter
     ? [
-        { label: 'projetos', value: projectsCount },
-        { label: 'postagens', value: postsCount },
-        { label: 'campanhas', value: campaignsCount },
-        { label: 'apoiadores', value: supportersCount },
         { label: 'seguindo', value: followingCount },
+        { label: 'campanhas apoiadas', value: supportedCampaignsCount },
       ]
-    : [
-        { label: 'projetos', value: projectsCount },
-        { label: 'postagens', value: postsCount },
-        { label: 'campanhas', value: campaignsCount },
-      ];
+    : isOwnProfile
+      ? [
+          { label: 'projetos', value: projectsCount },
+          { label: 'postagens', value: postsCount },
+          { label: 'campanhas', value: campaignsCount },
+          { label: 'apoiadores', value: supportersCount },
+          { label: 'seguindo', value: followingCount },
+        ]
+      : [
+          { label: 'projetos', value: projectsCount },
+          { label: 'postagens', value: postsCount },
+          { label: 'campanhas', value: campaignsCount },
+        ];
 
   const actionSx = {
     px: { xs: 2, sm: 2.5 },
@@ -256,7 +271,7 @@ export default function ProfileSummaryCard({
             {isOwnProfile ? (
               <>
                 <PillButton
-                  href="/profile/edit-profile"
+                  href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
                   tone="missionFilled"
                   size="medium"
                   sx={{
@@ -275,6 +290,7 @@ export default function ProfileSummaryCard({
             ) : (
               <>
                 <PillButton
+                  href={followHref}
                   tone="missionFilled"
                   size="medium"
                   sx={{
@@ -286,10 +302,15 @@ export default function ProfileSummaryCard({
                 >
                   Seguir
                 </PillButton>
-                <PillButton tone="cta" size="medium" sx={actionSx}>
+                <PillButton href={supportHref} tone="cta" size="medium" sx={actionSx}>
                   Apoiar
                 </PillButton>
-                <PillButton tone="primarySoftOutline" size="medium" sx={actionSx}>
+                <PillButton
+                  href={contactHref}
+                  tone="primarySoftOutline"
+                  size="medium"
+                  sx={actionSx}
+                >
                   Contato
                 </PillButton>
               </>

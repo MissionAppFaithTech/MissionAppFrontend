@@ -118,18 +118,34 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
 
         <Box
           component={Link}
-          href="/profile/edit-profile"
+          href="/profile/sobre"
           onClick={handleClose}
           sx={{
             display: 'block',
             px: 2.5,
-            py: 2,
+            py: 1.5,
             color: 'text.primary',
             textDecoration: 'none',
             '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
           }}
         >
-          <Typography sx={{ fontWeight: 700 }}>Editar perfil</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Missionário</Typography>
+        </Box>
+
+        <Box
+          component={Link}
+          href="/profile/supporter/missionarios"
+          onClick={handleClose}
+          sx={{
+            display: 'block',
+            px: 2.5,
+            py: 1.5,
+            color: 'text.primary',
+            textDecoration: 'none',
+            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
+          }}
+        >
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
         </Box>
 
         <Divider />

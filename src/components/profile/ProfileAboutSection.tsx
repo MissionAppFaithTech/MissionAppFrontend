@@ -102,7 +102,9 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
           <Stack spacing={1.25}>
             <DetailRow label="Local de origem" value={data.originLocation} />
             <DetailRow label="Local de atuação atual" value={data.currentLocation} />
-            <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
+            {data.missionaryAgency ? (
+              <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
+            ) : null}
             <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
           </Stack>
 

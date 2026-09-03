@@ -1,0 +1,49 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect } from 'vitest';
+import VisitorProfileView from './VisitorProfileView';
+import { mockProfile, mockSavedPosts } from '@/mocks/profile';
+
+describe('VisitorProfileView component', () => {
+  it('renders profile card, guest CTA banner, and tabs', () => {
+    render(<VisitorProfileView profile={mockProfile} posts={mockSavedPosts} />);
+
+    // Profile summary card
+    expect(screen.getByText(mockProfile.displayName)).toBeInTheDocument();
+
+    // Guest CTA
+    expect(screen.getByText(/crie sua conta para acompanhar/i)).toBeInTheDocument();
+
+    // Tabs
+    expect(screen.getByRole('tab', { name: /sobre/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /postagens/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /projetos/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /campanha/i })).toBeInTheDocument();
+  });
+
+  it('switches between tabs on click', async () => {
+    const user = userEvent.setup();
+    render(<VisitorProfileView profile={mockProfile} posts={mockSavedPosts} />);
+
+    // Default tab is 'Sobre'
+    expect(screen.getByText(/resumo da história em missões/i)).toBeInTheDocument();
+
+    // Switch to 'Postagens'
+    const postagensTab = screen.getByRole('tab', { name: /postagens/i });
+    await user.click(postagensTab);
+
+    expect(screen.getByText(/veja todas as postagens e orações/i)).toBeInTheDocument();
+
+    // Switch to 'Projetos'
+    const projetosTab = screen.getByRole('tab', { name: /projetos/i });
+    await user.click(projetosTab);
+
+    expect(screen.getByText(/acesse relatórios e fotos de projetos/i)).toBeInTheDocument();
+
+    // Switch to 'Campanha'
+    const campanhaTab = screen.getByRole('tab', { name: /campanha/i });
+    await user.click(campanhaTab);
+
+    expect(screen.getByText(/contribua com esta missão/i)).toBeInTheDocument();
+  });
+});
