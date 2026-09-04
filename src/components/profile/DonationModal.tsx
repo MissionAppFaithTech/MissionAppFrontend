@@ -17,13 +17,24 @@ import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
+import type { FinancialConfigData } from '@/types/profile';
 import PillButton from '@/components/common/PillButton';
+import Image from 'next/image';
 
 type DonationModalProps = {
   open: boolean;
   onClose: () => void;
   missionaryName?: string;
   isOwnProfile?: boolean;
+  financialConfig?: FinancialConfigData;
+};
+
+const pixKeyTypeLabels: Record<string, string> = {
+  cpf: 'CPF',
+  cnpj: 'CNPJ',
+  email: 'E-mail',
+  phone: 'Telefone',
+  random: 'Chave Aleatória',
 };
 
 export default function DonationModal({
@@ -31,19 +42,50 @@ export default function DonationModal({
   onClose,
   missionaryName = 'Samuel Mendonça',
   isOwnProfile = false,
+  financialConfig,
 }: DonationModalProps) {
-  const [activeTab, setActiveTab] = useState<'pix' | 'bank'>('pix');
+  const hasPix = financialConfig ? financialConfig.pix.enabled && Boolean(financialConfig.pix.key) : true;
+  const hasBank = financialConfig
+    ? financialConfig.bankTransfer.enabled &&
+      Boolean(financialConfig.bankTransfer.bankName && financialConfig.bankTransfer.account)
+    : true;
+
+  const defaultTab = hasPix ? 'pix' : hasBank ? 'bank' : 'pix';
+  const [activeTab, setActiveTab] = useState<'pix' | 'bank'>(defaultTab);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const pixKey = 'samuelhe@gmail.com';
-  const bankData = {
-    banco: '033 - Banco Santander',
-    agencia: '1234',
-    conta: '00123456-7',
-    tipo: 'Conta Corrente',
-    titular: missionaryName,
-    documento: '123.456.789-00',
-  };
+  const supporterMessage =
+    financialConfig?.supporterMessage ||
+    'Sua contribuição sustenta o trabalho de evangelização, distribuição de bíblias e construção da escola cristã na África do Sul. Que Deus abençoe sua generosidade!';
+
+  const pixKey = financialConfig?.pix.key || 'samuelhe@gmail.com';
+  const pixKeyType = financialConfig?.pix.keyType || 'email';
+  const pixQrCodeUrl = financialConfig?.pix.qrCodeUrl;
+
+  const bankData = financialConfig?.bankTransfer
+    ? {
+        banco: financialConfig.bankTransfer.bankNumber
+          ? `${financialConfig.bankTransfer.bankNumber} - ${financialConfig.bankTransfer.bankName}`
+          : financialConfig.bankTransfer.bankName,
+        agencia: financialConfig.bankTransfer.agency,
+        conta: financialConfig.bankTransfer.account,
+        tipo:
+          financialConfig.bankTransfer.accountType === 'corrente'
+            ? 'Conta Corrente'
+            : financialConfig.bankTransfer.accountType === 'poupanca'
+              ? 'Conta Poupança'
+              : 'Conta de Pagamento',
+        titular: financialConfig.bankTransfer.holderName || missionaryName,
+        documento: financialConfig.bankTransfer.holderDocument || '123.456.789-00',
+      }
+    : {
+        banco: '033 - Banco Santander',
+        agencia: '1234',
+        conta: '00123456-7',
+        tipo: 'Conta Corrente',
+        titular: missionaryName,
+        documento: '123.456.789-00',
+      };
 
   const handleCopy = (text: string, label: string) => {
     if (typeof window !== 'undefined') {
@@ -137,46 +179,54 @@ CPF/CNPJ: ${bankData.documento}`;
                 Mensagem aos Apoiadores:
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontStyle: 'italic' }}>
-                &ldquo;Sua contribuição sustenta o trabalho de evangelização, distribuição de
-                bíblias e construção da escola cristã na África do Sul. Que Deus abençoe sua
-                generosidade!&rdquo;
+                &ldquo;{supporterMessage}&rdquo;
               </Typography>
             </Box>
 
-            {/* Alternância de Métodos: Pix ou Transferência Bancária */}
-            <Tabs
-              value={activeTab}
-              onChange={(_, val) => setActiveTab(val)}
-              variant="fullWidth"
-              sx={{
-                minHeight: 44,
-                bgcolor: 'background.default',
-                borderRadius: 2,
-                p: 0.5,
-                '& .MuiTabs-indicator': {
-                  height: '100%',
-                  bgcolor: 'mission.main',
-                  borderRadius: 1.5,
-                  zIndex: 0,
-                },
-                '& .MuiTab-root': {
-                  minHeight: 36,
-                  fontWeight: 700,
-                  fontSize: '0.875rem',
-                  zIndex: 1,
-                  color: 'text.secondary',
-                  transition: 'color 0.2s ease',
-                  '&.Mui-selected': {
-                    color: 'common.white',
-                  },
-                },
-              }}
-            >
-              <Tab value="pix" label="Pix Simples" disableRipple />
-              <Tab value="bank" label="Transferência Bancária" disableRipple />
-            </Tabs>
+            {/* Quando não há métodos ativos */}
+            {!hasPix && !hasBank && (
+              <Alert severity="warning" sx={{ borderRadius: 2 }}>
+                O missionário ainda não concluiu a configuração de métodos de doação.
+              </Alert>
+            )}
 
-            {activeTab === 'pix' ? (
+            {/* Alternância de Métodos: Se ambos ativos, mostra Tabs */}
+            {hasPix && hasBank && (
+              <Tabs
+                value={activeTab}
+                onChange={(_, val) => setActiveTab(val)}
+                variant="fullWidth"
+                sx={{
+                  minHeight: 44,
+                  bgcolor: 'background.default',
+                  borderRadius: 2,
+                  p: 0.5,
+                  '& .MuiTabs-indicator': {
+                    height: '100%',
+                    bgcolor: 'mission.main',
+                    borderRadius: 1.5,
+                    zIndex: 0,
+                  },
+                  '& .MuiTab-root': {
+                    minHeight: 36,
+                    fontWeight: 700,
+                    fontSize: '0.875rem',
+                    zIndex: 1,
+                    color: 'text.secondary',
+                    transition: 'color 0.2s ease',
+                    '&.Mui-selected': {
+                      color: 'common.white',
+                    },
+                  },
+                }}
+              >
+                <Tab value="pix" label="Pix Simples" disableRipple />
+                <Tab value="bank" label="Transferência Bancária" disableRipple />
+              </Tabs>
+            )}
+
+            {/* Seção Pix */}
+            {(activeTab === 'pix' && hasPix) || (!hasBank && hasPix) ? (
               <Stack spacing={2} sx={{ pt: 1, alignItems: 'center' }}>
                 <Box
                   sx={{
@@ -191,7 +241,19 @@ CPF/CNPJ: ${bankData.documento}`;
                     gap: 1,
                   }}
                 >
-                  <QrCode2Icon sx={{ fontSize: 130, color: 'primary.main' }} />
+                  {pixQrCodeUrl ? (
+                    <Box sx={{ position: 'relative', width: 140, height: 140 }}>
+                      <Image
+                        src={pixQrCodeUrl}
+                        alt="QR Code Pix"
+                        fill
+                        sizes="140px"
+                        style={{ objectFit: 'contain' }}
+                      />
+                    </Box>
+                  ) : (
+                    <QrCode2Icon sx={{ fontSize: 130, color: 'primary.main' }} />
+                  )}
                   <Typography
                     variant="caption"
                     sx={{ color: 'text.secondary', textAlign: 'center' }}
@@ -202,7 +264,7 @@ CPF/CNPJ: ${bankData.documento}`;
 
                 <Box sx={{ width: '100%' }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-                    Chave Pix (E-mail):
+                    Chave Pix ({pixKeyTypeLabels[pixKeyType] || 'E-mail'}):
                   </Typography>
                   <Stack
                     direction="row"
@@ -233,7 +295,7 @@ CPF/CNPJ: ${bankData.documento}`;
                   </Stack>
                 </Box>
               </Stack>
-            ) : (
+            ) : (activeTab === 'bank' && hasBank) || (!hasPix && hasBank) ? (
               <Stack spacing={1.5} sx={{ pt: 1 }}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.5 }}>
                   <AccountBalanceIcon sx={{ color: 'primary.main', fontSize: 20 }} />
@@ -282,7 +344,7 @@ CPF/CNPJ: ${bankData.documento}`;
                   </PillButton>
                 </Box>
               </Stack>
-            )}
+            ) : null}
 
             <Divider />
 

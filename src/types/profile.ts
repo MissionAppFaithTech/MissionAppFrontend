@@ -68,4 +68,32 @@ export type ProfileData = {
   about: ProfileAboutData;
   contact?: ProfileContactData;
   impactProject?: ImpactProjectData;
+  financial?: FinancialConfigData;
+};
+
+export type PixKeyType = 'cpf' | 'cnpj' | 'email' | 'phone' | 'random';
+export type BankAccountType = 'corrente' | 'poupanca' | 'pagamento';
+
+export type PixConfigData = {
+  enabled: boolean;
+  key: string;
+  keyType: PixKeyType;
+  qrCodeUrl?: string;
+};
+
+export type BankTransferConfigData = {
+  enabled: boolean;
+  bankName: string;
+  bankNumber: string;
+  agency: string;
+  account: string;
+  accountType: BankAccountType;
+  holderName: string;
+  holderDocument: string;
+};
+
+export type FinancialConfigData = {
+  supporterMessage: string;
+  pix: PixConfigData;
+  bankTransfer: BankTransferConfigData;
 };

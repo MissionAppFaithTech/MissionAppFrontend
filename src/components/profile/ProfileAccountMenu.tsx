@@ -150,6 +150,26 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
 
         <Divider />
 
+        <Box
+          component={Link}
+          href="/profile/financeiro"
+          onClick={handleClose}
+          sx={{
+            display: 'block',
+            px: 2.5,
+            py: 1.5,
+            color: 'text.primary',
+            textDecoration: 'none',
+            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
+          }}
+        >
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+            Configurações Financeiras
+          </Typography>
+        </Box>
+
+        <Divider />
+
         <Box sx={{ px: 2.5, py: 2 }}>
           <Typography sx={{ fontWeight: 700 }}>Dados cadastrais</Typography>
         </Box>

@@ -65,4 +65,38 @@ describe('DonationModal Component', () => {
       )
     ).toBeInTheDocument();
   });
+
+  it('renders custom financialConfig supporter message and pix details', () => {
+    render(
+      <DonationModal
+        open={true}
+        onClose={vi.fn()}
+        missionaryName="Samuel Mendonça"
+        financialConfig={{
+          supporterMessage: 'Mensagem customizada de gratidão aos irmãos!',
+          pix: {
+            enabled: true,
+            key: 'custom-pix@test.com',
+            keyType: 'email',
+          },
+          bankTransfer: {
+            enabled: false,
+            bankName: '',
+            bankNumber: '',
+            agency: '',
+            account: '',
+            accountType: 'corrente',
+            holderName: '',
+            holderDocument: '',
+          },
+        }}
+      />
+    );
+
+    expect(
+      screen.getByText(/mensagem customizada de gratidão aos irmãos!/i)
+    ).toBeInTheDocument();
+    expect(screen.getByText('custom-pix@test.com')).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /transferência bancária/i })).not.toBeInTheDocument();
+  });
 });

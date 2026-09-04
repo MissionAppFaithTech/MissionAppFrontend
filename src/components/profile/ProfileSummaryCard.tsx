@@ -296,6 +296,16 @@ export default function ProfileSummaryCard({
                 >
                   Editar perfil
                 </PillButton>
+                {!isSupporter && (
+                  <PillButton
+                    href="/profile/financeiro"
+                    tone="primarySoftOutline"
+                    size="medium"
+                    sx={actionSx}
+                  >
+                    Configurar Doações
+                  </PillButton>
+                )}
                 <PillButton
                   tone="primarySoftOutline"
                   size="medium"
@@ -399,6 +409,7 @@ export default function ProfileSummaryCard({
         onClose={() => setDonationModalOpen(false)}
         missionaryName={displayName}
         isOwnProfile={isOwnProfile}
+        financialConfig={profile.financial}
       />
 
       {/* Toast Notification no Padrão de Cores do Sistema */}
