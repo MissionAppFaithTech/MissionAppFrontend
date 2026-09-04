@@ -704,6 +704,8 @@ export default function FinancialSettingsForm({
           onClose={() => setToastOpen(false)}
           severity={validationErrors.length > 0 && !isGloballyActive ? 'warning' : 'success'}
           variant="filled"
+          role="status"
+          aria-live="polite"
           sx={{
             bgcolor:
               validationErrors.length > 0 && !isGloballyActive

@@ -267,7 +267,8 @@ export default function LandingPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <SiteHeader />
 
-      <LandingHero />
+      <Box component="main" id="main-content" tabIndex={-1} sx={{ outline: 'none' }}>
+        <LandingHero />
 
       <Box id="objetivo" component="section" sx={{ py: { xs: 6, md: 10 } }}>
         <Container maxWidth={false} sx={landingContainerSx}>
@@ -574,10 +575,13 @@ export default function LandingPage() {
           </Grid>
         </Container>
       </Box>
+      </Box>
 
       <Box
         id="footer"
-        component="section"
+        component="footer"
+        role="contentinfo"
+        aria-label="Rodapé do site"
         sx={{
           py: { xs: 3, md: 4 },
           bgcolor: 'primary.dark',

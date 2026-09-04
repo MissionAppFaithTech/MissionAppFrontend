@@ -21,6 +21,8 @@ function RegisterMissionariesWizardContent() {
   return (
     <Box
       component="main"
+      id="main-content"
+      tabIndex={-1}
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -30,6 +32,7 @@ function RegisterMissionariesWizardContent() {
         px: { xs: 2, sm: 3 },
         py: { xs: 3, sm: 6 },
         position: 'relative',
+        outline: 'none',
       }}
     >
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>

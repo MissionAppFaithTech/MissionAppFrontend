@@ -71,7 +71,12 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
   };
 
   return (
-    <Box sx={{ bgcolor: 'background.default', pb: { xs: 8, md: 10 } }}>
+    <Box
+      component="main"
+      id="main-content"
+      tabIndex={-1}
+      sx={{ bgcolor: 'background.default', pb: { xs: 8, md: 10 }, outline: 'none' }}
+    >
       {/* 1. Banner Principal Hero (RF 13.3) */}
       <Box
         sx={{
@@ -600,6 +605,8 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
           onClose={() => setToastMessage(null)}
           severity="success"
           variant="filled"
+          role="status"
+          aria-live="polite"
           sx={{
             bgcolor: 'primary.main',
             color: 'common.white',

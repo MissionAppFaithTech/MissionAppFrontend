@@ -140,7 +140,7 @@ export default function ProfileSummaryCard({
                 <PersonIcon sx={{ fontSize: { xs: 44, sm: 54, md: 64 } }} />
               </Avatar>
               <Box
-                aria-label="Adicionar foto de perfil"
+                aria-hidden="true"
                 sx={{
                   position: 'absolute',
                   right: -2,

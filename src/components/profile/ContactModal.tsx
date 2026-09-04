@@ -54,6 +54,7 @@ export default function ContactModal({
         onClose={onClose}
         maxWidth="xs"
         fullWidth
+        aria-labelledby="contact-modal-title"
         slotProps={{
           paper: {
             sx: {
@@ -77,11 +78,16 @@ export default function ContactModal({
             px: 2,
           }}
         >
-          <Typography variant="h6" component="h2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+          <Typography
+            id="contact-modal-title"
+            variant="h6"
+            component="h2"
+            sx={{ fontWeight: 700, color: 'primary.main' }}
+          >
             Contato
           </Typography>
           <IconButton
-            aria-label="Fechar"
+            aria-label="Fechar modal de contato"
             onClick={onClose}
             size="small"
             sx={{
@@ -246,6 +252,8 @@ export default function ContactModal({
           onClose={() => setToastMessage(null)}
           severity="success"
           variant="filled"
+          role="status"
+          aria-live="polite"
           sx={{
             bgcolor: 'primary.main',
             color: 'common.white',

@@ -447,7 +447,7 @@ export default function ImpactProjectCard({
                 {galleryPhotos.length > 1 && (
                   <Stack
                     direction="row"
-                    spacing={1}
+                    spacing={0.5}
                     sx={{ justifyContent: 'center', alignItems: 'center', py: 0.5 }}
                   >
                     {galleryPhotos.map((_, idx) => (
@@ -456,21 +456,35 @@ export default function ImpactProjectCard({
                         component="button"
                         type="button"
                         aria-label={`Ir para a foto ${idx + 1}`}
+                        aria-current={idx === carouselIndex ? 'true' : undefined}
                         onClick={() => setCarouselIndex(idx)}
                         sx={{
-                          width: idx === carouselIndex ? 22 : 8,
-                          height: 8,
-                          borderRadius: 4,
+                          minWidth: 24,
+                          minHeight: 24,
+                          p: '8px 4px',
                           border: 'none',
-                          p: 0,
+                          bgcolor: 'transparent',
                           cursor: 'pointer',
-                          bgcolor: idx === carouselIndex ? 'mission.main' : 'divider',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            bgcolor: idx === carouselIndex ? 'mission.dark' : 'text.disabled',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 1,
+                          '&:focus-visible': {
+                            outline: '2px solid #0D2B5C',
+                            outlineOffset: 2,
                           },
                         }}
-                      />
+                      >
+                        <Box
+                          sx={{
+                            width: idx === carouselIndex ? 22 : 8,
+                            height: 8,
+                            borderRadius: 4,
+                            bgcolor: idx === carouselIndex ? 'mission.main' : 'divider',
+                            transition: 'all 0.3s ease',
+                          }}
+                        />
+                      </Box>
                     ))}
                   </Stack>
                 )}

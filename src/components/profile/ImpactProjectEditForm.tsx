@@ -543,6 +543,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           onClose={() => setToastOpen(false)}
           severity="success"
           variant="filled"
+          role="status"
+          aria-live="polite"
           sx={{
             bgcolor: 'primary.main',
             color: 'common.white',

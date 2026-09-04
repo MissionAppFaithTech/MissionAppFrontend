@@ -302,6 +302,8 @@ export default function MissionaryCampaignSection({
           onClose={() => setToastMessage(null)}
           severity="success"
           variant="filled"
+          role="status"
+          aria-live="polite"
           sx={{
             bgcolor: 'primary.main',
             color: 'common.white',

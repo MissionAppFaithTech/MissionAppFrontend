@@ -207,7 +207,7 @@ export default function CampaignMediaCarousel({
       {total > 1 && (
         <Stack
           direction="row"
-          spacing={1}
+          spacing={0.5}
           sx={{ justifyContent: 'center', alignItems: 'center', pt: 1.5 }}
         >
           {images.map((_, idx) => (
@@ -216,21 +216,35 @@ export default function CampaignMediaCarousel({
               component="button"
               type="button"
               aria-label={`Ir para imagem ${idx + 1}`}
+              aria-current={idx === activeIndex ? 'true' : undefined}
               onClick={() => setActiveIndex(idx)}
               sx={{
-                width: idx === activeIndex ? 22 : 8,
-                height: 8,
-                borderRadius: 4,
+                minWidth: 24,
+                minHeight: 24,
+                p: '8px 4px',
                 border: 'none',
-                p: 0,
+                bgcolor: 'transparent',
                 cursor: 'pointer',
-                bgcolor: idx === activeIndex ? 'mission.main' : 'divider',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  bgcolor: idx === activeIndex ? 'mission.dark' : 'text.disabled',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 1,
+                '&:focus-visible': {
+                  outline: '2px solid #0D2B5C',
+                  outlineOffset: 2,
                 },
               }}
-            />
+            >
+              <Box
+                sx={{
+                  width: idx === activeIndex ? 22 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  bgcolor: idx === activeIndex ? 'mission.main' : 'divider',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            </Box>
           ))}
         </Stack>
       )}

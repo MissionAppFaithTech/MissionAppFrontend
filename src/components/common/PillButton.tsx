@@ -37,6 +37,10 @@ const baseSx = {
   textTransform: 'none',
   boxShadow: 'none',
   transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
+  '&:focus-visible': {
+    outline: '2px solid #0D2B5C',
+    outlineOffset: '2px',
+  },
 };
 
 const hoverLightSx = {
@@ -58,6 +62,10 @@ const figmaActionBase = {
   boxShadow: 'none',
   '&:hover': {
     boxShadow: 'none',
+  },
+  '&:focus-visible': {
+    outline: '2px solid #0D2B5C',
+    outlineOffset: '2px',
   },
 } as const;
 

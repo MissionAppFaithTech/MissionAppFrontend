@@ -53,7 +53,13 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
         </PageNavbarActions>
       </PageNavbar>
 
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4, md: 6 } }}>
+      <Container
+        component="main"
+        id="main-content"
+        tabIndex={-1}
+        maxWidth="lg"
+        sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4, md: 6 }, outline: 'none' }}
+      >
         <Stack spacing={2}>
           <ProfileSummaryCard profile={mockProfile} />
           <ProfileNavigation />

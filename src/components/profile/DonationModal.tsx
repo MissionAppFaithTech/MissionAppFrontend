@@ -112,6 +112,8 @@ CPF/CNPJ: ${bankData.documento}`;
         onClose={onClose}
         maxWidth="sm"
         fullWidth
+        aria-labelledby="donation-modal-title"
+        aria-describedby="donation-modal-subtitle"
         slotProps={{
           paper: {
             sx: {
@@ -136,15 +138,20 @@ CPF/CNPJ: ${bankData.documento}`;
           }}
         >
           <Box>
-            <Typography variant="h6" component="h2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+            <Typography
+              id="donation-modal-title"
+              variant="h6"
+              component="h2"
+              sx={{ fontWeight: 700, color: 'primary.main' }}
+            >
               Ofertar na Missão
             </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            <Typography id="donation-modal-subtitle" variant="caption" sx={{ color: 'text.secondary' }}>
               Apoie o ministério de {missionaryName}
             </Typography>
           </Box>
           <IconButton
-            aria-label="Fechar"
+            aria-label="Fechar modal de doação"
             onClick={onClose}
             size="small"
             sx={{
@@ -384,6 +391,8 @@ CPF/CNPJ: ${bankData.documento}`;
           onClose={() => setToastMessage(null)}
           severity="success"
           variant="filled"
+          role="status"
+          aria-live="polite"
           sx={{
             bgcolor: 'primary.main',
             color: 'common.white',

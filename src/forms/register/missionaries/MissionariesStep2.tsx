@@ -142,8 +142,16 @@ export default function MissionariesStep2() {
         rules={{ required: 'Selecione a comunidade de fé' }}
         render={({ field }) => (
           <FormControl fullWidth error={Boolean(errors.faithCommunity)}>
-            <InputLabel shrink>Comunidade de fé</InputLabel>
-            <Select {...field} label="Comunidade de fé" displayEmpty>
+            <InputLabel id="missionary-faith-community-label" shrink>
+              Comunidade de fé
+            </InputLabel>
+            <Select
+              {...field}
+              labelId="missionary-faith-community-label"
+              id="faithCommunity"
+              label="Comunidade de fé"
+              displayEmpty
+            >
               <MenuItem value="" disabled>
                 Selecione...
               </MenuItem>

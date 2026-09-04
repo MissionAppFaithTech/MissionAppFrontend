@@ -20,6 +20,8 @@ function SupportersRegisterContent() {
   return (
     <Box
       component="main"
+      id="main-content"
+      tabIndex={-1}
       sx={{
         minHeight: '100vh',
         display: 'flex',
@@ -29,6 +31,7 @@ function SupportersRegisterContent() {
         px: { xs: 2, sm: 3 },
         py: { xs: 3, sm: 6 },
         position: 'relative',
+        outline: 'none',
       }}
     >
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
@@ -92,7 +95,7 @@ function SupportersRegisterContent() {
           {!isConfirmation ? (
             <Typography align="center" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
               Já tem uma conta?{' '}
-              <Link href="/login?role=apoiador" underline="hover" sx={{ color: 'text.primary' }}>
+              <Link href="/login?role=apoiador" underline="always" sx={{ color: 'text.primary' }}>
                 Entrar
               </Link>
             </Typography>
