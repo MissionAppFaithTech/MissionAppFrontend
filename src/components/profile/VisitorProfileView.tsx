@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
@@ -10,18 +11,19 @@ import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import GuestCtaBanner from '@/components/common/GuestCtaBanner';
 import LockedContentNotice from '@/components/common/LockedContentNotice';
+import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import VisitorProfileAboutSection from '@/components/profile/VisitorProfileAboutSection';
 import VisitorProfilePostsSection from '@/components/profile/VisitorProfilePostsSection';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
 import type { ProfileData, SavedPost } from '@/types/profile';
 
-type VisitorTabKey = 'sobre' | 'postagens' | 'projetos' | 'campanha';
+type VisitorTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
-const visitorTabs: { key: VisitorTabKey; label: string }[] = [
+const visitorTabs: { key: VisitorTabKey; label: string; mobileLabel?: string }[] = [
   { key: 'sobre', label: 'Sobre' },
+  { key: 'projetos', label: 'Projetos de Impacto', mobileLabel: 'Projetos' },
   { key: 'postagens', label: 'Postagens' },
-  { key: 'projetos', label: 'Projetos' },
   { key: 'campanha', label: 'Campanha' },
 ];
 
@@ -94,8 +96,22 @@ export default function VisitorProfileView({
             },
           }}
         >
-          {visitorTabs.map(({ key, label }) => (
-            <Tab key={key} value={key} label={label} disableRipple />
+          {visitorTabs.map(({ key, label, mobileLabel }) => (
+            <Tab
+              key={key}
+              value={key}
+              label={
+                <span>
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    {label}
+                  </Box>
+                  <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
+                    {mobileLabel || label}
+                  </Box>
+                </span>
+              }
+              disableRipple
+            />
           ))}
         </Tabs>
       </Paper>
@@ -103,36 +119,15 @@ export default function VisitorProfileView({
       {/* 4. Conteúdo Dinâmico por Aba */}
       {activeTab === 'sobre' && <VisitorProfileAboutSection data={profile.about} />}
 
-      {activeTab === 'postagens' && <VisitorProfilePostsSection posts={posts} />}
-
       {activeTab === 'projetos' && (
-        <Card
-          elevation={0}
-          sx={{
-            borderRadius: { xs: 2, sm: 3 },
-            border: '1px solid',
-            borderColor: 'divider',
-            boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
-            p: { xs: 2.5, sm: 3.5 },
-          }}
-        >
-          <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-            <Stack spacing={2.5}>
-              <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
-                Projetos de Impacto ({profile.projectsCount ?? 25})
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Iniciativas de desenvolvimento comunitário, plantação de igrejas e alfabetização na
-                África do Sul.
-              </Typography>
-              <LockedContentNotice
-                title="Acesse relatórios e fotos de projetos"
-                description="Cadastre-se para ver detalhes de metas, relatórios financeiros e impacto em campo de cada projeto."
-              />
-            </Stack>
-          </CardContent>
-        </Card>
+        <ImpactProjectCard
+          project={profile.impactProject}
+          isOwnProfile={false}
+          missionaryName={profile.displayName}
+        />
       )}
+
+      {activeTab === 'postagens' && <VisitorProfilePostsSection posts={posts} />}
 
       {activeTab === 'campanha' && (
         <Card

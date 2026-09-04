@@ -24,6 +24,8 @@ type PillButtonTone =
 type PillButtonProps = ButtonProps & {
   href?: string;
   tone?: PillButtonTone;
+  target?: string;
+  rel?: string;
 };
 
 const baseSx = {

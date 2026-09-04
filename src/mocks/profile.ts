@@ -24,6 +24,26 @@ export const mockProfile: ProfileData = {
     prayerRequests: '"O Senhor é meu pastor e nada me faltará." Salmos 23:1',
     lifeVerse: '"O Senhor é meu pastor e nada me faltará." Salmos 23:1',
   },
+  contact: {
+    publicEmail: 'samuelhe@gmail.com',
+    publicPhone: '+55 (21) 98765-4321',
+    whatsappNumber: '+5521987654321',
+  },
+  impactProject: {
+    id: 'proj-1',
+    title: 'Projeto social na favela do Lixão',
+    description:
+      'Ajude-nos a construir uma escola cristã em uma favela da África do Sul. Neste lugar, as crianças quase não tem acesso a materiais educativos cristãos. Ter uma escola confessional cristã em lugar tão carente pode revolucionar uma geração inteira.\n\nPrecisamos de recursos para comprar tijolos, argamassa, cimento, areia, tinta, telhas, carteiras escolares, quadro, mesas, dentre outros.',
+    imageUrl: '/images/projects/projeto-impacto.jpg',
+    galleryImages: [
+      '/landing-page/landing-page.png',
+      '/images/projects/projeto-impacto.jpg',
+      '/landing-page/background.png',
+    ],
+    videoUrl: 'https://www.youtube.com/watch?v=5dsGWM5XGdg',
+    campaignTitle: 'Campanha de Educação & Esperança',
+    campaignBadge: true,
+  },
 };
 
 export const mockSupporterProfile: ProfileData = {
@@ -41,6 +61,11 @@ export const mockSupporterProfile: ProfileData = {
     currentLocation: 'Rio de Janeiro - RJ',
     faithCommunity: 'Centro Evangelístico Internacional',
     lifeVerse: '"Ide por todo o mundo e pregai o evangelho a toda criatura." Marcos 16:15',
+  },
+  contact: {
+    publicEmail: 'soraia.santos@email.com',
+    publicPhone: '+55 (21) 99876-5432',
+    whatsappNumber: '+5521998765432',
   },
 };
 
@@ -83,8 +108,8 @@ export const mockSavedPosts: SavedPost[] = [
   },
   {
     id: '2',
-    authorName: 'Maria Silva',
-    authorUsername: 'MariaSilva',
+    authorName: 'Samuel Mendonça',
+    authorUsername: '_SamiMendonca',
     createdAt: '10/07/2025 às 22:06h',
     type: 'post',
     content:
@@ -93,5 +118,30 @@ export const mockSavedPosts: SavedPost[] = [
     likesCount: 142,
     prayersCount: 88,
     hasPrayed: false,
+  },
+  {
+    id: '3',
+    authorName: 'Maria Silva',
+    authorUsername: 'MariaSilva',
+    createdAt: '11/07/2025 às 15:30h',
+    type: 'post',
+    content:
+      'Distribuímos cestas básicas e kits escolares para 50 famílias em Moçambique. Glória a Deus pelas portas abertas!',
+    imageUrl: '/landing-page/background.png',
+    likesCount: 95,
+    prayersCount: 64,
+    hasPrayed: false,
+  },
+  {
+    id: '4',
+    authorName: 'Lucas Moreira',
+    authorUsername: 'LucasMoreira',
+    createdAt: '12/07/2025 às 10:15h',
+    type: 'campaign',
+    content:
+      'Iniciamos a campanha de agasalhos e suprimentos para as comunidades remotas do Nepal.',
+    likesCount: 81,
+    prayersCount: 45,
+    hasPrayed: true,
   },
 ];

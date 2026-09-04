@@ -1,12 +1,12 @@
 'use client';
 
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import PillButton from '@/components/common/PillButton';
 import { profileLocations } from '@/lib/profileOptions';
 import type { ReactNode } from 'react';
 import type { ProfileAboutData } from '@/types/profile';
@@ -183,12 +183,12 @@ export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEd
               },
             }}
           >
-            <Button type="button" variant="outlined" color="primary" onClick={onBack}>
+            <PillButton type="button" tone="primarySoftOutline" size="small" onClick={onBack}>
               Voltar
-            </Button>
-            <Button type="button" variant="contained" color="primary">
+            </PillButton>
+            <PillButton type="button" tone="primaryFilled" size="small">
               Salvar
-            </Button>
+            </PillButton>
           </Stack>
         </Stack>
       </CardContent>

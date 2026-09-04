@@ -52,3 +52,115 @@ embed,
 object {
   max-width: 100%;
 }
+
+/* Lightbox High-Contrast Floating Controls (Ensures crystal-clear visibility on bright/fullscreen photos) */
+.yarl__container {
+  background-color: rgba(10, 18, 38, 0.96) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.yarl__toolbar {
+  padding: 16px !important;
+  gap: 10px !important;
+  z-index: 1000 !important;
+}
+
+.yarl__toolbar .yarl__button {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  width: 44px !important;
+  height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+  transition: all 0.2s ease !important;
+}
+
+.yarl__toolbar .yarl__button:hover {
+  background-color: rgba(15, 23, 42, 1) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: scale(1.08) !important;
+}
+
+.yarl__counter {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  color: #ffffff !important;
+  border-radius: 20px !important;
+  padding: 8px 16px !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+  margin: 16px !important;
+}
+
+.yarl__navigation_prev,
+.yarl__navigation_next {
+  background-color: rgba(15, 23, 42, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  width: 52px !important;
+  height: 52px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  z-index: 1000 !important;
+}
+
+.yarl__navigation_prev {
+  left: 20px !important;
+}
+
+.yarl__navigation_next {
+  right: 20px !important;
+}
+
+@media (max-width: 600px) {
+  .yarl__navigation_prev {
+    left: 10px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .yarl__navigation_next {
+    right: 10px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+  .yarl__toolbar {
+    padding: 10px !important;
+  }
+  .yarl__toolbar .yarl__button {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .yarl__counter {
+    margin: 10px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+.yarl__navigation_prev:hover,
+.yarl__navigation_next:hover {
+  background-color: rgba(15, 23, 42, 1) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.yarl__icon {
+  width: 26px !important;
+  height: 26px !important;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9)) !important;
+}
