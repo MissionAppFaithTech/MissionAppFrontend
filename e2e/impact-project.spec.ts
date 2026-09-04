@@ -8,7 +8,9 @@ test.describe('Impact Project & Edit Flow E2E', () => {
     await page.goto('/profile/projetos-de-impacto');
 
     // Heading of the impact project
-    await expect(page.getByRole('heading', { name: /projeto social na favela do lixão/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /projeto social na favela do lixão/i })
+    ).toBeVisible();
 
     // YouTube presentation video
     await expect(page.getByText(/vídeo de apresentação/i)).toBeVisible();
@@ -26,7 +28,9 @@ test.describe('Impact Project & Edit Flow E2E', () => {
     await page.goto('/profile/projetos-de-impacto/edit');
     await expect(page.getByRole('heading', { name: /editar projeto de impacto/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /alterar foto de capa/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /adicionar fotos do dispositivo/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: /adicionar fotos do dispositivo/i })
+    ).toBeVisible();
     await expect(page.getByRole('button', { name: /salvar/i })).toBeVisible();
   });
 });

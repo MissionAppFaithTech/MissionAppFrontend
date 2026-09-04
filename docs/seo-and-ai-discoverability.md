@@ -97,3 +97,29 @@ Implementado através do componente modular [`JsonLd`](/src/components/seo/JsonL
 1. **Ao criar novas rotas públicas**: Adicionar a rota em [`sitemap.ts`](/src/app/sitemap.ts) com a respectiva prioridade.
 2. **Ao adicionar novas entidades**: Estender os geradores de schema em [`JsonLd.tsx`](/src/components/seo/JsonLd.tsx).
 3. **Novas agências/parceiros**: Atualizar referências no [`public/llms-full.txt`](/public/llms-full.txt).
+
+---
+
+## 7. Estratégia de Testes Automatizados (SEO & GEO)
+
+Para garantir paridade com as especificações oficiais do Schema.org, Google Search Central e agentes de IA generativa, foram integradas suítes de testes automatizados com bibliotecas padrão da indústria:
+
+### 7.1 Validação Estrutural com `schema-dts`
+
+- Arquivo: [`src/components/seo/schema-dts-validation.test.ts`](/src/components/seo/schema-dts-validation.test.ts)
+- Utiliza a biblioteca oficial [`schema-dts`](https://www.npmjs.com/package/schema-dts) (definições completas do Schema.org para TypeScript) para validar que os dados gerados de `Organization`, `WebSite`, `ProfilePage`, `Person`, `Project` e `DonateAction` respeitam 100% da tipagem estrita de entidades Schema.org.
+
+### 7.2 Análise de Metadados e Tags SSR com `cheerio`
+
+- Arquivo: [`src/app/seo-metadata.test.ts`](/src/app/seo-metadata.test.ts)
+- Simula crawlers e robôs de busca utilizando [`cheerio`](https://www.npmjs.com/package/cheerio) para inspecionar tags `<head>`, `og:image`, `og:title`, `twitter:card`, canônicos e tags de dados estruturados geradas pelo Next.js App Router.
+
+### 7.3 Verificação de Arquivos de Infraestrutura GEO
+
+- Arquivo: [`src/app/seo-geo-files.test.ts`](/src/app/seo-geo-files.test.ts)
+- Valida o conteúdo e formatação de `/robots.txt` (diretrizes para `GPTBot`, `ClaudeBot`, `PerplexityBot`, `Google-Extended`, `Applebot-Extended`), `/sitemap.xml`, `/manifest.webmanifest`, `/llms.txt` e `/llms-full.txt`.
+
+### 7.4 Testes End-to-End (E2E) com Playwright
+
+- Arquivo: [`e2e/seo-geo.spec.ts`](/e2e/seo-geo.spec.ts)
+- Executa testes em navegador Chromium real (desktop e mobile) verificando a extração em tempo de execução das tags de metadados, scripts JSON-LD, rotas estáticas e endpoints de LLM com status HTTP 200.

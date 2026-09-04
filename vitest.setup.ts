@@ -51,3 +51,11 @@ vi.mock('next/navigation', () => {
     useParams: () => ({ username: '_SamiMendonca' }),
   };
 });
+
+// Mock Next.js fonts
+vi.mock('next/font/google', () => ({
+  DM_Sans: () => ({
+    className: 'font-dm-sans',
+    variable: '--font-dm-sans',
+  }),
+}));
