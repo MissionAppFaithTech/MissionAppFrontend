@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import './globals.css';
 import { DM_Sans } from 'next/font/google';
 import { Providers } from './providers';
+import JsonLd, { generateOrganizationAndWebsiteSchema } from '@/components/seo/JsonLd';
 import { getSiteUrl, siteConfig } from '@/lib/site';
 
 const dmSans = DM_Sans({
@@ -16,16 +17,37 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: siteConfig.name,
+    default: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
   applicationName: siteConfig.name,
-  keywords: ['missão', 'missionários', 'apoiadores', 'oração', 'projetos sociais', 'Mission App'],
-  authors: [{ name: siteConfig.name }],
-  creator: siteConfig.name,
+  keywords: [
+    'missão',
+    'missionários',
+    'apoiadores',
+    'sustento missionário',
+    'oração',
+    'pedidos de oração',
+    'projetos sociais',
+    'missões transculturais',
+    'FaithTech',
+    'Mission App',
+    'doação para missões',
+    'igreja',
+  ],
+  authors: [{ name: 'FaithTech', url: 'https://github.com/MissionAppFaithTech' }],
+  creator: 'FaithTech',
+  publisher: siteConfig.name,
+  category: 'Community & Faith',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: '/logos/favicon_mission.png',
+    shortcut: '/logos/favicon_mission.png',
     apple: '/logos/favicon_mission.png',
   },
   openGraph: {
@@ -33,7 +55,7 @@ export const metadata: Metadata = {
     locale: siteConfig.locale,
     url: siteUrl,
     siteName: siteConfig.name,
-    title: siteConfig.name,
+    title: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
     description: siteConfig.description,
     images: [
       {
@@ -46,12 +68,15 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: siteConfig.name,
+    title: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
   },
   alternates: {
     canonical: '/',
+    languages: {
+      'pt-BR': '/',
+    },
   },
   robots: {
     index: true,
@@ -59,6 +84,7 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
+      'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
@@ -75,8 +101,13 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const orgWebsiteSchema = generateOrganizationAndWebsiteSchema();
+
   return (
     <html lang="pt-BR" suppressHydrationWarning className={dmSans.variable}>
+      <head>
+        <JsonLd data={orgWebsiteSchema} />
+      </head>
       <body className={dmSans.className}>
         <Providers>{children}</Providers>
       </body>

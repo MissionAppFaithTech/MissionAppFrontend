@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ImpactProjectEditForm from '@/components/profile/ImpactProjectEditForm';
 
 describe('ImpactProjectEditForm Component', () => {
@@ -20,13 +20,28 @@ describe('ImpactProjectEditForm Component', () => {
     campaignBadge: true,
   };
 
-  it('renders all project fields including banner, basic info, campaign, youtube video and gallery', () => {
+  beforeEach(() => {
+    if (!global.URL.createObjectURL) {
+      global.URL.createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
+    } else {
+      vi.spyOn(global.URL, 'createObjectURL').mockImplementation(
+        (file: any) => `blob:${file.name || 'preview'}`
+      );
+    }
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('renders all project fields including banner upload, basic info, campaign, youtube video and gallery', () => {
     render(<ImpactProjectEditForm project={mockProject} />);
 
     expect(screen.getByRole('heading', { name: /editar projeto de impacto/i })).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProject.title)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProject.description)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockProject.bannerUrl)).toBeInTheDocument();
+    expect(screen.getByAltText(/prévia da capa do projeto/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/upload de foto de capa/i)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProject.campaignTitle)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProject.videoUrl)).toBeInTheDocument();
 
@@ -36,6 +51,7 @@ describe('ImpactProjectEditForm Component', () => {
     // Gallery photos
     expect(screen.getByText(/fotos da galeria \(3\)/i)).toBeInTheDocument();
     expect(screen.getAllByAltText(/foto da galeria/i)).toHaveLength(3);
+    expect(screen.getByLabelText(/upload de fotos da galeria/i)).toBeInTheDocument();
 
     // Actions
     expect(screen.getByRole('link', { name: /voltar/i })).toHaveAttribute(
@@ -45,7 +61,20 @@ describe('ImpactProjectEditForm Component', () => {
     expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
   });
 
-  it('allows adding and removing gallery photos', async () => {
+  it('allows uploading a new cover photo from the user device', async () => {
+    const user = userEvent.setup();
+    render(<ImpactProjectEditForm project={mockProject} />);
+
+    const coverFileInput = screen.getByLabelText(/upload de foto de capa/i);
+    const newCoverFile = new File(['dummy-image'], 'new-cover.jpg', { type: 'image/jpeg' });
+
+    await user.upload(coverFileInput, newCoverFile);
+
+    const updatedCover = screen.getByAltText(/prévia da capa do projeto/i);
+    expect(updatedCover).toBeInTheDocument();
+  });
+
+  it('allows uploading multiple gallery photos from user device and removing photos', async () => {
     const user = userEvent.setup();
     render(<ImpactProjectEditForm project={mockProject} />);
 
@@ -56,15 +85,15 @@ describe('ImpactProjectEditForm Component', () => {
     expect(screen.getByText(/fotos da galeria \(2\)/i)).toBeInTheDocument();
     expect(screen.getAllByAltText(/foto da galeria/i)).toHaveLength(2);
 
-    // Add new photo
-    const newImageInput = screen.getByLabelText(/url da nova foto/i);
-    await user.type(newImageInput, '/images/new-photo.jpg');
+    // Upload new photo files from device
+    const galleryFileInput = screen.getByLabelText(/upload de fotos da galeria/i);
+    const file1 = new File(['photo1'], 'photo1.png', { type: 'image/png' });
+    const file2 = new File(['photo2'], 'photo2.png', { type: 'image/png' });
 
-    const addBtn = screen.getByRole('button', { name: /adicionar foto/i });
-    await user.click(addBtn);
+    await user.upload(galleryFileInput, [file1, file2]);
 
-    expect(screen.getByText(/fotos da galeria \(3\)/i)).toBeInTheDocument();
-    expect(screen.getAllByAltText(/foto da galeria/i)).toHaveLength(3);
+    expect(screen.getByText(/fotos da galeria \(4\)/i)).toBeInTheDocument();
+    expect(screen.getAllByAltText(/foto da galeria/i)).toHaveLength(4);
   });
 
   it('submits updated project and calls onSave with toast notification', async () => {

@@ -4,6 +4,8 @@ import Container from '@mui/material/Container';
 import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import VisitorNavbar from '@/components/layout/VisitorNavbar';
 import VisitorProfileView from '@/components/profile/VisitorProfileView';
+import JsonLd, { generateProfilePageSchema } from '@/components/seo/JsonLd';
+import { getSiteUrl } from '@/lib/site';
 import { mockProfile } from '@/mocks/profile';
 import type { ProfileData } from '@/types/profile';
 
@@ -16,22 +18,59 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
   const { username } = await params;
-  const displayName =
-    username.toLowerCase() === mockProfile.username.toLowerCase()
-      ? mockProfile.displayName
-      : username.replace(/-/g, ' ');
+  const baseUrl = getSiteUrl();
+
+  const isMock =
+    username.toLowerCase() === mockProfile.username.toLowerCase() ||
+    username.toLowerCase() === 'samuel-mendonca' ||
+    username.toLowerCase() === 'samuel';
+
+  const profile = isMock ? mockProfile : null;
+  const displayName = profile ? profile.displayName : username.replace(/-/g, ' ');
+  const description = profile
+    ? `${profile.roleDescription} - ${profile.about.introduction.slice(0, 150)}...`
+    : `Perfil público de ${displayName} no Mission App. Conecte-se, acompanhe a missão e apoie no campo.`;
+
+  const bannerImage = profile?.impactProject?.imageUrl || '/landing-page/landing-page.png';
 
   return {
-    title: `${displayName} (@${username}) | Mission App`,
-    description: `Perfil público de ${displayName} no Mission App. Conecte-se, acompanhe a missão e apoie no campo.`,
-    alternates: { canonical: `/user/${username}` },
+    title: `${displayName} (@${username})`,
+    description,
+    alternates: {
+      canonical: `/user/${username}`,
+    },
     openGraph: {
       title: `${displayName} (@${username}) | Mission App`,
-      description: `Perfil público de ${displayName} no Mission App.`,
-      url: `/user/${username}`,
+      description,
+      url: `${baseUrl}/user/${username}`,
       type: 'profile',
+      siteName: 'Mission App',
+      images: [
+        {
+          url: bannerImage,
+          width: 1200,
+          height: 630,
+          alt: `Perfil de ${displayName} no Mission App`,
+        },
+      ],
     },
-    robots: { index: true, follow: true },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${displayName} (@${username}) | Mission App`,
+      description,
+      images: [bannerImage],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
   };
 }
 
@@ -55,8 +94,13 @@ export default async function UserPage({ params }: UserPageProps) {
         },
       };
 
+  const profileSchemas = generateProfilePageSchema(profile, `/user/${username}`);
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 6 } }}>
+      {/* Schema.org JSON-LD para motores de busca e IAs */}
+      <JsonLd data={profileSchemas} />
+
       {/* TopBar do Visitante / Não Autenticado */}
       <VisitorNavbar maxWidth="lg" />
 

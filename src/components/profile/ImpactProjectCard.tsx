@@ -24,6 +24,7 @@ import Counter from 'yet-another-react-lightbox/plugins/counter';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
+import getYouTubeId from 'get-youtube-id';
 import type { ImpactProjectData } from '@/types/profile';
 
 import 'yet-another-react-lightbox/styles.css';
@@ -38,22 +39,10 @@ type ImpactProjectCardProps = {
 
 export function getYouTubeEmbedUrl(url?: string): string | null {
   if (!url) return null;
-
-  try {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
-    const match = url.match(regExp);
-
-    if (match && match[2].length === 11) {
-      return `https://www.youtube-nocookie.com/embed/${match[2]}`;
-    }
-
-    if (url.includes('youtube.com/embed/')) {
-      return url;
-    }
-  } catch {
-    return null;
+  const videoId = getYouTubeId(url.trim());
+  if (videoId) {
+    return `https://www.youtube-nocookie.com/embed/${videoId}`;
   }
-
   return null;
 }
 

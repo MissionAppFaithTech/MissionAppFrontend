@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
+import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import CollectionsOutlinedIcon from '@mui/icons-material/CollectionsOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
@@ -37,16 +38,26 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
   const [galleryImages, setGalleryImages] = useState<string[]>(
     project.galleryImages ?? project.images ?? []
   );
-  const [newImageUrl, setNewImageUrl] = useState('');
   const [toastOpen, setToastOpen] = useState(false);
 
   const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
 
-  const handleAddGalleryImage = () => {
-    const trimmed = newImageUrl.trim();
-    if (trimmed && !galleryImages.includes(trimmed)) {
-      setGalleryImages((prev) => [...prev, trimmed]);
-      setNewImageUrl('');
+  const handleBannerFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setBannerUrl(previewUrl);
+    }
+  };
+
+  const handleGalleryFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const newUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        newUrls.push(URL.createObjectURL(files[i]));
+      }
+      setGalleryImages((prev) => [...prev, ...newUrls]);
     }
   };
 
@@ -99,8 +110,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   Editar Projeto de Impacto
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Atualize as informações, fotos da galeria, capa e vídeo de apresentação do seu
-                  projeto.
+                  Envie fotos do seu dispositivo, personalize a capa, descrição e o vídeo de
+                  apresentação do seu projeto.
                 </Typography>
               </Box>
 
@@ -110,16 +121,17 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   Imagem de Capa (Banner)
                 </Typography>
 
-                {bannerUrl && (
+                {bannerUrl ? (
                   <Box
                     sx={{
                       position: 'relative',
                       width: '100%',
-                      height: { xs: 180, sm: 240 },
+                      height: { xs: 180, sm: 240, md: 280 },
                       borderRadius: 2,
                       overflow: 'hidden',
                       border: '1px solid',
                       borderColor: 'divider',
+                      boxShadow: 1,
                     }}
                   >
                     <Image
@@ -130,18 +142,57 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                       style={{ objectFit: 'cover' }}
                     />
                   </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: { xs: 140, sm: 180 },
+                      borderRadius: 2,
+                      border: '2px dashed',
+                      borderColor: 'divider',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'action.hover',
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      Nenhuma imagem de capa selecionada.
+                    </Typography>
+                  </Box>
                 )}
 
-                <TextField
-                  id="project-banner-url"
-                  label="URL da Imagem de Capa"
-                  value={bannerUrl}
-                  onChange={(e) => setBannerUrl(e.target.value)}
-                  placeholder="https://exemplo.com/imagem.jpg ou /images/projects/..."
-                  fullWidth
-                  size="small"
-                  helperText="Insira uma URL pública ou caminho local para o banner principal"
-                />
+                <Box>
+                  <PillButton
+                    component="label"
+                    tone="primarySoftOutline"
+                    size="small"
+                    sx={{
+                      minHeight: 44,
+                      px: 2.5,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                    }}
+                  >
+                    <CloudUploadOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />
+                    {bannerUrl ? 'Alterar foto de capa' : 'Selecionar foto de capa'}
+                    <Box
+                      component="input"
+                      type="file"
+                      accept="image/*"
+                      aria-label="Upload de foto de capa"
+                      hidden
+                      onChange={handleBannerFileChange}
+                    />
+                  </PillButton>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mt: 0.75 }}
+                  >
+                    Selecione uma imagem do seu dispositivo (JPG, PNG, WebP)
+                  </Typography>
+                </Box>
               </Stack>
 
               <Divider />
@@ -241,7 +292,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
 
               <Divider />
 
-              {/* 4. Vídeo do YouTube (Opcional) */}
+              {/* 4. Vídeo do YouTube (Opcional - Suporta URL) */}
               <Stack spacing={2}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                   <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'mission.main' }} />
@@ -300,7 +351,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
 
               <Divider />
 
-              {/* 5. Galeria de Fotos do Carrossel */}
+              {/* 5. Galeria de Fotos do Carrossel (Upload do Dispositivo) */}
               <Stack spacing={2}>
                 <Stack
                   direction="row"
@@ -367,33 +418,44 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   </Stack>
                 ) : (
                   <Typography variant="body2" color="text.secondary">
-                    Nenhuma foto adicional na galeria. Adicione URLs abaixo.
+                    Nenhuma foto na galeria. Clique no botão abaixo para selecionar fotos do seu
+                    computador ou celular.
                   </Typography>
                 )}
 
-                {/* Input para Adicionar Nova Foto */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
-                  <TextField
-                    id="new-gallery-image"
-                    label="URL da nova foto"
-                    value={newImageUrl}
-                    onChange={(e) => setNewImageUrl(e.target.value)}
-                    placeholder="https://exemplo.com/foto.jpg ou /landing-page/..."
-                    fullWidth
-                    size="small"
-                  />
+                {/* Botão para Fazer Upload de Fotos do Dispositivo */}
+                <Box>
                   <PillButton
-                    type="button"
+                    component="label"
                     tone="primarySoftOutline"
                     size="small"
-                    onClick={handleAddGalleryImage}
-                    disabled={!newImageUrl.trim()}
-                    sx={{ minHeight: 40, whiteSpace: 'nowrap' }}
+                    sx={{
+                      minHeight: 44,
+                      px: 2.5,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                    }}
                   >
-                    <AddPhotoAlternateOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
-                    Adicionar Foto
+                    <AddPhotoAlternateOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />
+                    Adicionar fotos do dispositivo
+                    <Box
+                      component="input"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      aria-label="Upload de fotos da galeria"
+                      hidden
+                      onChange={handleGalleryFilesChange}
+                    />
                   </PillButton>
-                </Stack>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: 'block', mt: 0.75 }}
+                  >
+                    Você pode selecionar uma ou várias imagens ao mesmo tempo do seu dispositivo
+                  </Typography>
+                </Box>
               </Stack>
 
               {/* Ações Finais */}
