@@ -22,10 +22,12 @@ describe('ImpactProjectEditForm Component', () => {
 
   beforeEach(() => {
     if (!global.URL.createObjectURL) {
-      global.URL.createObjectURL = vi.fn((file: File) => `blob:${file.name}`);
+      global.URL.createObjectURL = vi.fn(
+        (file: Blob | MediaSource) => `blob:${(file as File).name || 'preview'}`
+      );
     } else {
       vi.spyOn(global.URL, 'createObjectURL').mockImplementation(
-        (file: any) => `blob:${file.name || 'preview'}`
+        (file: Blob | MediaSource) => `blob:${(file as File).name || 'preview'}`
       );
     }
   });
