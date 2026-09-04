@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ImpactProjectEditForm from '@/components/profile/ImpactProjectEditForm';
 
 describe('ImpactProjectEditForm Component', () => {
-  const mockProject = {
+  const mockProjectWithCampaign = {
     id: 'proj-1',
     title: 'Projeto social na favela do Lixão',
     description: 'Ajude-nos a construir uma escola cristã na África do Sul.',
@@ -18,6 +18,18 @@ describe('ImpactProjectEditForm Component', () => {
     videoUrl: 'https://www.youtube.com/watch?v=5dsGWM5XGdg',
     campaignTitle: 'Campanha de Educação & Esperança',
     campaignBadge: true,
+  };
+
+  const mockProjectWithoutCampaign = {
+    id: 'proj-2',
+    title: 'Projeto Sem Campanha',
+    description: 'Projeto social focado em desenvolvimento comunitário local.',
+    imageUrl: '/images/projects/projeto-impacto.jpg',
+    bannerUrl: '/images/projects/projeto-impacto.jpg',
+    galleryImages: [],
+    videoUrl: '',
+    campaignTitle: undefined,
+    campaignBadge: false,
   };
 
   beforeEach(() => {
@@ -36,16 +48,15 @@ describe('ImpactProjectEditForm Component', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders all project fields including banner upload, basic info, campaign, youtube video and gallery', () => {
-    render(<ImpactProjectEditForm project={mockProject} />);
+  it('renders all project fields including banner upload, basic info, youtube video and gallery', () => {
+    render(<ImpactProjectEditForm project={mockProjectWithCampaign} />);
 
     expect(screen.getByRole('heading', { name: /editar projeto de impacto/i })).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockProject.title)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockProject.description)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(mockProjectWithCampaign.title)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(mockProjectWithCampaign.description)).toBeInTheDocument();
     expect(screen.getByAltText(/prévia da capa do projeto/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/upload de foto de capa/i)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockProject.campaignTitle)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockProject.videoUrl)).toBeInTheDocument();
+    expect(screen.getByDisplayValue(mockProjectWithCampaign.videoUrl)).toBeInTheDocument();
 
     // YouTube iframe preview
     expect(screen.getByTitle(/prévia do vídeo de apresentação/i)).toBeInTheDocument();
@@ -63,9 +74,31 @@ describe('ImpactProjectEditForm Component', () => {
     expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
   });
 
+  it('displays Campanha Ativa badge and title when linked by backend data', () => {
+    render(<ImpactProjectEditForm project={mockProjectWithCampaign} />);
+
+    expect(screen.getByText(/campanha vinculada/i)).toBeInTheDocument();
+    expect(screen.getByText('Campanha Ativa')).toBeInTheDocument();
+    expect(screen.getByText(mockProjectWithCampaign.campaignTitle)).toBeInTheDocument();
+
+    // Manual input fields must be removed
+    expect(
+      screen.queryByPlaceholderText(/ex: campanha de educação & esperança/i)
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+  });
+
+  it('displays placeholder waiting for backend integration when project is not linked to a campaign', () => {
+    render(<ImpactProjectEditForm project={mockProjectWithoutCampaign} />);
+
+    expect(screen.getByText(/campanha vinculada/i)).toBeInTheDocument();
+    expect(screen.getByText(/aguardando integração com o backend/i)).toBeInTheDocument();
+    expect(screen.queryByText('Campanha Ativa')).not.toBeInTheDocument();
+  });
+
   it('allows uploading a new cover photo from the user device', async () => {
     const user = userEvent.setup();
-    render(<ImpactProjectEditForm project={mockProject} />);
+    render(<ImpactProjectEditForm project={mockProjectWithCampaign} />);
 
     const coverFileInput = screen.getByLabelText(/upload de foto de capa/i);
     const newCoverFile = new File(['dummy-image'], 'new-cover.jpg', { type: 'image/jpeg' });
@@ -78,7 +111,7 @@ describe('ImpactProjectEditForm Component', () => {
 
   it('allows uploading multiple gallery photos from user device and removing photos', async () => {
     const user = userEvent.setup();
-    render(<ImpactProjectEditForm project={mockProject} />);
+    render(<ImpactProjectEditForm project={mockProjectWithCampaign} />);
 
     // Remove first photo
     const removeFirstBtn = screen.getByRole('button', { name: /remover foto 1 da galeria/i });
@@ -101,9 +134,9 @@ describe('ImpactProjectEditForm Component', () => {
   it('submits updated project and calls onSave with toast notification', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
-    render(<ImpactProjectEditForm project={mockProject} onSave={handleSave} />);
+    render(<ImpactProjectEditForm project={mockProjectWithCampaign} onSave={handleSave} />);
 
-    const titleInput = screen.getByDisplayValue(mockProject.title);
+    const titleInput = screen.getByDisplayValue(mockProjectWithCampaign.title);
     await user.clear(titleInput);
     await user.type(titleInput, 'Novo Título do Projeto');
 

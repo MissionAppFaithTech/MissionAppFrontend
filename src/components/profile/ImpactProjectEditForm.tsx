@@ -2,20 +2,22 @@
 
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
+import CampaignIcon from '@mui/icons-material/Campaign';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import CollectionsOutlinedIcon from '@mui/icons-material/CollectionsOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
@@ -32,14 +34,13 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
   const [title, setTitle] = useState(project.title);
   const [description, setDescription] = useState(project.description);
   const [bannerUrl, setBannerUrl] = useState(project.bannerUrl || project.imageUrl);
-  const [campaignTitle, setCampaignTitle] = useState(project.campaignTitle || '');
-  const [campaignBadge, setCampaignBadge] = useState(Boolean(project.campaignBadge));
   const [videoUrl, setVideoUrl] = useState(project.videoUrl || project.youtubeUrl || '');
   const [galleryImages, setGalleryImages] = useState<string[]>(
     project.galleryImages ?? project.images ?? []
   );
   const [toastOpen, setToastOpen] = useState(false);
 
+  const isLinkedWithCampaign = Boolean(project.campaignBadge && project.campaignTitle);
   const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
 
   const handleBannerFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -73,8 +74,6 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
       description,
       imageUrl: bannerUrl,
       bannerUrl,
-      campaignTitle: campaignTitle.trim() ? campaignTitle.trim() : undefined,
-      campaignBadge,
       videoUrl: videoUrl.trim() ? videoUrl.trim() : undefined,
       youtubeUrl: videoUrl.trim() ? videoUrl.trim() : undefined,
       galleryImages,
@@ -249,45 +248,90 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
 
               <Divider />
 
-              {/* 3. Campanha Vinculada */}
+              {/* 3. Campanha Vinculada (Controlada pelo Backend / Administração - RF 13.2 / 18.4) */}
               <Stack spacing={2}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  Campanha Vinculada
-                </Typography>
-
-                <Stack spacing={0.75}>
-                  <Typography
-                    component="label"
-                    htmlFor="project-campaign-title"
-                    variant="body2"
-                    sx={{ color: 'primary.main', fontWeight: 600 }}
-                  >
-                    Título da Campanha (Opcional):
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <CampaignIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                    Campanha Vinculada
                   </Typography>
-                  <TextField
-                    id="project-campaign-title"
-                    value={campaignTitle}
-                    onChange={(e) => setCampaignTitle(e.target.value)}
-                    fullWidth
-                    size="small"
-                    placeholder="Ex: Campanha de Educação & Esperança"
-                  />
                 </Stack>
 
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={campaignBadge}
-                      onChange={(e) => setCampaignBadge(e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label={
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      Exibir selo de &quot;Campanha Ativa&quot; no card do projeto
-                    </Typography>
-                  }
-                />
+                {isLinkedWithCampaign ? (
+                  <Box
+                    sx={{
+                      p: 2.5,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(230, 81, 0, 0.04)',
+                      border: '1px solid',
+                      borderColor: 'rgba(230, 81, 0, 0.25)',
+                    }}
+                  >
+                    <Stack spacing={1.5}>
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}
+                      >
+                        <Chip
+                          icon={
+                            <VerifiedIcon
+                              sx={{ fontSize: '16px !important', color: 'common.white !important' }}
+                            />
+                          }
+                          label="Campanha Ativa"
+                          size="small"
+                          sx={{
+                            bgcolor: 'mission.main',
+                            color: 'common.white',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                          }}
+                        />
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ fontWeight: 700, color: 'primary.main' }}
+                        >
+                          {project.campaignTitle}
+                        </Typography>
+                      </Box>
+
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                        Este projeto de impacto está associado a uma campanha oficial da plataforma.
+                        O vínculo e o selo de &quot;Campanha Ativa&quot; são gerenciados pela
+                        administração e sincronizados automaticamente através do backend.
+                      </Typography>
+                    </Stack>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      p: 2.5,
+                      borderRadius: 2,
+                      bgcolor: 'rgba(13, 43, 92, 0.03)',
+                      border: '1px dashed',
+                      borderColor: 'divider',
+                    }}
+                  >
+                    <Stack spacing={1.5}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <InfoOutlinedIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                        <Typography
+                          variant="subtitle2"
+                          color="primary.main"
+                          sx={{ fontWeight: 700 }}
+                        >
+                          Aguardando integração com o backend
+                        </Typography>
+                      </Box>
+
+                      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                        O status de &quot;Campanha Ativa&quot; será exibido automaticamente neste
+                        projeto assim que ele for vinculado a uma campanha oficial no backend.
+                        Vínculos e selos são gerenciados exclusivamente por administradores e
+                        avaliadores da plataforma.
+                      </Typography>
+                    </Stack>
+                  </Box>
+                )}
               </Stack>
 
               <Divider />
@@ -302,7 +346,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                 </Stack>
 
                 <TextField
-                  id="project-video-url"
+                  id="project-youtube-url"
                   label="Link do Vídeo no YouTube"
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
