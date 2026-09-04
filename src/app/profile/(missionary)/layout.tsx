@@ -35,7 +35,7 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
             }}
             sx={{
               width: '100%',
-              maxWidth: 280,
+              maxWidth: { xs: 150, sm: 240, md: 280 },
               '& .MuiOutlinedInput-root': {
                 height: { xs: 34, sm: 36 },
                 bgcolor: 'background.paper',

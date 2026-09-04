@@ -37,7 +37,7 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
         aria-haspopup="true"
         aria-expanded={isOpen ? 'true' : undefined}
         onClick={handleOpen}
-        sx={{ p: 0 }}
+        sx={{ p: 0, minWidth: 44, minHeight: 44 }}
       >
         <Avatar
           sx={{

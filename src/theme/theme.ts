@@ -250,6 +250,10 @@ export function createAppTheme(mode: 'light' | 'dark') {
             textTransform: 'none',
             fontWeight: 500,
             borderRadius: 4,
+            minHeight: 38,
+            '@media (max-width:600px)': {
+              minHeight: 44,
+            },
           },
         },
         variants: [
@@ -335,6 +339,12 @@ export function createAppTheme(mode: 'light' | 'dark') {
       MuiIconButton: {
         styleOverrides: {
           root: {
+            minWidth: 36,
+            minHeight: 36,
+            '@media (max-width:600px)': {
+              minWidth: 44,
+              minHeight: 44,
+            },
             '&:hover': {
               color: roleColors.intermediate,
             },

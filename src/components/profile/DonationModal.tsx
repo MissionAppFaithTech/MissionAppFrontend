@@ -117,6 +117,8 @@ CPF/CNPJ: ${bankData.documento}`;
             sx: {
               borderRadius: { xs: 2.5, sm: 3 },
               p: { xs: 1, sm: 1.5 },
+              m: { xs: 1.5, sm: 2 },
+              width: { xs: 'calc(100% - 24px)', sm: 'auto' },
               boxShadow: '0 8px 30px rgba(13, 43, 92, 0.18)',
             },
           },
@@ -267,7 +269,7 @@ CPF/CNPJ: ${bankData.documento}`;
                     Chave Pix ({pixKeyTypeLabels[pixKeyType] || 'E-mail'}):
                   </Typography>
                   <Stack
-                    direction="row"
+                    direction={{ xs: 'column', sm: 'row' }}
                     spacing={1}
                     sx={{
                       mt: 0.5,
@@ -276,20 +278,33 @@ CPF/CNPJ: ${bankData.documento}`;
                       borderRadius: 2,
                       border: '1px solid',
                       borderColor: 'divider',
-                      alignItems: 'center',
+                      alignItems: { xs: 'stretch', sm: 'center' },
                       justifyContent: 'space-between',
                     }}
                   >
-                    <Typography variant="body2" sx={{ fontWeight: 600, wordBreak: 'break-all' }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: 600,
+                        wordBreak: 'break-all',
+                        textAlign: { xs: 'center', sm: 'left' },
+                      }}
+                    >
                       {pixKey}
                     </Typography>
                     <PillButton
                       tone="missionFilled"
                       size="small"
                       onClick={() => handleCopy(pixKey, 'Chave Pix')}
-                      sx={{ minHeight: 32, px: 1.5, fontSize: '0.75rem', flexShrink: 0 }}
+                      sx={{
+                        minHeight: 44,
+                        px: 2,
+                        fontSize: '0.8125rem',
+                        flexShrink: 0,
+                        width: { xs: '100%', sm: 'auto' },
+                      }}
                     >
-                      <ContentCopyIcon sx={{ fontSize: 14, mr: 0.5 }} />
+                      <ContentCopyIcon sx={{ fontSize: 16, mr: 0.5 }} />
                       Copiar chave Pix
                     </PillButton>
                   </Stack>
@@ -337,7 +352,7 @@ CPF/CNPJ: ${bankData.documento}`;
                     tone="missionFilled"
                     size="medium"
                     onClick={handleCopyAllBank}
-                    sx={{ width: '100%', minHeight: 40, fontSize: '0.875rem' }}
+                    sx={{ width: '100%', minHeight: 44, fontSize: '0.875rem' }}
                   >
                     <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
                     Copiar todos os dados bancários

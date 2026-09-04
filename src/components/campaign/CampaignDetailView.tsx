@@ -342,9 +342,9 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                     </Typography>
 
                                     <Stack
-                                      direction="row"
-                                      spacing={1.5}
-                                      sx={{ pt: 0.5, alignItems: 'center' }}
+                                      direction={{ xs: 'column', sm: 'row' }}
+                                      spacing={1}
+                                      sx={{ pt: 0.5, alignItems: { xs: 'stretch', sm: 'center' } }}
                                     >
                                       <PillButton
                                         tone="missionFilled"
@@ -358,11 +358,13 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                         sx={{
                                           fontSize: '0.8125rem',
                                           fontWeight: 700,
+                                          minHeight: 44,
                                           py: 0.5,
                                           px: 2,
                                           bgcolor: 'mission.main',
                                           color: 'common.white',
                                           '&:hover': { bgcolor: 'mission.dark' },
+                                          justifyContent: 'center',
                                         }}
                                       >
                                         <VolunteerActivismIcon sx={{ fontSize: 16, mr: 0.5 }} />
@@ -375,7 +377,13 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                           href={`/user/${project.missionaryUsername}`}
                                           tone="primarySoftOutline"
                                           size="small"
-                                          sx={{ fontSize: '0.8125rem', py: 0.5, px: 2 }}
+                                          sx={{
+                                            fontSize: '0.8125rem',
+                                            minHeight: 44,
+                                            py: 0.5,
+                                            px: 2,
+                                            justifyContent: 'center',
+                                          }}
                                         >
                                           Ver Perfil
                                         </PillButton>

@@ -59,6 +59,8 @@ export default function ContactModal({
             sx: {
               borderRadius: { xs: 2.5, sm: 3 },
               p: { xs: 1, sm: 1.5 },
+              m: { xs: 1.5, sm: 2 },
+              width: { xs: 'calc(100% - 24px)', sm: 'auto' },
               boxShadow: '0 8px 30px rgba(13, 43, 92, 0.18)',
             },
           },
@@ -131,7 +133,12 @@ export default function ContactModal({
                   tone="primarySoftOutline"
                   size="small"
                   onClick={() => handleCopy(contact.publicPhone, 'Telefone')}
-                  sx={{ minHeight: 36, px: 2, fontSize: '0.8125rem' }}
+                  sx={{
+                    minHeight: 44,
+                    px: 2,
+                    fontSize: '0.8125rem',
+                    flex: { xs: 1, sm: 'initial' },
+                  }}
                 >
                   <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
                   Copiar
@@ -142,7 +149,12 @@ export default function ContactModal({
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  sx={{ minHeight: 36, px: 2, fontSize: '0.8125rem' }}
+                  sx={{
+                    minHeight: 44,
+                    px: 2,
+                    fontSize: '0.8125rem',
+                    flex: { xs: 1, sm: 'initial' },
+                  }}
                 >
                   Conversar
                 </PillButton>
@@ -189,7 +201,12 @@ export default function ContactModal({
                   tone="primarySoftOutline"
                   size="small"
                   onClick={() => handleCopy(contact.publicEmail, 'E-mail')}
-                  sx={{ minHeight: 36, px: 2, fontSize: '0.8125rem' }}
+                  sx={{
+                    minHeight: 44,
+                    px: 2,
+                    fontSize: '0.8125rem',
+                    flex: { xs: 1, sm: 'initial' },
+                  }}
                 >
                   <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
                   Copiar
@@ -207,7 +224,7 @@ export default function ContactModal({
                     tone="primarySoftOutline"
                     size="small"
                     onClick={onClose}
-                    sx={{ width: '100%', minHeight: 40, fontSize: '0.8125rem' }}
+                    sx={{ width: '100%', minHeight: 44, fontSize: '0.8125rem' }}
                   >
                     Editar contatos públicos
                   </PillButton>

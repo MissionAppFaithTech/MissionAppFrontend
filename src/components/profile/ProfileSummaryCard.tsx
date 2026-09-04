@@ -97,6 +97,8 @@ export default function ProfileSummaryCard({
     fontWeight: 600,
     whiteSpace: 'nowrap' as const,
     minHeight: 44,
+    flex: { xs: '1 1 auto', sm: 'none' },
+    justifyContent: 'center',
   };
 
   return (

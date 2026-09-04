@@ -220,7 +220,7 @@ export default function FinancialSettingsForm({
                   tone="primarySoftOutline"
                   size="small"
                   onClick={() => setPreviewOpen(true)}
-                  sx={{ minHeight: 40, px: 2, flexShrink: 0 }}
+                  sx={{ minHeight: 44, px: 2, flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
                 >
                   <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Visualizar Prévia do Apoiador
@@ -445,12 +445,12 @@ export default function FinancialSettingsForm({
                         )}
 
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, mb: 1 }}>
                             <PillButton
                               component="label"
                               tone="primarySoftOutline"
                               size="small"
-                              sx={{ minHeight: 36, px: 2, cursor: 'pointer' }}
+                              sx={{ minHeight: 44, px: 2, cursor: 'pointer', justifyContent: 'center' }}
                             >
                               <CloudUploadOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                               {pixQrCodeUrl ? 'Substituir imagem' : 'Enviar imagem do QR Code'}
@@ -470,7 +470,7 @@ export default function FinancialSettingsForm({
                                 tone="outline"
                                 size="small"
                                 onClick={handleRemoveQrCode}
-                                sx={{ minHeight: 36, px: 1.5 }}
+                                sx={{ minHeight: 44, px: 1.5, justifyContent: 'center' }}
                               >
                                 <DeleteOutlinedIcon sx={{ fontSize: 18, mr: 0.5 }} />
                                 Remover
@@ -663,7 +663,7 @@ export default function FinancialSettingsForm({
                   tone="primarySoftOutline"
                   size="medium"
                   onClick={() => setPreviewOpen(true)}
-                  sx={{ minHeight: 44, px: 3 }}
+                  sx={{ minHeight: 44, px: 3, width: { xs: '100%', sm: 'auto' } }}
                 >
                   <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Visualizar Prévia
@@ -673,7 +673,7 @@ export default function FinancialSettingsForm({
                   type="submit"
                   tone="missionFilled"
                   size="medium"
-                  sx={{ minHeight: 44, px: 4 }}
+                  sx={{ minHeight: 44, px: 4, width: { xs: '100%', sm: 'auto' } }}
                 >
                   <SaveOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Salvar Configurações

@@ -57,6 +57,7 @@ export default function VisitorBottomNav() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              minHeight: 48,
               gap: 0.25,
               textDecoration: 'none',
               color: isActive ? 'primary.main' : 'text.secondary',

@@ -49,7 +49,7 @@ const hoverLightSx = {
 /** Figma profile actions — um pouco mais compactos que o default do MUI. */
 const figmaActionBase = {
   borderRadius: '10px',
-  minHeight: 32,
+  minHeight: { xs: 44, sm: 32 },
   py: 0.5,
   px: 1.75,
   fontSize: '0.8125rem',

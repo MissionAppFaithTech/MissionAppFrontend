@@ -485,6 +485,7 @@ export default function ImpactProjectCard({
                 onClick={() => setDonationModalOpen(true)}
                 sx={{
                   minHeight: 44,
+                  width: { xs: '100%', sm: 'auto' },
                   px: 3,
                   fontSize: '0.9375rem',
                   fontWeight: 700,

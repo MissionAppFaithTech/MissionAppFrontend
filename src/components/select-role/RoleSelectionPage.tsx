@@ -24,8 +24,8 @@ export default function RoleSelectionPage() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        px: 3,
-        py: 6,
+        px: { xs: 2, sm: 3 },
+        py: { xs: 3, sm: 6 },
         position: 'relative',
       }}
     >

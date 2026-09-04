@@ -171,6 +171,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                       px: 2.5,
                       cursor: 'pointer',
                       display: 'inline-flex',
+                      width: { xs: '100%', sm: 'auto' },
+                      justifyContent: 'center',
                     }}
                   >
                     <CloudUploadOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />
@@ -478,6 +480,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                       px: 2.5,
                       cursor: 'pointer',
                       display: 'inline-flex',
+                      width: { xs: '100%', sm: 'auto' },
+                      justifyContent: 'center',
                     }}
                   >
                     <AddPhotoAlternateOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />

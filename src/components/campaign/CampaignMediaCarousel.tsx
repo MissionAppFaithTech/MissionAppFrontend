@@ -171,8 +171,8 @@ export default function CampaignMediaCarousel({
                 zIndex: 3,
                 color: 'common.white',
                 bgcolor: 'rgba(15, 23, 42, 0.65)',
-                minWidth: 40,
-                minHeight: 40,
+                minWidth: { xs: 44, sm: 40 },
+                minHeight: { xs: 44, sm: 40 },
                 backdropFilter: 'blur(4px)',
                 '&:hover': { bgcolor: 'rgba(15, 23, 42, 0.9)' },
               }}
@@ -191,8 +191,8 @@ export default function CampaignMediaCarousel({
                 zIndex: 3,
                 color: 'common.white',
                 bgcolor: 'rgba(15, 23, 42, 0.65)',
-                minWidth: 40,
-                minHeight: 40,
+                minWidth: { xs: 44, sm: 40 },
+                minHeight: { xs: 44, sm: 40 },
                 backdropFilter: 'blur(4px)',
                 '&:hover': { bgcolor: 'rgba(15, 23, 42, 0.9)' },
               }}

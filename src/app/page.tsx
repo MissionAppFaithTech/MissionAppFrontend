@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import LandingPage from '@/components/landing/LandingPage';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import { getSiteUrl, siteConfig } from '@/lib/site';
 
 /** Landing is static marketing content — regenerate at most once per hour. */
@@ -52,6 +53,7 @@ export default function Home() {
     <>
       <JsonLd />
       <LandingPage />
+      <VisitorBottomNav />
     </>
   );
 }
