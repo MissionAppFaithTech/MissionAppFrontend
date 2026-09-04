@@ -11,6 +11,20 @@ const nextConfig: NextConfig = {
     // Avoid serving stale optimized images after replacing files in public/
     minimumCacheTTL: isDev ? 0 : 14400,
   },
+  async redirects() {
+    return [
+      {
+        source: '/profile',
+        destination: '/profile/sobre',
+        permanent: false,
+      },
+      {
+        source: '/profile/supporter',
+        destination: '/profile/supporter/missionarios',
+        permanent: false,
+      },
+    ];
+  },
   ...(isDev && {
     async headers() {
       const noStore = [{ key: 'Cache-Control', value: 'no-store, must-revalidate' }];

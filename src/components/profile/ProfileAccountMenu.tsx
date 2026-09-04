@@ -118,7 +118,7 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
 
         <Box
           component={Link}
-          href="/profile/sobre"
+          href="/profile/projetos-de-impacto"
           onClick={handleClose}
           sx={{
             display: 'block',

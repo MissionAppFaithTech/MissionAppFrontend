@@ -32,6 +32,26 @@ export type ProfileAboutData = {
   lifeVerse: string;
 };
 
+export type ImpactProjectData = {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  bannerUrl?: string;
+  galleryImages?: string[];
+  images?: string[];
+  videoUrl?: string;
+  youtubeUrl?: string;
+  campaignTitle?: string;
+  campaignBadge?: boolean;
+};
+
+export type ProfileContactData = {
+  publicEmail: string;
+  publicPhone: string;
+  whatsappNumber?: string;
+};
+
 export type ProfileData = {
   username: string;
   displayName: string;
@@ -46,4 +66,6 @@ export type ProfileData = {
   followingCount?: number;
   supportedCampaignsCount?: number;
   about: ProfileAboutData;
+  contact?: ProfileContactData;
+  impactProject?: ImpactProjectData;
 };

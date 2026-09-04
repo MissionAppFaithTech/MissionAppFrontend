@@ -14,20 +14,41 @@ describe('ProfileSummaryCard component', () => {
     expect(screen.getByRole('link', { name: /editar perfil/i })).toBeInTheDocument();
   });
 
-  it('renders guest visitor action buttons when isOwnProfile is false', () => {
+  it('renders action buttons with "Ofertar" button when isOwnProfile is false', () => {
     render(
       <ProfileSummaryCard
         profile={mockProfile}
         isOwnProfile={false}
         followHref="/select-role"
-        supportHref="/select-role"
-        contactHref="/login"
+        viewerRole="visitor"
       />
     );
 
     expect(screen.getByRole('link', { name: /seguir/i })).toHaveAttribute('href', '/select-role');
-    expect(screen.getByRole('link', { name: /apoiar/i })).toHaveAttribute('href', '/select-role');
-    expect(screen.getByRole('link', { name: /contato/i })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('button', { name: /ofertar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /contato/i })).toBeInTheDocument();
+  });
+
+  it('opens DonationModal when clicking Ofertar button', async () => {
+    const user = userEvent.setup();
+    render(
+      <ProfileSummaryCard profile={mockProfile} isOwnProfile={false} viewerRole="supporter" />
+    );
+
+    const ofertarBtn = screen.getByRole('button', { name: /ofertar/i });
+    await user.click(ofertarBtn);
+
+    expect(screen.getByRole('heading', { name: /ofertar na missão/i })).toBeInTheDocument();
+  });
+
+  it('opens ContactModal when clicking Contato button', async () => {
+    const user = userEvent.setup();
+    render(<ProfileSummaryCard profile={mockProfile} isOwnProfile={true} />);
+
+    const contactBtn = screen.getByRole('button', { name: /contato/i });
+    await user.click(contactBtn);
+
+    expect(screen.getByRole('heading', { name: /^contato$/i })).toBeInTheDocument();
   });
 
   it('copies profile URL to clipboard when share button is clicked', async () => {

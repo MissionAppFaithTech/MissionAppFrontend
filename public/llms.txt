@@ -1,0 +1,26 @@
+# Mission App
+
+> Plataforma digital que conecta missionários em campo, apoiadores, igrejas e projetos de impacto social em todo o mundo.
+
+## Visão Geral
+Mission App é uma solução desenvolvida pela FaithTech para unir o ecossistema missionário transcultural e comunitário. A plataforma permite que missionários compartilhem suas histórias, pedidos de oração, atualizações de campo, vídeos e projetos de impacto social, ao mesmo tempo em que permite que apoiadores acompanhem a jornada, ofertem financeiramente e orem com direcionamento específico.
+
+## Público-Alvo
+- **Missionários**: Trabalhadores no campo missionário nacional e transcultural que necessitam de suporte, comunicação centralizada com seus mantenedores e divulgação de seus projetos de impacto.
+- **Apoiadores**: Cristãos, doadores e intercessores que desejam investir no Reino, acompanhar relatos de missões e ofertar com segurança.
+- **Comunidades de Fé & Igrejas**: Congregações que enviam e supervisionam projetos missionários.
+
+## Rotas Principais e Recursos Públicos
+- [Início / Landing Page](/): Apresentação institucional da plataforma, proposta de valor, badges para aplicativo e visão de impacto.
+- [Seleção de Perfil](/select-role): Escolha inicial de cadastro entre "Sou Missionário" e "Quero Apoiar".
+- [Cadastro de Missionários](/register/missionaries): Fluxo de onboarding para missionários e agências.
+- [Cadastro de Apoiadores](/register/supporters): Fluxo de onboarding para mantenedores e intercessores.
+- [Perfis Públicos](/user/{username}): Página pública de missionários contendo biografia, história ministerial, versículo para a vida, contatos públicos (WhatsApp e E-mail), pedidos de oração, carrossel de fotos, vídeo de apresentação no YouTube e botão de oferta/doação.
+
+## Formas de Engajamento
+1. **Oração**: Acesso direto aos motivos de oração do missionário.
+2. **Oferta / Doação**: Apoio financeiro a projetos de impacto e manutenção de missionários.
+3. **Contato Direto**: Canais de WhatsApp e e-mail públicos fornecidos com consentimento.
+4. **Compartilhamento**: Divulgação de projetos em redes sociais.
+
+Para a versão completa e detalhada deste manifesto, acesse: [/llms-full.txt](/llms-full.txt)

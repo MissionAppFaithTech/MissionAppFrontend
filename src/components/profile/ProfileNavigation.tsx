@@ -2,20 +2,37 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 
 const missionarySections = [
-  { label: 'Sobre', href: '/profile/sobre' },
-  { label: 'Projetos de Impacto', href: '/profile/projetos-de-impacto' },
-  { label: 'Postagens', href: '/profile/postagens' },
-  { label: 'Campanha', href: '/profile/campanha' },
+  {
+    label: 'Sobre',
+    mobileLabel: 'Sobre',
+    href: '/profile/sobre',
+  },
+  {
+    label: 'Projetos de Impacto',
+    mobileLabel: 'Projetos',
+    href: '/profile/projetos-de-impacto',
+  },
+  {
+    label: 'Postagens',
+    mobileLabel: 'Postagens',
+    href: '/profile/postagens',
+  },
+  {
+    label: 'Campanha',
+    mobileLabel: 'Campanha',
+    href: '/profile/campanha',
+  },
 ] as const;
 
 const supporterSections = [
-  { label: 'Seguindo', href: '/profile/supporter/missionarios' },
-  { label: 'Salvos', href: '/profile/supporter/postagens-salvas' },
+  { label: 'Seguindo', mobileLabel: 'Seguindo', href: '/profile/supporter/missionarios' },
+  { label: 'Salvos', mobileLabel: 'Salvos', href: '/profile/supporter/postagens-salvas' },
 ] as const;
 
 type ProfileNavigationProps = {
@@ -76,8 +93,24 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
           },
         }}
       >
-        {profileSections.map(({ label, href }) => (
-          <Tab component={Link} key={href} label={label} value={href} href={href} disableRipple />
+        {profileSections.map(({ label, mobileLabel, href }) => (
+          <Tab
+            component={Link}
+            key={href}
+            label={
+              <span>
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  {label}
+                </Box>
+                <Box component="span" sx={{ display: { xs: 'inline', sm: 'none' } }}>
+                  {mobileLabel || label}
+                </Box>
+              </span>
+            }
+            value={href}
+            href={href}
+            disableRipple
+          />
         ))}
       </Tabs>
     </Paper>

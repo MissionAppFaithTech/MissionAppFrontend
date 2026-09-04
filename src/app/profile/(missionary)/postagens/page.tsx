@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useState, type FormEvent, type SyntheticEvent } from 'react';
+import AddIcon from '@mui/icons-material/Add';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
@@ -31,9 +32,10 @@ const cardSx = {
   boxShadow: 1,
 } as const;
 
-function NewPostForm() {
+function NewPostForm({ onCancel }: { onCancel?: () => void }) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    onCancel?.();
   };
 
   return (
@@ -89,7 +91,7 @@ function NewPostForm() {
               spacing={1}
               sx={{ justifyContent: 'flex-end', pt: { xs: 2, sm: 6 } }}
             >
-              <PillButton tone="primarySoftOutline" size="small" type="reset">
+              <PillButton tone="primarySoftOutline" size="small" type="button" onClick={onCancel}>
                 Cancelar
               </PillButton>
               <PillButton tone="primaryFilled" size="small" type="submit">
@@ -248,10 +250,31 @@ function PostCard({ showAuthor }: { showAuthor: boolean }) {
 
 export default function ProfilePostsPage() {
   const [feedView, setFeedView] = useState<FeedView>('mine');
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
 
   return (
     <Stack spacing={{ xs: 2, sm: 3 }}>
-      {feedView === 'mine' ? <NewPostForm /> : null}
+      {isCreatingPost ? (
+        <NewPostForm onCancel={() => setIsCreatingPost(false)} />
+      ) : (
+        <PillButton
+          tone="primaryFilled"
+          size="large"
+          onClick={() => setIsCreatingPost(true)}
+          sx={{
+            width: '100%',
+            minHeight: { xs: 44, sm: 48 },
+            borderRadius: { xs: 2, sm: 3 },
+            fontWeight: 700,
+            fontSize: { xs: '0.9375rem', sm: '1rem' },
+            boxShadow: '0 2px 8px rgba(13, 43, 92, 0.25)',
+          }}
+        >
+          <AddIcon sx={{ fontSize: 20, mr: 1 }} />
+          Postar
+        </PillButton>
+      )}
+
       <FeedNavigation value={feedView} onChange={setFeedView} />
       <PostCard showAuthor={feedView === 'general'} />
     </Stack>

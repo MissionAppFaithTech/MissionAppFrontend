@@ -5,6 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -15,24 +16,36 @@ import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import ContactModal from '@/components/profile/ContactModal';
+import DonationModal from '@/components/profile/DonationModal';
 import type { ProfileData } from '@/types/profile';
 
 type ProfileSummaryCardProps = {
   profile: ProfileData;
   isOwnProfile?: boolean;
+  viewerRole?: 'visitor' | 'supporter' | 'missionary';
   followHref?: string;
   supportHref?: string;
   contactHref?: string;
+  isFollowingInitial?: boolean;
+  onFollowToggle?: (following: boolean) => void;
+  onDonate?: () => void;
 };
 
 export default function ProfileSummaryCard({
   profile,
   isOwnProfile = true,
-  followHref = '/select-role',
-  supportHref = '/select-role',
-  contactHref = '/login',
+  viewerRole = 'visitor',
+  followHref,
+  supportHref,
+  isFollowingInitial = true,
+  onFollowToggle,
+  onDonate,
 }: ProfileSummaryCardProps) {
   const [toastOpen, setToastOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [donationModalOpen, setDonationModalOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(isFollowingInitial);
 
   const {
     username,
@@ -283,16 +296,30 @@ export default function ProfileSummaryCard({
                 >
                   Editar perfil
                 </PillButton>
-                <PillButton tone="primarySoftOutline" size="medium" sx={actionSx}>
+                <PillButton
+                  tone="primarySoftOutline"
+                  size="medium"
+                  onClick={() => setContactModalOpen(true)}
+                  sx={actionSx}
+                >
                   Contato
                 </PillButton>
               </>
             ) : (
               <>
+                {/* Botão Ofertar para apoiadores / visitantes (não possui editar perfil) */}
                 <PillButton
-                  href={followHref}
+                  href={supportHref && viewerRole === 'visitor' ? supportHref : undefined}
                   tone="missionFilled"
                   size="medium"
+                  onClick={
+                    supportHref && viewerRole === 'visitor'
+                      ? undefined
+                      : () => {
+                          setDonationModalOpen(true);
+                          onDonate?.();
+                        }
+                  }
                   sx={{
                     ...actionSx,
                     bgcolor: 'mission.main',
@@ -300,15 +327,39 @@ export default function ProfileSummaryCard({
                     '&:hover': { bgcolor: 'mission.dark' },
                   }}
                 >
-                  Seguir
+                  <VolunteerActivismIcon sx={{ fontSize: 18, mr: 0.75 }} />
+                  Ofertar
                 </PillButton>
-                <PillButton href={supportHref} tone="cta" size="medium" sx={actionSx}>
-                  Apoiar
-                </PillButton>
+
+                {/* Botão Seguir / Seguindo com suporte a link ou toggle */}
+                {followHref && viewerRole === 'visitor' ? (
+                  <PillButton
+                    href={followHref}
+                    tone="primarySoftOutline"
+                    size="medium"
+                    sx={actionSx}
+                  >
+                    Seguir
+                  </PillButton>
+                ) : (
+                  <PillButton
+                    tone={isFollowing ? 'primarySoftOutline' : 'cta'}
+                    size="medium"
+                    onClick={() => {
+                      const next = !isFollowing;
+                      setIsFollowing(next);
+                      onFollowToggle?.(next);
+                    }}
+                    sx={actionSx}
+                  >
+                    {isFollowing ? 'Seguindo' : 'Seguir'}
+                  </PillButton>
+                )}
+
                 <PillButton
-                  href={contactHref}
                   tone="primarySoftOutline"
                   size="medium"
+                  onClick={() => setContactModalOpen(true)}
                   sx={actionSx}
                 >
                   Contato
@@ -333,6 +384,22 @@ export default function ProfileSummaryCard({
           </Stack>
         </Stack>
       </CardContent>
+
+      {/* Modal de Contato com WhatsApp e E-mail */}
+      <ContactModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        contact={profile.contact}
+        isOwnProfile={isOwnProfile}
+      />
+
+      {/* Modal de Doação / Oferta */}
+      <DonationModal
+        open={donationModalOpen}
+        onClose={() => setDonationModalOpen(false)}
+        missionaryName={displayName}
+        isOwnProfile={isOwnProfile}
+      />
 
       {/* Toast Notification no Padrão de Cores do Sistema */}
       <Snackbar
