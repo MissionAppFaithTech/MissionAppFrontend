@@ -97,7 +97,13 @@ export default async function UserPage({ params }: UserPageProps) {
   const profileSchemas = generateProfilePageSchema(profile, `/user/${username}`);
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 6 } }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        bgcolor: 'background.default',
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', md: 6 },
+      }}
+    >
       {/* Schema.org JSON-LD para motores de busca e IAs */}
       <JsonLd data={profileSchemas} />
 

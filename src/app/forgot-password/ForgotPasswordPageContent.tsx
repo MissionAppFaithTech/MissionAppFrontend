@@ -3,6 +3,7 @@
 import { Box, Stack, Typography, Link, Card, CardContent } from '@mui/material';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import ForgotPasswordForm from '@/forms/ForgotPasswordForm';
 
 export default function ForgotPasswordPageContent() {
@@ -18,7 +19,8 @@ export default function ForgotPasswordPageContent() {
         alignItems: 'center',
         justifyContent: 'center',
         px: { xs: 2, sm: 3 },
-        py: { xs: 3, sm: 6 },
+        pt: { xs: 3, sm: 6 },
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
         position: 'relative',
         outline: 'none',
       }}
@@ -67,6 +69,8 @@ export default function ForgotPasswordPageContent() {
           </CardContent>
         </Card>
       </Box>
+
+      <VisitorBottomNav />
     </Box>
   );
 }

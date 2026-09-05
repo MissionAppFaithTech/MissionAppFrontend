@@ -4,6 +4,7 @@ import { Box, Stack, Typography, CardContent, Card } from '@mui/material';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import RegistrationStepper from '@/components/register/RegistrationStepper';
 import SupportersStep1 from '@/forms/register/supporters/SupportersStep1';
 import SupportersStep2 from '@/forms/register/supporters/SupportersStep2';
@@ -31,7 +32,8 @@ function SupportersRegisterContent() {
         alignItems: 'center',
         justifyContent: 'center',
         px: { xs: 2, sm: 3 },
-        py: { xs: 4, sm: 6 },
+        pt: { xs: 4, sm: 6 },
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
         position: 'relative',
         outline: 'none',
         bgcolor: 'background.default',
@@ -51,7 +53,7 @@ function SupportersRegisterContent() {
         }}
       >
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-          <Logo size="lg" />
+          <Logo size="md" />
         </Box>
 
         <Stack
@@ -156,6 +158,8 @@ function SupportersRegisterContent() {
           )}
         </Stack>
       </Box>
+
+      <VisitorBottomNav />
     </Box>
   );
 }

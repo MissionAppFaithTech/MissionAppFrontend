@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import LoginForm from '@/forms/LoginForm';
 
 const roleLabels: Record<string, string> = {
@@ -30,7 +31,8 @@ export default function LoginPageContent() {
         alignItems: 'center',
         justifyContent: 'center',
         px: { xs: 2, sm: 3 },
-        py: { xs: 4, sm: 6 },
+        pt: { xs: 4, sm: 6 },
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
         position: 'relative',
         outline: 'none',
         bgcolor: 'background.default',
@@ -50,7 +52,7 @@ export default function LoginPageContent() {
         }}
       >
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-          <Logo size="lg" />
+          <Logo size="md" />
         </Box>
 
         {roleLabel && (
@@ -153,6 +155,8 @@ export default function LoginPageContent() {
           </Card>
         </Stack>
       </Box>
+
+      <VisitorBottomNav />
     </Box>
   );
 }

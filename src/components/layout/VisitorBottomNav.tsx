@@ -12,7 +12,7 @@ import LoginOutlinedIcon from '@mui/icons-material/LoginOutlined';
 
 const navItems = [
   { label: 'Explorar', href: '/', icon: ExploreOutlinedIcon },
-  { label: 'Buscar', href: '/#buscar', icon: SearchOutlinedIcon },
+  { label: 'Pesquisar', href: '/#buscar', icon: SearchOutlinedIcon },
   { label: 'Campanhas', href: '/#campanhas', icon: VolunteerActivismOutlinedIcon },
   { label: 'Entrar', href: '/login', icon: LoginOutlinedIcon },
 ];

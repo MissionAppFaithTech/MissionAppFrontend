@@ -9,7 +9,7 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     testTimeout: 60000,
-    maxWorkers: 4,
+    maxWorkers: 2,
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',

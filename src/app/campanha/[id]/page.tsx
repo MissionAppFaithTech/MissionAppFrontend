@@ -60,7 +60,13 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        bgcolor: 'background.default',
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', md: 4 },
+      }}
+    >
       <VisitorNavbar maxWidth="lg" />
       <CampaignDetailView campaign={campaign} />
       <VisitorBottomNav />

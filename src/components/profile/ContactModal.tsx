@@ -159,6 +159,10 @@ export default function ContactModal({
                     minHeight: 44,
                     px: 2,
                     fontSize: '0.8125rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF !important',
+                    bgcolor: '#9A3412',
+                    '&:hover': { bgcolor: '#7C2D12' },
                     flex: { xs: 1, sm: 'initial' },
                   }}
                 >

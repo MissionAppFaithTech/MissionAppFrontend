@@ -4,6 +4,7 @@ import { Box, Stack, Typography, CardContent, Card } from '@mui/material';
 import Link from 'next/link';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import RegistrationStepper from '@/components/register/RegistrationStepper';
 import MissionariesStep1 from '@/forms/register/missionaries/MissionariesStep1';
 import MissionariesStep2 from '@/forms/register/missionaries/MissionariesStep2';
@@ -32,7 +33,8 @@ function RegisterMissionariesWizardContent() {
         alignItems: 'center',
         justifyContent: 'center',
         px: { xs: 2, sm: 3 },
-        py: { xs: 4, sm: 6 },
+        pt: { xs: 4, sm: 6 },
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
         position: 'relative',
         outline: 'none',
         bgcolor: 'background.default',
@@ -52,7 +54,7 @@ function RegisterMissionariesWizardContent() {
         }}
       >
         <Box sx={{ mb: 3, display: 'flex', justifyContent: 'center' }}>
-          <Logo size="lg" />
+          <Logo size="md" />
         </Box>
 
         <Stack
@@ -158,6 +160,8 @@ function RegisterMissionariesWizardContent() {
           )}
         </Stack>
       </Box>
+
+      <VisitorBottomNav />
     </Box>
   );
 }
