@@ -4,12 +4,12 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CampaignIcon from '@mui/icons-material/Campaign';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import LaunchIcon from '@mui/icons-material/Launch';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import Avatar from '@mui/material/Avatar';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -425,35 +425,45 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
               >
                 <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                   <Stack spacing={2.5}>
-                    {/* Imagem de Perfil / Missionário Promotor (RF 13.3) */}
-                    {campaign.profileImageUrl && (
-                      <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                        <Avatar
-                          src={campaign.profileImageUrl}
-                          alt={campaign.missionaryName || campaign.title}
-                          sx={{
-                            width: 56,
-                            height: 56,
-                            border: '2px solid',
-                            borderColor: 'mission.main',
-                          }}
-                        />
-                        <div>
+                    {/* Cabeçalho Institucional da Campanha (RF 13.1 / 13.3) */}
+                    <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: '12px',
+                          bgcolor: 'rgba(194, 65, 12, 0.08)',
+                          color: 'mission.main',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          border: '1.5px solid',
+                          borderColor: 'divider',
+                        }}
+                      >
+                        <CampaignIcon sx={{ fontSize: 26, color: 'mission.main' }} />
+                      </Box>
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          sx={{ alignItems: 'center', mb: 0.25, flexWrap: 'wrap' }}
+                        >
                           <Typography
                             variant="subtitle2"
                             color="primary.main"
-                            sx={{ fontWeight: 700 }}
+                            sx={{ fontWeight: 800, lineHeight: 1.2 }}
                           >
-                            {campaign.missionaryName || 'Campanha Oficial'}
+                            Campanha Oficial
                           </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {campaign.missionaryUsername
-                              ? `@${campaign.missionaryUsername}`
-                              : 'Mission App Brasil'}
-                          </Typography>
-                        </div>
-                      </Stack>
-                    )}
+                          <CampaignBadge label={campaign.badge || 'Oficial'} size="small" />
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          Mission App Brasil · Mobilização Nacional
+                        </Typography>
+                      </Box>
+                    </Stack>
 
                     <Divider />
 
@@ -513,7 +523,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                         tone="missionFilled"
                         size="medium"
                         onClick={() => {
-                          setSelectedMissionary(campaign.missionaryName || 'Samuel Mendonça');
+                          setSelectedMissionary(campaign.title || 'Campanha Oficial');
                           setDonationModalOpen(true);
                         }}
                         aria-label="Ofertar na campanha"

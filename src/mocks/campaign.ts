@@ -22,8 +22,6 @@ export const mockCampaign: CampaignData = {
   redirectUrl: 'https://github.com/MissionAppFaithTech',
   shareUrl: '/campanha/campanha-educacao-esperanca',
   status: 'publicada',
-  missionaryName: 'Samuel Mendonça',
-  missionaryUsername: '_SamiMendonca',
   associatedImpactProjects: [
     {
       id: 'proj-1',
