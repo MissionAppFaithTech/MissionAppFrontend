@@ -8,7 +8,6 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
@@ -24,10 +23,13 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import MissionaryCampaignSection from '@/components/campaign/MissionaryCampaignSection';
 import DonationModal from '@/components/profile/DonationModal';
 import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
+import { getMockCampaignForMissionary } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
+import type { CampaignData } from '@/types/campaign';
 import type { ProfileAboutData, ProfileData, SavedPost } from '@/types/profile';
 
 type SupporterTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
@@ -145,15 +147,20 @@ function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
 type SupporterMissionaryProfileViewProps = {
   profile?: ProfileData;
   posts?: SavedPost[];
+  campaign?: CampaignData | null;
 };
 
 export default function SupporterMissionaryProfileView({
   profile = mockProfile,
   posts = mockSavedPosts,
+  campaign,
 }: SupporterMissionaryProfileViewProps) {
   const [activeTab, setActiveTab] = useState<SupporterTabKey>('sobre');
   const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const missionaryCampaign =
+    campaign !== undefined ? campaign : getMockCampaignForMissionary(profile.username);
 
   // Filtra rigorosamente para exibir apenas as postagens deste missionário específico
   const missionaryPosts = posts.filter(
@@ -519,49 +526,11 @@ export default function SupporterMissionaryProfileView({
       )}
 
       {activeTab === 'campanha' && (
-        <Card
-          elevation={0}
-          sx={{
-            borderRadius: { xs: 2, sm: 3 },
-            border: '1px solid',
-            borderColor: 'divider',
-            boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
-            p: { xs: 2.5, sm: 3.5 },
-          }}
-        >
-          <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-            <Stack spacing={2.5}>
-              <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
-                Campanhas Ativas ({profile.campaignsCount ?? 4})
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Apoie as necessidades emergenciais e contínuas de sustentação e estrutura
-                missionária de {profile.displayName}.
-              </Typography>
-
-              <Box sx={{ pt: 1 }}>
-                <PillButton
-                  tone="missionFilled"
-                  size="medium"
-                  onClick={() => setDonationModalOpen(true)}
-                  sx={{
-                    minHeight: 44,
-                    px: 3,
-                    fontSize: '0.9375rem',
-                    fontWeight: 700,
-                    bgcolor: 'mission.main',
-                    color: 'common.white',
-                    '&:hover': { bgcolor: 'mission.dark' },
-                    boxShadow: '0 2px 8px rgba(230, 81, 0, 0.25)',
-                  }}
-                >
-                  <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
-                  Ofertar na Campanha
-                </PillButton>
-              </Box>
-            </Stack>
-          </CardContent>
-        </Card>
+        <MissionaryCampaignSection
+          campaign={missionaryCampaign}
+          missionaryName={profile.displayName}
+          isOwnProfile={false}
+        />
       )}
 
       {/* Modal de Oferta */}

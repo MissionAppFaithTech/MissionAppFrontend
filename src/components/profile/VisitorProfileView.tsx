@@ -2,20 +2,19 @@
 
 import { useState } from 'react';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import Typography from '@mui/material/Typography';
 import GuestCtaBanner from '@/components/common/GuestCtaBanner';
-import LockedContentNotice from '@/components/common/LockedContentNotice';
+import MissionaryCampaignSection from '@/components/campaign/MissionaryCampaignSection';
 import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import VisitorProfileAboutSection from '@/components/profile/VisitorProfileAboutSection';
 import VisitorProfilePostsSection from '@/components/profile/VisitorProfilePostsSection';
+import { getMockCampaignForMissionary } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
+import type { CampaignData } from '@/types/campaign';
 import type { ProfileData, SavedPost } from '@/types/profile';
 
 type VisitorTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
@@ -30,13 +29,17 @@ const visitorTabs: { key: VisitorTabKey; label: string; mobileLabel?: string }[]
 type VisitorProfileViewProps = {
   profile?: ProfileData;
   posts?: SavedPost[];
+  campaign?: CampaignData | null;
 };
 
 export default function VisitorProfileView({
   profile = mockProfile,
   posts = mockSavedPosts,
+  campaign,
 }: VisitorProfileViewProps) {
   const [activeTab, setActiveTab] = useState<VisitorTabKey>('sobre');
+  const missionaryCampaign =
+    campaign !== undefined ? campaign : getMockCampaignForMissionary(profile.username);
 
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
@@ -130,33 +133,11 @@ export default function VisitorProfileView({
       {activeTab === 'postagens' && <VisitorProfilePostsSection posts={posts} />}
 
       {activeTab === 'campanha' && (
-        <Card
-          elevation={0}
-          sx={{
-            borderRadius: { xs: 2, sm: 3 },
-            border: '1px solid',
-            borderColor: 'divider',
-            boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
-            p: { xs: 2.5, sm: 3.5 },
-          }}
-        >
-          <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-            <Stack spacing={2.5}>
-              <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
-                Campanhas Ativas ({profile.campaignsCount ?? 4})
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Apoie as necessidades emergenciais e contínuas de sustentação e estrutura
-                missionária.
-              </Typography>
-              <LockedContentNotice
-                title="Contribua com esta missão"
-                description="Cadastre-se para fazer doações seguras, acompanhar recibos e manter contato direto com o missionário."
-                registerHref="/select-role"
-              />
-            </Stack>
-          </CardContent>
-        </Card>
+        <MissionaryCampaignSection
+          campaign={missionaryCampaign}
+          missionaryName={profile.displayName}
+          isOwnProfile={false}
+        />
       )}
     </Stack>
   );

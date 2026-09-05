@@ -459,7 +459,11 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           </Typography>
                           <CampaignBadge label={campaign.badge || 'Oficial'} size="small" />
                         </Stack>
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: 'block' }}
+                        >
                           Mission App Brasil · Mobilização Nacional
                         </Typography>
                       </Box>
