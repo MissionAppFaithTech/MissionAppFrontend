@@ -150,13 +150,8 @@ export default function MissionaryCampaignSection({
               </PillButton>
             </Stack>
 
-            {/* Carrossel Rotativo de Imagens */}
-            {campaign.images && campaign.images.length > 0 && (
-              <CampaignMediaCarousel images={campaign.images} title={campaign.title} />
-            )}
-
-            {/* Informações da Campanha (Título, Subtítulo, Descrição) */}
-            <Stack spacing={1.5}>
+            {/* 1. Título e Subtítulo da Campanha (O Título vem primeiro) */}
+            <Stack spacing={1}>
               <Typography
                 variant="h5"
                 component="h2"
@@ -170,18 +165,28 @@ export default function MissionaryCampaignSection({
                 {campaign.title}
               </Typography>
 
-              <Typography
-                variant="subtitle1"
-                color="text.secondary"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: { xs: '0.9375rem', sm: '1.05rem' },
-                  lineHeight: 1.5,
-                }}
-              >
-                {campaign.subtitle}
-              </Typography>
+              {campaign.subtitle && (
+                <Typography
+                  variant="subtitle1"
+                  color="text.secondary"
+                  sx={{
+                    fontWeight: 600,
+                    fontSize: { xs: '0.9375rem', sm: '1.05rem' },
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {campaign.subtitle}
+                </Typography>
+              )}
+            </Stack>
 
+            {/* 2. Carrossel Rotativo de Imagens da Campanha */}
+            {campaign.images && campaign.images.length > 0 && (
+              <CampaignMediaCarousel images={campaign.images} title={campaign.title} />
+            )}
+
+            {/* 3. Detalhes e Descrição da Campanha */}
+            <Stack spacing={1.5}>
               {campaign.churchDay && (
                 <Stack
                   direction="row"
@@ -222,7 +227,7 @@ export default function MissionaryCampaignSection({
               </Typography>
             </Stack>
 
-            {/* Vídeo Opcional */}
+            {/* 4. Vídeo da Campanha */}
             {campaign.videoUrl && (
               <CampaignVideoPlayer videoUrl={campaign.videoUrl} title={campaign.title} />
             )}

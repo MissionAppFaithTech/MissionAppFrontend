@@ -72,5 +72,12 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: /configurações financeiras/i })
     ).toBeVisible();
+
+    // Verify "Voltar" button returns to /profile/sobre
+    const backBtn = page.getByRole('link', { name: /voltar para o perfil/i }).first();
+    await expect(backBtn).toBeVisible();
+    await backBtn.click();
+    await page.waitForURL('**/profile/sobre');
+    await expect(page).toHaveURL(/\/profile\/sobre/);
   });
 });

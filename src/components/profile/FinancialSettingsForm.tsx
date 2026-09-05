@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
@@ -215,16 +216,36 @@ export default function FinancialSettingsForm({
                   </Typography>
                 </Box>
 
-                <PillButton
-                  type="button"
-                  tone="primarySoftOutline"
-                  size="small"
-                  onClick={() => setPreviewOpen(true)}
-                  sx={{ minHeight: 44, px: 2, flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={1}
+                  sx={{
+                    alignItems: 'center',
+                    width: { xs: '100%', sm: 'auto' },
+                  }}
                 >
-                  <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
-                  Visualizar Prévia do Apoiador
-                </PillButton>
+                  <PillButton
+                    href="/profile/sobre"
+                    tone="primarySoftOutline"
+                    size="small"
+                    aria-label="Voltar para o perfil"
+                    sx={{ minHeight: 44, px: 2, flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
+                  >
+                    <ArrowBackIcon sx={{ fontSize: 18, mr: 0.75 }} />
+                    Voltar
+                  </PillButton>
+
+                  <PillButton
+                    type="button"
+                    tone="primarySoftOutline"
+                    size="small"
+                    onClick={() => setPreviewOpen(true)}
+                    sx={{ minHeight: 44, px: 2, flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
+                  >
+                    <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
+                    Visualizar Prévia do Apoiador
+                  </PillButton>
+                </Stack>
               </Box>
 
               {/* Banner Informativo de Segurança (RF 12.3) */}
@@ -658,6 +679,17 @@ export default function FinancialSettingsForm({
                   pt: 1,
                 }}
               >
+                <PillButton
+                  href="/profile/sobre"
+                  tone="primarySoftOutline"
+                  size="medium"
+                  aria-label="Voltar para o perfil"
+                  sx={{ minHeight: 44, px: 3, width: { xs: '100%', sm: 'auto' } }}
+                >
+                  <ArrowBackIcon sx={{ fontSize: 18, mr: 0.75 }} />
+                  Voltar
+                </PillButton>
+
                 <PillButton
                   type="button"
                   tone="primarySoftOutline"

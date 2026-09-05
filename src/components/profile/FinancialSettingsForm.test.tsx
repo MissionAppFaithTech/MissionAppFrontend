@@ -47,6 +47,10 @@ describe('FinancialSettingsForm Component', () => {
     expect(screen.getByDisplayValue('missionario@email.com')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Banco do Brasil')).toBeInTheDocument();
     expect(screen.getByDisplayValue('1234-5')).toBeInTheDocument();
+
+    const backButtons = screen.getAllByRole('link', { name: /voltar/i });
+    expect(backButtons.length).toBeGreaterThanOrEqual(1);
+    expect(backButtons[0]).toHaveAttribute('href', '/profile/sobre');
   });
 
   it('updates supporter message and character counter dynamically', async () => {

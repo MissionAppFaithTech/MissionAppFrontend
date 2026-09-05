@@ -180,19 +180,34 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
               >
                 <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                   <Stack spacing={3}>
-                    {/* Subtítulo em destaque */}
-                    <Typography
-                      variant="h6"
-                      component="h2"
-                      color="primary.main"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: { xs: '1.05rem', sm: '1.25rem' },
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {campaign.subtitle}
-                    </Typography>
+                    {/* Título e Subtítulo da Campanha (Título vem primeiro) */}
+                    <Stack spacing={1}>
+                      <Typography
+                        variant="h5"
+                        component="h2"
+                        color="primary.main"
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: { xs: '1.25rem', sm: '1.65rem' },
+                          lineHeight: 1.3,
+                        }}
+                      >
+                        {campaign.title}
+                      </Typography>
+                      {campaign.subtitle && (
+                        <Typography
+                          variant="subtitle1"
+                          color="text.secondary"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: '0.95rem', sm: '1.1rem' },
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {campaign.subtitle}
+                        </Typography>
+                      )}
+                    </Stack>
 
                     {/* Carrossel de Fotos da Campanha */}
                     {campaign.images && campaign.images.length > 0 && (
