@@ -9,12 +9,14 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import Avatar from '@mui/material/Avatar';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
+import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -186,7 +188,7 @@ function PostAuthor() {
   );
 }
 
-function PostCard({ showAuthor }: { showAuthor: boolean }) {
+function PostCard({ showAuthor, onShare }: { showAuthor: boolean; onShare?: () => void }) {
   return (
     <Card component="article" elevation={0} sx={cardSx}>
       <CardContent
@@ -238,7 +240,7 @@ function PostCard({ showAuthor }: { showAuthor: boolean }) {
             <IconButton aria-label="Salvar postagem" color="primary">
               <BookmarkBorderOutlinedIcon />
             </IconButton>
-            <IconButton aria-label="Compartilhar postagem" color="primary">
+            <IconButton aria-label="Compartilhar postagem" color="primary" onClick={onShare}>
               <ShareOutlinedIcon />
             </IconButton>
           </Stack>
@@ -251,6 +253,14 @@ function PostCard({ showAuthor }: { showAuthor: boolean }) {
 export default function ProfilePostsPage() {
   const [feedView, setFeedView] = useState<FeedView>('mine');
   const [isCreatingPost, setIsCreatingPost] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setToastOpen(true);
+    }
+  };
 
   return (
     <Stack spacing={{ xs: 2, sm: 3 }}>
@@ -276,7 +286,34 @@ export default function ProfilePostsPage() {
       )}
 
       <FeedNavigation value={feedView} onChange={setFeedView} />
-      <PostCard showAuthor={feedView === 'general'} />
+      <PostCard showAuthor={feedView === 'general'} onShare={handleShare} />
+
+      {/* Toast Notification no Padrão de Cores do Sistema */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity="success"
+          variant="filled"
+          role="status"
+          aria-live="polite"
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'common.white',
+            fontWeight: 600,
+            boxShadow: 3,
+            '& .MuiAlert-icon': {
+              color: 'common.white',
+            },
+          }}
+        >
+          Link copiado para a área de transferência!
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

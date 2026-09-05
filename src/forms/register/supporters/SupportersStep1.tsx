@@ -146,8 +146,16 @@ export default function SupportersStep1() {
         control={control}
         render={({ field }) => (
           <FormControl fullWidth>
-            <InputLabel shrink>Comunidade de fé (opcional)</InputLabel>
-            <Select {...field} label="Comunidade de fé (opcional)" displayEmpty>
+            <InputLabel id="supporter-faith-community-label" shrink>
+              Comunidade de fé (opcional)
+            </InputLabel>
+            <Select
+              {...field}
+              labelId="supporter-faith-community-label"
+              id="faithCommunity"
+              label="Comunidade de fé (opcional)"
+              displayEmpty
+            >
               <MenuItem value="">
                 <em>Nenhuma</em>
               </MenuItem>

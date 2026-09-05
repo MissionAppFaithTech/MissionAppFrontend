@@ -105,7 +105,13 @@ export default async function UserPage({ params }: UserPageProps) {
       <VisitorNavbar maxWidth="lg" />
 
       {/* Área Central de Conteúdo */}
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4 } }}>
+      <Container
+        component="main"
+        id="main-content"
+        tabIndex={-1}
+        maxWidth="lg"
+        sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4 }, outline: 'none' }}
+      >
         <VisitorProfileView profile={profile} />
       </Container>
 

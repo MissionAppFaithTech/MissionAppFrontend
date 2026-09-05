@@ -4,6 +4,7 @@ import './globals.css';
 import { DM_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import JsonLd, { generateOrganizationAndWebsiteSchema } from '@/components/seo/JsonLd';
+import SkipToContent from '@/components/common/SkipToContent';
 import { getSiteUrl, siteConfig } from '@/lib/site';
 
 const dmSans = DM_Sans({
@@ -109,7 +110,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <JsonLd data={orgWebsiteSchema} />
       </head>
       <body className={dmSans.className}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <SkipToContent />
+          {children}
+        </Providers>
       </body>
     </html>
   );

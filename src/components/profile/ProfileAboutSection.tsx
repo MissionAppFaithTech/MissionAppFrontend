@@ -60,9 +60,10 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
               aria-label="Editar"
               onClick={onEditAction}
               sx={{
-                minWidth: { xs: 32, sm: 'auto' },
-                width: { xs: 32, sm: 'auto' },
-                height: { xs: 32, sm: 'auto' },
+                minWidth: { xs: 44, sm: 'auto' },
+                minHeight: { xs: 44, sm: 'auto' },
+                width: { xs: 44, sm: 'auto' },
+                height: { xs: 44, sm: 'auto' },
                 px: { xs: 0, sm: 1.75 },
                 py: { xs: 0, sm: 0.5 },
                 gap: 0.5,

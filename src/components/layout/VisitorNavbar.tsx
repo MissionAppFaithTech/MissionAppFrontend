@@ -36,7 +36,7 @@ export default function VisitorNavbar({ maxWidth = 'lg', onSearchClick }: Visito
           }}
           sx={{
             width: '100%',
-            maxWidth: { xs: 170, sm: 240, md: 320 },
+            maxWidth: { xs: 150, sm: 240, md: 320 },
             '& .MuiOutlinedInput-root': {
               height: { xs: 34, sm: 36 },
               bgcolor: 'background.paper',

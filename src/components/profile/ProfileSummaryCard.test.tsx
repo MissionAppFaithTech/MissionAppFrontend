@@ -12,6 +12,7 @@ describe('ProfileSummaryCard component', () => {
     expect(screen.getByText(`@${mockProfile.username}`)).toBeInTheDocument();
     expect(screen.getByText(mockProfile.roleDescription)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /editar perfil/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /configurar doações/i })).toBeInTheDocument();
   });
 
   it('renders action buttons with "Ofertar" button when isOwnProfile is false', () => {

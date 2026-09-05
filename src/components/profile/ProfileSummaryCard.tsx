@@ -97,6 +97,8 @@ export default function ProfileSummaryCard({
     fontWeight: 600,
     whiteSpace: 'nowrap' as const,
     minHeight: 44,
+    flex: { xs: '1 1 auto', sm: 'none' },
+    justifyContent: 'center',
   };
 
   return (
@@ -138,7 +140,7 @@ export default function ProfileSummaryCard({
                 <PersonIcon sx={{ fontSize: { xs: 44, sm: 54, md: 64 } }} />
               </Avatar>
               <Box
-                aria-label="Adicionar foto de perfil"
+                aria-hidden="true"
                 sx={{
                   position: 'absolute',
                   right: -2,
@@ -296,6 +298,16 @@ export default function ProfileSummaryCard({
                 >
                   Editar perfil
                 </PillButton>
+                {!isSupporter && (
+                  <PillButton
+                    href="/profile/financeiro"
+                    tone="primarySoftOutline"
+                    size="medium"
+                    sx={actionSx}
+                  >
+                    Configurar Doações
+                  </PillButton>
+                )}
                 <PillButton
                   tone="primarySoftOutline"
                   size="medium"
@@ -399,6 +411,7 @@ export default function ProfileSummaryCard({
         onClose={() => setDonationModalOpen(false)}
         missionaryName={displayName}
         isOwnProfile={isOwnProfile}
+        financialConfig={profile.financial}
       />
 
       {/* Toast Notification no Padrão de Cores do Sistema */}

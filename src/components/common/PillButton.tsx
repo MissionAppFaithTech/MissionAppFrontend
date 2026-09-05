@@ -37,6 +37,10 @@ const baseSx = {
   textTransform: 'none',
   boxShadow: 'none',
   transition: 'background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease',
+  '&:focus-visible': {
+    outline: '2px solid #0D2B5C',
+    outlineOffset: '2px',
+  },
 };
 
 const hoverLightSx = {
@@ -49,7 +53,7 @@ const hoverLightSx = {
 /** Figma profile actions — um pouco mais compactos que o default do MUI. */
 const figmaActionBase = {
   borderRadius: '10px',
-  minHeight: 32,
+  minHeight: { xs: 44, sm: 32 },
   py: 0.5,
   px: 1.75,
   fontSize: '0.8125rem',
@@ -58,6 +62,10 @@ const figmaActionBase = {
   boxShadow: 'none',
   '&:hover': {
     boxShadow: 'none',
+  },
+  '&:focus-visible': {
+    outline: '2px solid #0D2B5C',
+    outlineOffset: '2px',
   },
 } as const;
 

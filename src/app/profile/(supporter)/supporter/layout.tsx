@@ -35,7 +35,7 @@ export default function SupporterProfileLayout({ children }: { children: ReactNo
             }}
             sx={{
               width: '100%',
-              maxWidth: 320,
+              maxWidth: { xs: 150, sm: 240, md: 320 },
               '& .MuiOutlinedInput-root': {
                 height: { xs: 34, sm: 36 },
                 bgcolor: 'background.paper',
@@ -53,7 +53,13 @@ export default function SupporterProfileLayout({ children }: { children: ReactNo
         </PageNavbarActions>
       </PageNavbar>
 
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4, md: 6 } }}>
+      <Container
+        component="main"
+        id="main-content"
+        tabIndex={-1}
+        maxWidth="lg"
+        sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4, md: 6 }, outline: 'none' }}
+      >
         <Stack spacing={2}>
           <ProfileSummaryCard profile={mockSupporterProfile} />
           <ProfileNavigation role="supporter" />

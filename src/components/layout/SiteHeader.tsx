@@ -161,6 +161,7 @@ export default function SiteHeader() {
         anchor="right"
         open={mobileOpen && !isDesktop}
         onClose={closeMobileMenu}
+        aria-label="Menu de navegação móvel"
         ModalProps={{ keepMounted: true }}
         sx={{
           display: { md: 'none' },

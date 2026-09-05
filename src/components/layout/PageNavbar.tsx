@@ -68,7 +68,15 @@ export default function PageNavbar({
             : undefined
         }
       >
-        <Toolbar disableGutters sx={{ gap: 2, py: 0.5, minHeight: 64 }}>
+        <Toolbar
+          disableGutters
+          sx={{
+            gap: { xs: 1, sm: 2 },
+            py: 0.5,
+            minHeight: { xs: 56, sm: 64 },
+            px: { xs: 1, sm: 0 },
+          }}
+        >
           {children}
         </Toolbar>
       </Container>

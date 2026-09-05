@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
 import VisitorProfileView from './VisitorProfileView';
+import { mockCampaign } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
 
 describe('VisitorProfileView component', () => {
@@ -47,6 +48,7 @@ describe('VisitorProfileView component', () => {
     const campanhaTab = screen.getByRole('tab', { name: /campanha/i });
     await user.click(campanhaTab);
 
-    expect(screen.getByText(/contribua com esta missão/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: mockCampaign.title })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /ofertar na campanha/i })).toBeInTheDocument();
   });
 });

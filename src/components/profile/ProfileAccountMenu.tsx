@@ -37,7 +37,7 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
         aria-haspopup="true"
         aria-expanded={isOpen ? 'true' : undefined}
         onClick={handleOpen}
-        sx={{ p: 0 }}
+        sx={{ p: 0, minWidth: 44, minHeight: 44 }}
       >
         <Avatar
           sx={{
@@ -146,6 +146,26 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
           }}
         >
           <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
+        </Box>
+
+        <Divider />
+
+        <Box
+          component={Link}
+          href="/profile/financeiro"
+          onClick={handleClose}
+          sx={{
+            display: 'block',
+            px: 2.5,
+            py: 1.5,
+            color: 'text.primary',
+            textDecoration: 'none',
+            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
+          }}
+        >
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+            Configurações Financeiras
+          </Typography>
         </Box>
 
         <Divider />

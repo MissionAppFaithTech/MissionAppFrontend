@@ -6,12 +6,14 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
+import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
@@ -22,6 +24,14 @@ type SavedPostsSectionProps = {
 };
 
 export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
+  const [toastOpen, setToastOpen] = useState(false);
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setToastOpen(true);
+    }
+  };
   const [prayedPosts, setPrayedPosts] = useState<
     Record<string, { count: number; active: boolean }>
   >(() => {
@@ -219,7 +229,12 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       <BookmarkIcon sx={{ fontSize: 20, color: 'primary.main' }} />
                     </IconButton>
 
-                    <IconButton aria-label="Compartilhar" size="small" color="primary">
+                    <IconButton
+                      aria-label="Compartilhar"
+                      size="small"
+                      color="primary"
+                      onClick={handleShare}
+                    >
                       <ShareOutlinedIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                   </Stack>
@@ -245,6 +260,33 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
           </Card>
         );
       })}
+
+      {/* Toast Notification no Padrão de Cores do Sistema */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity="success"
+          variant="filled"
+          role="status"
+          aria-live="polite"
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'common.white',
+            fontWeight: 600,
+            boxShadow: 3,
+            '& .MuiAlert-icon': {
+              color: 'common.white',
+            },
+          }}
+        >
+          Link copiado para a área de transferência!
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

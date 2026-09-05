@@ -44,6 +44,26 @@ export const mockProfile: ProfileData = {
     campaignTitle: 'Campanha de Educação & Esperança',
     campaignBadge: true,
   },
+  financial: {
+    supporterMessage:
+      'Sua oferta voluntária sustenta nossa atuação direta em comunidades carentes da África do Sul, permitindo manter projetos de educação infantil e apoio pastoral. Que Deus abençoe sua generosidade!',
+    pix: {
+      enabled: true,
+      key: 'samuelhe@gmail.com',
+      keyType: 'email',
+      qrCodeUrl: '/images/projects/projeto-impacto.jpg',
+    },
+    bankTransfer: {
+      enabled: true,
+      bankName: 'Banco do Brasil',
+      bankNumber: '001',
+      agency: '1234-5',
+      account: '98765-4',
+      accountType: 'corrente',
+      holderName: 'Samuel Mendonça',
+      holderDocument: '123.456.789-00',
+    },
+  },
 };
 
 export const mockSupporterProfile: ProfileData = {

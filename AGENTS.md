@@ -101,6 +101,35 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 
 ---
 
+## Accessibility (mandatory — WCAG 2.2 AA/AAA)
+
+**Accessibility (a11y) is strictly mandatory for every line of code, component, page, form, and dialog created or modified.** The app must be fully operable by blind users, screen reader users, keyboard-only users, and individuals with visual, motor, or cognitive disabilities.
+
+### Rules
+
+1. **Semantic HTML5 & Landmarks:** Always use semantic elements (`<main id="main-content" tabIndex={-1}>`, `<nav>`, `<header>`, `<footer>`, `<section aria-labelledby="...">`) rather than generic `<div>` wrappers. Every page must contain exactly one `<main>` landmark.
+2. **Skip Links:** Provide an accessible "Pular para o conteúdo principal" (Skip to main content) link at the top of every page layout, visible upon keyboard focus.
+3. **Screen Reader & Labeling Standards:**
+   - All icon buttons (`IconButton`) and interactive controls without visible text **must** have an explicit, localized `aria-label`.
+   - Modals and dialogs (`Dialog`) **must** declare `aria-labelledby` linking to the title and `aria-describedby` linking to descriptions.
+   - All images (`next/image`) must have meaningful `alt` text or `alt=""` with `aria-hidden="true"` for purely decorative elements.
+4. **Keyboard Navigation & Focus Management:**
+   - Every interactive control must be reachable and actionable via keyboard (`Tab`, `Shift+Tab`, `Enter`, `Space`, `Escape`).
+   - Visual focus indicators (`:focus-visible`) must **never** be removed (`outline: none` without replacement is strictly forbidden). Use high-contrast focus rings.
+   - Dialogs and drawers must trap focus while open, close on `Escape`, and restore focus to the trigger upon dismissal.
+5. **Forms & Input Accessibility:**
+   - All form inputs must have associated `<label>` elements via `htmlFor` / `id` or `aria-labelledby`.
+   - Error messages must be linked to inputs via `aria-describedby` and `aria-invalid="true"`.
+   - Dynamic validation updates and toast notifications must use ARIA live regions (`role="status"`, `aria-live="polite"` or `role="alert"`).
+6. **Touch Targets & Color Contrast:**
+   - Minimum 44x44px touch targets on mobile viewports.
+   - Color contrast must meet or exceed WCAG AA standards (minimum 4.5:1 for normal text, 3:1 for large text and UI components).
+   - Never use color alone as the single visual cue for status or errors (always pair with icons or explicit text).
+7. **Automated Verification:**
+   - Run automated accessibility tests via `@axe-core/playwright` across all routes. Zero tolerance for critical or serious accessibility violations.
+
+---
+
 ## UI component reuse (mandatory)
 
 **Reuse first. Create only when nothing similar exists.**

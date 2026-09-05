@@ -3,26 +3,26 @@ import { createTheme, type ThemeOptions } from '@mui/material/styles';
 /** UI color tokens */
 export const colors = {
   primary: '#0D2B5C',
-  secondary: '#F97316',
+  secondary: '#C2410C',
 
-  success: '#22C55E',
-  warning: '#F59E0B',
-  error: '#EF4444',
+  success: '#15803D',
+  warning: '#B45309',
+  error: '#DC2626',
 
   background: '#F7F9FC',
   surface: '#FFFFFF',
 
   textPrimary: '#081C3A',
-  textSecondary: '#6B7280',
+  textSecondary: '#475569',
 
-  border: '#D1D5DB',
+  border: '#CBD5E1',
 } as const;
 
 export const roleColors = {
   missionary: '#0D2B5C',
   supporter: '#6BA6FF',
   intermediate: '#2563EB',
-  mission: '#F97316',
+  mission: '#C2410C',
 } as const;
 
 /** Derived shades for MUI palette variants */
@@ -32,8 +32,8 @@ const shades = {
   supporterDark: '#4F8FE6',
   intermediateLight: '#3B82F6',
   intermediateDark: '#1D4ED8',
-  missionLight: '#FB923C',
-  missionDark: '#EA580C',
+  missionLight: '#EA580C',
+  missionDark: '#9A3412',
   surfaceMuted: '#EAF1FA',
 } as const;
 
@@ -240,6 +240,16 @@ export function createAppTheme(mode: 'light' | 'dark') {
           },
         },
       },
+      MuiButtonBase: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focusVisible': {
+              outline: isLight ? '2px solid #0D2B5C' : '2px solid #60A5FA',
+              outlineOffset: '2px',
+            },
+          },
+        },
+      },
       MuiButton: {
         defaultProps: {
           disableElevation: true,
@@ -250,6 +260,14 @@ export function createAppTheme(mode: 'light' | 'dark') {
             textTransform: 'none',
             fontWeight: 500,
             borderRadius: 4,
+            minHeight: 38,
+            '@media (max-width:600px)': {
+              minHeight: 44,
+            },
+            '&.Mui-focusVisible': {
+              outline: isLight ? '2px solid #0D2B5C' : '2px solid #60A5FA',
+              outlineOffset: '2px',
+            },
           },
         },
         variants: [
@@ -335,8 +353,28 @@ export function createAppTheme(mode: 'light' | 'dark') {
       MuiIconButton: {
         styleOverrides: {
           root: {
+            minWidth: 36,
+            minHeight: 36,
+            '@media (max-width:600px)': {
+              minWidth: 44,
+              minHeight: 44,
+            },
+            '&.Mui-focusVisible': {
+              outline: isLight ? '2px solid #0D2B5C' : '2px solid #60A5FA',
+              outlineOffset: '2px',
+            },
             '&:hover': {
               color: roleColors.intermediate,
+            },
+          },
+        },
+      },
+      MuiTab: {
+        styleOverrides: {
+          root: {
+            '&.Mui-focusVisible': {
+              outline: isLight ? '2px solid #0D2B5C' : '2px solid #60A5FA',
+              outlineOffset: '-2px',
             },
           },
         },

@@ -267,317 +267,321 @@ export default function LandingPage() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <SiteHeader />
 
-      <LandingHero />
+      <Box component="main" id="main-content" tabIndex={-1} sx={{ outline: 'none' }}>
+        <LandingHero />
 
-      <Box id="objetivo" component="section" sx={{ py: { xs: 6, md: 10 } }}>
-        <Container maxWidth={false} sx={landingContainerSx}>
-          <Stack spacing={4} sx={{ alignItems: 'center' }}>
-            <SectionHeader
-              eyebrow="Nossa missão"
-              title="Conectamos missionários e apoiadores em um só lugar."
-              subtitle="Acompanhe histórias, compartilhe avanços, ore junto e fortaleça relacionamentos que sustentam a missão."
-            />
-          </Stack>
-        </Container>
-      </Box>
-
-      <Divider sx={{ width: '50%', mx: 'auto' }} />
-
-      <Box id="sobre" component="section" sx={{ py: { xs: 6, md: 10 } }}>
-        <Container maxWidth={false} sx={landingContainerSx}>
-          <Stack spacing={{ xs: 8, md: 10, lg: 12 }}>
-            {audienceCards.map((card, index) => (
-              <AudienceCard
-                key={card.label}
-                {...card}
-                layout="row"
-                imagePosition={index === 0 ? 'right' : 'left'}
-                header={
-                  index === 0 ? (
-                    <SectionHeader
-                      align="left"
-                      eyebrow="Dois lados da mesma missão"
-                      title="Para quem é?"
-                    />
-                  ) : undefined
-                }
+        <Box id="objetivo" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Stack spacing={4} sx={{ alignItems: 'center' }}>
+              <SectionHeader
+                eyebrow="Nossa missão"
+                title="Conectamos missionários e apoiadores em um só lugar."
+                subtitle="Acompanhe histórias, compartilhe avanços, ore junto e fortaleça relacionamentos que sustentam a missão."
               />
-            ))}
-          </Stack>
-        </Container>
-      </Box>
+            </Stack>
+          </Container>
+        </Box>
 
-      <Divider sx={{ width: '50%', mx: 'auto' }} />
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-      <Box id="como-funciona" component="section" sx={{ py: { xs: 6, md: 10 } }}>
-        <Container maxWidth={false} sx={landingContainerSx}>
-          <Stack spacing={5} sx={{ alignItems: 'center' }}>
-            <SectionHeader
-              eyebrow="Como funciona"
-              title="Comece sua jornada em poucos minutos."
-              subtitle="Crie seu perfil, conecte-se e compartilhe aquilo que Deus está fazendo através da sua missão."
-            />
+        <Box id="sobre" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Stack spacing={{ xs: 8, md: 10, lg: 12 }}>
+              {audienceCards.map((card, index) => (
+                <AudienceCard
+                  key={card.label}
+                  {...card}
+                  layout="row"
+                  imagePosition={index === 0 ? 'right' : 'left'}
+                  header={
+                    index === 0 ? (
+                      <SectionHeader
+                        align="left"
+                        eyebrow="Dois lados da mesma missão"
+                        title="Para quem é?"
+                      />
+                    ) : undefined
+                  }
+                />
+              ))}
+            </Stack>
+          </Container>
+        </Box>
 
-            <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
-              {steps.map(({ step, titleLines, icon, description }) => (
-                <Grid
-                  key={step}
-                  size={{ xs: 12, sm: 6, md: 4 }}
-                  sx={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch' }}
-                >
-                  <Stack
-                    spacing={2.5}
-                    sx={{
-                      width: '100%',
-                      maxWidth: { xs: 300, md: 350 },
-                      height: '100%',
-                      px: { xs: 4, md: 5 },
-                      py: { xs: 4, md: 5 },
-                      minHeight: { xs: 300, md: 350 },
-                      borderRadius: 3,
-                      bgcolor: 'background.paper',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      textAlign: 'center',
-                      border: 'none',
-                      boxShadow: `
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box id="como-funciona" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Stack spacing={5} sx={{ alignItems: 'center' }}>
+              <SectionHeader
+                eyebrow="Como funciona"
+                title="Comece sua jornada em poucos minutos."
+                subtitle="Crie seu perfil, conecte-se e compartilhe aquilo que Deus está fazendo através da sua missão."
+              />
+
+              <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
+                {steps.map(({ step, titleLines, icon, description }) => (
+                  <Grid
+                    key={step}
+                    size={{ xs: 12, sm: 6, md: 4 }}
+                    sx={{ display: 'flex', justifyContent: 'center', alignItems: 'stretch' }}
+                  >
+                    <Stack
+                      spacing={2.5}
+                      sx={{
+                        width: '100%',
+                        maxWidth: { xs: 300, md: 350 },
+                        height: '100%',
+                        px: { xs: 4, md: 5 },
+                        py: { xs: 4, md: 5 },
+                        minHeight: { xs: 300, md: 350 },
+                        borderRadius: 3,
+                        bgcolor: 'background.paper',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        border: 'none',
+                        boxShadow: `
                         0 1px 0 rgba(255, 255, 255, 0.95) inset,
                         0 14px 28px rgba(13, 43, 92, 0.1)
                       `,
-                      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        boxShadow: `
+                        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                        '&:hover': {
+                          transform: 'translateY(-3px)',
+                          boxShadow: `
                           0 1px 0 rgba(255, 255, 255, 0.95) inset,
                           0 18px 32px rgba(13, 43, 92, 0.12)
                         `,
-                      },
-                    }}
-                  >
-                    <Avatar
-                      sx={{
-                        width: 100,
-                        height: 100,
-                        bgcolor: 'transparent',
+                        },
                       }}
                     >
-                      <Image src={icon} alt="" width={100} height={100} />
-                    </Avatar>
-
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      sx={{
-                        alignItems: 'stretch',
-                        justifyContent: 'left',
-                        width: '100%',
-                      }}
-                    >
-                      <Box
+                      <Avatar
                         sx={{
-                          flexShrink: 0,
-                          alignSelf: 'stretch',
-                          aspectRatio: '1',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          borderRadius: '50%',
-                          bgcolor: 'rgba(251, 146, 60, 0.28)',
+                          width: 100,
+                          height: 100,
+                          bgcolor: 'transparent',
                         }}
                       >
-                        <Typography
+                        <Image src={icon} alt="" width={100} height={100} />
+                      </Avatar>
+
+                      <Stack
+                        direction="row"
+                        spacing={2}
+                        sx={{
+                          alignItems: 'stretch',
+                          justifyContent: 'left',
+                          width: '100%',
+                        }}
+                      >
+                        <Box
                           sx={{
-                            color: 'mission.dark',
-                            fontWeight: 800,
-                            lineHeight: 1,
-                            fontSize: '1.5rem',
+                            flexShrink: 0,
+                            alignSelf: 'stretch',
+                            aspectRatio: '1',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            borderRadius: '50%',
+                            bgcolor: 'rgba(251, 146, 60, 0.28)',
                           }}
                         >
-                          {step}
-                        </Typography>
-                      </Box>
-                      <Stack sx={{ justifyContent: 'center', textAlign: 'left' }}>
-                        {titleLines.map((line) => (
                           <Typography
-                            key={line}
                             sx={{
-                              fontWeight: 700,
-                              lineHeight: 1.2,
-                              fontSize: { xs: '1.125rem', md: '1.25rem' },
-                              color: 'primary.main',
+                              color: 'mission.dark',
+                              fontWeight: 800,
+                              lineHeight: 1,
+                              fontSize: '1.5rem',
                             }}
                           >
-                            {line}
+                            {step}
                           </Typography>
-                        ))}
+                        </Box>
+                        <Stack sx={{ justifyContent: 'center', textAlign: 'left' }}>
+                          {titleLines.map((line) => (
+                            <Typography
+                              key={line}
+                              sx={{
+                                fontWeight: 700,
+                                lineHeight: 1.2,
+                                fontSize: { xs: '1.125rem', md: '1.25rem' },
+                                color: 'primary.main',
+                              }}
+                            >
+                              {line}
+                            </Typography>
+                          ))}
+                        </Stack>
                       </Stack>
-                    </Stack>
 
-                    <Typography
-                      variant="body1"
-                      color="text.secondary"
+                      <Typography
+                        variant="body1"
+                        color="text.secondary"
+                        sx={{
+                          fontWeight: 500,
+                          lineHeight: 1.55,
+                          fontSize: { xs: '0.9375rem', md: '1rem' },
+                          textAlign: 'left',
+                          width: '100%',
+                        }}
+                      >
+                        {description}
+                      </Typography>
+                    </Stack>
+                  </Grid>
+                ))}
+              </Grid>
+            </Stack>
+          </Container>
+        </Box>
+
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box id="faq" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Grid container spacing={{ xs: 4, md: 8 }} sx={{ alignItems: 'center' }}>
+              <Grid size={{ xs: 12, md: 5 }}>
+                <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
+                  <SectionHeader
+                    eyebrow="Perguntas frequentes"
+                    title="Tudo o que você precisa saber."
+                    subtitle="Reunimos as principais dúvidas para ajudar você a utilizar a plataforma com confiança e tranquilidade."
+                  />
+                  <Stack spacing={1} sx={{ alignItems: 'center', width: '100%' }}>
+                    <Box
+                      component="img"
+                      src="/images/faq-illustration.PNG"
+                      alt="Perguntas frequentes"
                       sx={{
-                        fontWeight: 500,
-                        lineHeight: 1.55,
-                        fontSize: { xs: '0.9375rem', md: '1rem' },
-                        textAlign: 'left',
                         width: '100%',
+                        maxWidth: 300,
+                        mx: 'auto',
+                      }}
+                    />
+
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                      Continua com dúvida?
+                    </Typography>
+                    <PillButton
+                      href="/select-role"
+                      tone="missionFlat"
+                      size="small"
+                      sx={{
+                        py: 0.5,
+                        px: 2,
+                        fontSize: '0.875rem',
+                        fontWeight: 600,
+                        minHeight: 36,
                       }}
                     >
-                      {description}
-                    </Typography>
+                      Entre em contato
+                    </PillButton>
                   </Stack>
-                </Grid>
-              ))}
-            </Grid>
-          </Stack>
-        </Container>
-      </Box>
-
-      <Divider sx={{ width: '50%', mx: 'auto' }} />
-
-      <Box id="faq" component="section" sx={{ py: { xs: 6, md: 10 } }}>
-        <Container maxWidth={false} sx={landingContainerSx}>
-          <Grid container spacing={{ xs: 4, md: 8 }} sx={{ alignItems: 'center' }}>
-            <Grid size={{ xs: 12, md: 5 }}>
-              <Stack spacing={2} sx={{ alignItems: { xs: 'center', md: 'flex-start' } }}>
-                <SectionHeader
-                  eyebrow="Perguntas frequentes"
-                  title="Tudo o que você precisa saber."
-                  subtitle="Reunimos as principais dúvidas para ajudar você a utilizar a plataforma com confiança e tranquilidade."
-                />
-                <Stack spacing={1} sx={{ alignItems: 'center', width: '100%' }}>
-                  <Box
-                    component="img"
-                    src="/images/faq-illustration.PNG"
-                    alt="Perguntas frequentes"
-                    sx={{
-                      width: '100%',
-                      maxWidth: 300,
-                      mx: 'auto',
-                    }}
-                  />
-
-                  <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                    Continua com dúvida?
-                  </Typography>
-                  <PillButton
-                    href="/select-role"
-                    tone="missionFlat"
-                    size="small"
-                    sx={{
-                      py: 0.5,
-                      px: 2,
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      minHeight: 36,
-                    }}
-                  >
-                    Entre em contato
-                  </PillButton>
                 </Stack>
-              </Stack>
+              </Grid>
+
+              <Grid size={{ xs: 12, md: 7 }}>
+                <Stack spacing={2}>
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        Como funciona o cadastro de missionários?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
+                        por e-mail com a aprovação, solicitação de informações adicionais ou
+                        reprovação.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        Como funciona o cadastro de missionários?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
+                        por e-mail com a aprovação, solicitação de informações adicionais ou
+                        reprovação.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        Como funciona o cadastro de missionários?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
+                        por e-mail com a aprovação, solicitação de informações adicionais ou
+                        reprovação.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        Como funciona o cadastro de missionários?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
+                        por e-mail com a aprovação, solicitação de informações adicionais ou
+                        reprovação.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        Como funciona o cadastro de missionários?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
+                        por e-mail com a aprovação, solicitação de informações adicionais ou
+                        reprovação.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        Posso receber apoio em oração pela plataforma?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        Sim. Você pode compartilhar pedidos de oração e manter seus apoiadores
+                        atualizados sobre sua jornada missionária.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+                </Stack>
+              </Grid>
             </Grid>
-
-            <Grid size={{ xs: 12, md: 7 }}>
-              <Stack spacing={2}>
-                <Accordion>
-                  <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      Como funciona o cadastro de missionários?
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography color="text.secondary">
-                      Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                      por e-mail com a aprovação, solicitação de informações adicionais ou
-                      reprovação.
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      Como funciona o cadastro de missionários?
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography color="text.secondary">
-                      Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                      por e-mail com a aprovação, solicitação de informações adicionais ou
-                      reprovação.
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      Como funciona o cadastro de missionários?
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography color="text.secondary">
-                      Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                      por e-mail com a aprovação, solicitação de informações adicionais ou
-                      reprovação.
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      Como funciona o cadastro de missionários?
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography color="text.secondary">
-                      Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                      por e-mail com a aprovação, solicitação de informações adicionais ou
-                      reprovação.
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      Como funciona o cadastro de missionários?
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography color="text.secondary">
-                      Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                      por e-mail com a aprovação, solicitação de informações adicionais ou
-                      reprovação.
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-
-                <Accordion>
-                  <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                    <Typography sx={{ fontWeight: 600 }}>
-                      Posso receber apoio em oração pela plataforma?
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography color="text.secondary">
-                      Sim. Você pode compartilhar pedidos de oração e manter seus apoiadores
-                      atualizados sobre sua jornada missionária.
-                    </Typography>
-                  </AccordionDetails>
-                </Accordion>
-              </Stack>
-            </Grid>
-          </Grid>
-        </Container>
+          </Container>
+        </Box>
       </Box>
 
       <Box
         id="footer"
-        component="section"
+        component="footer"
+        role="contentinfo"
+        aria-label="Rodapé do site"
         sx={{
           py: { xs: 3, md: 4 },
           bgcolor: 'primary.dark',
