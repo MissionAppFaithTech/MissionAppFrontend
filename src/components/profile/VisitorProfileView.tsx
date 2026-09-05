@@ -1,11 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ElementType } from 'react';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import VolunteerActivismOutlinedIcon from '@mui/icons-material/VolunteerActivismOutlined';
+import DynamicFeedOutlinedIcon from '@mui/icons-material/DynamicFeedOutlined';
+import CampaignOutlinedIcon from '@mui/icons-material/CampaignOutlined';
 import GuestCtaBanner from '@/components/common/GuestCtaBanner';
 import MissionaryCampaignSection from '@/components/campaign/MissionaryCampaignSection';
 import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
@@ -19,11 +23,23 @@ import type { ProfileData, SavedPost } from '@/types/profile';
 
 type VisitorTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
-const visitorTabs: { key: VisitorTabKey; label: string; mobileLabel?: string }[] = [
-  { key: 'sobre', label: 'Sobre' },
-  { key: 'projetos', label: 'Projetos de Impacto', mobileLabel: 'Projetos' },
-  { key: 'postagens', label: 'Postagens' },
-  { key: 'campanha', label: 'Campanha' },
+interface TabItem {
+  key: VisitorTabKey;
+  label: string;
+  mobileLabel?: string;
+  icon: ElementType;
+}
+
+const visitorTabs: TabItem[] = [
+  { key: 'sobre', label: 'Sobre', icon: InfoOutlinedIcon },
+  {
+    key: 'projetos',
+    label: 'Projetos de Impacto',
+    mobileLabel: 'Projetos',
+    icon: VolunteerActivismOutlinedIcon,
+  },
+  { key: 'postagens', label: 'Postagens', icon: DynamicFeedOutlinedIcon },
+  { key: 'campanha', label: 'Campanha', icon: CampaignOutlinedIcon },
 ];
 
 type VisitorProfileViewProps = {
@@ -60,7 +76,7 @@ export default function VisitorProfileView({
         buttonHref="/select-role"
       />
 
-      {/* 3. Navegação em Abas do Perfil */}
+      {/* 3. Navegação em Abas do Perfil (Com ícones redundantes no padrão GAIA) */}
       <Paper
         elevation={0}
         sx={{
@@ -87,22 +103,28 @@ export default function VisitorProfileView({
             '& .MuiTab-root': {
               minHeight: { xs: 48, sm: 52 },
               minWidth: { xs: 'max-content', md: 0 },
-              px: { xs: 2.5, sm: 3.5 },
+              px: { xs: 2, sm: 3 },
               color: 'primary.main',
               fontSize: { xs: '0.8125rem', sm: '0.875rem' },
               fontWeight: 700,
               flex: { md: 1 },
               maxWidth: 'none',
+              gap: 0.75,
+              '& .MuiSvgIcon-root': {
+                fontSize: { xs: 18, sm: 20 },
+              },
             },
             '& .Mui-selected': {
               color: 'mission.main',
             },
           }}
         >
-          {visitorTabs.map(({ key, label, mobileLabel }) => (
+          {visitorTabs.map(({ key, label, mobileLabel, icon: Icon }) => (
             <Tab
               key={key}
               value={key}
+              icon={<Icon />}
+              iconPosition="start"
               label={
                 <span>
                   <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>

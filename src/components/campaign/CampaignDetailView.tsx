@@ -64,9 +64,14 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
         sx={{
           position: 'relative',
           width: '100%',
-          height: { xs: 220, sm: 340, md: 420 },
+          minHeight: { xs: 340, sm: 400, md: 460 },
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
           bgcolor: 'primary.dark',
           overflow: 'hidden',
+          pt: { xs: 5, sm: 7, md: 9 },
+          pb: { xs: 7, sm: 8, md: 10 },
         }}
       >
         <Image
@@ -75,14 +80,15 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: 'cover', objectPosition: 'center 35%' }}
         />
+        {/* Scrim Gradiente de Alto Contraste (WCAG AAA) */}
         <Box
           sx={{
             position: 'absolute',
             inset: 0,
             background:
-              'linear-gradient(to top, rgba(13, 43, 92, 0.92) 0%, rgba(13, 43, 92, 0.45) 60%, rgba(13, 43, 92, 0.2) 100%)',
+              'linear-gradient(180deg, rgba(8, 28, 58, 0.45) 0%, rgba(8, 28, 58, 0.75) 45%, rgba(8, 28, 58, 0.96) 100%)',
           }}
         />
 
@@ -90,52 +96,72 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
           maxWidth="lg"
           sx={{
             position: 'relative',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-end',
-            pb: { xs: 3, sm: 4 },
+            zIndex: 1,
             px: { xs: 2, sm: 3 },
           }}
         >
-          <Stack spacing={1.5} sx={{ maxWidth: 840 }}>
+          <Stack spacing={2} sx={{ maxWidth: 900 }}>
+            {/* Linha de Selo e Badges Oficiais */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
-              <CampaignBadge label={campaign.badge} />
+              <CampaignBadge label={campaign.badge} variant="hero" />
               {campaign.churchDay && (
                 <Stack
                   direction="row"
                   spacing={0.75}
                   sx={{
                     alignItems: 'center',
-                    bgcolor: 'rgba(255, 255, 255, 0.2)',
-                    backdropFilter: 'blur(8px)',
-                    color: 'common.white',
+                    bgcolor: 'rgba(15, 23, 42, 0.65)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    color: '#FFFFFF',
                     px: 1.5,
                     py: 0.5,
                     borderRadius: 2,
-                    fontSize: '0.8125rem',
+                    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
                     fontWeight: 600,
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.25)',
                   }}
                 >
-                  <CalendarMonthIcon sx={{ fontSize: 16 }} />
+                  <CalendarMonthIcon sx={{ fontSize: 16, color: '#FB923C' }} />
                   <span>Dia Oficial nas Igrejas: {campaign.churchDay}</span>
                 </Stack>
               )}
             </Box>
 
+            {/* Título Principal H1 em Alto Contraste */}
             <Typography
-              variant="h3"
+              variant="h1"
               component="h1"
-              color="common.white"
               sx={{
+                color: '#FFFFFF !important',
                 fontWeight: 800,
-                fontSize: { xs: '1.5rem', sm: '2.25rem', md: '2.75rem' },
+                fontSize: { xs: '1.65rem', sm: '2.25rem', md: '2.75rem' },
                 lineHeight: 1.2,
-                textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+                letterSpacing: '-0.02em',
+                textShadow:
+                  '0 2px 10px rgba(0, 0, 0, 0.7), 0 4px 24px rgba(0, 0, 0, 0.45)',
               }}
             >
               {campaign.title}
             </Typography>
+
+            {/* Subtítulo da Campanha no Hero */}
+            {campaign.subtitle && (
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.92) !important',
+                  fontWeight: 500,
+                  fontSize: { xs: '0.9375rem', sm: '1.05rem', md: '1.125rem' },
+                  lineHeight: 1.6,
+                  maxWidth: 840,
+                  textShadow: '0 1px 6px rgba(0, 0, 0, 0.6)',
+                }}
+              >
+                {campaign.subtitle}
+              </Typography>
+            )}
           </Stack>
         </Container>
       </Box>
@@ -143,7 +169,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
       {/* 2. Container Central */}
       <Container
         maxWidth="lg"
-        sx={{ px: { xs: 2, sm: 3 }, mt: { xs: -2, sm: -3 }, position: 'relative', zIndex: 2 }}
+        sx={{ px: { xs: 2, sm: 3 }, mt: { xs: -3, sm: -4, md: -5 }, position: 'relative', zIndex: 2 }}
       >
         <Grid container spacing={3}>
           {/* Coluna Principal */}
@@ -162,35 +188,6 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
               >
                 <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                   <Stack spacing={3}>
-                    {/* Título e Subtítulo da Campanha (Título vem primeiro) */}
-                    <Stack spacing={1}>
-                      <Typography
-                        variant="h5"
-                        component="h2"
-                        color="primary.main"
-                        sx={{
-                          fontWeight: 800,
-                          fontSize: { xs: '1.25rem', sm: '1.65rem' },
-                          lineHeight: 1.3,
-                        }}
-                      >
-                        {campaign.title}
-                      </Typography>
-                      {campaign.subtitle && (
-                        <Typography
-                          variant="subtitle1"
-                          color="text.secondary"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.95rem', sm: '1.1rem' },
-                            lineHeight: 1.5,
-                          }}
-                        >
-                          {campaign.subtitle}
-                        </Typography>
-                      )}
-                    </Stack>
-
                     {/* Carrossel de Fotos da Campanha */}
                     {campaign.images && campaign.images.length > 0 && (
                       <CampaignMediaCarousel images={campaign.images} title={campaign.title} />
@@ -199,9 +196,10 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                     {/* Descrição Completa (RF 13.3 - até 1.500 palavras) */}
                     <Stack spacing={1.5}>
                       <Typography
-                        variant="subtitle2"
+                        variant="h5"
+                        component="h2"
                         color="primary.main"
-                        sx={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '0.02em' }}
+                        sx={{ fontWeight: 800, fontSize: { xs: '1.15rem', sm: '1.35rem' } }}
                       >
                         Sobre esta Campanha
                       </Typography>
@@ -432,17 +430,30 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           width: 48,
                           height: 48,
                           borderRadius: '12px',
-                          bgcolor: 'rgba(194, 65, 12, 0.08)',
-                          color: 'mission.main',
+                          bgcolor: (theme) =>
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(249, 115, 22, 0.2)'
+                              : 'rgba(194, 65, 12, 0.08)',
+                          color: (theme) =>
+                            theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
                           border: '1.5px solid',
-                          borderColor: 'divider',
+                          borderColor: (theme) =>
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(249, 115, 22, 0.35)'
+                              : 'divider',
                         }}
                       >
-                        <CampaignIcon sx={{ fontSize: 26, color: 'mission.main' }} />
+                        <CampaignIcon
+                          sx={{
+                            fontSize: 26,
+                            color: (theme) =>
+                              theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main',
+                          }}
+                        />
                       </Box>
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Stack

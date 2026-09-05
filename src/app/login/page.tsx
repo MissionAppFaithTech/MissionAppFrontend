@@ -23,7 +23,7 @@ function LoginFallback() {
         justifyContent: 'center',
       }}
     >
-      <CircularProgress color="inherit" />
+      <CircularProgress color="inherit" aria-label="Carregando página de login" />
     </Box>
   );
 }

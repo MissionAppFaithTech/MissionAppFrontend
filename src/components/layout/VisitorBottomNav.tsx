@@ -51,6 +51,7 @@ export default function VisitorBottomNav() {
             key={item.label}
             component={Link}
             href={item.href}
+            aria-current={isActive ? 'page' : undefined}
             sx={{
               flex: 1,
               display: 'flex',
@@ -58,17 +59,25 @@ export default function VisitorBottomNav() {
               alignItems: 'center',
               justifyContent: 'center',
               minHeight: 48,
+              minWidth: 48,
               gap: 0.25,
               textDecoration: 'none',
-              color: isActive ? 'primary.main' : 'text.secondary',
-              transition: 'color 0.15s ease',
+              color: isActive ? 'mission.main' : 'text.secondary',
+              transition: 'color 0.15s ease, transform 0.15s ease',
               py: 0.5,
+              borderRadius: 1.5,
+              position: 'relative',
               '&:hover': {
-                color: 'primary.main',
+                color: 'mission.main',
+              },
+              '&:focus-visible': {
+                outline: '2px solid',
+                outlineColor: 'primary.main',
+                outlineOffset: '-2px',
               },
             }}
           >
-            <Icon sx={{ fontSize: 22 }} />
+            <Icon sx={{ fontSize: 24 }} />
             <Typography
               variant="caption"
               sx={{
@@ -79,6 +88,18 @@ export default function VisitorBottomNav() {
             >
               {item.label}
             </Typography>
+            {isActive && (
+              <Box
+                sx={{
+                  position: 'absolute',
+                  top: -6,
+                  width: 20,
+                  height: 3,
+                  borderRadius: 1.5,
+                  bgcolor: 'mission.main',
+                }}
+              />
+            )}
           </Box>
         );
       })}

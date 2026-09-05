@@ -10,12 +10,15 @@ describe('passwordStrength utility', () => {
     const res = getPasswordStrength('');
     expect(res.level).toBe('empty');
     expect(res.score).toBe(0);
+    expect(res.label).toBe('');
+    expect(res.color).toBe('inherit');
   });
 
   it('classifies weak passwords', () => {
     const res = getPasswordStrength('abc');
     expect(res.level).toBe('weak');
     expect(res.color).toBe('error');
+    expect(res.label).toBe('Senha fraca');
     expect(res.score).toBe(33);
   });
 
@@ -24,15 +27,24 @@ describe('passwordStrength utility', () => {
     const res = getPasswordStrength('Abcdefgh');
     expect(res.level).toBe('medium');
     expect(res.color).toBe('warning');
+    expect(res.label).toBe('Senha média');
     expect(res.score).toBe(66);
   });
 
-  it('classifies strong passwords', () => {
-    // Meets all 5 requirements
-    const res = getPasswordStrength('Password123!');
-    expect(res.level).toBe('strong');
-    expect(res.color).toBe('success');
-    expect(res.score).toBe(100);
+  it('classifies strong passwords with bonus for 12+ chars', () => {
+    // Meets all 5 requirements and has 12+ chars -> 100
+    const res12 = getPasswordStrength('Password123!');
+    expect(res12.level).toBe('strong');
+    expect(res12.color).toBe('success');
+    expect(res12.label).toBe('Senha forte');
+    expect(res12.score).toBe(100);
+
+    // Meets all 5 requirements but only 8-11 chars -> 85
+    const res8 = getPasswordStrength('Pass123!');
+    expect(res8.level).toBe('strong');
+    expect(res8.color).toBe('success');
+    expect(res8.label).toBe('Senha forte');
+    expect(res8.score).toBe(85);
   });
 
   describe('validateStrongPassword', () => {
@@ -45,15 +57,33 @@ describe('passwordStrength utility', () => {
     });
 
     it('returns missing requirements when not strong', () => {
-      const res = validateStrongPassword('short');
-      expect(typeof res).toBe('string');
-      expect(res).toContain('Senha fraca');
+      expect(validateStrongPassword('abcdefgh1!')).toBe('Senha fraca: inclua uma letra maiúscula');
+      expect(validateStrongPassword('ABCDEFGH1!')).toBe('Senha fraca: inclua uma letra minúscula');
+      expect(validateStrongPassword('Abcdefgh!!')).toBe('Senha fraca: inclua um número');
+      expect(validateStrongPassword('Abcdefgh12')).toBe(
+        'Senha fraca: inclua um caractere especial (!@#$…)'
+      );
+      expect(validateStrongPassword('Ab1!')).toBe('Senha fraca: inclua pelo menos 8 caracteres');
+      expect(validateStrongPassword('short')).toBe(
+        'Senha fraca: inclua pelo menos 8 caracteres, uma letra maiúscula, um número, um caractere especial (!@#$…)'
+      );
     });
   });
 
   describe('passwordRequirements', () => {
-    it('has 5 standard requirements', () => {
+    it('has 5 standard requirements with working tests', () => {
       expect(passwordRequirements).toHaveLength(5);
+      const [len, lower, upper, digit, special] = passwordRequirements;
+      expect(len.test('12345678')).toBe(true);
+      expect(len.test('1234567')).toBe(false);
+      expect(lower.test('a')).toBe(true);
+      expect(lower.test('A')).toBe(false);
+      expect(upper.test('A')).toBe(true);
+      expect(upper.test('a')).toBe(false);
+      expect(digit.test('1')).toBe(true);
+      expect(digit.test('a')).toBe(false);
+      expect(special.test('@')).toBe(true);
+      expect(special.test('a')).toBe(false);
     });
   });
 });

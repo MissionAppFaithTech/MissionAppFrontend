@@ -1,21 +1,17 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
-import Link from 'next/link';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Alert, Stack, TextField, Typography } from '@mui/material';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
-import { validateStrongPassword } from '@/lib/passwordStrength';
+import PillButton from '@/components/common/PillButton';
+import { resetPasswordSchema, type ResetPasswordFormData } from '@/schemas/auth.schema';
 import {
   getResetTokenStatus,
   RESET_PASSWORD_TOKEN_TTL_MINUTES,
   resetPassword,
 } from '@/services/auth.service';
-
-type ResetPasswordValues = {
-  password: string;
-  confirmPassword: string;
-};
 
 type ResetPasswordFormProps = {
   token: string | null;
@@ -30,27 +26,14 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting, isValid },
-  } = useForm<ResetPasswordValues>({
-    mode: 'onChange',
+    formState: { errors, isSubmitting },
+  } = useForm<ResetPasswordFormData>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: 'onTouched',
     defaultValues: { password: '', confirmPassword: '' },
   });
 
   const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
-
-  const canSubmit = useMemo(() => {
-    const passwordOk = validateStrongPassword(password) === true;
-    const confirmOk = confirmPassword.length > 0 && confirmPassword === password;
-    return (
-      Boolean(token) &&
-      tokenStatus !== 'invalid' &&
-      tokenStatus !== 'expired' &&
-      isValid &&
-      passwordOk &&
-      confirmOk
-    );
-  }, [confirmPassword, isValid, password, token, tokenStatus]);
 
   if (tokenStatus === 'invalid') {
     return (
@@ -58,22 +41,18 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Link inválido
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Este link de redefinição é inválido ou está incompleto. Solicite um novo e-mail em
-          “Esqueci minha senha”.
-        </Typography>
-        <Button
-          component={Link}
-          href="/forgot-password"
-          variant="contained"
-          color="primary"
-          fullWidth
-        >
+
+        <Alert severity="error">
+          O link de redefinição informado não é válido. Solicite um novo link para continuar.
+        </Alert>
+
+        <PillButton href="/forgot-password" tone="cta" fullWidth sx={{ minHeight: 44 }}>
           Solicitar novo link
-        </Button>
-        <Button component={Link} href="/login" variant="text" fullWidth>
+        </PillButton>
+
+        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
           Voltar para o login
-        </Button>
+        </PillButton>
       </Stack>
     );
   }
@@ -84,22 +63,19 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Link expirado
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Este link de redefinição expirou (válido por {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos).
-          Solicite um novo e-mail para continuar.
-        </Typography>
-        <Button
-          component={Link}
-          href="/forgot-password"
-          variant="contained"
-          color="primary"
-          fullWidth
-        >
+
+        <Alert severity="warning">
+          Este link de redefinição expirou (validade máxima de {RESET_PASSWORD_TOKEN_TTL_MINUTES}{' '}
+          minutos). Por motivos de segurança, solicite um novo link.
+        </Alert>
+
+        <PillButton href="/forgot-password" tone="cta" fullWidth sx={{ minHeight: 44 }}>
           Solicitar novo link
-        </Button>
-        <Button component={Link} href="/login" variant="text" fullWidth>
+        </PillButton>
+
+        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
           Voltar para o login
-        </Button>
+        </PillButton>
       </Stack>
     );
   }
@@ -108,21 +84,27 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     return (
       <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
-          Senha atualizada
+          Senha alterada com sucesso!
         </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Sua nova senha foi salva. Você já pode entrar na sua conta.
-        </Typography>
-        <Button component={Link} href="/login" variant="contained" color="primary" fullWidth>
-          Ir para o login
-        </Button>
+
+        <Alert severity="success">
+          Sua nova senha foi salva. Você já pode acessar sua conta com as novas credenciais.
+        </Alert>
+
+        <PillButton href="/login" tone="cta" fullWidth sx={{ minHeight: 44 }}>
+          Entrar com a nova senha
+        </PillButton>
       </Stack>
     );
   }
 
-  const onSubmit = async (values: ResetPasswordValues) => {
-    if (!token) return;
+  const onSubmit = async (values: ResetPasswordFormData) => {
     setFormError(null);
+
+    if (!token) {
+      setFormError('Token de recuperação não informado');
+      return;
+    }
 
     try {
       await resetPassword({
@@ -154,9 +136,6 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       <Controller
         name="password"
         control={control}
-        rules={{
-          validate: (value) => validateStrongPassword(value),
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -176,10 +155,6 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       <Controller
         name="confirmPassword"
         control={control}
-        rules={{
-          required: 'Confirme sua senha',
-          validate: (value) => value === password || 'As senhas não coincidem',
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -194,19 +169,19 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         )}
       />
 
-      <Button
+      <PillButton
         type="submit"
-        variant="contained"
-        color="primary"
+        tone="cta"
         fullWidth
-        disabled={!canSubmit || isSubmitting}
+        disabled={isSubmitting}
+        sx={{ minHeight: 48, fontWeight: 600 }}
       >
         {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
-      </Button>
+      </PillButton>
 
-      <Button component={Link} href="/login" variant="text" fullWidth>
+      <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
         Voltar para o login
-      </Button>
+      </PillButton>
     </Stack>
   );
 }

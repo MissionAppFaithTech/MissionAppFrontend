@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
+import DynamicFeedOutlinedIcon from '@mui/icons-material/DynamicFeedOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
@@ -16,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import EmptyState from '@/components/common/EmptyState';
 import LockedContentNotice from '@/components/common/LockedContentNotice';
 import PillButton from '@/components/common/PillButton';
 import type { SavedPost } from '@/types/profile';
@@ -33,6 +35,19 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
       setToastOpen(true);
     }
   };
+
+  if (!posts || posts.length === 0) {
+    return (
+      <EmptyState
+        icon={DynamicFeedOutlinedIcon}
+        title="Nenhuma publicação no momento"
+        description="Este missionário ainda não compartilhou atualizações públicas ou pedidos de oração."
+        actionLabel="Explorar outras missões"
+        actionHref="/#buscar"
+      />
+    );
+  }
+
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
       {posts.map((post) => (
@@ -167,6 +182,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     aria-label="Curtir postagem (necessário login)"
                     size="small"
                     color="primary"
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <FavoriteBorderOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -184,6 +200,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     aria-label="Salvar postagem (necessário login)"
                     size="small"
                     color="primary"
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <BookmarkBorderOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -193,6 +210,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     size="small"
                     color="primary"
                     onClick={handleShare}
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <ShareOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -208,6 +226,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                     fontWeight: 600,
                     borderColor: 'primary.main',
+                    minHeight: 44,
                   }}
                 >
                   Orei · {post.prayersCount ?? 0}

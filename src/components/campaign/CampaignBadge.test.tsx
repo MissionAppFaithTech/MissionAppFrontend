@@ -12,4 +12,10 @@ describe('CampaignBadge component', () => {
     render(<CampaignBadge label="Campanha Especial 2026" size="small" />);
     expect(screen.getByText('Campanha Especial 2026')).toBeInTheDocument();
   });
+
+  it('renders hero variant with glassmorphic styling', () => {
+    render(<CampaignBadge variant="hero" label="Selo Oficial de Campanha" />);
+    expect(screen.getByText('Selo Oficial de Campanha')).toBeInTheDocument();
+  });
 });
+

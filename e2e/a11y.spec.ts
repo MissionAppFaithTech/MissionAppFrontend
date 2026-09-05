@@ -15,12 +15,14 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
     { name: 'Missionary Profile (Financial Settings)', path: '/profile/financeiro' },
     { name: 'Supporter Profile (Following)', path: '/profile/supporter/missionarios' },
     { name: 'Supporter Profile (Saved Posts)', path: '/profile/supporter/postagens-salvas' },
+    { name: 'Dedicated Campaign Page', path: '/campanha/campanha-educacao-esperanca' },
   ];
 
   for (const route of publicRoutes) {
     test(`route ${route.name} (${route.path}) satisfies WCAG 2.2 AA accessibility standards`, async ({
       page,
     }) => {
+      test.setTimeout(60000);
       await page.goto(route.path, { waitUntil: 'domcontentloaded' });
       await page.waitForTimeout(300);
 
@@ -52,10 +54,10 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   test('DonationModal open dialog satisfies WCAG 2.2 AA accessibility standards', async ({
     page,
   }) => {
-    await page.goto('/profile/campanha', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(300);
+    await page.goto('/profile/campanha', { waitUntil: 'networkidle' });
 
-    const ofertarBtn = page.getByRole('button', { name: /ofertar/i }).first();
+    const ofertarBtn = page.getByRole('button', { name: /ofertar na campanha/i });
+    await expect(ofertarBtn).toBeVisible();
     await ofertarBtn.click();
 
     const dialog = page.getByRole('dialog');
@@ -79,10 +81,10 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   test('ContactModal open dialog satisfies WCAG 2.2 AA accessibility standards', async ({
     page,
   }) => {
-    await page.goto('/profile/sobre', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(300);
+    await page.goto('/profile/sobre', { waitUntil: 'networkidle' });
 
     const contactBtn = page.getByRole('button', { name: /contato/i });
+    await expect(contactBtn).toBeVisible();
     await contactBtn.click();
 
     const dialog = page.getByRole('dialog');

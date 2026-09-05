@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -33,6 +35,10 @@ import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
+import {
+  financialSettingsSchema,
+  type FinancialSettingsFormData,
+} from '@/schemas/financial.schema';
 import type { BankAccountType, FinancialConfigData, PixKeyType } from '@/types/profile';
 
 type FinancialSettingsFormProps = {
@@ -69,28 +75,65 @@ export default function FinancialSettingsForm({
 }: FinancialSettingsFormProps) {
   const source = initialData ?? defaultFinancialData;
 
-  const [supporterMessage, setSupporterMessage] = useState(source.supporterMessage);
-
-  // Pix state
-  const [pixEnabled, setPixEnabled] = useState(source.pix.enabled);
-  const [pixKey, setPixKey] = useState(source.pix.key);
-  const [pixKeyType, setPixKeyType] = useState<PixKeyType>(source.pix.keyType);
-  const [pixQrCodeUrl, setPixQrCodeUrl] = useState<string>(source.pix.qrCodeUrl || '');
-
-  // Bank transfer state
-  const [bankEnabled, setBankEnabled] = useState(source.bankTransfer.enabled);
-  const [bankName, setBankName] = useState(source.bankTransfer.bankName);
-  const [bankNumber, setBankNumber] = useState(source.bankTransfer.bankNumber);
-  const [agency, setAgency] = useState(source.bankTransfer.agency);
-  const [account, setAccount] = useState(source.bankTransfer.account);
-  const [accountType, setAccountType] = useState<BankAccountType>(source.bankTransfer.accountType);
-  const [holderName, setHolderName] = useState(source.bankTransfer.holderName);
-  const [holderDocument, setHolderDocument] = useState(source.bankTransfer.holderDocument);
-
-  // UI state
   const [previewOpen, setPreviewOpen] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<FinancialSettingsFormData>({
+    resolver: zodResolver(financialSettingsSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      supporterMessage: source.supporterMessage,
+      pixEnabled: source.pix.enabled,
+      pixKey: source.pix.key,
+      pixKeyType: source.pix.keyType,
+      pixQrCodeUrl: source.pix.qrCodeUrl || '',
+      bankEnabled: source.bankTransfer.enabled,
+      bankName: source.bankTransfer.bankName,
+      bankNumber: source.bankTransfer.bankNumber || '',
+      agency: source.bankTransfer.agency,
+      account: source.bankTransfer.account,
+      accountType: source.bankTransfer.accountType,
+      holderName: source.bankTransfer.holderName,
+      holderDocument: source.bankTransfer.holderDocument,
+    },
+  });
+
+  const [
+    supporterMessage,
+    pixEnabled,
+    pixKey,
+    pixKeyType,
+    pixQrCodeUrl,
+    bankEnabled,
+    bankName,
+    bankNumber,
+    agency,
+    account,
+    accountType,
+    holderName,
+    holderDocument,
+  ] = watch([
+    'supporterMessage',
+    'pixEnabled',
+    'pixKey',
+    'pixKeyType',
+    'pixQrCodeUrl',
+    'bankEnabled',
+    'bankName',
+    'bankNumber',
+    'agency',
+    'account',
+    'accountType',
+    'holderName',
+    'holderDocument',
+  ]);
 
   // Validation calculations
   const isPixComplete = pixEnabled ? pixKey.trim().length > 0 : false;
@@ -109,16 +152,16 @@ export default function FinancialSettingsForm({
     pix: {
       enabled: pixEnabled,
       key: pixKey,
-      keyType: pixKeyType,
+      keyType: pixKeyType as PixKeyType,
       qrCodeUrl: pixQrCodeUrl || undefined,
     },
     bankTransfer: {
       enabled: bankEnabled,
       bankName,
-      bankNumber,
+      bankNumber: bankNumber || '',
       agency,
       account,
-      accountType,
+      accountType: accountType as BankAccountType,
       holderName,
       holderDocument,
     },
@@ -128,36 +171,35 @@ export default function FinancialSettingsForm({
     const file = e.target.files?.[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      setPixQrCodeUrl(previewUrl);
+      setValue('pixQrCodeUrl', previewUrl, { shouldDirty: true, shouldValidate: true });
     }
   };
 
   const handleRemoveQrCode = () => {
-    setPixQrCodeUrl('');
+    setValue('pixQrCodeUrl', '', { shouldDirty: true, shouldValidate: true });
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const errors: string[] = [];
-
-    if (pixEnabled && !pixKey.trim()) {
-      errors.push('Pix está ativado, mas a chave Pix não foi informada.');
-    }
-
-    if (bankEnabled) {
-      if (!bankName.trim()) errors.push('Informe o nome da instituição bancária.');
-      if (!agency.trim()) errors.push('Informe a agência bancária.');
-      if (!account.trim()) errors.push('Informe o número da conta com dígito.');
-      if (!holderName.trim()) errors.push('Informe o nome do titular da conta.');
-      if (!holderDocument.trim()) errors.push('Informe o CPF/CNPJ do titular da conta.');
-    }
-
-    if (!pixEnabled && !bankEnabled) {
-      errors.push('Recomendado: ative ao menos um método de doação (Pix ou Transferência).');
-    }
-
-    setValidationErrors(errors);
-    onSave?.(currentFinancialConfig);
+  const onSubmit = (data: FinancialSettingsFormData) => {
+    const configToSave: FinancialConfigData = {
+      supporterMessage: data.supporterMessage,
+      pix: {
+        enabled: data.pixEnabled,
+        key: data.pixKey,
+        keyType: data.pixKeyType as PixKeyType,
+        qrCodeUrl: data.pixQrCodeUrl || undefined,
+      },
+      bankTransfer: {
+        enabled: data.bankEnabled,
+        bankName: data.bankName,
+        bankNumber: data.bankNumber || '',
+        agency: data.agency,
+        account: data.account,
+        accountType: data.accountType as BankAccountType,
+        holderName: data.holderName,
+        holderDocument: data.holderDocument,
+      },
+    };
+    onSave?.(configToSave);
     setToastOpen(true);
   };
 
@@ -180,7 +222,7 @@ export default function FinancialSettingsForm({
             '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
           }}
         >
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Stack spacing={{ xs: 3, sm: 3.5 }}>
               {/* Header com Status Geral e Ações */}
               <Box
@@ -288,9 +330,12 @@ export default function FinancialSettingsForm({
                   multiline
                   rows={3}
                   fullWidth
-                  value={supporterMessage}
-                  onChange={(e) => setSupporterMessage(e.target.value.slice(0, 500))}
-                  helperText={`${supporterMessage.length}/500 caracteres`}
+                  {...register('supporterMessage')}
+                  error={Boolean(errors.supporterMessage)}
+                  helperText={
+                    errors.supporterMessage?.message ||
+                    `${(supporterMessage || '').length}/500 caracteres`
+                  }
                   placeholder="Ex: Sua contribuição sustenta nossa atuação no campo missionário..."
                 />
 
@@ -360,11 +405,17 @@ export default function FinancialSettingsForm({
                     />
                     <FormControlLabel
                       control={
-                        <Switch
-                          checked={pixEnabled}
-                          onChange={(e) => setPixEnabled(e.target.checked)}
-                          color="primary"
-                          slotProps={{ input: { 'aria-label': 'Ativar Doação via Pix' } }}
+                        <Controller
+                          name="pixEnabled"
+                          control={control}
+                          render={({ field }) => (
+                            <Switch
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              color="primary"
+                              slotProps={{ input: { 'aria-label': 'Ativar Doação via Pix' } }}
+                            />
+                          )}
                         />
                       }
                       label={pixEnabled ? 'Ativado' : 'Desativado'}
@@ -379,19 +430,24 @@ export default function FinancialSettingsForm({
                       <Grid size={{ xs: 12, sm: 4 }}>
                         <FormControl fullWidth size="small">
                           <InputLabel id="pix-key-type-label">Tipo de Chave Pix</InputLabel>
-                          <Select
-                            labelId="pix-key-type-label"
-                            id="pix-key-type-select"
-                            value={pixKeyType}
-                            label="Tipo de Chave Pix"
-                            onChange={(e) => setPixKeyType(e.target.value as PixKeyType)}
-                          >
-                            <MenuItem value="cpf">CPF</MenuItem>
-                            <MenuItem value="cnpj">CNPJ</MenuItem>
-                            <MenuItem value="email">E-mail</MenuItem>
-                            <MenuItem value="phone">Telefone / Celular</MenuItem>
-                            <MenuItem value="random">Chave Aleatória</MenuItem>
-                          </Select>
+                          <Controller
+                            name="pixKeyType"
+                            control={control}
+                            render={({ field }) => (
+                              <Select
+                                {...field}
+                                labelId="pix-key-type-label"
+                                id="pix-key-type-select"
+                                label="Tipo de Chave Pix"
+                              >
+                                <MenuItem value="cpf">CPF</MenuItem>
+                                <MenuItem value="cnpj">CNPJ</MenuItem>
+                                <MenuItem value="email">E-mail</MenuItem>
+                                <MenuItem value="phone">Telefone / Celular</MenuItem>
+                                <MenuItem value="random">Chave Aleatória</MenuItem>
+                              </Select>
+                            )}
+                          />
                         </FormControl>
                       </Grid>
 
@@ -400,9 +456,7 @@ export default function FinancialSettingsForm({
                           label="Chave Pix"
                           size="small"
                           fullWidth
-                          required={pixEnabled}
-                          value={pixKey}
-                          onChange={(e) => setPixKey(e.target.value)}
+                          {...register('pixKey')}
                           placeholder={
                             pixKeyType === 'email'
                               ? 'exemplo@email.com'
@@ -414,8 +468,11 @@ export default function FinancialSettingsForm({
                                     ? '00.000.000/0001-00'
                                     : 'Chave aleatória EVP'
                           }
-                          helperText="Chave Pix registrada na sua instituição financeira"
-                          error={pixEnabled && !pixKey.trim()}
+                          helperText={
+                            errors.pixKey?.message ||
+                            'Chave Pix registrada na sua instituição financeira'
+                          }
+                          error={Boolean(errors.pixKey)}
                         />
                       </Grid>
                     </Grid>
@@ -573,11 +630,19 @@ export default function FinancialSettingsForm({
                     />
                     <FormControlLabel
                       control={
-                        <Switch
-                          checked={bankEnabled}
-                          onChange={(e) => setBankEnabled(e.target.checked)}
-                          color="primary"
-                          slotProps={{ input: { 'aria-label': 'Ativar Transferência Bancária' } }}
+                        <Controller
+                          name="bankEnabled"
+                          control={control}
+                          render={({ field }) => (
+                            <Switch
+                              checked={field.value}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              color="primary"
+                              slotProps={{
+                                input: { 'aria-label': 'Ativar Transferência Bancária' },
+                              }}
+                            />
+                          )}
                         />
                       }
                       label={bankEnabled ? 'Ativado' : 'Desativado'}
@@ -594,11 +659,10 @@ export default function FinancialSettingsForm({
                           label="Instituição Bancária"
                           size="small"
                           fullWidth
-                          required={bankEnabled}
-                          value={bankName}
-                          onChange={(e) => setBankName(e.target.value)}
+                          {...register('bankName')}
                           placeholder="Ex: Banco do Brasil, Bradesco, Nubank..."
-                          error={bankEnabled && !bankName.trim()}
+                          error={Boolean(errors.bankName)}
+                          helperText={errors.bankName?.message}
                         />
                       </Grid>
 
@@ -607,8 +671,7 @@ export default function FinancialSettingsForm({
                           label="Código do Banco (opcional)"
                           size="small"
                           fullWidth
-                          value={bankNumber}
-                          onChange={(e) => setBankNumber(e.target.value)}
+                          {...register('bankNumber')}
                           placeholder="Ex: 001, 237, 260"
                         />
                       </Grid>
@@ -618,11 +681,10 @@ export default function FinancialSettingsForm({
                           label="Agência"
                           size="small"
                           fullWidth
-                          required={bankEnabled}
-                          value={agency}
-                          onChange={(e) => setAgency(e.target.value)}
+                          {...register('agency')}
                           placeholder="Ex: 1234 ou 1234-5"
-                          error={bankEnabled && !agency.trim()}
+                          error={Boolean(errors.agency)}
+                          helperText={errors.agency?.message}
                         />
                       </Grid>
 
@@ -631,28 +693,32 @@ export default function FinancialSettingsForm({
                           label="Número da Conta com Dígito"
                           size="small"
                           fullWidth
-                          required={bankEnabled}
-                          value={account}
-                          onChange={(e) => setAccount(e.target.value)}
+                          {...register('account')}
                           placeholder="Ex: 98765-4"
-                          error={bankEnabled && !account.trim()}
+                          error={Boolean(errors.account)}
+                          helperText={errors.account?.message}
                         />
                       </Grid>
 
                       <Grid size={{ xs: 12, sm: 4 }}>
                         <FormControl fullWidth size="small">
                           <InputLabel id="account-type-label">Tipo de Conta</InputLabel>
-                          <Select
-                            labelId="account-type-label"
-                            id="account-type-select"
-                            value={accountType}
-                            label="Tipo de Conta"
-                            onChange={(e) => setAccountType(e.target.value as BankAccountType)}
-                          >
-                            <MenuItem value="corrente">Conta Corrente</MenuItem>
-                            <MenuItem value="poupanca">Conta Poupança</MenuItem>
-                            <MenuItem value="pagamento">Conta de Pagamento</MenuItem>
-                          </Select>
+                          <Controller
+                            name="accountType"
+                            control={control}
+                            render={({ field }) => (
+                              <Select
+                                {...field}
+                                labelId="account-type-label"
+                                id="account-type-select"
+                                label="Tipo de Conta"
+                              >
+                                <MenuItem value="corrente">Conta Corrente</MenuItem>
+                                <MenuItem value="poupanca">Conta Poupança</MenuItem>
+                                <MenuItem value="pagamento">Conta de Pagamento</MenuItem>
+                              </Select>
+                            )}
+                          />
                         </FormControl>
                       </Grid>
 
@@ -661,11 +727,10 @@ export default function FinancialSettingsForm({
                           label="Nome Completo do Titular"
                           size="small"
                           fullWidth
-                          required={bankEnabled}
-                          value={holderName}
-                          onChange={(e) => setHolderName(e.target.value)}
+                          {...register('holderName')}
                           placeholder="Ex: Samuel Mendonça"
-                          error={bankEnabled && !holderName.trim()}
+                          error={Boolean(errors.holderName)}
+                          helperText={errors.holderName?.message}
                         />
                       </Grid>
 
@@ -674,11 +739,10 @@ export default function FinancialSettingsForm({
                           label="CPF / CNPJ do Titular"
                           size="small"
                           fullWidth
-                          required={bankEnabled}
-                          value={holderDocument}
-                          onChange={(e) => setHolderDocument(e.target.value)}
+                          {...register('holderDocument')}
                           placeholder="000.000.000-00"
-                          error={bankEnabled && !holderDocument.trim()}
+                          error={Boolean(errors.holderDocument)}
+                          helperText={errors.holderDocument?.message}
                         />
                       </Grid>
                     </Grid>
@@ -758,13 +822,12 @@ export default function FinancialSettingsForm({
       >
         <Alert
           onClose={() => setToastOpen(false)}
-          severity={validationErrors.length > 0 && !isGloballyActive ? 'warning' : 'success'}
+          severity="success"
           variant="filled"
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor:
-              validationErrors.length > 0 && !isGloballyActive ? 'warning.main' : 'primary.main',
+            bgcolor: 'primary.main',
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
@@ -774,9 +837,7 @@ export default function FinancialSettingsForm({
             },
           }}
         >
-          {validationErrors.length > 0 && !isGloballyActive
-            ? 'Configurações salvas, mas alguns dados estão incompletos.'
-            : 'Configurações financeiras salvas com sucesso!'}
+          Configurações financeiras salvas com sucesso!
         </Alert>
       </Snackbar>
     </>

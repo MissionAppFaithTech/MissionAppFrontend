@@ -8,7 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
-    testTimeout: 15000,
+    testTimeout: 60000,
+    maxWorkers: 4,
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',

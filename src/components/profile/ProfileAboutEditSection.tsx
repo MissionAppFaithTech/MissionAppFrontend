@@ -1,5 +1,8 @@
 'use client';
 
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import MenuItem from '@mui/material/MenuItem';
@@ -8,12 +11,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import { profileLocations } from '@/lib/profileOptions';
-import type { ReactNode } from 'react';
+import { profileAboutSchema, type ProfileAboutFormData } from '@/schemas/profile.schema';
 import type { ProfileAboutData } from '@/types/profile';
+import type { ReactNode } from 'react';
 
 type ProfileAboutEditSectionProps = {
   data: ProfileAboutData;
   onBack: () => void;
+  onSave?: (data: ProfileAboutFormData) => void;
 };
 
 const missionaryAgencies = [
@@ -46,7 +51,36 @@ function LabeledField({ children, htmlFor, label }: LabeledFieldProps) {
   );
 }
 
-export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEditSectionProps) {
+export default function ProfileAboutEditSection({
+  data,
+  onBack,
+  onSave,
+}: ProfileAboutEditSectionProps) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<ProfileAboutFormData>({
+    resolver: zodResolver(profileAboutSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      introduction: data.introduction || '',
+      missionHistory: data.missionHistory || '',
+      originLocation: data.originLocation || '',
+      currentLocation: data.currentLocation || '',
+      missionaryAgency: data.missionaryAgency || '',
+      faithCommunity: data.faithCommunity || '',
+      prayerRequests: data.prayerRequests || '',
+      lifeVerse: data.lifeVerse || '',
+    },
+  });
+
+  const onSubmit = (formData: ProfileAboutFormData) => {
+    onSave?.(formData);
+    onBack();
+  };
+
   return (
     <Card
       component="section"
@@ -64,133 +98,175 @@ export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEd
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Stack spacing={{ xs: 2, sm: 2.5 }}>
-          <Typography variant="h6" color="primary.main">
-            Editar sobre
-          </Typography>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <Stack spacing={{ xs: 2, sm: 2.5 }}>
+            <Typography variant="h6" color="primary.main">
+              Editar sobre
+            </Typography>
 
-          <LabeledField htmlFor="profile-about-introduction" label="Sobre mim">
-            <TextField
-              id="profile-about-introduction"
-              defaultValue={data.introduction}
-              multiline
-              minRows={4}
-              fullWidth
-            />
-          </LabeledField>
+            <LabeledField htmlFor="profile-about-introduction" label="Sobre mim">
+              <TextField
+                id="profile-about-introduction"
+                {...register('introduction')}
+                multiline
+                minRows={4}
+                fullWidth
+                error={Boolean(errors.introduction)}
+                helperText={errors.introduction?.message}
+              />
+            </LabeledField>
 
-          <LabeledField
-            htmlFor="profile-about-mission-history"
-            label="Resumo da minha história em missões"
-          >
-            <TextField
-              id="profile-about-mission-history"
-              defaultValue={data.missionHistory}
-              multiline
-              minRows={4}
-              fullWidth
-            />
-          </LabeledField>
-
-          <LabeledField htmlFor="profile-about-origin" label="Local de origem">
-            <TextField
-              id="profile-about-origin"
-              select
-              defaultValue={data.originLocation}
-              fullWidth
+            <LabeledField
+              htmlFor="profile-about-mission-history"
+              label="Resumo da minha história em missões"
             >
-              {profileLocations.map((location) => (
-                <MenuItem key={location} value={location}>
-                  {location}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
+              <TextField
+                id="profile-about-mission-history"
+                {...register('missionHistory')}
+                multiline
+                minRows={4}
+                fullWidth
+                error={Boolean(errors.missionHistory)}
+                helperText={errors.missionHistory?.message}
+              />
+            </LabeledField>
 
-          <LabeledField htmlFor="profile-about-current-location" label="Local de atuação atual">
-            <TextField
-              id="profile-about-current-location"
-              select
-              defaultValue={data.currentLocation}
-              fullWidth
+            <LabeledField htmlFor="profile-about-origin" label="Local de origem">
+              <Controller
+                name="originLocation"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-origin"
+                    select
+                    fullWidth
+                    error={Boolean(errors.originLocation)}
+                    helperText={errors.originLocation?.message}
+                  >
+                    {profileLocations.map((location) => (
+                      <MenuItem key={location} value={location}>
+                        {location}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
+
+            <LabeledField htmlFor="profile-about-current-location" label="Local de atuação atual">
+              <Controller
+                name="currentLocation"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-current-location"
+                    select
+                    fullWidth
+                    error={Boolean(errors.currentLocation)}
+                    helperText={errors.currentLocation?.message}
+                  >
+                    {profileLocations.map((location) => (
+                      <MenuItem key={location} value={location}>
+                        {location}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
+
+            <LabeledField htmlFor="profile-about-agency" label="Agência missionária">
+              <Controller
+                name="missionaryAgency"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-agency"
+                    select
+                    fullWidth
+                    error={Boolean(errors.missionaryAgency)}
+                    helperText={errors.missionaryAgency?.message}
+                  >
+                    {missionaryAgencies.map((agency) => (
+                      <MenuItem key={agency} value={agency}>
+                        {agency}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
+
+            <LabeledField htmlFor="profile-about-faith-community" label="Comunidade de fé">
+              <Controller
+                name="faithCommunity"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-faith-community"
+                    select
+                    fullWidth
+                    error={Boolean(errors.faithCommunity)}
+                    helperText={errors.faithCommunity?.message}
+                  >
+                    {faithCommunities.map((community) => (
+                      <MenuItem key={community} value={community}>
+                        {community}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
+
+            <LabeledField htmlFor="profile-about-prayer-requests" label="Pedidos de oração">
+              <TextField
+                id="profile-about-prayer-requests"
+                {...register('prayerRequests')}
+                multiline
+                minRows={3}
+                fullWidth
+                error={Boolean(errors.prayerRequests)}
+                helperText={errors.prayerRequests?.message}
+              />
+            </LabeledField>
+
+            <LabeledField htmlFor="profile-about-life-verse" label="Versículo para a vida">
+              <TextField
+                id="profile-about-life-verse"
+                {...register('lifeVerse')}
+                multiline
+                minRows={3}
+                fullWidth
+                error={Boolean(errors.lifeVerse)}
+                helperText={errors.lifeVerse?.message}
+              />
+            </LabeledField>
+
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                pt: 1,
+                justifyContent: 'flex-end',
+                '& .MuiButton-root': {
+                  flex: { xs: 1, sm: 'initial' },
+                },
+              }}
             >
-              {profileLocations.map((location) => (
-                <MenuItem key={location} value={location}>
-                  {location}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
-
-          <LabeledField htmlFor="profile-about-agency" label="Agência missionária">
-            <TextField
-              id="profile-about-agency"
-              select
-              defaultValue={data.missionaryAgency}
-              fullWidth
-            >
-              {missionaryAgencies.map((agency) => (
-                <MenuItem key={agency} value={agency}>
-                  {agency}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
-
-          <LabeledField htmlFor="profile-about-faith-community" label="Comunidade de fé">
-            <TextField
-              id="profile-about-faith-community"
-              select
-              defaultValue={data.faithCommunity}
-              fullWidth
-            >
-              {faithCommunities.map((community) => (
-                <MenuItem key={community} value={community}>
-                  {community}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
-
-          <LabeledField htmlFor="profile-about-prayer-requests" label="Pedidos de oração">
-            <TextField
-              id="profile-about-prayer-requests"
-              defaultValue={data.prayerRequests}
-              multiline
-              minRows={3}
-              fullWidth
-            />
-          </LabeledField>
-
-          <LabeledField htmlFor="profile-about-life-verse" label="Versículo para a vida">
-            <TextField
-              id="profile-about-life-verse"
-              defaultValue={data.lifeVerse}
-              multiline
-              minRows={3}
-              fullWidth
-            />
-          </LabeledField>
-
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              pt: 1,
-              justifyContent: 'flex-end',
-              '& .MuiButton-root': {
-                flex: { xs: 1, sm: 'initial' },
-              },
-            }}
-          >
-            <PillButton type="button" tone="primarySoftOutline" size="small" onClick={onBack}>
-              Voltar
-            </PillButton>
-            <PillButton type="button" tone="primaryFilled" size="small">
-              Salvar
-            </PillButton>
+              <PillButton type="button" tone="primarySoftOutline" size="small" onClick={onBack}>
+                Voltar
+              </PillButton>
+              <PillButton type="submit" tone="primaryFilled" size="small">
+                Salvar
+              </PillButton>
+            </Stack>
           </Stack>
-        </Stack>
+        </Box>
       </CardContent>
     </Card>
   );

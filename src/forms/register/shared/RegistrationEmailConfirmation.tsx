@@ -1,7 +1,8 @@
 'use client';
 
-import { Stack, Typography, Button } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import Link from 'next/link';
+import PillButton from '@/components/common/PillButton';
 
 type RegistrationEmailConfirmationProps = {
   email?: string;
@@ -43,13 +44,25 @@ export default function RegistrationEmailConfirmation({
         Enquanto o e-mail não for confirmado, o login permanecerá bloqueado.
       </Typography>
 
-      <Stack direction="row" spacing={2}>
-        <Button component={Link} href="/login" variant="outlined" fullWidth>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <PillButton
+          component={Link}
+          href="/login"
+          tone="primarySoftOutline"
+          fullWidth
+          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
+        >
           Ir para login
-        </Button>
-        <Button component={Link} href="/" variant="contained" color="primary" fullWidth>
+        </PillButton>
+        <PillButton
+          component={Link}
+          href="/"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 600 }}
+        >
           Ir para início
-        </Button>
+        </PillButton>
       </Stack>
     </Stack>
   );

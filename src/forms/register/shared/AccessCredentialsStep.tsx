@@ -1,12 +1,24 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { TextField, Typography, Stack, Button, Chip, CircularProgress } from '@mui/material';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  TextField,
+  Typography,
+  Stack,
+  Chip,
+  CircularProgress,
+  IconButton,
+  InputAdornment,
+} from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import PillButton from '@/components/common/PillButton';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
-import { isValidEmail, normalizeEmail } from '@/lib/masks';
-import { validateStrongPassword } from '@/lib/passwordStrength';
+import { yieldToMain } from '@/lib/scheduler';
 import type { AccessCredentialsValues } from '@/forms/register/types';
+import { accessCredentialsSchema, type AccessCredentialsFormData } from '@/schemas/register.schema';
 import { checkUsernameAvailability } from '@/services/username.service';
 
 type AccessCredentialsStepProps = {
@@ -36,24 +48,21 @@ export default function AccessCredentialsStep({
     setValue,
     setError,
     clearErrors,
-    formState: { errors, isValid },
-  } = useForm<AccessCredentialsValues>({
-    mode: 'onChange',
+    formState: { errors, isSubmitting },
+  } = useForm<AccessCredentialsFormData>({
+    resolver: zodResolver(accessCredentialsSchema),
+    mode: 'onTouched',
     defaultValues: {
       username: '',
-      email: '',
       password: '',
       confirmPassword: '',
       ...defaultValues,
     },
   });
 
-  const [username, email, password, confirmPassword] = watch([
-    'username',
-    'email',
-    'password',
-    'confirmPassword',
-  ]);
+  const [username, password] = watch(['username', 'password']);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const requestIdRef = useRef(0);
@@ -98,17 +107,6 @@ export default function AccessCredentialsStep({
     return () => window.clearTimeout(timer);
   }, [username, clearErrors, setError]);
 
-  const canSubmit = useMemo(() => {
-    const passwordOk = validateStrongPassword(password) === true;
-    const emailOk = isValidEmail(email);
-    const confirmOk = confirmPassword.length > 0 && confirmPassword === password;
-    const usernameOk = isUsernameFormatValid(username.trim().toLowerCase());
-
-    // Disponibilidade de username no back ainda não é obrigatória:
-    // libera o botão com a validação local dos campos.
-    return isValid && usernameOk && emailOk && passwordOk && confirmOk;
-  }, [confirmPassword, email, isValid, password, username]);
-
   const applySuggestion = (suggestion: string) => {
     setValue('username', suggestion, { shouldDirty: true, shouldValidate: true });
   };
@@ -124,11 +122,23 @@ export default function AccessCredentialsStep({
     return 'Use letras minúsculas, números e _';
   })();
 
+  const handleFormSubmit = async (values: AccessCredentialsFormData) => {
+    if (usernameStatus === 'taken') {
+      setError('username', {
+        type: 'validate',
+        message: 'Este nome de usuário já está em uso',
+      });
+      return;
+    }
+    await yieldToMain();
+    onSubmit(values);
+  };
+
   return (
     <Stack
       component="form"
       spacing={2.5}
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(handleFormSubmit)}
       sx={{ width: '100%' }}
       noValidate
     >
@@ -137,15 +147,6 @@ export default function AccessCredentialsStep({
       <Controller
         name="username"
         control={control}
-        rules={{
-          required: 'Informe seu nome de usuário',
-          minLength: { value: 3, message: 'Use pelo menos 3 caracteres' },
-          maxLength: { value: 32, message: 'Use no máximo 32 caracteres' },
-          pattern: {
-            value: /^[a-z0-9_]+$/,
-            message: 'Use apenas letras minúsculas, números e _',
-          },
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -155,10 +156,19 @@ export default function AccessCredentialsStep({
             error={Boolean(errors.username) || usernameStatus === 'taken'}
             helperText={usernameHelperText}
             slotProps={{
+              htmlInput: {
+                autoComplete: 'username',
+                autoCapitalize: 'none',
+                spellCheck: false,
+              },
               input: {
                 endAdornment:
                   usernameStatus === 'checking' ? (
-                    <CircularProgress color="inherit" size={18} />
+                    <CircularProgress
+                      color="inherit"
+                      size={18}
+                      aria-label="Verificando disponibilidade do nome de usuário"
+                    />
                   ) : undefined,
               },
             }}
@@ -189,33 +199,10 @@ export default function AccessCredentialsStep({
         </Stack>
       ) : null}
 
-      <Controller
-        name="email"
-        control={control}
-        rules={{
-          required: 'Informe seu e-mail',
-          validate: (value) => isValidEmail(value) || 'E-mail inválido',
-        }}
-        render={({ field }) => (
-          <TextField
-            {...field}
-            label="E-mail"
-            type="email"
-            fullWidth
-            placeholder="seu@email.com"
-            error={Boolean(errors.email)}
-            helperText={errors.email?.message}
-            onChange={(event) => field.onChange(normalizeEmail(event.target.value))}
-          />
-        )}
-      />
-
       <TextField
-        {...register('password', {
-          validate: (value) => validateStrongPassword(value),
-        })}
+        {...register('password')}
         label="Senha"
-        type="password"
+        type={showPassword ? 'text' : 'password'}
         fullWidth
         placeholder="Ex: Senha@123"
         error={Boolean(errors.password)}
@@ -223,29 +210,101 @@ export default function AccessCredentialsStep({
           errors.password?.message ??
           'Use maiúscula, minúscula, número e caractere especial (mín. 8)'
         }
+        slotProps={{
+          htmlInput: {
+            autoComplete: 'new-password',
+            spellCheck: false,
+          },
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  edge="end"
+                  size="medium"
+                  sx={{ minWidth: 44, minHeight: 44 }}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+        }}
       />
       <PasswordStrengthIndicator password={password} />
 
       <TextField
-        {...register('confirmPassword', {
-          required: 'Confirme sua senha',
-          validate: (value) => value === password || 'As senhas não coincidem',
-        })}
+        {...register('confirmPassword')}
         label="Confirmar senha"
-        type="password"
+        type={showConfirmPassword ? 'text' : 'password'}
         fullWidth
         placeholder="Repita a senha"
         error={Boolean(errors.confirmPassword)}
         helperText={errors.confirmPassword?.message}
+        slotProps={{
+          htmlInput: {
+            autoComplete: 'new-password',
+            spellCheck: false,
+          },
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={
+                    showConfirmPassword
+                      ? 'Ocultar confirmação de senha'
+                      : 'Mostrar confirmação de senha'
+                  }
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  edge="end"
+                  size="medium"
+                  sx={{ minWidth: 44, minHeight: 44 }}
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
+        }}
       />
 
       <Stack direction="row" spacing={2}>
-        <Button type="button" variant="outlined" onClick={onBack} fullWidth>
+        <PillButton
+          type="button"
+          tone="primarySoftOutline"
+          onClick={onBack}
+          fullWidth
+          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
+        >
           Voltar
-        </Button>
-        <Button type="submit" variant="contained" color="primary" fullWidth disabled={!canSubmit}>
-          {submitLabel}
-        </Button>
+        </PillButton>
+        <PillButton
+          type="submit"
+          tone="cta"
+          fullWidth
+          disabled={isSubmitting}
+          sx={{
+            minHeight: 48,
+            fontSize: '1rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1.5,
+          }}
+        >
+          {isSubmitting ? (
+            <>
+              <CircularProgress size={20} color="inherit" aria-label="Enviando cadastro" />
+              <span>Finalizando...</span>
+            </>
+          ) : (
+            submitLabel
+          )}
+        </PillButton>
       </Stack>
     </Stack>
   );

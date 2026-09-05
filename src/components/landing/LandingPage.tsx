@@ -471,7 +471,7 @@ export default function LandingPage() {
                         px: 2,
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        minHeight: 36,
+                        minHeight: 44,
                       }}
                     >
                       Entre em contato
@@ -490,9 +490,8 @@ export default function LandingPage() {
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
+                        Após preencher seus dados e ministério, nossa equipe realiza a validação do
+                        seu perfil para garantir a segurança e autenticidade da comunidade.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>
@@ -500,14 +499,13 @@ export default function LandingPage() {
                   <Accordion>
                     <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
                       <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
+                        Como os apoiadores podem contribuir com as missões?
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
+                        Apoiadores podem ofertar em campanhas específicas, acompanhar relatórios de
+                        impacto e interagir diretamente com os pedidos de oração.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>
@@ -515,44 +513,14 @@ export default function LandingPage() {
                   <Accordion>
                     <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
                       <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
+                        A plataforma cobra taxa sobre as ofertas enviadas?
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
+                        O MissionApp prioriza o sustento missionário integral, aproximando você
+                        diretamente aos canais oficiais com total transparência e sem taxas
+                        abusivas.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>
@@ -566,7 +534,21 @@ export default function LandingPage() {
                     <AccordionDetails>
                       <Typography color="text.secondary">
                         Sim. Você pode compartilhar pedidos de oração e manter seus apoiadores
-                        atualizados sobre sua jornada missionária.
+                        atualizados em tempo real sobre os desafios e testemunhos da missão.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        O que são os Projetos de Impacto?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        São causas estruturadas e ações sociais no campo que possuem metas claras,
+                        histórico de atividades, galeria de fotos e acompanhamento contínuo.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>

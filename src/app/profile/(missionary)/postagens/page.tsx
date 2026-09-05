@@ -1,7 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, type FormEvent, type SyntheticEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
@@ -24,6 +26,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import { mockProfile } from '@/mocks/profile';
+import { newPostSchema, type NewPostFormData } from '@/schemas/content.schema';
 
 type FeedView = 'mine' | 'general';
 
@@ -34,9 +37,28 @@ const cardSx = {
   boxShadow: 1,
 } as const;
 
-function NewPostForm({ onCancel }: { onCancel?: () => void }) {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+type NewPostFormProps = {
+  onCancel?: () => void;
+  onSubmitPost?: (data: NewPostFormData) => void;
+};
+
+function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<NewPostFormData>({
+    resolver: zodResolver(newPostSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      content: '',
+      youtubeUrl: '',
+      images: [],
+    },
+  });
+
+  const onSubmit = (data: NewPostFormData) => {
+    onSubmitPost?.(data);
     onCancel?.();
   };
 
@@ -48,18 +70,21 @@ function NewPostForm({ onCancel }: { onCancel?: () => void }) {
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Stack spacing={2}>
             <Typography variant="subtitle2" color="primary.main">
               Nova postagem
             </Typography>
 
             <TextField
+              {...register('content')}
               multiline
               minRows={6}
               fullWidth
               placeholder="Comece a escrever..."
               aria-label="Conteúdo da nova postagem"
+              error={Boolean(errors.content)}
+              helperText={errors.content?.message}
             />
 
             <Stack spacing={0.75}>
@@ -73,10 +98,13 @@ function NewPostForm({ onCancel }: { onCancel?: () => void }) {
               </Typography>
               <TextField
                 id="post-youtube-link"
+                {...register('youtubeUrl')}
                 type="url"
                 size="small"
                 fullWidth
                 placeholder="www.youtube.com/..."
+                error={Boolean(errors.youtubeUrl)}
+                helperText={errors.youtubeUrl?.message}
               />
             </Stack>
 

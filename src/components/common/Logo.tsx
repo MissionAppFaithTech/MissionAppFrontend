@@ -44,19 +44,21 @@ function resolveVariant(variant: LogoVariant, onDark: boolean): LogoVariant {
 }
 
 export default function Logo({ href = '/', size, variant = 'auto', onDark = false }: LogoProps) {
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, theme } = useTheme();
   const mounted = useHasMounted();
   const resolvedSize = resolveSize(size);
   const { height, maxWidth } = sizes[resolvedSize];
   const logoVariant = resolveVariant(variant, onDark);
 
+  const currentTheme = resolvedTheme || theme;
   const useDarkLogo =
-    logoVariant === 'dark' || (logoVariant === 'auto' && mounted && resolvedTheme === 'dark');
+    logoVariant === 'dark' || (logoVariant === 'auto' && mounted && currentTheme === 'dark');
 
   const src = useDarkLogo ? LOGO_PATHS.dark : LOGO_PATHS.light;
 
   const image = (
     <Image
+      key={src}
       src={src}
       alt="Mission App"
       width={280}
