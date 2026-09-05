@@ -39,7 +39,10 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
             summary: n.failureSummary,
           })),
         }));
-        console.error(`[A11Y VIOLATIONS] ${route.name} (${route.path}):\n`, JSON.stringify(simplified, null, 2));
+        console.error(
+          `[A11Y VIOLATIONS] ${route.name} (${route.path}):\n`,
+          JSON.stringify(simplified, null, 2)
+        );
       }
 
       expect(accessibilityScanResults.violations).toEqual([]);
@@ -64,7 +67,10 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
       .analyze();
 
     if (accessibilityScanResults.violations.length > 0) {
-      console.error('[A11Y VIOLATIONS] DonationModal:\n', JSON.stringify(accessibilityScanResults.violations, null, 2));
+      console.error(
+        '[A11Y VIOLATIONS] DonationModal:\n',
+        JSON.stringify(accessibilityScanResults.violations, null, 2)
+      );
     }
 
     expect(accessibilityScanResults.violations).toEqual([]);
@@ -88,7 +94,10 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
       .analyze();
 
     if (accessibilityScanResults.violations.length > 0) {
-      console.error('[A11Y VIOLATIONS] ContactModal:\n', JSON.stringify(accessibilityScanResults.violations, null, 2));
+      console.error(
+        '[A11Y VIOLATIONS] ContactModal:\n',
+        JSON.stringify(accessibilityScanResults.violations, null, 2)
+      );
     }
 
     expect(accessibilityScanResults.violations).toEqual([]);

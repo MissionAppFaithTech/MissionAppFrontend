@@ -84,28 +84,10 @@ export default function MissionaryCampaignSection({
     );
   }
 
-  const handleShare = async () => {
-    const campaignUrl =
-      typeof window !== 'undefined'
-        ? `${window.location.origin}/campanha/${campaign.id}`
-        : `/campanha/${campaign.id}`;
-
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
-        await navigator.share({
-          title: campaign.title,
-          text: campaign.subtitle,
-          url: campaignUrl,
-        });
-        return;
-      } catch {
-        // Fallback to clipboard
-      }
-    }
-
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      await navigator.clipboard.writeText(campaignUrl);
-      setToastMessage('Link da campanha copiado para a área de transferência!');
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setToastMessage('Link copiado para a área de transferência!');
     }
   };
 

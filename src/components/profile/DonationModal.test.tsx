@@ -93,9 +93,7 @@ describe('DonationModal Component', () => {
       />
     );
 
-    expect(
-      screen.getByText(/mensagem customizada de gratidão aos irmãos!/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/mensagem customizada de gratidão aos irmãos!/i)).toBeInTheDocument();
     expect(screen.getByText('custom-pix@test.com')).toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /transferência bancária/i })).not.toBeInTheDocument();
   });

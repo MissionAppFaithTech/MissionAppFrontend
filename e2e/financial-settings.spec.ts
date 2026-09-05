@@ -33,7 +33,9 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
     // Verify modal is open and shows preview banner
     await expect(page.getByRole('heading', { name: /ofertar na missão/i })).toBeVisible();
     await expect(
-      page.getByText(/você está visualizando a experiência de oferta exatamente como seus apoiadores verão/i)
+      page.getByText(
+        /você está visualizando a experiência de oferta exatamente como seus apoiadores verão/i
+      )
     ).toBeVisible();
     await expect(page.getByRole('button', { name: /copiar chave pix/i })).toBeVisible();
 
@@ -53,14 +55,10 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
     // 6. Save configurations and verify toast
     const saveBtn = page.getByRole('button', { name: /salvar configurações/i });
     await saveBtn.click();
-    await expect(
-      page.getByText(/configurações financeiras salvas com sucesso!/i)
-    ).toBeVisible();
+    await expect(page.getByText(/configurações financeiras salvas com sucesso!/i)).toBeVisible();
   });
 
-  test('navigates to financial settings from missionary profile summary card', async ({
-    page,
-  }) => {
+  test('navigates to financial settings from missionary profile summary card', async ({ page }) => {
     await page.goto('/profile/projetos-de-impacto');
 
     // Click on "Configurar Doações" in the missionary profile header card

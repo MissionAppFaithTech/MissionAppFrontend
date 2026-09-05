@@ -1,16 +1,19 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
+import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
+import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LockedContentNotice from '@/components/common/LockedContentNotice';
@@ -22,6 +25,14 @@ type VisitorProfilePostsSectionProps = {
 };
 
 export default function VisitorProfilePostsSection({ posts }: VisitorProfilePostsSectionProps) {
+  const [toastOpen, setToastOpen] = useState(false);
+
+  const handleShare = () => {
+    if (typeof window !== 'undefined') {
+      navigator.clipboard.writeText(window.location.href);
+      setToastOpen(true);
+    }
+  };
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
       {posts.map((post) => (
@@ -181,11 +192,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     aria-label="Compartilhar"
                     size="small"
                     color="primary"
-                    onClick={() => {
-                      if (typeof window !== 'undefined') {
-                        navigator.clipboard.writeText(window.location.href);
-                      }
-                    }}
+                    onClick={handleShare}
                   >
                     <ShareOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -215,6 +222,33 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
         title="Veja todas as postagens e orações"
         description="Junte-se à comunidade para interagir, orar em tempo real e acompanhar os testemunhos da missão."
       />
+
+      {/* Toast Notification no Padrão de Cores do Sistema */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={3000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity="success"
+          variant="filled"
+          role="status"
+          aria-live="polite"
+          sx={{
+            bgcolor: 'primary.main',
+            color: 'common.white',
+            fontWeight: 600,
+            boxShadow: 3,
+            '& .MuiAlert-icon': {
+              color: 'common.white',
+            },
+          }}
+        >
+          Link copiado para a área de transferência!
+        </Alert>
+      </Snackbar>
     </Stack>
   );
 }

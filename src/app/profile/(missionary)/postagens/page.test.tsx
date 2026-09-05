@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import ProfilePostsPage from './page';
 
 describe('ProfilePostsPage - Postar button & collapsible Nova Postagem', () => {
@@ -83,5 +83,25 @@ describe('ProfilePostsPage - Postar button & collapsible Nova Postagem', () => {
 
     // Card remains open
     expect(screen.getByText(/nova postagem/i)).toBeInTheDocument();
+  });
+
+  it('copies current URL to clipboard and displays toast when clicking share button', async () => {
+    const user = userEvent.setup();
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: writeTextMock },
+      configurable: true,
+      writable: true,
+    });
+
+    render(<ProfilePostsPage />);
+
+    const shareBtn = screen.getByRole('button', { name: /compartilhar postagem/i });
+    await user.click(shareBtn);
+
+    expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
+    expect(
+      await screen.findByText(/link copiado para a área de transferência!/i)
+    ).toBeInTheDocument();
   });
 });

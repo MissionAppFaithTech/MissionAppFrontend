@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import CampaignDetailView from './CampaignDetailView';
 import { mockCampaign } from '@/mocks/campaign';
 
@@ -32,5 +32,25 @@ describe('CampaignDetailView component', () => {
     await user.click(ofertarBtn);
 
     expect(screen.getByRole('heading', { name: /ofertar na missão/i })).toBeInTheDocument();
+  });
+
+  it('copies current URL to clipboard and displays toast when clicking share button', async () => {
+    const user = userEvent.setup();
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: writeTextMock },
+      configurable: true,
+      writable: true,
+    });
+
+    render(<CampaignDetailView campaign={mockCampaign} />);
+
+    const shareBtn = screen.getByRole('button', { name: /compartilhar campanha/i });
+    await user.click(shareBtn);
+
+    expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
+    expect(
+      await screen.findByText(/link copiado para a área de transferência!/i)
+    ).toBeInTheDocument();
   });
 });

@@ -32,15 +32,10 @@ describe('FinancialSettingsForm Component', () => {
 
   it('renders correctly with initial data, global status Ativo and all sections', () => {
     render(
-      <FinancialSettingsForm
-        initialData={mockFinancialData}
-        missionaryName="Samuel Mendonça"
-      />
+      <FinancialSettingsForm initialData={mockFinancialData} missionaryName="Samuel Mendonça" />
     );
 
-    expect(
-      screen.getByRole('heading', { name: /configurações financeiras/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /configurações financeiras/i })).toBeInTheDocument();
     expect(screen.getByText(/status: ativo/i)).toBeInTheDocument();
     expect(screen.getByText(/ambiente seguro/i)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockFinancialData.supporterMessage)).toBeInTheDocument();
@@ -92,7 +87,9 @@ describe('FinancialSettingsForm Component', () => {
     // Modal opens
     expect(screen.getByRole('heading', { name: /ofertar na missão/i })).toBeInTheDocument();
     expect(
-      screen.getByText(/você está visualizando a experiência de oferta exatamente como seus apoiadores verão/i)
+      screen.getByText(
+        /você está visualizando a experiência de oferta exatamente como seus apoiadores verão/i
+      )
     ).toBeInTheDocument();
 
     // Close modal
@@ -108,12 +105,7 @@ describe('FinancialSettingsForm Component', () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
 
-    render(
-      <FinancialSettingsForm
-        initialData={mockFinancialData}
-        onSave={handleSave}
-      />
-    );
+    render(<FinancialSettingsForm initialData={mockFinancialData} onSave={handleSave} />);
 
     // Click remove QR Code
     const removeQrBtn = screen.getByRole('button', { name: /remover/i });

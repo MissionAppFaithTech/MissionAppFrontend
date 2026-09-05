@@ -33,11 +33,7 @@ import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
-import type {
-  BankAccountType,
-  FinancialConfigData,
-  PixKeyType,
-} from '@/types/profile';
+import type { BankAccountType, FinancialConfigData, PixKeyType } from '@/types/profile';
 
 type FinancialSettingsFormProps = {
   initialData?: FinancialConfigData;
@@ -87,9 +83,7 @@ export default function FinancialSettingsForm({
   const [bankNumber, setBankNumber] = useState(source.bankTransfer.bankNumber);
   const [agency, setAgency] = useState(source.bankTransfer.agency);
   const [account, setAccount] = useState(source.bankTransfer.account);
-  const [accountType, setAccountType] = useState<BankAccountType>(
-    source.bankTransfer.accountType
-  );
+  const [accountType, setAccountType] = useState<BankAccountType>(source.bankTransfer.accountType);
   const [holderName, setHolderName] = useState(source.bankTransfer.holderName);
   const [holderDocument, setHolderDocument] = useState(source.bankTransfer.holderDocument);
 
@@ -200,7 +194,12 @@ export default function FinancialSettingsForm({
               >
                 <Box>
                   <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 0.5 }}>
-                    <Typography variant="h5" component="h1" color="primary.main" sx={{ fontWeight: 700 }}>
+                    <Typography
+                      variant="h5"
+                      component="h1"
+                      color="primary.main"
+                      sx={{ fontWeight: 700 }}
+                    >
                       Configurações Financeiras
                     </Typography>
                     <Chip
@@ -212,7 +211,8 @@ export default function FinancialSettingsForm({
                     />
                   </Stack>
                   <Typography variant="body2" color="text.secondary">
-                    Configure os canais de recebimento de ofertas voluntárias e mensagens aos apoiadores.
+                    Configure os canais de recebimento de ofertas voluntárias e mensagens aos
+                    apoiadores.
                   </Typography>
                 </Box>
 
@@ -254,16 +254,17 @@ export default function FinancialSettingsForm({
                 icon={<SecurityOutlinedIcon fontSize="inherit" />}
                 sx={{ borderRadius: 2, fontSize: '0.8125rem', bgcolor: 'rgba(13, 43, 92, 0.05)' }}
               >
-                <strong>Ambiente Seguro:</strong> A plataforma MissionApp não intermedia nem armazena
-                dados de cartões de crédito ou senhas bancárias. As doações são voluntárias e realizadas
-                diretamente de banco a banco através do aplicativo do apoiador.
+                <strong>Ambiente Seguro:</strong> A plataforma MissionApp não intermedia nem
+                armazena dados de cartões de crédito ou senhas bancárias. As doações são voluntárias
+                e realizadas diretamente de banco a banco através do aplicativo do apoiador.
               </Alert>
 
               {!isGloballyActive && (
                 <Alert severity="warning" sx={{ borderRadius: 2, fontSize: '0.8125rem' }}>
                   <strong>Atenção:</strong> Seus métodos de doação ainda constam como pendentes.
-                  Para que apoiadores consigam realizar doações no seu perfil, ative e preencha todos os
-                  dados obrigatórios de ao menos uma modalidade (Pix ou Transferência Bancária).
+                  Para que apoiadores consigam realizar doações no seu perfil, ative e preencha
+                  todos os dados obrigatórios de ao menos uma modalidade (Pix ou Transferência
+                  Bancária).
                 </Alert>
               )}
 
@@ -278,7 +279,8 @@ export default function FinancialSettingsForm({
                   </Typography>
                 </Stack>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Esta mensagem de gratidão e prestação de propósito é apresentada aos doadores no momento da oferta.
+                  Esta mensagem de gratidão e prestação de propósito é apresentada aos doadores no
+                  momento da oferta.
                 </Typography>
 
                 <TextField
@@ -303,7 +305,10 @@ export default function FinancialSettingsForm({
                     borderRadius: 2,
                   }}
                 >
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5 }}
+                  >
                     Prévia ao vivo no modal de doação:
                   </Typography>
                   <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.primary' }}>
@@ -421,7 +426,11 @@ export default function FinancialSettingsForm({
                         QR Code Estático (Opcional)
                       </Typography>
 
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ alignItems: 'flex-start' }}>
+                      <Stack
+                        direction={{ xs: 'column', sm: 'row' }}
+                        spacing={2}
+                        sx={{ alignItems: 'flex-start' }}
+                      >
                         {pixQrCodeUrl ? (
                           <Box
                             sx={{
@@ -466,12 +475,21 @@ export default function FinancialSettingsForm({
                         )}
 
                         <Box sx={{ flex: 1 }}>
-                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, mb: 1 }}>
+                          <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            spacing={1.5}
+                            sx={{ alignItems: { xs: 'stretch', sm: 'center' }, mb: 1 }}
+                          >
                             <PillButton
                               component="label"
                               tone="primarySoftOutline"
                               size="small"
-                              sx={{ minHeight: 44, px: 2, cursor: 'pointer', justifyContent: 'center' }}
+                              sx={{
+                                minHeight: 44,
+                                px: 2,
+                                cursor: 'pointer',
+                                justifyContent: 'center',
+                              }}
                             >
                               <CloudUploadOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                               {pixQrCodeUrl ? 'Substituir imagem' : 'Enviar imagem do QR Code'}
@@ -499,8 +517,13 @@ export default function FinancialSettingsForm({
                             )}
                           </Stack>
 
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                            Envie a imagem do QR Code Pix gerado no seu app bancário para facilitar o pagamento de apoiadores.
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block' }}
+                          >
+                            Envie a imagem do QR Code Pix gerado no seu app bancário para facilitar
+                            o pagamento de apoiadores.
                           </Typography>
                         </Box>
                       </Stack>
@@ -661,7 +684,8 @@ export default function FinancialSettingsForm({
                     </Grid>
 
                     <FormHelperText>
-                      Apoiadores poderão copiar todos os dados com 1 clique para colar no aplicativo bancário.
+                      Apoiadores poderão copiar todos os dados com 1 clique para colar no aplicativo
+                      bancário.
                     </FormHelperText>
                   </Stack>
                 )}
@@ -740,9 +764,7 @@ export default function FinancialSettingsForm({
           aria-live="polite"
           sx={{
             bgcolor:
-              validationErrors.length > 0 && !isGloballyActive
-                ? 'warning.main'
-                : 'primary.main',
+              validationErrors.length > 0 && !isGloballyActive ? 'warning.main' : 'primary.main',
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,

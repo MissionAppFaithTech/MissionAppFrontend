@@ -44,7 +44,9 @@ export default function DonationModal({
   isOwnProfile = false,
   financialConfig,
 }: DonationModalProps) {
-  const hasPix = financialConfig ? financialConfig.pix.enabled && Boolean(financialConfig.pix.key) : true;
+  const hasPix = financialConfig
+    ? financialConfig.pix.enabled && Boolean(financialConfig.pix.key)
+    : true;
   const hasBank = financialConfig
     ? financialConfig.bankTransfer.enabled &&
       Boolean(financialConfig.bankTransfer.bankName && financialConfig.bankTransfer.account)
@@ -146,7 +148,11 @@ CPF/CNPJ: ${bankData.documento}`;
             >
               Ofertar na Missão
             </Typography>
-            <Typography id="donation-modal-subtitle" variant="caption" sx={{ color: 'text.secondary' }}>
+            <Typography
+              id="donation-modal-subtitle"
+              variant="caption"
+              sx={{ color: 'text.secondary' }}
+            >
               Apoie o ministério de {missionaryName}
             </Typography>
           </Box>
