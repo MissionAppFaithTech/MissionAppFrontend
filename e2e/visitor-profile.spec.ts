@@ -27,6 +27,6 @@ test.describe('Visitor Profile E2E', () => {
 
     const campanhaTab = page.getByRole('tab', { name: /campanha/i });
     await campanhaTab.click();
-    await expect(page.getByText(/contribua com esta missão/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: /ofertar na campanha/i })).toBeVisible();
   });
 });
