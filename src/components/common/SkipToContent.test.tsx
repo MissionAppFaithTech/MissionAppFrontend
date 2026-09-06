@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import SkipToContent from './SkipToContent';
 
 describe('SkipToContent component', () => {
@@ -16,4 +16,23 @@ describe('SkipToContent component', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '#conteudo-alvo');
   });
+
+  it('scrolls and focuses target element on click', () => {
+    const target = document.createElement('main');
+    target.id = 'main-content';
+    target.tabIndex = -1;
+    target.scrollIntoView = vi.fn();
+    target.focus = vi.fn();
+    document.body.appendChild(target);
+
+    render(<SkipToContent />);
+    const link = screen.getByRole('link', { name: /pular para o conteúdo principal/i });
+    link.click();
+
+    expect(target.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' });
+    expect(target.focus).toHaveBeenCalledWith({ preventScroll: true });
+
+    document.body.removeChild(target);
+  });
 });
+
