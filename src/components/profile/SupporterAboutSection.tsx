@@ -95,8 +95,7 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
                     },
                     borderColor: {
                       xs: 'transparent',
-                      sm: (theme) =>
-                        theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
+                      sm: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
                     },
                   },
                 }}

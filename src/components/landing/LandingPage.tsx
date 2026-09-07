@@ -211,8 +211,7 @@ function HeroHeadline() {
                 theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
               bgcolor: (theme) =>
                 theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
-              color: (theme) =>
-                theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
               boxShadow: (theme) =>
                 theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
               '&:hover': {

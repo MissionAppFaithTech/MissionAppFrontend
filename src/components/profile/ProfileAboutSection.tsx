@@ -78,9 +78,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
                   bgcolor: {
                     xs: 'transparent',
                     sm: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.08)'
-                        : 'common.white',
+                      theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'common.white',
                   },
                   color: (theme) =>
                     theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
@@ -96,8 +94,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
                   },
                   borderColor: {
                     xs: 'transparent',
-                    sm: (theme) =>
-                      theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
+                    sm: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
                   },
                 },
               }}
