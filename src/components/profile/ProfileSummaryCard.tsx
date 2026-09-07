@@ -185,11 +185,11 @@ export default function ProfileSummaryCard({
               </Typography>
               <Typography
                 variant="body1"
-                color="primary.main"
                 sx={{
                   fontWeight: 700,
                   fontSize: { xs: '0.875rem', sm: '1rem' },
                   pt: 0.25,
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
                 }}
               >
                 {roleDescription}
@@ -199,15 +199,21 @@ export default function ProfileSummaryCard({
               <Stack
                 direction="row"
                 spacing={0.5}
-                sx={{ alignItems: 'center', pt: 0.25, color: 'primary.main' }}
+                sx={{
+                  alignItems: 'center',
+                  pt: 0.25,
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.85)' : 'primary.main',
+                }}
               >
                 <PlaceOutlinedIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
                 <Typography
                   variant="body2"
-                  color="primary.main"
                   sx={{
                     fontWeight: 500,
                     fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.85)' : 'primary.main',
                   }}
                 >
                   {location}
@@ -246,7 +252,7 @@ export default function ProfileSummaryCard({
               >
                 <Typography
                   variant="h6"
-                  color="primary.main"
+                  color="text.primary"
                   sx={{
                     fontWeight: 700,
                     fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.375rem' },
@@ -416,13 +422,18 @@ export default function ProfileSummaryCard({
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: 'primary.main',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
             },
           }}
         >

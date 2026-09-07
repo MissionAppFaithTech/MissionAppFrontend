@@ -66,7 +66,7 @@ describe('RichTextEditor component', () => {
     fireEvent.click(closeBtn);
   });
 
-  it('shows draft recovery notice when an existing draft is found in localStorage', () => {
+  it('shows draft recovery notice when an existing draft is found in localStorage and allows restoring or dismissing', () => {
     localStorage.setItem('draft_test_mission_about', 'Rascunho recuperado do campo');
 
     render(
@@ -76,6 +76,29 @@ describe('RichTextEditor component', () => {
     expect(
       screen.getByText(/existe um rascunho salvo anteriormente deste texto no seu aparelho/i)
     ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /restaurar rascunho/i })).toBeInTheDocument();
+    const restoreButton = screen.getByRole('button', { name: /restaurar rascunho/i });
+    expect(restoreButton).toBeInTheDocument();
+
+    // Test restoring draft
+    fireEvent.click(restoreButton);
+    expect(
+      screen.queryByText(/existe um rascunho salvo anteriormente deste texto no seu aparelho/i)
+    ).not.toBeInTheDocument();
+  });
+
+  it('allows dismissing draft recovery notice without restoring', () => {
+    localStorage.setItem('draft_test_mission_dismiss', 'Rascunho a descartar');
+
+    render(
+      <RichTextEditor label="Sobre" draftKey="test_mission_dismiss" defaultValue="Texto original" />
+    );
+
+    const dismissButtons = screen.getAllByRole('button', { name: /descartar aviso de rascunho/i });
+    expect(dismissButtons.length).toBeGreaterThan(0);
+
+    fireEvent.click(dismissButtons[0]);
+    expect(
+      screen.queryByText(/existe um rascunho salvo anteriormente deste texto no seu aparelho/i)
+    ).not.toBeInTheDocument();
   });
 });

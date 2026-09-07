@@ -133,15 +133,16 @@ const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
     '&&': {
       border: '2px solid',
       borderColor: (theme) =>
-        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'primary.main',
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.65)' : 'primary.main',
       borderRadius: '6px',
-      bgcolor: 'transparent',
+      bgcolor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
       color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
     },
     '&:hover': {
       '&&': {
         bgcolor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(13, 43, 92, 0.06)',
+          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(13, 43, 92, 0.06)',
         borderColor: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
         color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
         boxShadow: 'none',
@@ -152,14 +153,15 @@ const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
     '&&': {
       border: '2px solid',
       borderColor: (theme) =>
-        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'primary.main',
-      bgcolor: 'transparent',
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.65)' : 'primary.main',
+      bgcolor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
       color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
     },
     '&:hover': {
       '&&': {
         bgcolor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : 'rgba(13, 43, 92, 0.06)',
+          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(13, 43, 92, 0.06)',
         borderColor: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
         color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
       },
@@ -185,16 +187,16 @@ const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
     '&&': {
       border: '1.5px solid',
       borderColor: (theme) =>
-        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.35)' : 'primary.main',
+        theme.palette.mode === 'dark' ? 'rgba(147, 197, 253, 0.4)' : 'primary.main',
       bgcolor: (theme) =>
-        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.06)' : 'common.white',
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'common.white',
       color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
     },
     '&:hover': {
       ...figmaActionBase['&:hover'],
       '&&': {
         bgcolor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.14)' : 'rgba(13, 43, 92, 0.05)',
+          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.16)' : 'rgba(13, 43, 92, 0.05)',
         borderColor: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
         color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
       },

@@ -1,9 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback, useId, useSyncExternalStore } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
+import { useEffect, useState, useCallback, useId, useRef } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -15,7 +12,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import FormHelperText from '@mui/material/FormHelperText';
-import Alert from '@mui/material/Alert';
+import Paper from '@mui/material/Paper';
 import UndoIcon from '@mui/icons-material/Undo';
 import RedoIcon from '@mui/icons-material/Redo';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlineOutlined';
@@ -73,14 +70,30 @@ export default function RichTextEditor({
   const editorId = explicitId || `rich-editor-${generatedId}`;
   const [helpOpen, setHelpOpen] = useState(false);
   const [lastSavedDraft, setLastSavedDraft] = useState<string | null>(null);
-  const [, setEditorVersion] = useState(0);
 
-  const isClient = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false
-  );
+  // Controlled vs uncontrolled state
+  const isControlled = value !== undefined;
+  const [internalValue, setInternalValue] = useState<string>(defaultValue);
+  const currentValue = isControlled ? (value ?? '') : internalValue;
 
+  // History stack for Undo / Redo
+  const [history, setHistory] = useState<string[]>([currentValue]);
+  const [historyIndex, setHistoryIndex] = useState<number>(0);
+  const prevValueRef = useRef<string>(currentValue);
+
+  // Sync external controlled value changes safely without re-render loop
+  useEffect(() => {
+    if (isControlled && value !== undefined && value !== prevValueRef.current) {
+      prevValueRef.current = value;
+      setHistory((prev) => {
+        if (prev[prev.length - 1] === value) return prev;
+        return [...prev, value];
+      });
+      setHistoryIndex((prev) => prev + 1);
+    }
+  }, [value, isControlled]);
+
+  // Saved draft detection
   const [savedDraftContent] = useState<string | null>(() => {
     if (!draftKey || typeof window === 'undefined') return null;
     try {
@@ -95,74 +108,85 @@ export default function RichTextEditor({
   });
   const [hasDraftNotice, setHasDraftNotice] = useState<boolean>(Boolean(savedDraftContent));
 
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [
-      StarterKit.configure({
-        bold: false,
-        italic: false,
-        strike: false,
-        code: false,
-        codeBlock: false,
-        heading: false,
-        bulletList: false,
-        orderedList: false,
-        blockquote: false,
-        horizontalRule: false,
-      }),
-      Placeholder.configure({
-        placeholder,
-        emptyEditorClass: 'is-editor-empty',
-      }),
-    ],
-    content: value !== undefined ? value : defaultValue,
-    editable: !disabled,
-    onTransaction: () => {
-      setEditorVersion((v) => v + 1);
-    },
-    onUpdate: ({ editor: currentEditor }) => {
-      const plainText = currentEditor.getText({ blockSeparator: '\n' });
-      onChange?.(plainText);
+  const canUndo = historyIndex > 0 && !disabled;
+  const canRedo = historyIndex < history.length - 1 && !disabled;
 
-      // Autosave draft to localStorage with timestamp
-      if (draftKey && typeof window !== 'undefined') {
-        try {
-          localStorage.setItem(`draft_${draftKey}`, plainText);
-          const now = new Date();
-          const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-          setLastSavedDraft(timeStr);
-        } catch {
-          // Ignore localStorage quota errors
-        }
-      }
-    },
-  });
+  const handleTextChange = (newValue: string) => {
+    if (maxLength && newValue.length > maxLength) return;
+    prevValueRef.current = newValue;
+    if (!isControlled) {
+      setInternalValue(newValue);
+    }
+    onChange?.(newValue);
 
-  // Sync external value changes
-  useEffect(() => {
-    if (editor && value !== undefined) {
-      const currentEditorText = editor.getText({ blockSeparator: '\n' });
-      if (value !== currentEditorText) {
-        editor.commands.setContent(value, { emitUpdate: false });
+    setHistory((prev) => [...prev.slice(0, historyIndex + 1), newValue]);
+    setHistoryIndex((prev) => prev + 1);
+
+    // Autosave draft to localStorage
+    if (draftKey && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(`draft_${draftKey}`, newValue);
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        setLastSavedDraft(timeStr);
+      } catch {
+        // Ignore localStorage quota errors
       }
     }
-  }, [editor, value]);
+  };
 
-  // Update editable state
-  useEffect(() => {
-    if (editor) {
-      editor.setEditable(!disabled);
+  const handleUndo = () => {
+    if (!canUndo) return;
+    const nextIndex = historyIndex - 1;
+    const targetValue = history[nextIndex] ?? '';
+    setHistoryIndex(nextIndex);
+    prevValueRef.current = targetValue;
+    if (!isControlled) {
+      setInternalValue(targetValue);
     }
-  }, [editor, disabled]);
+    onChange?.(targetValue);
+  };
+
+  const handleRedo = () => {
+    if (!canRedo) return;
+    const nextIndex = historyIndex + 1;
+    const targetValue = history[nextIndex] ?? '';
+    setHistoryIndex(nextIndex);
+    prevValueRef.current = targetValue;
+    if (!isControlled) {
+      setInternalValue(targetValue);
+    }
+    onChange?.(targetValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+    if (isCtrlOrCmd && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        handleRedo();
+      } else {
+        handleUndo();
+      }
+    } else if (isCtrlOrCmd && e.key.toLowerCase() === 'y') {
+      e.preventDefault();
+      handleRedo();
+    }
+  };
 
   // Restore draft handler
   const handleRestoreDraft = useCallback(() => {
-    if (editor && savedDraftContent) {
-      editor.commands.setContent(savedDraftContent, { emitUpdate: true });
+    if (savedDraftContent) {
+      prevValueRef.current = savedDraftContent;
+      if (!isControlled) {
+        setInternalValue(savedDraftContent);
+      }
+      onChange?.(savedDraftContent);
+      setHistory((prev) => [...prev.slice(0, historyIndex + 1), savedDraftContent]);
+      setHistoryIndex((prev) => prev + 1);
       setHasDraftNotice(false);
-      setEditorVersion((v) => v + 1);
     }
-  }, [editor, savedDraftContent, setHasDraftNotice]);
+  }, [savedDraftContent, historyIndex, isControlled, onChange]);
 
   const handleDismissDraft = useCallback(() => {
     setHasDraftNotice(false);
@@ -173,62 +197,22 @@ export default function RichTextEditor({
         // Ignore
       }
     }
-  }, [draftKey, setHasDraftNotice]);
+  }, [draftKey]);
 
   // Unsaved changes warning before window unload
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (editor && !editor.isEmpty && lastSavedDraft) {
+      if (currentValue && lastSavedDraft) {
         e.preventDefault();
         e.returnValue = '';
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [editor, lastSavedDraft]);
-
-  const currentLength = (
-    value !== undefined ? value : editor?.getText({ blockSeparator: '\n' }) || defaultValue
-  ).length;
-
-  if (!isClient) {
-    return (
-      <Box sx={{ width: '100%' }}>
-        {label && (
-          <Typography
-            variant="body2"
-            sx={{
-              mb: 0.75,
-              fontWeight: 600,
-              color: 'primary.main',
-              fontSize: { xs: '0.9375rem', sm: '0.875rem' },
-            }}
-          >
-            {label.endsWith(':') ? label : `${label}:`}
-            {required && (
-              <span aria-hidden="true" style={{ color: '#d32f2f', marginLeft: 4 }}>
-                *
-              </span>
-            )}
-          </Typography>
-        )}
-        <Box
-          sx={{
-            minHeight: `${minRows * 28 + 56}px`,
-            borderRadius: { xs: 2.5, sm: 2 },
-            border: '1px solid',
-            borderColor: error ? 'error.main' : 'divider',
-            bgcolor: 'background.paper',
-            p: 2,
-          }}
-        />
-      </Box>
-    );
-  }
+  }, [currentValue, lastSavedDraft]);
 
   const minHeightPx = Math.max(72, minRows * 28);
-  const isUndoActive = Boolean(editor?.can().undo() && !disabled);
-  const isRedoActive = Boolean(editor?.can().redo() && !disabled);
+  const currentLength = currentValue.length;
 
   return (
     <Box sx={{ width: '100%', position: 'relative' }}>
@@ -236,11 +220,12 @@ export default function RichTextEditor({
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 0.75 }}>
           <Typography
             component="label"
+            id={`${editorId}-label`}
             htmlFor={editorId}
             variant="body2"
             sx={{
               fontWeight: 600,
-              color: 'primary.main',
+              color: 'text.primary',
               fontSize: { xs: '0.9375rem', sm: '0.875rem' },
             }}
           >
@@ -255,39 +240,134 @@ export default function RichTextEditor({
       )}
 
       {hasDraftNotice && (
-        <Alert
-          severity="info"
-          icon={<RestoreIcon fontSize="inherit" />}
-          action={
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              <Button
-                color="inherit"
-                size="small"
-                onClick={handleRestoreDraft}
-                sx={{
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  minHeight: 36,
-                  px: 1.5,
-                }}
-              >
-                Restaurar rascunho
-              </Button>
-              <IconButton
-                size="small"
-                aria-label="Descartar aviso de rascunho"
-                color="inherit"
-                onClick={handleDismissDraft}
-                sx={{ minWidth: 36, minHeight: 36 }}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Stack>
-          }
-          sx={{ mb: 1.5, borderRadius: 2 }}
+        <Paper
+          elevation={0}
+          role="status"
+          aria-live="polite"
+          sx={{
+            mb: 1.5,
+            p: { xs: 1.5, sm: 1.75 },
+            borderRadius: 2.5,
+            border: '1.5px solid',
+            borderColor: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'rgba(147, 197, 253, 0.35)'
+                : 'rgba(37, 99, 235, 0.25)',
+            bgcolor: (theme) =>
+              theme.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.85)' : 'rgba(37, 99, 235, 0.05)',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : 'none',
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            justifyContent: 'space-between',
+            gap: { xs: 1.25, sm: 2 },
+          }}
         >
-          Existe um rascunho salvo anteriormente deste texto no seu aparelho.
-        </Alert>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: { xs: 'flex-start', sm: 'center' },
+              gap: 1.25,
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            <RestoreIcon
+              sx={{
+                fontSize: 22,
+                color: (theme) => (theme.palette.mode === 'dark' ? '#60A5FA' : 'connection.main'),
+                mt: { xs: 0.25, sm: 0 },
+                flexShrink: 0,
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.primary',
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                lineHeight: 1.5,
+                fontWeight: 500,
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              Existe um rascunho salvo anteriormente deste texto no seu aparelho.
+            </Typography>
+            <IconButton
+              size="small"
+              aria-label="Descartar aviso de rascunho"
+              onClick={handleDismissDraft}
+              sx={{
+                display: { xs: 'inline-flex', sm: 'none' },
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'text.secondary',
+                minWidth: 44,
+                minHeight: 44,
+                m: -1,
+                '&:hover': {
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'text.primary'),
+                },
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+              justifyContent: { xs: 'stretch', sm: 'flex-end' },
+              width: { xs: '100%', sm: 'auto' },
+              flexShrink: 0,
+            }}
+          >
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleRestoreDraft}
+              startIcon={<RestoreIcon sx={{ fontSize: 18 }} />}
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                minHeight: 44,
+                px: 2,
+                fontWeight: 700,
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                textTransform: 'none',
+                borderRadius: 2,
+                bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#2563EB' : 'primary.main'),
+                color: '#FFFFFF',
+                boxShadow: 'none',
+                '&:hover': {
+                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1D4ED8' : 'primary.dark'),
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Restaurar rascunho
+            </Button>
+
+            <IconButton
+              size="small"
+              aria-label="Descartar aviso de rascunho"
+              onClick={handleDismissDraft}
+              sx={{
+                display: { xs: 'none', sm: 'inline-flex' },
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'text.secondary',
+                minWidth: 44,
+                minHeight: 44,
+                '&:hover': {
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'text.primary'),
+                },
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Stack>
+        </Paper>
       )}
 
       {/* Editor Box */}
@@ -350,8 +430,8 @@ export default function RichTextEditor({
                 variant="outlined"
                 size="small"
                 aria-label="Desfazer alteração"
-                disabled={!isUndoActive}
-                onClick={() => editor?.chain().focus().undo().run()}
+                disabled={!canUndo}
+                onClick={handleUndo}
                 startIcon={<UndoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
                 sx={{
                   flex: { xs: 1, sm: 'initial' },
@@ -361,26 +441,29 @@ export default function RichTextEditor({
                   fontSize: { xs: '0.875rem', sm: '0.8125rem' },
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderColor: isUndoActive
+                  borderColor: canUndo
                     ? (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(144, 202, 249, 0.5)'
+                          ? 'rgba(147, 197, 253, 0.5)'
                           : 'rgba(13, 43, 92, 0.35)'
                     : 'divider',
-                  color: isUndoActive ? 'primary.main' : 'text.disabled',
-                  bgcolor: isUndoActive
+                  color: canUndo
+                    ? (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main')
+                    : 'text.disabled',
+                  bgcolor: canUndo
                     ? (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(144, 202, 249, 0.1)'
+                          ? 'rgba(147, 197, 253, 0.12)'
                           : 'rgba(255, 255, 255, 0.95)'
                     : 'transparent',
-                  boxShadow: isUndoActive ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
+                  boxShadow: canUndo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
                   '&:hover': {
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(144, 202, 249, 0.18)'
+                        ? 'rgba(147, 197, 253, 0.2)'
                         : 'rgba(13, 43, 92, 0.08)',
-                    borderColor: 'primary.main',
+                    borderColor: (theme) =>
+                      theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
                   },
                   '&:active': {
                     transform: 'scale(0.97)',
@@ -403,8 +486,8 @@ export default function RichTextEditor({
                 variant="outlined"
                 size="small"
                 aria-label="Refazer alteração"
-                disabled={!isRedoActive}
-                onClick={() => editor?.chain().focus().redo().run()}
+                disabled={!canRedo}
+                onClick={handleRedo}
                 startIcon={<RedoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
                 sx={{
                   flex: { xs: 1, sm: 'initial' },
@@ -414,26 +497,29 @@ export default function RichTextEditor({
                   fontSize: { xs: '0.875rem', sm: '0.8125rem' },
                   fontWeight: 600,
                   textTransform: 'none',
-                  borderColor: isRedoActive
+                  borderColor: canRedo
                     ? (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(144, 202, 249, 0.5)'
+                          ? 'rgba(147, 197, 253, 0.5)'
                           : 'rgba(13, 43, 92, 0.35)'
                     : 'divider',
-                  color: isRedoActive ? 'primary.main' : 'text.disabled',
-                  bgcolor: isRedoActive
+                  color: canRedo
+                    ? (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main')
+                    : 'text.disabled',
+                  bgcolor: canRedo
                     ? (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(144, 202, 249, 0.1)'
+                          ? 'rgba(147, 197, 253, 0.12)'
                           : 'rgba(255, 255, 255, 0.95)'
                     : 'transparent',
-                  boxShadow: isRedoActive ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
+                  boxShadow: canRedo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
                   '&:hover': {
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(144, 202, 249, 0.18)'
+                        ? 'rgba(147, 197, 253, 0.2)'
                         : 'rgba(13, 43, 92, 0.08)',
-                    borderColor: 'primary.main',
+                    borderColor: (theme) =>
+                      theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
                   },
                   '&:active': {
                     transform: 'scale(0.97)',
@@ -504,7 +590,7 @@ export default function RichTextEditor({
                   minWidth: 44,
                   minHeight: 44,
                   borderRadius: '9999px',
-                  color: 'primary.main',
+                  color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
                   bgcolor: (theme) =>
                     theme.palette.mode === 'dark'
                       ? 'rgba(255, 255, 255, 0.06)'
@@ -523,73 +609,38 @@ export default function RichTextEditor({
           </Stack>
         </Box>
 
-        {/* Visually hidden synchronized textarea for native form submission and test compatibility */}
-        <textarea
+        {/* Text Area Nativa e Acessível com Digitação e Estilização Fluida */}
+        <Box
+          component="textarea"
           id={editorId}
-          value={
-            value !== undefined ? value : editor?.getText({ blockSeparator: '\n' }) || defaultValue
-          }
-          onChange={(e) => {
-            const val = e.target.value;
-            onChange?.(val);
-            if (editor && editor.getText({ blockSeparator: '\n' }) !== val) {
-              editor.commands.setContent(val, { emitUpdate: false });
-              setEditorVersion((v) => v + 1);
-            }
-          }}
+          value={currentValue}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleTextChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={disabled}
           placeholder={placeholder}
-          tabIndex={-1}
-          style={{
-            position: 'absolute',
-            opacity: 0,
-            width: 1,
-            height: 1,
-            margin: -1,
-            padding: 0,
-            border: 0,
-            overflow: 'hidden',
-          }}
-        />
-
-        {/* Text Input Area with clean mobile-first typography */}
-        <Box
-          id={`${editorId}-visual`}
+          rows={minRows}
           sx={{
+            display: 'block',
+            width: '100%',
             p: { xs: 2, sm: 2.25 },
             minHeight: `${minHeightPx}px`,
+            border: 'none',
+            outline: 'none',
+            resize: 'vertical',
+            fontSize: { xs: '1rem', sm: '0.9375rem' },
+            lineHeight: 1.6,
+            color: 'text.primary',
+            bgcolor: 'transparent',
+            fontFamily: 'inherit',
             cursor: disabled ? 'not-allowed' : 'text',
             opacity: disabled ? 0.7 : 1,
-            '& .ProseMirror': {
-              outline: 'none',
-              minHeight: `${minHeightPx}px`,
-              fontSize: { xs: '1rem', sm: '0.9375rem' },
-              lineHeight: 1.6,
-              color: 'text.primary',
-              fontFamily: 'inherit',
-              '& p': {
-                margin: '0 0 0.5rem 0',
-              },
-              '& p:last-child': {
-                margin: 0,
-              },
-              '& .is-editor-empty:first-of-type::before': {
-                content: 'attr(data-placeholder)',
-                float: 'left',
-                color: 'text.disabled',
-                pointerEvents: 'none',
-                height: 0,
-              },
+            boxSizing: 'border-box',
+            '&::placeholder': {
+              color: 'text.disabled',
+              opacity: 1,
             },
           }}
-          onClick={() => {
-            if (!editor?.isFocused && !disabled) {
-              editor?.chain().focus().run();
-            }
-          }}
-        >
-          <EditorContent editor={editor} />
-        </Box>
+        />
       </Box>
 
       {/* Helper text or error message */}
@@ -620,7 +671,7 @@ export default function RichTextEditor({
           id="shortcuts-dialog-title"
           sx={{
             fontWeight: 700,
-            color: 'primary.main',
+            color: 'text.primary',
             fontSize: { xs: '1.125rem', sm: '1.25rem' },
           }}
         >
@@ -648,7 +699,7 @@ export default function RichTextEditor({
             >
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
                 <PhoneIphoneIcon color="primary" />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   No Celular ou Tablet
                 </Typography>
               </Stack>
@@ -667,7 +718,7 @@ export default function RichTextEditor({
                     borderColor: 'divider',
                     fontSize: '0.8125rem',
                     fontWeight: 600,
-                    color: 'primary.main',
+                    color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 0.5,
@@ -685,7 +736,7 @@ export default function RichTextEditor({
                     borderColor: 'divider',
                     fontSize: '0.8125rem',
                     fontWeight: 600,
-                    color: 'primary.main',
+                    color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 0.5,
@@ -711,7 +762,7 @@ export default function RichTextEditor({
             >
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', mb: 1 }}>
                 <LaptopIcon color="primary" />
-                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
                   No Computador (Teclado)
                 </Typography>
               </Stack>
@@ -739,7 +790,8 @@ export default function RichTextEditor({
                         fontFamily: 'monospace',
                         fontSize: '0.8rem',
                         fontWeight: 700,
-                        color: 'primary.main',
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
                         minWidth: 72,
                         textAlign: 'center',
                       }}

@@ -24,13 +24,21 @@ const navLinkSx = (isActive: boolean) => ({
   display: 'inline-block',
   py: 0.5,
   textDecoration: 'none',
-  color: isActive ? roleColors.intermediate : 'text.primary',
-  fontWeight: isActive ? 600 : 500,
+  color: (theme: { palette: { mode: string } }) =>
+    isActive
+      ? theme.palette.mode === 'dark'
+        ? '#FB923C'
+        : roleColors.intermediate
+      : 'text.primary',
+  fontWeight: isActive ? 700 : 500,
   whiteSpace: 'nowrap' as const,
   fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '0.95rem' },
   transition: 'color 0.2s ease',
   cursor: 'pointer',
-  '&:hover': { color: roleColors.intermediate },
+  '&:hover': {
+    color: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'dark' ? '#FB923C' : roleColors.intermediate,
+  },
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -38,7 +46,8 @@ const navLinkSx = (isActive: boolean) => ({
     bottom: 0,
     width: isActive ? '100%' : 0,
     height: 2,
-    bgcolor: roleColors.intermediate,
+    bgcolor: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'dark' ? '#FB923C' : roleColors.intermediate,
     transition: 'width 0.2s ease',
   },
   '&:hover::after': {
@@ -50,14 +59,22 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   display: 'block',
   py: 1.5,
   textDecoration: 'none',
-  color: isActive ? roleColors.intermediate : 'text.primary',
-  fontWeight: isActive ? 600 : 500,
+  color: (theme: { palette: { mode: string } }) =>
+    isActive
+      ? theme.palette.mode === 'dark'
+        ? '#FB923C'
+        : roleColors.intermediate
+      : 'text.primary',
+  fontWeight: isActive ? 700 : 500,
   fontSize: '1.05rem',
   borderBottom: '1px solid',
   borderColor: 'divider',
   transition: 'color 0.2s ease',
   cursor: 'pointer',
-  '&:hover': { color: roleColors.intermediate },
+  '&:hover': {
+    color: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'dark' ? '#FB923C' : roleColors.intermediate,
+  },
 });
 
 export default function SiteHeader() {
@@ -174,9 +191,26 @@ export default function SiteHeader() {
               sx={{
                 flexShrink: 0,
                 minHeight: 38,
-                px: { xs: 1.5, sm: 2 },
+                px: { xs: 1.5, sm: 2.25 },
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                 fontWeight: 600,
+                borderWidth: '1.5px',
+                borderColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+                boxShadow: (theme) =>
+                  theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                '&:hover': {
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'rgba(255, 255, 255, 0.22)'
+                      : 'rgba(13, 43, 92, 0.08)',
+                },
               }}
             >
               Entrar
@@ -190,12 +224,17 @@ export default function SiteHeader() {
                 flexShrink: 0,
                 display: { xs: 'none', sm: 'inline-flex' },
                 minHeight: 38,
-                px: { sm: 1.75, md: 2 },
+                px: { sm: 1.75, md: 2.25 },
                 fontSize: '0.875rem',
                 fontWeight: 700,
-                boxShadow: '0 2px 8px rgba(230, 81, 0, 0.25)',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? '#EA580C' : 'mission.main',
+                color: 'common.white',
+                boxShadow: '0 2px 8px rgba(230, 81, 0, 0.35)',
                 '&:hover': {
-                  boxShadow: '0 4px 12px rgba(230, 81, 0, 0.35)',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? '#C2410C' : 'mission.dark',
+                  boxShadow: '0 4px 12px rgba(230, 81, 0, 0.45)',
                 },
               }}
             >

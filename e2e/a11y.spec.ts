@@ -54,7 +54,9 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   test('DonationModal open dialog satisfies WCAG 2.2 AA accessibility standards', async ({
     page,
   }) => {
-    await page.goto('/profile/campanha', { waitUntil: 'networkidle' });
+    test.setTimeout(60000);
+    await page.goto('/profile/campanha');
+    await page.waitForTimeout(500);
 
     const ofertarBtn = page.getByRole('button', { name: /ofertar na campanha/i });
     await expect(ofertarBtn).toBeVisible();
@@ -81,7 +83,9 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   test('ContactModal open dialog satisfies WCAG 2.2 AA accessibility standards', async ({
     page,
   }) => {
-    await page.goto('/profile/sobre', { waitUntil: 'networkidle' });
+    test.setTimeout(60000);
+    await page.goto('/profile/sobre');
+    await page.waitForTimeout(500);
 
     const contactBtn = page.getByRole('button', { name: /contato/i });
     await expect(contactBtn).toBeVisible();

@@ -230,7 +230,8 @@ export default function CampaignMediaCarousel({
                 justifyContent: 'center',
                 borderRadius: 1,
                 '&:focus-visible': {
-                  outline: '2px solid #0D2B5C',
+                  outline: (theme) =>
+                    theme.palette.mode === 'dark' ? '2px solid #60A5FA' : '2px solid #0D2B5C',
                   outlineOffset: 2,
                 },
               }}
@@ -240,7 +241,12 @@ export default function CampaignMediaCarousel({
                   width: idx === activeIndex ? 22 : 8,
                   height: 8,
                   borderRadius: 4,
-                  bgcolor: idx === activeIndex ? 'mission.main' : 'divider',
+                  bgcolor: (theme) =>
+                    idx === activeIndex
+                      ? theme.palette.mode === 'dark'
+                        ? '#FB923C'
+                        : 'mission.main'
+                      : 'divider',
                   transition: 'all 0.3s ease',
                 }}
               />

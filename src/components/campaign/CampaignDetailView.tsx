@@ -202,7 +202,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                       <Typography
                         variant="h5"
                         component="h2"
-                        color="primary.main"
+                        color="text.primary"
                         sx={{ fontWeight: 800, fontSize: { xs: '1.15rem', sm: '1.35rem' } }}
                       >
                         Sobre esta Campanha
@@ -251,7 +251,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           <Typography
                             variant="h6"
                             component="h2"
-                            color="primary.main"
+                            color="text.primary"
                             sx={{ fontWeight: 800 }}
                           >
                             Projetos de Impacto Vinculados (
@@ -277,7 +277,8 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                 p: 2,
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
-                                  borderColor: 'primary.main',
+                                  borderColor: (theme) =>
+                                    theme.palette.mode === 'dark' ? '#60A5FA' : 'primary.main',
                                   boxShadow: '0 4px 12px rgba(13, 43, 92, 0.08)',
                                 },
                               }}
@@ -325,7 +326,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
 
                                     <Typography
                                       variant="subtitle1"
-                                      color="primary.main"
+                                      color="text.primary"
                                       sx={{ fontWeight: 700, lineHeight: 1.3 }}
                                     >
                                       {project.title}
@@ -365,9 +366,17 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                           minHeight: 44,
                                           py: 0.5,
                                           px: 2,
-                                          bgcolor: 'mission.main',
+                                          bgcolor: (theme) =>
+                                            theme.palette.mode === 'dark'
+                                              ? '#EA580C'
+                                              : 'mission.main',
                                           color: 'common.white',
-                                          '&:hover': { bgcolor: 'mission.dark' },
+                                          '&:hover': {
+                                            bgcolor: (theme) =>
+                                              theme.palette.mode === 'dark'
+                                                ? '#C2410C'
+                                                : 'mission.dark',
+                                          },
                                           justifyContent: 'center',
                                         }}
                                       >
@@ -465,7 +474,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                         >
                           <Typography
                             variant="subtitle2"
-                            color="primary.main"
+                            color="text.primary"
                             sx={{ fontWeight: 800, lineHeight: 1.2 }}
                           >
                             Campanha Oficial
@@ -501,7 +510,12 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                       {campaign.churchDay && (
                         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
                           <CalendarMonthIcon
-                            sx={{ color: 'mission.main', fontSize: 20, mt: 0.2 }}
+                            sx={{
+                              color: (theme) =>
+                                theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main',
+                              fontSize: 20,
+                              mt: 0.2,
+                            }}
                           />
                           <div>
                             <Typography variant="caption" color="text.secondary">
@@ -509,7 +523,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                             </Typography>
                             <Typography
                               variant="body2"
-                              color="primary.main"
+                              color="text.primary"
                               sx={{ fontWeight: 700 }}
                             >
                               {campaign.churchDay}
@@ -519,12 +533,19 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                       )}
 
                       <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-                        <EventAvailableIcon sx={{ color: 'primary.main', fontSize: 20, mt: 0.2 }} />
+                        <EventAvailableIcon
+                          sx={{
+                            color: (theme) =>
+                              theme.palette.mode === 'dark' ? '#60A5FA' : 'connection.main',
+                            fontSize: 20,
+                            mt: 0.2,
+                          }}
+                        />
                         <div>
                           <Typography variant="caption" color="text.secondary">
                             Período de Vigência
                           </Typography>
-                          <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>
+                          <Typography variant="body2" color="text.primary" sx={{ fontWeight: 600 }}>
                             {campaign.startDate} até {campaign.endDate}
                           </Typography>
                         </div>
@@ -548,10 +569,17 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           minHeight: 48,
                           fontSize: '1rem',
                           fontWeight: 700,
-                          bgcolor: 'mission.main',
+                          bgcolor: (theme) =>
+                            theme.palette.mode === 'dark' ? '#EA580C' : 'mission.main',
                           color: 'common.white',
-                          '&:hover': { bgcolor: 'mission.dark' },
-                          boxShadow: '0 3px 12px rgba(230, 81, 0, 0.3)',
+                          '&:hover': {
+                            bgcolor: (theme) =>
+                              theme.palette.mode === 'dark' ? '#C2410C' : 'mission.dark',
+                          },
+                          boxShadow: (theme) =>
+                            theme.palette.mode === 'dark'
+                              ? '0 4px 16px rgba(234, 88, 12, 0.45)'
+                              : '0 3px 12px rgba(230, 81, 0, 0.3)',
                         }}
                       >
                         <VolunteerActivismIcon sx={{ fontSize: 22, mr: 1 }} />
@@ -567,8 +595,18 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           minHeight: 44,
                           fontSize: '0.875rem',
                           fontWeight: 700,
-                          borderColor: 'primary.main',
-                          color: 'primary.main',
+                          borderColor: (theme) =>
+                            theme.palette.mode === 'dark'
+                              ? 'rgba(255, 255, 255, 0.35)'
+                              : 'primary.main',
+                          color: (theme) =>
+                            theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main',
+                          '&:hover': {
+                            bgcolor: (theme) =>
+                              theme.palette.mode === 'dark'
+                                ? 'rgba(255, 255, 255, 0.1)'
+                                : 'rgba(13, 43, 92, 0.05)',
+                          },
                         }}
                       >
                         <ArrowDownwardIcon sx={{ fontSize: 18, mr: 0.75 }} />
@@ -632,13 +670,18 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
             },
           }}
         >

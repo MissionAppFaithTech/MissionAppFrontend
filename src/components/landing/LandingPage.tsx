@@ -206,6 +206,23 @@ function HeroHeadline() {
             sx={{
               ...heroCtaButtonSx,
               borderRadius: '12px',
+              borderWidth: '2px',
+              borderColor: (theme) =>
+                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              color: (theme) =>
+                theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+              boxShadow: (theme) =>
+                theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+              '&:hover': {
+                borderColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.22)'
+                    : 'rgba(13, 43, 92, 0.08)',
+              },
             }}
           >
             Saiba mais
@@ -251,8 +268,22 @@ function LandingHero() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: 'cover', objectPosition: 'center', opacity: isDark ? 0.15 : 0.3 }}
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center',
+            opacity: isDark ? 0.6 : 0.3,
+          }}
         />
+        {isDark && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(8, 28, 58, 0.7)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </Box>
 
       <Box
@@ -260,7 +291,6 @@ function LandingHero() {
           display: { xs: 'none', md: 'block' },
           position: 'absolute',
           inset: 0,
-          bgcolor: isDark ? 'background.default' : 'transparent',
         }}
       >
         <Image
@@ -272,9 +302,21 @@ function LandingHero() {
           style={{
             objectFit: 'cover',
             objectPosition: 'center',
-            opacity: isDark ? 0.22 : 1,
+            opacity: isDark ? 0.85 : 1,
+            filter: isDark ? 'contrast(1.05) brightness(0.95)' : 'none',
           }}
         />
+        {isDark && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(90deg, rgba(8, 28, 58, 0.94) 0%, rgba(8, 28, 58, 0.8) 42%, rgba(8, 28, 58, 0.35) 68%, rgba(8, 28, 58, 0.08) 100%)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </Box>
 
       <Box

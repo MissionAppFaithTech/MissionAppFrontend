@@ -400,13 +400,18 @@ CPF/CNPJ: ${bankData.documento}`;
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
             },
           }}
         >

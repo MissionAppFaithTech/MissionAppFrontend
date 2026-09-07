@@ -118,8 +118,28 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                   }
                   size="small"
                   sx={{
-                    bgcolor: 'rgba(234, 241, 250, 0.85)',
-                    color: 'primary.main',
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? post.type === 'campaign'
+                          ? 'rgba(249, 115, 22, 0.2)'
+                          : 'rgba(59, 130, 246, 0.2)'
+                        : post.type === 'campaign'
+                          ? 'rgba(254, 243, 199, 0.9)'
+                          : 'rgba(234, 241, 250, 0.85)',
+                    color: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? post.type === 'campaign'
+                          ? '#FB923C'
+                          : '#93C5FD'
+                        : post.type === 'campaign'
+                          ? 'warning.dark'
+                          : 'primary.main',
+                    border: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? post.type === 'campaign'
+                          ? '1px solid rgba(251, 146, 60, 0.4)'
+                          : '1px solid rgba(147, 197, 253, 0.35)'
+                        : 'none',
                     fontWeight: 700,
                     fontSize: '0.7rem',
                     letterSpacing: '0.05em',
@@ -256,12 +276,18 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
-            boxShadow: 3,
+            borderRadius: 2,
+            border: (theme) =>
+              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
             },
           }}
         >
