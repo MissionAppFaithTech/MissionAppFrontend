@@ -139,8 +139,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                 fontSize: { xs: '1.65rem', sm: '2.25rem', md: '2.75rem' },
                 lineHeight: 1.2,
                 letterSpacing: '-0.02em',
-                textShadow:
-                  '0 2px 10px rgba(0, 0, 0, 0.7), 0 4px 24px rgba(0, 0, 0, 0.45)',
+                textShadow: '0 2px 10px rgba(0, 0, 0, 0.7), 0 4px 24px rgba(0, 0, 0, 0.45)',
               }}
             >
               {campaign.title}
@@ -169,7 +168,12 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
       {/* 2. Container Central */}
       <Container
         maxWidth="lg"
-        sx={{ px: { xs: 2, sm: 3 }, mt: { xs: -3, sm: -4, md: -5 }, position: 'relative', zIndex: 2 }}
+        sx={{
+          px: { xs: 2, sm: 3 },
+          mt: { xs: -3, sm: -4, md: -5 },
+          position: 'relative',
+          zIndex: 2,
+        }}
       >
         <Grid container spacing={3}>
           {/* Coluna Principal */}
@@ -442,9 +446,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           flexShrink: 0,
                           border: '1.5px solid',
                           borderColor: (theme) =>
-                            theme.palette.mode === 'dark'
-                              ? 'rgba(249, 115, 22, 0.35)'
-                              : 'divider',
+                            theme.palette.mode === 'dark' ? 'rgba(249, 115, 22, 0.35)' : 'divider',
                         }}
                       >
                         <CampaignIcon

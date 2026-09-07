@@ -1,14 +1,12 @@
 import type { ReactNode } from 'react';
-import SearchIcon from '@mui/icons-material/Search';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import Logo from '@/components/common/Logo';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
 import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
 import ProfileNavigation from '@/components/profile/ProfileNavigation';
+import ProfileSearchField from '@/components/profile/ProfileSearchField';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import { mockSupporterProfile } from '@/mocks/profile';
 
@@ -19,32 +17,9 @@ export default function SupporterProfileLayout({ children }: { children: ReactNo
         <Logo size="lg" href="/profile/supporter" variant="dark" />
 
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'center' }}>
-          <TextField
+          <ProfileSearchField
             placeholder="Buscar missionários, projetos, campanhas..."
-            size="small"
-            aria-label="Buscar missionários, projetos, campanhas"
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon sx={{ fontSize: 18, color: 'primary.main' }} />
-                  </InputAdornment>
-                ),
-              },
-              htmlInput: { readOnly: true },
-            }}
-            sx={{
-              width: '100%',
-              maxWidth: { xs: 150, sm: 240, md: 320 },
-              '& .MuiOutlinedInput-root': {
-                height: { xs: 34, sm: 36 },
-                bgcolor: 'background.paper',
-                borderRadius: 2,
-                fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                px: { xs: 0.5, sm: 1 },
-              },
-              '& .MuiInputAdornment-root': { mr: { xs: 0.25, sm: 1 } },
-            }}
+            maxWidth={{ xs: 150, sm: 240, md: 320 }}
           />
         </Box>
 

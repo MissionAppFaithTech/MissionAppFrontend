@@ -35,4 +35,3 @@ describe('SkipToContent component', () => {
     document.body.removeChild(target);
   });
 });
-

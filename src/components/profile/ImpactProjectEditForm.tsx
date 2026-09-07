@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ChangeEvent } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import CampaignIcon from '@mui/icons-material/Campaign';
@@ -24,6 +24,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { getYouTubeEmbedUrl } from '@/components/profile/ImpactProjectCard';
 import { impactProjectEditSchema, type ImpactProjectEditFormData } from '@/schemas/content.schema';
 import type { ImpactProjectData } from '@/types/profile';
@@ -41,6 +42,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
     handleSubmit,
     setValue,
     watch,
+    control,
     formState: { errors },
   } = useForm<ImpactProjectEditFormData>({
     resolver: zodResolver(impactProjectEditSchema),
@@ -90,6 +92,13 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
   };
 
   const onSubmit = (data: ImpactProjectEditFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(`draft_impact_project_${project.id}`);
+      } catch {
+        // Ignore
+      }
+    }
     const updated: ImpactProjectData = {
       ...project,
       title: data.title,
@@ -246,26 +255,23 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   />
                 </Stack>
 
-                <Stack spacing={0.75}>
-                  <Typography
-                    component="label"
-                    htmlFor="project-description"
-                    variant="body2"
-                    sx={{ color: 'primary.main', fontWeight: 600 }}
-                  >
-                    Descrição Detalhada:
-                  </Typography>
-                  <TextField
-                    id="project-description"
-                    {...register('description')}
-                    multiline
-                    minRows={4}
-                    fullWidth
-                    error={Boolean(errors.description)}
-                    helperText={errors.description?.message}
-                    placeholder="Conte sobre o objetivo, público alcançado e necessidades do projeto..."
-                  />
-                </Stack>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      id="project-description"
+                      label="Descrição Detalhada"
+                      value={field.value}
+                      onChange={field.onChange}
+                      minRows={5}
+                      draftKey={`impact_project_${project.id}`}
+                      placeholder="Conte sobre o objetivo, público alcançado, etapas e necessidades do projeto..."
+                      error={Boolean(errors.description)}
+                      helperText={errors.description?.message}
+                    />
+                  )}
+                />
               </Stack>
 
               <Divider />
@@ -531,22 +537,26 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
 
               {/* Ações Finais */}
               <Stack
-                direction="row"
-                spacing={1}
+                direction={{ xs: 'column-reverse', sm: 'row' }}
+                spacing={{ xs: 1.5, sm: 1.5 }}
                 sx={{
                   justifyContent: 'flex-end',
-                  pt: { xs: 1, sm: 2 },
-                  '& .MuiButton-root': { flex: { xs: 1, sm: 'initial' } },
+                  pt: { xs: 2, sm: 2 },
+                  '& .MuiButton-root': {
+                    minHeight: { xs: 48, sm: 40 },
+                    width: { xs: '100%', sm: 'auto' },
+                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                  },
                 }}
               >
                 <PillButton
                   href="/profile/projetos-de-impacto"
                   tone="primarySoftOutline"
-                  size="small"
+                  size="medium"
                 >
                   Voltar
                 </PillButton>
-                <PillButton type="submit" tone="primaryFilled" size="small">
+                <PillButton type="submit" tone="primaryFilled" size="medium">
                   Salvar
                 </PillButton>
               </Stack>

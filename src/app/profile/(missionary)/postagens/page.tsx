@@ -2,8 +2,9 @@
 
 import Image from 'next/image';
 import { useState, type SyntheticEvent } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import AddIcon from '@mui/icons-material/Add';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
@@ -46,6 +47,7 @@ function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<NewPostFormData>({
     resolver: zodResolver(newPostSchema),
@@ -58,6 +60,13 @@ function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
   });
 
   const onSubmit = (data: NewPostFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_missionary_new_post');
+      } catch {
+        // Ignore
+      }
+    }
     onSubmitPost?.(data);
     onCancel?.();
   };
@@ -76,15 +85,22 @@ function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
               Nova postagem
             </Typography>
 
-            <TextField
-              {...register('content')}
-              multiline
-              minRows={6}
-              fullWidth
-              placeholder="Comece a escrever..."
-              aria-label="Conteúdo da nova postagem"
-              error={Boolean(errors.content)}
-              helperText={errors.content?.message}
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="post-content-editor"
+                  label="Mensagem"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={6}
+                  draftKey="missionary_new_post"
+                  placeholder="Comece a escrever..."
+                  error={Boolean(errors.content)}
+                  helperText={errors.content?.message}
+                />
+              )}
             />
 
             <Stack spacing={0.75}>
@@ -109,22 +125,38 @@ function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
             </Stack>
 
             <Box>
-              <PillButton component="label" tone="primarySoftOutline" size="small">
-                <ImageOutlinedIcon sx={{ mr: 0.75, fontSize: 17 }} />
+              <PillButton
+                component="label"
+                tone="primarySoftOutline"
+                size="medium"
+                sx={{
+                  minHeight: { xs: 48, sm: 40 },
+                  width: { xs: '100%', sm: 'auto' },
+                }}
+              >
+                <ImageOutlinedIcon sx={{ mr: 0.75, fontSize: 19 }} />
                 Inserir imagens
                 <Box component="input" type="file" accept="image/*" multiple hidden />
               </PillButton>
             </Box>
 
             <Stack
-              direction="row"
-              spacing={1}
-              sx={{ justifyContent: 'flex-end', pt: { xs: 2, sm: 6 } }}
+              direction={{ xs: 'column-reverse', sm: 'row' }}
+              spacing={{ xs: 1.5, sm: 1 }}
+              sx={{
+                justifyContent: 'flex-end',
+                pt: { xs: 2, sm: 4 },
+                '& .MuiButton-root': {
+                  minHeight: { xs: 48, sm: 40 },
+                  width: { xs: '100%', sm: 'auto' },
+                  fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                },
+              }}
             >
-              <PillButton tone="primarySoftOutline" size="small" type="button" onClick={onCancel}>
+              <PillButton tone="primarySoftOutline" size="medium" type="button" onClick={onCancel}>
                 Cancelar
               </PillButton>
-              <PillButton tone="primaryFilled" size="small" type="submit">
+              <PillButton tone="primaryFilled" size="medium" type="submit">
                 Postar
               </PillButton>
             </Stack>

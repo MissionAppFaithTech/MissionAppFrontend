@@ -16,6 +16,8 @@ describe('SupporterEditForm Component', () => {
     expect(screen.getByDisplayValue(mockProfile.username)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProfile.displayName)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProfile.roleDescription)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /desfazer alteração/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /refazer alteração/i })).toBeInTheDocument();
 
     // Contact Fields
     expect(screen.getByLabelText(/e-mail de contato público/i)).toHaveValue('samuelhe@gmail.com');

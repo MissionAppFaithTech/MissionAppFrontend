@@ -18,4 +18,3 @@ describe('CampaignBadge component', () => {
     expect(screen.getByText('Selo Oficial de Campanha')).toBeInTheDocument();
   });
 });
-

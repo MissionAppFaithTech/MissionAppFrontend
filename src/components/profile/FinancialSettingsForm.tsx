@@ -34,6 +34,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import DonationModal from '@/components/profile/DonationModal';
 import {
   financialSettingsSchema,
@@ -180,6 +181,13 @@ export default function FinancialSettingsForm({
   };
 
   const onSubmit = (data: FinancialSettingsFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_financial_supporter_message');
+      } catch {
+        // Ignore
+      }
+    }
     const configToSave: FinancialConfigData = {
       supporterMessage: data.supporterMessage,
       pix: {
@@ -269,9 +277,14 @@ export default function FinancialSettingsForm({
                   <PillButton
                     href="/profile/sobre"
                     tone="primarySoftOutline"
-                    size="small"
+                    size="medium"
                     aria-label="Voltar para o perfil"
-                    sx={{ minHeight: 44, px: 2, flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
+                    sx={{
+                      minHeight: { xs: 48, sm: 42 },
+                      px: 2,
+                      flexShrink: 0,
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
                   >
                     <ArrowBackIcon sx={{ fontSize: 18, mr: 0.75 }} />
                     Voltar
@@ -280,9 +293,14 @@ export default function FinancialSettingsForm({
                   <PillButton
                     type="button"
                     tone="primarySoftOutline"
-                    size="small"
+                    size="medium"
                     onClick={() => setPreviewOpen(true)}
-                    sx={{ minHeight: 44, px: 2, flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}
+                    sx={{
+                      minHeight: { xs: 48, sm: 42 },
+                      px: 2,
+                      flexShrink: 0,
+                      width: { xs: '100%', sm: 'auto' },
+                    }}
                   >
                     <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                     Visualizar Prévia do Apoiador
@@ -325,18 +343,23 @@ export default function FinancialSettingsForm({
                   momento da oferta.
                 </Typography>
 
-                <TextField
-                  label="Mensagem de Gratidão e Direcionamento"
-                  multiline
-                  rows={3}
-                  fullWidth
-                  {...register('supporterMessage')}
-                  error={Boolean(errors.supporterMessage)}
-                  helperText={
-                    errors.supporterMessage?.message ||
-                    `${(supporterMessage || '').length}/500 caracteres`
-                  }
-                  placeholder="Ex: Sua contribuição sustenta nossa atuação no campo missionário..."
+                <Controller
+                  name="supporterMessage"
+                  control={control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      id="financial-supporter-message"
+                      label="Mensagem de Gratidão e Direcionamento"
+                      value={field.value}
+                      onChange={field.onChange}
+                      minRows={3}
+                      maxLength={500}
+                      draftKey="financial_supporter_message"
+                      placeholder="Ex: Sua contribuição sustenta nossa atuação no campo missionário..."
+                      error={Boolean(errors.supporterMessage)}
+                      helperText={errors.supporterMessage?.message}
+                    />
+                  )}
                 />
 
                 {/* Prévia dinâmica da mensagem */}
@@ -763,8 +786,14 @@ export default function FinancialSettingsForm({
                   display: 'flex',
                   flexDirection: { xs: 'column-reverse', sm: 'row' },
                   justifyContent: 'flex-end',
+                  alignItems: { xs: 'stretch', sm: 'center' },
                   gap: 1.5,
                   pt: 1,
+                  '& .MuiButton-root': {
+                    minHeight: { xs: 48, sm: 44 },
+                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                    width: { xs: '100%', sm: 'auto' },
+                  },
                 }}
               >
                 <PillButton
@@ -772,7 +801,7 @@ export default function FinancialSettingsForm({
                   tone="primarySoftOutline"
                   size="medium"
                   aria-label="Voltar para o perfil"
-                  sx={{ minHeight: 44, px: 3, width: { xs: '100%', sm: 'auto' } }}
+                  sx={{ px: 3 }}
                 >
                   <ArrowBackIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Voltar
@@ -783,18 +812,13 @@ export default function FinancialSettingsForm({
                   tone="primarySoftOutline"
                   size="medium"
                   onClick={() => setPreviewOpen(true)}
-                  sx={{ minHeight: 44, px: 3, width: { xs: '100%', sm: 'auto' } }}
+                  sx={{ px: 3 }}
                 >
                   <VisibilityOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Visualizar Prévia
                 </PillButton>
 
-                <PillButton
-                  type="submit"
-                  tone="missionFilled"
-                  size="medium"
-                  sx={{ minHeight: 44, px: 4, width: { xs: '100%', sm: 'auto' } }}
-                >
+                <PillButton type="submit" tone="missionFilled" size="medium" sx={{ px: 4 }}>
                   <SaveOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Salvar Configurações
                 </PillButton>

@@ -22,6 +22,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { profileLocations } from '@/lib/profileOptions';
 import { supporterEditSchema, type SupporterEditFormData } from '@/schemas/profile.schema';
 import type { ProfileData } from '@/types/profile';
@@ -53,6 +54,13 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
   });
 
   const onSubmit = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_supporter_header_bio');
+      } catch {
+        // Ignore
+      }
+    }
     setToastOpen(true);
   };
 
@@ -99,21 +107,21 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                   <IconButton
                     component="label"
                     aria-label="Alterar foto de perfil"
-                    size="small"
                     sx={{
                       position: 'absolute',
-                      right: -2,
-                      bottom: 2,
-                      width: 30,
-                      height: 30,
+                      right: { xs: -4, sm: -2 },
+                      bottom: { xs: -2, sm: 2 },
+                      width: { xs: 44, sm: 40 },
+                      height: { xs: 44, sm: 40 },
                       bgcolor: 'primary.main',
                       color: 'common.white',
                       border: '2px solid',
                       borderColor: 'background.paper',
+                      boxShadow: 2,
                       '&:hover': { bgcolor: 'primary.dark', color: 'common.white' },
                     }}
                   >
-                    <AddIcon sx={{ fontSize: 20 }} />
+                    <AddIcon sx={{ fontSize: { xs: 22, sm: 20 } }} />
                     <Box component="input" type="file" accept="image/*" hidden />
                   </IconButton>
                 </Box>
@@ -167,24 +175,23 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                   />
                 </Stack>
 
-                <Stack spacing={0.75}>
-                  <Typography
-                    component="label"
-                    htmlFor="bio"
-                    variant="body2"
-                    sx={{ color: 'primary.main', fontWeight: 600 }}
-                  >
-                    Bio / Papel:
-                  </Typography>
-                  <TextField
-                    id="bio"
-                    {...register('bio')}
-                    size="small"
-                    fullWidth
-                    error={Boolean(errors.bio)}
-                    helperText={errors.bio?.message}
-                  />
-                </Stack>
+                <Controller
+                  name="bio"
+                  control={control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      id="bio"
+                      label="Bio / Papel"
+                      value={field.value}
+                      onChange={field.onChange}
+                      minRows={2}
+                      draftKey="supporter_header_bio"
+                      placeholder="Descreva seu papel ou como você apoia missões..."
+                      error={Boolean(errors.bio)}
+                      helperText={errors.bio?.message}
+                    />
+                  )}
+                />
 
                 <Stack spacing={0.75}>
                   <Typography
@@ -331,22 +338,26 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
               </Stack>
 
               <Stack
-                direction="row"
-                spacing={1}
+                direction={{ xs: 'column-reverse', sm: 'row' }}
+                spacing={{ xs: 1.5, sm: 1.5 }}
                 sx={{
                   justifyContent: 'flex-end',
-                  pt: { xs: 1, sm: 3, md: 4 },
-                  '& .MuiButton-root': { flex: { xs: 1, sm: 'initial' } },
+                  pt: { xs: 2, sm: 3, md: 4 },
+                  '& .MuiButton-root': {
+                    minHeight: { xs: 48, sm: 42 },
+                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                    width: { xs: '100%', sm: 'auto' },
+                  },
                 }}
               >
                 <PillButton
                   href="/profile/supporter/missionarios"
                   tone="primarySoftOutline"
-                  size="small"
+                  size="medium"
                 >
                   Voltar
                 </PillButton>
-                <PillButton type="submit" tone="primaryFilled" size="small">
+                <PillButton type="submit" tone="primaryFilled" size="medium">
                   Salvar
                 </PillButton>
               </Stack>

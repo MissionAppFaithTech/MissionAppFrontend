@@ -10,18 +10,44 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { profileLocations } from '@/lib/profileOptions';
 import { supporterAboutSchema, type SupporterAboutFormData } from '@/schemas/profile.schema';
 import type { ProfileAboutData } from '@/types/profile';
+import type { ReactNode } from 'react';
 
 type SupporterAboutEditSectionProps = {
   data: ProfileAboutData;
   onBack: () => void;
+  onSave?: (data: SupporterAboutFormData) => void;
 };
+
+type LabeledFieldProps = {
+  children: ReactNode;
+  htmlFor: string;
+  label: string;
+};
+
+function LabeledField({ children, htmlFor, label }: LabeledFieldProps) {
+  return (
+    <Stack spacing={0.75}>
+      <Typography
+        component="label"
+        htmlFor={htmlFor}
+        variant="body2"
+        sx={{ color: 'primary.main', fontWeight: 600 }}
+      >
+        {label}:
+      </Typography>
+      {children}
+    </Stack>
+  );
+}
 
 export default function SupporterAboutEditSection({
   data,
   onBack,
+  onSave,
 }: SupporterAboutEditSectionProps) {
   const {
     register,
@@ -40,7 +66,16 @@ export default function SupporterAboutEditSection({
     },
   });
 
-  const onSubmit = () => {
+  const onSubmit = (formData: SupporterAboutFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_supporter_about_intro');
+        localStorage.removeItem('draft_supporter_about_life_verse');
+      } catch {
+        // Ignore
+      }
+    }
+    onSave?.(formData);
     onBack();
   };
 
@@ -67,43 +102,32 @@ export default function SupporterAboutEditSection({
               Editar informação do sobre
             </Typography>
 
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="introduction"
-                variant="body2"
-                sx={{ color: 'primary.main', fontWeight: 600 }}
-              >
-                Bio / Apresentação:
-              </Typography>
-              <TextField
-                id="introduction"
-                {...register('introduction')}
-                multiline
-                minRows={3}
-                fullWidth
-                size="small"
-                error={Boolean(errors.introduction)}
-                helperText={errors.introduction?.message}
-              />
-            </Stack>
+            <Controller
+              name="introduction"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="supporter-about-introduction"
+                  label="Bio / Apresentação"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={4}
+                  draftKey="supporter_about_intro"
+                  placeholder="Escreva uma breve apresentação sobre sua caminhada cristã e ministério..."
+                  error={Boolean(errors.introduction)}
+                  helperText={errors.introduction?.message}
+                />
+              )}
+            />
 
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="originLocation"
-                variant="body2"
-                sx={{ color: 'primary.main', fontWeight: 600 }}
-              >
-                Local de origem:
-              </Typography>
+            <LabeledField htmlFor="supporter-about-origin" label="Local de origem">
               <Controller
                 name="originLocation"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    id="originLocation"
+                    id="supporter-about-origin"
                     select
                     fullWidth
                     size="small"
@@ -118,24 +142,16 @@ export default function SupporterAboutEditSection({
                   </TextField>
                 )}
               />
-            </Stack>
+            </LabeledField>
 
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="currentLocation"
-                variant="body2"
-                sx={{ color: 'primary.main', fontWeight: 600 }}
-              >
-                Localização atual:
-              </Typography>
+            <LabeledField htmlFor="supporter-about-current" label="Localização atual">
               <Controller
                 name="currentLocation"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    id="currentLocation"
+                    id="supporter-about-current"
                     select
                     fullWidth
                     size="small"
@@ -150,59 +166,53 @@ export default function SupporterAboutEditSection({
                   </TextField>
                 )}
               />
-            </Stack>
+            </LabeledField>
 
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="faithCommunity"
-                variant="body2"
-                sx={{ color: 'primary.main', fontWeight: 600 }}
-              >
-                Comunidade de fé:
-              </Typography>
+            <LabeledField htmlFor="supporter-about-faith" label="Comunidade de fé">
               <TextField
-                id="faithCommunity"
+                id="supporter-about-faith"
                 {...register('faithCommunity')}
                 fullWidth
                 size="small"
                 error={Boolean(errors.faithCommunity)}
                 helperText={errors.faithCommunity?.message}
               />
-            </Stack>
+            </LabeledField>
 
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="lifeVerse"
-                variant="body2"
-                sx={{ color: 'primary.main', fontWeight: 600 }}
-              >
-                Versículo para a vida:
-              </Typography>
-              <TextField
-                id="lifeVerse"
-                {...register('lifeVerse')}
-                fullWidth
-                size="small"
-                error={Boolean(errors.lifeVerse)}
-                helperText={errors.lifeVerse?.message}
-              />
-            </Stack>
+            <Controller
+              name="lifeVerse"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="supporter-about-life-verse"
+                  label="Versículo para a vida"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={2}
+                  draftKey="supporter_about_life_verse"
+                  placeholder="Insira seu versículo bíblico favorito ou lema de fé..."
+                  error={Boolean(errors.lifeVerse)}
+                  helperText={errors.lifeVerse?.message}
+                />
+              )}
+            />
 
             <Stack
               direction="row"
-              spacing={1}
+              spacing={1.5}
               sx={{
                 justifyContent: 'flex-end',
-                pt: { xs: 1, sm: 2 },
-                '& .MuiButton-root': { flex: { xs: 1, sm: 'initial' } },
+                pt: { xs: 1.5, sm: 2 },
+                '& .MuiButton-root': {
+                  minHeight: { xs: 48, sm: 40 },
+                  flex: { xs: 1, sm: 'initial' },
+                },
               }}
             >
-              <PillButton tone="primarySoftOutline" size="small" onClick={onBack}>
+              <PillButton tone="primarySoftOutline" size="medium" onClick={onBack}>
                 Voltar
               </PillButton>
-              <PillButton type="submit" tone="primaryFilled" size="small">
+              <PillButton type="submit" tone="primaryFilled" size="medium">
                 Salvar
               </PillButton>
             </Stack>

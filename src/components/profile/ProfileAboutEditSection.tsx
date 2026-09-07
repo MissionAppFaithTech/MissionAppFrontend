@@ -10,6 +10,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { profileLocations } from '@/lib/profileOptions';
 import { profileAboutSchema, type ProfileAboutFormData } from '@/schemas/profile.schema';
 import type { ProfileAboutData } from '@/types/profile';
@@ -57,7 +58,6 @@ export default function ProfileAboutEditSection({
   onSave,
 }: ProfileAboutEditSectionProps) {
   const {
-    register,
     handleSubmit,
     control,
     formState: { errors },
@@ -77,6 +77,16 @@ export default function ProfileAboutEditSection({
   });
 
   const onSubmit = (formData: ProfileAboutFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_profile_about_intro');
+        localStorage.removeItem('draft_profile_about_mission_history');
+        localStorage.removeItem('draft_profile_about_prayer_requests');
+        localStorage.removeItem('draft_profile_about_life_verse');
+      } catch {
+        // Ignore
+      }
+    }
     onSave?.(formData);
     onBack();
   };
@@ -104,32 +114,41 @@ export default function ProfileAboutEditSection({
               Editar sobre
             </Typography>
 
-            <LabeledField htmlFor="profile-about-introduction" label="Sobre mim">
-              <TextField
-                id="profile-about-introduction"
-                {...register('introduction')}
-                multiline
-                minRows={4}
-                fullWidth
-                error={Boolean(errors.introduction)}
-                helperText={errors.introduction?.message}
-              />
-            </LabeledField>
+            <Controller
+              name="introduction"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-introduction"
+                  label="Sobre mim"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={4}
+                  draftKey="profile_about_intro"
+                  placeholder="Compartilhe sua trajetória, testemunho e dedicação ministerial..."
+                  error={Boolean(errors.introduction)}
+                  helperText={errors.introduction?.message}
+                />
+              )}
+            />
 
-            <LabeledField
-              htmlFor="profile-about-mission-history"
-              label="Resumo da minha história em missões"
-            >
-              <TextField
-                id="profile-about-mission-history"
-                {...register('missionHistory')}
-                multiline
-                minRows={4}
-                fullWidth
-                error={Boolean(errors.missionHistory)}
-                helperText={errors.missionHistory?.message}
-              />
-            </LabeledField>
+            <Controller
+              name="missionHistory"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-mission-history"
+                  label="Resumo da minha história em missões"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={4}
+                  draftKey="profile_about_mission_history"
+                  placeholder="Conte sobre os países, comunidades e marcos por onde você serviu..."
+                  error={Boolean(errors.missionHistory)}
+                  helperText={errors.missionHistory?.message}
+                />
+              )}
+            />
 
             <LabeledField htmlFor="profile-about-origin" label="Local de origem">
               <Controller
@@ -223,45 +242,58 @@ export default function ProfileAboutEditSection({
               />
             </LabeledField>
 
-            <LabeledField htmlFor="profile-about-prayer-requests" label="Pedidos de oração">
-              <TextField
-                id="profile-about-prayer-requests"
-                {...register('prayerRequests')}
-                multiline
-                minRows={3}
-                fullWidth
-                error={Boolean(errors.prayerRequests)}
-                helperText={errors.prayerRequests?.message}
-              />
-            </LabeledField>
+            <Controller
+              name="prayerRequests"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-prayer-requests"
+                  label="Pedidos de oração"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={3}
+                  draftKey="profile_about_prayer_requests"
+                  placeholder="Liste pedidos de oração pelo seu ministério, saúde e família..."
+                  error={Boolean(errors.prayerRequests)}
+                  helperText={errors.prayerRequests?.message}
+                />
+              )}
+            />
 
-            <LabeledField htmlFor="profile-about-life-verse" label="Versículo para a vida">
-              <TextField
-                id="profile-about-life-verse"
-                {...register('lifeVerse')}
-                multiline
-                minRows={3}
-                fullWidth
-                error={Boolean(errors.lifeVerse)}
-                helperText={errors.lifeVerse?.message}
-              />
-            </LabeledField>
+            <Controller
+              name="lifeVerse"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-life-verse"
+                  label="Versículo para a vida"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={2}
+                  draftKey="profile_about_life_verse"
+                  placeholder="Insira sua citação bíblica ou lema de fé (ex: 'Tudo posso naquele que me fortalece')..."
+                  error={Boolean(errors.lifeVerse)}
+                  helperText={errors.lifeVerse?.message}
+                />
+              )}
+            />
 
             <Stack
               direction="row"
-              spacing={1}
+              spacing={1.5}
               sx={{
-                pt: 1,
+                pt: 1.5,
                 justifyContent: 'flex-end',
                 '& .MuiButton-root': {
+                  minHeight: { xs: 48, sm: 40 },
                   flex: { xs: 1, sm: 'initial' },
                 },
               }}
             >
-              <PillButton type="button" tone="primarySoftOutline" size="small" onClick={onBack}>
+              <PillButton type="button" tone="primarySoftOutline" size="medium" onClick={onBack}>
                 Voltar
               </PillButton>
-              <PillButton type="submit" tone="primaryFilled" size="small">
+              <PillButton type="submit" tone="primaryFilled" size="medium">
                 Salvar
               </PillButton>
             </Stack>

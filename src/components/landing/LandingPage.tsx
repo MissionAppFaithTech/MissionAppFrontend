@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionSummary,
   Avatar,
+  useTheme,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Image from 'next/image';
@@ -96,6 +97,10 @@ const HERO_NAVBAR_OVERLAP = {
 } as const;
 
 function HeroHeadline() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const headingPrimaryColor = isDark ? 'common.white' : 'primary.main';
+
   return (
     <Stack
       spacing={0}
@@ -123,23 +128,23 @@ function HeroHeadline() {
           },
         }}
       >
-        <Box component="span" sx={{ display: 'block', color: 'primary.main' }}>
+        <Box component="span" sx={{ display: 'block', color: headingPrimaryColor }}>
           Conectando
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
           <Box component="span" sx={{ color: 'mission.main' }}>
             missionários
           </Box>
-          <Box component="span" sx={{ color: 'primary.main' }}>
+          <Box component="span" sx={{ color: headingPrimaryColor }}>
             {' '}
             e
           </Box>
         </Box>
-        <Box component="span" sx={{ display: 'block', color: 'primary.main' }}>
+        <Box component="span" sx={{ display: 'block', color: headingPrimaryColor }}>
           apoiadores ao
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'primary.main' }}>
+          <Box component="span" sx={{ color: headingPrimaryColor }}>
             redor do{' '}
           </Box>
           <Box component="span" sx={{ color: 'mission.main' }}>
@@ -173,10 +178,36 @@ function HeroHeadline() {
             justifyContent: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <PillButton href="/select-role" tone="missionFlat" sx={heroCtaButtonSx}>
+          <PillButton
+            href="/select-role"
+            tone="missionFilled"
+            sx={{
+              ...heroCtaButtonSx,
+              borderRadius: '12px',
+              boxShadow: '0 4px 14px rgba(230, 81, 0, 0.3)',
+              '&:hover': {
+                boxShadow: '0 6px 18px rgba(230, 81, 0, 0.4)',
+              },
+            }}
+          >
             Comece agora
           </PillButton>
-          <PillButton href="#como-funciona" tone="primaryOutline" sx={heroCtaButtonSx}>
+          <PillButton
+            href="#como-funciona"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById('como-funciona');
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+                window.history.pushState(null, '', '#como-funciona');
+              }
+            }}
+            tone="primaryOutline"
+            sx={{
+              ...heroCtaButtonSx,
+              borderRadius: '12px',
+            }}
+          >
             Saiba mais
           </PillButton>
         </Stack>
@@ -186,6 +217,9 @@ function HeroHeadline() {
 }
 
 function LandingHero() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Box
       id="inicio"
@@ -201,6 +235,7 @@ function LandingHero() {
         height: { xs: '100svh', md: '100svh' },
         py: { xs: 0, md: 0 },
         bgcolor: 'background.default',
+        scrollMarginTop: { xs: '72px', md: '88px' },
       }}
     >
       <Box
@@ -216,7 +251,7 @@ function LandingHero() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: 'cover', objectPosition: 'center', opacity: 0.3 }}
+          style={{ objectFit: 'cover', objectPosition: 'center', opacity: isDark ? 0.15 : 0.3 }}
         />
       </Box>
 
@@ -225,6 +260,7 @@ function LandingHero() {
           display: { xs: 'none', md: 'block' },
           position: 'absolute',
           inset: 0,
+          bgcolor: isDark ? 'background.default' : 'transparent',
         }}
       >
         <Image
@@ -233,7 +269,11 @@ function LandingHero() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center',
+            opacity: isDark ? 0.22 : 1,
+          }}
         />
       </Box>
 
@@ -270,7 +310,11 @@ export default function LandingPage() {
       <Box component="main" id="main-content" tabIndex={-1} sx={{ outline: 'none' }}>
         <LandingHero />
 
-        <Box id="objetivo" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="objetivo"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Stack spacing={4} sx={{ alignItems: 'center' }}>
               <SectionHeader
@@ -284,7 +328,11 @@ export default function LandingPage() {
 
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-        <Box id="sobre" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="sobre"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Stack spacing={{ xs: 8, md: 10, lg: 12 }}>
               {audienceCards.map((card, index) => (
@@ -310,7 +358,11 @@ export default function LandingPage() {
 
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-        <Box id="como-funciona" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="como-funciona"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Stack spacing={5} sx={{ alignItems: 'center' }}>
               <SectionHeader
@@ -340,18 +392,19 @@ export default function LandingPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         textAlign: 'center',
-                        border: 'none',
-                        boxShadow: `
-                        0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                        0 14px 28px rgba(13, 43, 92, 0.1)
-                      `,
+                        border: (t) =>
+                          t.palette.mode === 'dark' ? '1px solid rgba(107, 166, 255, 0.2)' : 'none',
+                        boxShadow: (t) =>
+                          t.palette.mode === 'dark'
+                            ? '0 10px 30px rgba(0, 0, 0, 0.4)'
+                            : `0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 14px 28px rgba(13, 43, 92, 0.1)`,
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                         '&:hover': {
                           transform: 'translateY(-3px)',
-                          boxShadow: `
-                          0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                          0 18px 32px rgba(13, 43, 92, 0.12)
-                        `,
+                          boxShadow: (t) =>
+                            t.palette.mode === 'dark'
+                              ? '0 14px 36px rgba(0, 0, 0, 0.55)'
+                              : `0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 18px 32px rgba(13, 43, 92, 0.12)`,
                         },
                       }}
                     >
@@ -383,12 +436,13 @@ export default function LandingPage() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderRadius: '50%',
-                            bgcolor: 'rgba(251, 146, 60, 0.28)',
+                            bgcolor: 'mission.main',
+                            boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
                           }}
                         >
                           <Typography
                             sx={{
-                              color: 'mission.dark',
+                              color: 'common.white',
                               fontWeight: 800,
                               lineHeight: 1,
                               fontSize: '1.5rem',
@@ -405,7 +459,8 @@ export default function LandingPage() {
                                 fontWeight: 700,
                                 lineHeight: 1.2,
                                 fontSize: { xs: '1.125rem', md: '1.25rem' },
-                                color: 'primary.main',
+                                color: (t) =>
+                                  t.palette.mode === 'dark' ? 'common.white' : 'primary.main',
                               }}
                             >
                               {line}
@@ -437,7 +492,11 @@ export default function LandingPage() {
 
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-        <Box id="faq" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="faq"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Grid container spacing={{ xs: 4, md: 8 }} sx={{ alignItems: 'center' }}>
               <Grid size={{ xs: 12, md: 5 }}>

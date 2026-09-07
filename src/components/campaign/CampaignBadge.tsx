@@ -52,11 +52,8 @@ export default function CampaignBadge({
             }
           : {
               bgcolor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(234, 88, 12, 0.2)'
-                  : 'rgba(230, 81, 0, 0.08)',
-              color: (theme) =>
-                theme.palette.mode === 'dark' ? '#FED7AA' : 'mission.dark',
+                theme.palette.mode === 'dark' ? 'rgba(234, 88, 12, 0.2)' : 'rgba(230, 81, 0, 0.08)',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#FED7AA' : 'mission.dark'),
               border: '1px solid',
               borderColor: (theme) =>
                 theme.palette.mode === 'dark'
@@ -68,4 +65,3 @@ export default function CampaignBadge({
     />
   );
 }
-

@@ -289,12 +289,7 @@ export default function ProfileSummaryCard({
                   href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
                   tone="missionFilled"
                   size="medium"
-                  sx={{
-                    ...actionSx,
-                    bgcolor: 'mission.main',
-                    color: 'common.white',
-                    '&:hover': { bgcolor: 'mission.dark' },
-                  }}
+                  sx={actionSx}
                 >
                   Editar perfil
                 </PillButton>
@@ -332,12 +327,7 @@ export default function ProfileSummaryCard({
                           onDonate?.();
                         }
                   }
-                  sx={{
-                    ...actionSx,
-                    bgcolor: 'mission.main',
-                    color: 'common.white',
-                    '&:hover': { bgcolor: 'mission.dark' },
-                  }}
+                  sx={actionSx}
                 >
                   <VolunteerActivismIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Ofertar

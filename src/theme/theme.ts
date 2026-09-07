@@ -232,7 +232,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
             backgroundColor: isLight ? colors.background : colors.textPrimary,
             color: isLight ? colors.textPrimary : colors.surface,
           },
-          a: {
+          'a:not(.MuiButtonBase-root)': {
             color: isLight ? roleColors.intermediate : roleColors.supporter,
             '&:hover': {
               color: isLight ? shades.intermediateDark : shades.supporterLight,
