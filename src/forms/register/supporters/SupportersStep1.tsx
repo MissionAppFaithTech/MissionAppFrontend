@@ -1,11 +1,11 @@
 'use client';
 
 import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   TextField,
   Typography,
   Stack,
-  Button,
   FormControl,
   FormLabel,
   RadioGroup,
@@ -15,23 +15,15 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  CircularProgress,
 } from '@mui/material';
-import PhoneField, { isValidInternationalPhone } from '@/components/common/PhoneField';
-import { isValidBirthDate, maskBirthDate } from '@/lib/masks';
-import type { SupportersStep1Values } from '../types';
+import PillButton from '@/components/common/PillButton';
+import PhoneField from '@/components/common/PhoneField';
+import { maskBirthDate } from '@/lib/masks';
+import { supporterStep1Schema, type SupporterStep1FormData } from '@/schemas/register.schema';
 import { useSupporterRegisterWizard } from '@/components/register/supporters/SupporterRegisterWizardContext';
 import { SELECT_OTHER, faithCommunities } from '@/forms/register/options';
-
-function phoneRules(message: string, required: boolean) {
-  return {
-    validate: (value: string) => {
-      if (!value.replace(/\D/g, '')) {
-        return required ? message : true;
-      }
-      return isValidInternationalPhone(value) || 'Informe um telefone válido';
-    },
-  };
-}
+import { yieldToMain } from '@/lib/scheduler';
 
 export default function SupportersStep1() {
   const { formData, completeStep1 } = useSupporterRegisterWizard();
@@ -40,49 +32,69 @@ export default function SupportersStep1() {
     handleSubmit,
     control,
     watch,
-    formState: { errors },
-  } = useForm<SupportersStep1Values>({
+    formState: { errors, isSubmitting },
+  } = useForm<SupporterStep1FormData>({
+    resolver: zodResolver(supporterStep1Schema),
+    mode: 'onTouched',
     defaultValues: {
-      fullName: '',
-      birthDate: '',
-      gender: '',
-      phone: '',
-      faithCommunity: '',
-      communityPhone: '',
-      pastorName: '',
-      pastorPhone: '',
-      ...formData,
+      fullName: formData.fullName || '',
+      email: formData.email || '',
+      birthDate: formData.birthDate || '',
+      gender: (formData.gender as 'feminino' | 'masculino') || undefined,
+      phone: formData.phone || '',
+      faithCommunity: formData.faithCommunity || '',
+      communityPhone: formData.communityPhone || '',
+      pastorName: formData.pastorName || '',
+      pastorPhone: formData.pastorPhone || '',
     },
   });
 
   const faithCommunity = watch('faithCommunity');
   const showCommunityDetails = faithCommunity === SELECT_OTHER;
 
+  const handleStepSubmit = async (data: SupporterStep1FormData) => {
+    await yieldToMain();
+    completeStep1(data);
+  };
+
   return (
     <Stack
       component="form"
       spacing={2.5}
-      onSubmit={handleSubmit(completeStep1)}
+      onSubmit={handleSubmit(handleStepSubmit)}
       sx={{ width: '100%' }}
+      noValidate
     >
       <Typography variant="body1">Dados pessoais</Typography>
 
       <TextField
-        {...register('fullName', { required: 'Informe seu nome completo' })}
+        {...register('fullName')}
         label="Nome completo"
         fullWidth
         placeholder="Maria da Silva"
+        slotProps={{
+          htmlInput: { autoComplete: 'name' },
+        }}
         error={Boolean(errors.fullName)}
         helperText={errors.fullName?.message}
+      />
+
+      <TextField
+        {...register('email')}
+        label="E-mail"
+        type="email"
+        fullWidth
+        placeholder="seu@email.com"
+        slotProps={{
+          htmlInput: { autoComplete: 'email', inputMode: 'email' },
+        }}
+        error={Boolean(errors.email)}
+        helperText={errors.email?.message}
       />
 
       <Controller
         name="birthDate"
         control={control}
-        rules={{
-          required: 'Informe sua data de nascimento',
-          validate: (value) => isValidBirthDate(value) || 'Use o formato DD/MM/AAAA',
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -102,7 +114,6 @@ export default function SupportersStep1() {
       <Controller
         name="gender"
         control={control}
-        rules={{ required: 'Selecione o gênero' }}
         render={({ field }) => (
           <FormControl error={Boolean(errors.gender)} component="fieldset" fullWidth>
             <FormLabel
@@ -111,7 +122,7 @@ export default function SupportersStep1() {
             >
               Gênero
             </FormLabel>
-            <RadioGroup row {...field} value={field.value}>
+            <RadioGroup row {...field} value={field.value ?? ''}>
               <FormControlLabel value="feminino" control={<Radio />} label="Feminino" />
               <FormControlLabel value="masculino" control={<Radio />} label="Masculino" />
             </RadioGroup>
@@ -123,12 +134,6 @@ export default function SupportersStep1() {
       <Controller
         name="phone"
         control={control}
-        rules={{
-          validate: (value) => {
-            if (!value.replace(/\D/g, '')) return 'Informe seu telefone';
-            return isValidInternationalPhone(value) || 'Informe um telefone válido';
-          },
-        }}
         render={({ field }) => (
           <PhoneField
             value={field.value}
@@ -175,7 +180,6 @@ export default function SupportersStep1() {
           <Controller
             name="communityPhone"
             control={control}
-            rules={phoneRules('Informe o telefone da comunidade de fé', true)}
             render={({ field }) => (
               <PhoneField
                 label="Telefone da comunidade de fé"
@@ -190,9 +194,7 @@ export default function SupportersStep1() {
           />
 
           <TextField
-            {...register('pastorName', {
-              required: showCommunityDetails ? 'Informe o nome do pastor' : false,
-            })}
+            {...register('pastorName')}
             label="Nome do pastor"
             fullWidth
             placeholder="Pr. João Souza"
@@ -203,7 +205,6 @@ export default function SupportersStep1() {
           <Controller
             name="pastorPhone"
             control={control}
-            rules={phoneRules('Informe o telefone do pastor', true)}
             render={({ field }) => (
               <PhoneField
                 label="Telefone do pastor"
@@ -219,9 +220,30 @@ export default function SupportersStep1() {
         </>
       ) : null}
 
-      <Button type="submit" variant="contained" color="primary">
-        Continuar
-      </Button>
+      <PillButton
+        type="submit"
+        tone="cta"
+        disabled={isSubmitting}
+        fullWidth
+        sx={{
+          minHeight: 48,
+          fontSize: '1rem',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 1.5,
+        }}
+      >
+        {isSubmitting ? (
+          <>
+            <CircularProgress size={20} color="inherit" aria-label="Enviando dados" />
+            <span>Continuando...</span>
+          </>
+        ) : (
+          'Continuar'
+        )}
+      </PillButton>
     </Stack>
   );
 }

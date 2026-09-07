@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionSummary,
   Avatar,
+  useTheme,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Image from 'next/image';
@@ -96,6 +97,10 @@ const HERO_NAVBAR_OVERLAP = {
 } as const;
 
 function HeroHeadline() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+  const headingPrimaryColor = isDark ? 'common.white' : 'primary.main';
+
   return (
     <Stack
       spacing={0}
@@ -123,23 +128,23 @@ function HeroHeadline() {
           },
         }}
       >
-        <Box component="span" sx={{ display: 'block', color: 'primary.main' }}>
+        <Box component="span" sx={{ display: 'block', color: headingPrimaryColor }}>
           Conectando
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
           <Box component="span" sx={{ color: 'mission.main' }}>
             missionários
           </Box>
-          <Box component="span" sx={{ color: 'primary.main' }}>
+          <Box component="span" sx={{ color: headingPrimaryColor }}>
             {' '}
             e
           </Box>
         </Box>
-        <Box component="span" sx={{ display: 'block', color: 'primary.main' }}>
+        <Box component="span" sx={{ display: 'block', color: headingPrimaryColor }}>
           apoiadores ao
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'primary.main' }}>
+          <Box component="span" sx={{ color: headingPrimaryColor }}>
             redor do{' '}
           </Box>
           <Box component="span" sx={{ color: 'mission.main' }}>
@@ -173,10 +178,52 @@ function HeroHeadline() {
             justifyContent: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <PillButton href="/select-role" tone="missionFlat" sx={heroCtaButtonSx}>
+          <PillButton
+            href="/select-role"
+            tone="missionFilled"
+            sx={{
+              ...heroCtaButtonSx,
+              borderRadius: '12px',
+              boxShadow: '0 4px 14px rgba(230, 81, 0, 0.3)',
+              '&:hover': {
+                boxShadow: '0 6px 18px rgba(230, 81, 0, 0.4)',
+              },
+            }}
+          >
             Comece agora
           </PillButton>
-          <PillButton href="#como-funciona" tone="primaryOutline" sx={heroCtaButtonSx}>
+          <PillButton
+            href="#como-funciona"
+            onClick={(e) => {
+              e.preventDefault();
+              const target = document.getElementById('como-funciona');
+              if (target) {
+                target.scrollIntoView({ behavior: 'smooth' });
+                window.history.pushState(null, '', '#como-funciona');
+              }
+            }}
+            tone="primaryOutline"
+            sx={{
+              ...heroCtaButtonSx,
+              borderRadius: '12px',
+              borderWidth: '2px',
+              borderColor: (theme) =>
+                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
+              bgcolor: (theme) =>
+                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+              boxShadow: (theme) =>
+                theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+              '&:hover': {
+                borderColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.22)'
+                    : 'rgba(13, 43, 92, 0.08)',
+              },
+            }}
+          >
             Saiba mais
           </PillButton>
         </Stack>
@@ -186,6 +233,9 @@ function HeroHeadline() {
 }
 
 function LandingHero() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
+
   return (
     <Box
       id="inicio"
@@ -201,6 +251,7 @@ function LandingHero() {
         height: { xs: '100svh', md: '100svh' },
         py: { xs: 0, md: 0 },
         bgcolor: 'background.default',
+        scrollMarginTop: { xs: '72px', md: '88px' },
       }}
     >
       <Box
@@ -216,8 +267,22 @@ function LandingHero() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: 'cover', objectPosition: 'center', opacity: 0.3 }}
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center',
+            opacity: isDark ? 0.6 : 0.3,
+          }}
         />
+        {isDark && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(8, 28, 58, 0.7)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </Box>
 
       <Box
@@ -233,8 +298,24 @@ function LandingHero() {
           fill
           priority
           sizes="100vw"
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center',
+            opacity: isDark ? 0.85 : 1,
+            filter: isDark ? 'contrast(1.05) brightness(0.95)' : 'none',
+          }}
         />
+        {isDark && (
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(90deg, rgba(8, 28, 58, 0.94) 0%, rgba(8, 28, 58, 0.8) 42%, rgba(8, 28, 58, 0.35) 68%, rgba(8, 28, 58, 0.08) 100%)',
+              pointerEvents: 'none',
+            }}
+          />
+        )}
       </Box>
 
       <Box
@@ -270,7 +351,11 @@ export default function LandingPage() {
       <Box component="main" id="main-content" tabIndex={-1} sx={{ outline: 'none' }}>
         <LandingHero />
 
-        <Box id="objetivo" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="objetivo"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Stack spacing={4} sx={{ alignItems: 'center' }}>
               <SectionHeader
@@ -284,7 +369,11 @@ export default function LandingPage() {
 
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-        <Box id="sobre" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="sobre"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Stack spacing={{ xs: 8, md: 10, lg: 12 }}>
               {audienceCards.map((card, index) => (
@@ -310,7 +399,11 @@ export default function LandingPage() {
 
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-        <Box id="como-funciona" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="como-funciona"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Stack spacing={5} sx={{ alignItems: 'center' }}>
               <SectionHeader
@@ -340,18 +433,19 @@ export default function LandingPage() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         textAlign: 'center',
-                        border: 'none',
-                        boxShadow: `
-                        0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                        0 14px 28px rgba(13, 43, 92, 0.1)
-                      `,
+                        border: (t) =>
+                          t.palette.mode === 'dark' ? '1px solid rgba(107, 166, 255, 0.2)' : 'none',
+                        boxShadow: (t) =>
+                          t.palette.mode === 'dark'
+                            ? '0 10px 30px rgba(0, 0, 0, 0.4)'
+                            : `0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 14px 28px rgba(13, 43, 92, 0.1)`,
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                         '&:hover': {
                           transform: 'translateY(-3px)',
-                          boxShadow: `
-                          0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                          0 18px 32px rgba(13, 43, 92, 0.12)
-                        `,
+                          boxShadow: (t) =>
+                            t.palette.mode === 'dark'
+                              ? '0 14px 36px rgba(0, 0, 0, 0.55)'
+                              : `0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 18px 32px rgba(13, 43, 92, 0.12)`,
                         },
                       }}
                     >
@@ -383,12 +477,13 @@ export default function LandingPage() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderRadius: '50%',
-                            bgcolor: 'rgba(251, 146, 60, 0.28)',
+                            bgcolor: 'mission.main',
+                            boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
                           }}
                         >
                           <Typography
                             sx={{
-                              color: 'mission.dark',
+                              color: 'common.white',
                               fontWeight: 800,
                               lineHeight: 1,
                               fontSize: '1.5rem',
@@ -405,7 +500,8 @@ export default function LandingPage() {
                                 fontWeight: 700,
                                 lineHeight: 1.2,
                                 fontSize: { xs: '1.125rem', md: '1.25rem' },
-                                color: 'primary.main',
+                                color: (t) =>
+                                  t.palette.mode === 'dark' ? 'common.white' : 'primary.main',
                               }}
                             >
                               {line}
@@ -437,7 +533,11 @@ export default function LandingPage() {
 
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
-        <Box id="faq" component="section" sx={{ py: { xs: 6, md: 10 } }}>
+        <Box
+          id="faq"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
           <Container maxWidth={false} sx={landingContainerSx}>
             <Grid container spacing={{ xs: 4, md: 8 }} sx={{ alignItems: 'center' }}>
               <Grid size={{ xs: 12, md: 5 }}>
@@ -471,7 +571,7 @@ export default function LandingPage() {
                         px: 2,
                         fontSize: '0.875rem',
                         fontWeight: 600,
-                        minHeight: 36,
+                        minHeight: 44,
                       }}
                     >
                       Entre em contato
@@ -490,9 +590,8 @@ export default function LandingPage() {
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
+                        Após preencher seus dados e ministério, nossa equipe realiza a validação do
+                        seu perfil para garantir a segurança e autenticidade da comunidade.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>
@@ -500,14 +599,13 @@ export default function LandingPage() {
                   <Accordion>
                     <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
                       <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
+                        Como os apoiadores podem contribuir com as missões?
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
+                        Apoiadores podem ofertar em campanhas específicas, acompanhar relatórios de
+                        impacto e interagir diretamente com os pedidos de oração.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>
@@ -515,44 +613,14 @@ export default function LandingPage() {
                   <Accordion>
                     <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
                       <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
+                        A plataforma cobra taxa sobre as ofertas enviadas?
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Após enviar seus dados, nossa equipe realiza uma análise e entra em contato
-                        por e-mail com a aprovação, solicitação de informações adicionais ou
-                        reprovação.
+                        O MissionApp prioriza o sustento missionário integral, aproximando você
+                        diretamente aos canais oficiais com total transparência e sem taxas
+                        abusivas.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>
@@ -566,7 +634,21 @@ export default function LandingPage() {
                     <AccordionDetails>
                       <Typography color="text.secondary">
                         Sim. Você pode compartilhar pedidos de oração e manter seus apoiadores
-                        atualizados sobre sua jornada missionária.
+                        atualizados em tempo real sobre os desafios e testemunhos da missão.
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+
+                  <Accordion>
+                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
+                      <Typography sx={{ fontWeight: 600 }}>
+                        O que são os Projetos de Impacto?
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography color="text.secondary">
+                        São causas estruturadas e ações sociais no campo que possuem metas claras,
+                        histórico de atividades, galeria de fotos e acompanhamento contínuo.
                       </Typography>
                     </AccordionDetails>
                   </Accordion>

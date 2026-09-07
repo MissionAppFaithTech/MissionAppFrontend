@@ -51,7 +51,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
       >
         <Stack spacing={{ xs: 2, sm: 2.5 }}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="h6" color="primary.main">
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Sobre
             </Typography>
             <PillButton
@@ -70,17 +70,42 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
                 // Mobile: só o lápis, sem caixa/borda. sm+: outline + label.
                 '&&': {
                   border: { xs: 'none', sm: '1.5px solid' },
-                  borderColor: { xs: 'transparent', sm: 'primary.main' },
-                  bgcolor: { xs: 'transparent', sm: 'common.white' },
+                  borderColor: {
+                    xs: 'transparent',
+                    sm: (theme) =>
+                      theme.palette.mode === 'dark' ? 'rgba(147, 197, 253, 0.4)' : 'primary.main',
+                  },
+                  bgcolor: {
+                    xs: 'transparent',
+                    sm: (theme) =>
+                      theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'common.white',
+                  },
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
                   boxShadow: 'none',
                 },
                 '&:hover': {
-                  bgcolor: { xs: 'transparent', sm: 'rgba(13, 43, 92, 0.04)' },
-                  borderColor: { xs: 'transparent', sm: 'primary.main' },
+                  bgcolor: {
+                    xs: 'transparent',
+                    sm: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.16)'
+                        : 'rgba(13, 43, 92, 0.04)',
+                  },
+                  borderColor: {
+                    xs: 'transparent',
+                    sm: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
+                  },
                 },
               }}
             >
-              <EditOutlinedIcon sx={{ fontSize: { xs: 20, sm: 16 }, color: 'primary.main' }} />
+              <EditOutlinedIcon
+                sx={{
+                  fontSize: { xs: 20, sm: 16 },
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+                }}
+              />
               <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                 Editar
               </Box>

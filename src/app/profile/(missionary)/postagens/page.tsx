@@ -1,7 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { useState, type FormEvent, type SyntheticEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import AddIcon from '@mui/icons-material/Add';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
@@ -24,6 +27,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import { mockProfile } from '@/mocks/profile';
+import { newPostSchema, type NewPostFormData } from '@/schemas/content.schema';
 
 type FeedView = 'mine' | 'general';
 
@@ -34,9 +38,36 @@ const cardSx = {
   boxShadow: 1,
 } as const;
 
-function NewPostForm({ onCancel }: { onCancel?: () => void }) {
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+type NewPostFormProps = {
+  onCancel?: () => void;
+  onSubmitPost?: (data: NewPostFormData) => void;
+};
+
+function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<NewPostFormData>({
+    resolver: zodResolver(newPostSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      content: '',
+      youtubeUrl: '',
+      images: [],
+    },
+  });
+
+  const onSubmit = (data: NewPostFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_missionary_new_post');
+      } catch {
+        // Ignore
+      }
+    }
+    onSubmitPost?.(data);
     onCancel?.();
   };
 
@@ -48,18 +79,28 @@ function NewPostForm({ onCancel }: { onCancel?: () => void }) {
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Box component="form" onSubmit={handleSubmit}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           <Stack spacing={2}>
             <Typography variant="subtitle2" color="primary.main">
               Nova postagem
             </Typography>
 
-            <TextField
-              multiline
-              minRows={6}
-              fullWidth
-              placeholder="Comece a escrever..."
-              aria-label="Conteúdo da nova postagem"
+            <Controller
+              name="content"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="post-content-editor"
+                  label="Mensagem"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={6}
+                  draftKey="missionary_new_post"
+                  placeholder="Comece a escrever..."
+                  error={Boolean(errors.content)}
+                  helperText={errors.content?.message}
+                />
+              )}
             />
 
             <Stack spacing={0.75}>
@@ -73,30 +114,49 @@ function NewPostForm({ onCancel }: { onCancel?: () => void }) {
               </Typography>
               <TextField
                 id="post-youtube-link"
+                {...register('youtubeUrl')}
                 type="url"
                 size="small"
                 fullWidth
                 placeholder="www.youtube.com/..."
+                error={Boolean(errors.youtubeUrl)}
+                helperText={errors.youtubeUrl?.message}
               />
             </Stack>
 
             <Box>
-              <PillButton component="label" tone="primarySoftOutline" size="small">
-                <ImageOutlinedIcon sx={{ mr: 0.75, fontSize: 17 }} />
+              <PillButton
+                component="label"
+                tone="primarySoftOutline"
+                size="medium"
+                sx={{
+                  minHeight: { xs: 48, sm: 40 },
+                  width: { xs: '100%', sm: 'auto' },
+                }}
+              >
+                <ImageOutlinedIcon sx={{ mr: 0.75, fontSize: 19 }} />
                 Inserir imagens
                 <Box component="input" type="file" accept="image/*" multiple hidden />
               </PillButton>
             </Box>
 
             <Stack
-              direction="row"
-              spacing={1}
-              sx={{ justifyContent: 'flex-end', pt: { xs: 2, sm: 6 } }}
+              direction={{ xs: 'column-reverse', sm: 'row' }}
+              spacing={{ xs: 1.5, sm: 1 }}
+              sx={{
+                justifyContent: 'flex-end',
+                pt: { xs: 2, sm: 4 },
+                '& .MuiButton-root': {
+                  minHeight: { xs: 48, sm: 40 },
+                  width: { xs: '100%', sm: 'auto' },
+                  fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                },
+              }}
             >
-              <PillButton tone="primarySoftOutline" size="small" type="button" onClick={onCancel}>
+              <PillButton tone="primarySoftOutline" size="medium" type="button" onClick={onCancel}>
                 Cancelar
               </PillButton>
-              <PillButton tone="primaryFilled" size="small" type="submit">
+              <PillButton tone="primaryFilled" size="medium" type="submit">
                 Postar
               </PillButton>
             </Stack>
@@ -302,12 +362,18 @@ export default function ProfilePostsPage() {
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
-            boxShadow: 3,
+            borderRadius: 2,
+            border: (theme) =>
+              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
             },
           }}
         >

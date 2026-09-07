@@ -7,6 +7,7 @@ import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import ThemeToggle from '@/components/ThemeToggle';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 
 const roles = [
   { label: 'Sou um apoiador', href: '/register/supporters' },
@@ -27,7 +28,8 @@ export default function RoleSelectionPage() {
         alignItems: 'center',
         justifyContent: 'center',
         px: { xs: 2, sm: 3 },
-        py: { xs: 3, sm: 6 },
+        pt: { xs: 3, sm: 6 },
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
         position: 'relative',
         outline: 'none',
       }}
@@ -35,8 +37,8 @@ export default function RoleSelectionPage() {
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
         <ThemeToggle />
       </Box>
-      <Stack spacing={5} sx={{ width: '100%', maxWidth: 400, alignItems: 'center' }}>
-        <Logo size="xl" />
+      <Stack spacing={4} sx={{ width: '100%', maxWidth: 400, alignItems: 'center' }}>
+        <Logo size="md" />
 
         <Typography align="center" sx={{ color: 'text.secondary' }}>
           Como você quer usar o Mission app?
@@ -73,7 +75,7 @@ export default function RoleSelectionPage() {
             sx={{
               color: 'text.secondary',
               textDecoration: 'none',
-              fontSize: '0.65rem',
+              fontSize: '0.75rem',
               '&:hover': {
                 color: 'connection.main',
                 textDecoration: 'underline',
@@ -84,6 +86,8 @@ export default function RoleSelectionPage() {
           </Typography>
         </Stack>
       </Stack>
+
+      <VisitorBottomNav />
     </Box>
   );
 }

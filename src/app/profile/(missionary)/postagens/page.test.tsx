@@ -104,4 +104,35 @@ describe('ProfilePostsPage - Postar button & collapsible Nova Postagem', () => {
       await screen.findByText(/link copiado para a área de transferência!/i)
     ).toBeInTheDocument();
   });
+
+  it('validates required content field on submit', async () => {
+    const user = userEvent.setup();
+    render(<ProfilePostsPage />);
+
+    const openButton = screen.getByRole('button', { name: /^postar$/i });
+    await user.click(openButton);
+
+    const submitButton = screen.getByRole('button', { name: /^postar$/i });
+    await user.click(submitButton);
+
+    expect(await screen.findByText(/escreva o conteúdo da publicação/i)).toBeInTheDocument();
+  });
+
+  it('submits successfully when content is provided', async () => {
+    const user = userEvent.setup();
+    render(<ProfilePostsPage />);
+
+    const openButton = screen.getByRole('button', { name: /^postar$/i });
+    await user.click(openButton);
+
+    const contentInput = screen.getByPlaceholderText(/comece a escrever/i);
+    await user.type(contentInput, 'Esta é uma nova publicação de teste.');
+
+    const submitButton = screen.getByRole('button', { name: /^postar$/i });
+    await user.click(submitButton);
+
+    // Form should close after successful submission
+    expect(screen.queryByText(/nova postagem/i)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^postar$/i })).toBeInTheDocument();
+  });
 });

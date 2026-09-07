@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Link, Stack, Typography } from '@mui/material';
 import { useSearchParams } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
+import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import ResetPasswordForm from '@/forms/ResetPasswordForm';
 
 export default function ResetPasswordPageContent() {
@@ -22,7 +23,8 @@ export default function ResetPasswordPageContent() {
         alignItems: 'center',
         justifyContent: 'center',
         px: { xs: 2, sm: 3 },
-        py: { xs: 3, sm: 6 },
+        pt: { xs: 3, sm: 6 },
+        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
         position: 'relative',
         outline: 'none',
       }}
@@ -71,6 +73,8 @@ export default function ResetPasswordPageContent() {
           </CardContent>
         </Card>
       </Box>
+
+      <VisitorBottomNav />
     </Box>
   );
 }

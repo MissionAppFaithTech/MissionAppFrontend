@@ -194,11 +194,11 @@ const extendedPalette = {
 export function createAppTheme(mode: 'light' | 'dark') {
   const isLight = mode === 'light';
 
-  /** Em fundo escuro o navy some — CTAs usam laranja da marca. */
+  /** Em fundo escuro o navy some — CTAs usam laranja da marca e acentos azuis usam shades.supporterLight. */
   const darkFieldBg = 'rgba(255, 255, 255, 0.06)';
-  const darkFieldBorder = 'rgba(107, 166, 255, 0.35)';
-  const darkFieldBorderHover = 'rgba(107, 166, 255, 0.55)';
-  const darkFieldBorderFocus = roleColors.supporter;
+  const darkFieldBorder = 'rgba(147, 197, 253, 0.35)';
+  const darkFieldBorderHover = 'rgba(147, 197, 253, 0.6)';
+  const darkFieldBorderFocus = shades.supporterLight;
 
   return createTheme({
     palette: {
@@ -208,10 +208,16 @@ export function createAppTheme(mode: 'light' | 'dark') {
         ? {}
         : {
             primary: {
-              main: roleColors.supporter,
-              light: shades.supporterLight,
-              dark: shades.supporterDark,
+              main: shades.supporterLight,
+              light: '#BFDBFE',
+              dark: roleColors.intermediate,
               contrastText: colors.textPrimary,
+            },
+            mission: {
+              main: '#FB923C',
+              light: '#FED7AA',
+              dark: '#EA580C',
+              contrastText: colors.surface,
             },
           }),
       background: {
@@ -222,7 +228,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
         primary: isLight ? colors.textPrimary : colors.surface,
         secondary: isLight ? colors.textSecondary : '#94A3B8',
       },
-      divider: isLight ? `${colors.border}33` : 'rgba(107, 166, 255, 0.15)',
+      divider: isLight ? `${colors.border}33` : 'rgba(147, 197, 253, 0.18)',
     },
     typography: createTypography(),
     components: {
@@ -232,10 +238,10 @@ export function createAppTheme(mode: 'light' | 'dark') {
             backgroundColor: isLight ? colors.background : colors.textPrimary,
             color: isLight ? colors.textPrimary : colors.surface,
           },
-          a: {
-            color: isLight ? roleColors.intermediate : roleColors.supporter,
+          'a:not(.MuiButtonBase-root)': {
+            color: isLight ? roleColors.intermediate : shades.supporterLight,
             '&:hover': {
-              color: isLight ? shades.intermediateDark : shades.supporterLight,
+              color: isLight ? shades.intermediateDark : '#BFDBFE',
             },
           },
         },
@@ -277,13 +283,13 @@ export function createAppTheme(mode: 'light' | 'dark') {
                 {
                   props: { color: 'primary' as const, variant: 'contained' as const },
                   style: {
-                    backgroundColor: roleColors.mission,
+                    backgroundColor: '#EA580C',
                     color: colors.surface,
                     '&:hover': {
-                      backgroundColor: shades.missionDark,
+                      backgroundColor: roleColors.mission,
                     },
                     '&.Mui-disabled': {
-                      backgroundColor: 'rgba(249, 115, 22, 0.35)',
+                      backgroundColor: 'rgba(234, 88, 12, 0.35)',
                       color: 'rgba(255, 255, 255, 0.55)',
                     },
                   },
@@ -291,9 +297,9 @@ export function createAppTheme(mode: 'light' | 'dark') {
                 {
                   props: { color: 'primary' as const, variant: 'text' as const },
                   style: {
-                    color: roleColors.supporter,
+                    color: shades.supporterLight,
                     '&:hover': {
-                      backgroundColor: 'rgba(107, 166, 255, 0.12)',
+                      backgroundColor: 'rgba(147, 197, 253, 0.12)',
                     },
                   },
                 },
@@ -323,7 +329,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
                   color: colors.surface,
                   '&:hover': {
                     borderColor: darkFieldBorderHover,
-                    backgroundColor: 'rgba(107, 166, 255, 0.1)',
+                    backgroundColor: 'rgba(147, 197, 253, 0.1)',
                   },
                 },
           },
@@ -366,6 +372,15 @@ export function createAppTheme(mode: 'light' | 'dark') {
             '&:hover': {
               color: roleColors.intermediate,
             },
+          },
+        },
+      },
+      MuiTabs: {
+        styleOverrides: {
+          indicator: {
+            backgroundColor: isLight ? roleColors.mission : '#FB923C',
+            height: 3,
+            borderRadius: '3px 3px 0 0',
           },
         },
       },
@@ -424,7 +439,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
             : {
                 color: '#94A3B8',
                 '&.Mui-focused': {
-                  color: roleColors.supporter,
+                  color: shades.supporterLight,
                 },
                 '&.Mui-error': {
                   color: colors.error,
@@ -463,7 +478,7 @@ export function createAppTheme(mode: 'light' | 'dark') {
           root: isLight
             ? undefined
             : {
-                borderColor: 'rgba(107, 166, 255, 0.22)',
+                borderColor: 'rgba(147, 197, 253, 0.22)',
               },
         },
       },
@@ -472,9 +487,34 @@ export function createAppTheme(mode: 'light' | 'dark') {
           root: isLight
             ? undefined
             : {
-                color: roleColors.supporter,
+                color: shades.supporterLight,
               },
         },
+      },
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+          },
+        },
+        variants: [
+          {
+            props: { variant: 'filled', severity: 'success' },
+            style: isLight
+              ? {
+                  backgroundColor: colors.primary,
+                  color: colors.surface,
+                  '& .MuiAlert-icon': { color: colors.surface },
+                }
+              : {
+                  backgroundColor: '#1E293B',
+                  color: colors.surface,
+                  border: '1px solid rgba(147, 197, 253, 0.3)',
+                  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.5)',
+                  '& .MuiAlert-icon': { color: '#4ADE80' },
+                },
+          },
+        ],
       },
     },
   });

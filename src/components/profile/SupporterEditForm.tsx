@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AddIcon from '@mui/icons-material/Add';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PersonIcon from '@mui/icons-material/Person';
@@ -20,79 +22,45 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { profileLocations } from '@/lib/profileOptions';
+import { supporterEditSchema, type SupporterEditFormData } from '@/schemas/profile.schema';
 import type { ProfileData } from '@/types/profile';
 
 type SupporterEditFormProps = {
   profile: ProfileData;
 };
 
-type ProfileFieldProps = {
-  id: string;
-  label: string;
-  defaultValue: string;
-  select?: boolean;
-  type?: string;
-  placeholder?: string;
-  helperText?: string;
-  startAdornment?: React.ReactNode;
-};
-
-function ProfileField({
-  id,
-  label,
-  defaultValue,
-  select = false,
-  type = 'text',
-  placeholder,
-  helperText,
-  startAdornment,
-}: ProfileFieldProps) {
-  return (
-    <Stack spacing={0.75}>
-      <Typography
-        component="label"
-        htmlFor={id}
-        variant="body2"
-        sx={{ color: 'primary.main', fontWeight: 600 }}
-      >
-        {label}:
-      </Typography>
-      <TextField
-        id={id}
-        name={id}
-        type={type}
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        helperText={helperText}
-        select={select}
-        fullWidth
-        size="small"
-        slotProps={{
-          input: {
-            startAdornment: startAdornment ? (
-              <InputAdornment position="start">{startAdornment}</InputAdornment>
-            ) : undefined,
-          },
-        }}
-      >
-        {select
-          ? profileLocations.map((location) => (
-              <MenuItem key={location} value={location}>
-                {location}
-              </MenuItem>
-            ))
-          : null}
-      </TextField>
-    </Stack>
-  );
-}
-
 export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
   const [toastOpen, setToastOpen] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<SupporterEditFormData>({
+    resolver: zodResolver(supporterEditSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      username: profile.username || '',
+      displayName: profile.displayName || '',
+      bio: profile.roleDescription || '',
+      currentLocation: profile.about.currentLocation || '',
+      publicEmail: profile.contact?.publicEmail || '',
+      publicPhone: profile.contact?.publicPhone || '',
+      whatsappNumber: profile.contact?.whatsappNumber || '',
+    },
+  });
+
+  const onSubmit = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_supporter_header_bio');
+      } catch {
+        // Ignore
+      }
+    }
     setToastOpen(true);
   };
 
@@ -114,7 +82,7 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
             '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
           }}
         >
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Stack spacing={{ xs: 3, sm: 4 }}>
               <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
                 Editar perfil de apoiador
@@ -139,21 +107,21 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                   <IconButton
                     component="label"
                     aria-label="Alterar foto de perfil"
-                    size="small"
                     sx={{
                       position: 'absolute',
-                      right: -2,
-                      bottom: 2,
-                      width: 30,
-                      height: 30,
+                      right: { xs: -4, sm: -2 },
+                      bottom: { xs: -2, sm: 2 },
+                      width: { xs: 44, sm: 40 },
+                      height: { xs: 44, sm: 40 },
                       bgcolor: 'primary.main',
                       color: 'common.white',
                       border: '2px solid',
                       borderColor: 'background.paper',
+                      boxShadow: 2,
                       '&:hover': { bgcolor: 'primary.dark', color: 'common.white' },
                     }}
                   >
-                    <AddIcon sx={{ fontSize: 20 }} />
+                    <AddIcon sx={{ fontSize: { xs: 22, sm: 20 } }} />
                     <Box component="input" type="file" accept="image/*" hidden />
                   </IconButton>
                 </Box>
@@ -168,23 +136,94 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                 >
                   Informações Básicas
                 </Typography>
-                <ProfileField
-                  id="username"
-                  label="Nome de usuário"
-                  defaultValue={profile.username}
+
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="username"
+                    variant="body2"
+                    sx={{ color: 'primary.main', fontWeight: 600 }}
+                  >
+                    Nome de usuário:
+                  </Typography>
+                  <TextField
+                    id="username"
+                    {...register('username')}
+                    size="small"
+                    fullWidth
+                    error={Boolean(errors.username)}
+                    helperText={errors.username?.message}
+                  />
+                </Stack>
+
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="displayName"
+                    variant="body2"
+                    sx={{ color: 'primary.main', fontWeight: 600 }}
+                  >
+                    Nome completo:
+                  </Typography>
+                  <TextField
+                    id="displayName"
+                    {...register('displayName')}
+                    size="small"
+                    fullWidth
+                    error={Boolean(errors.displayName)}
+                    helperText={errors.displayName?.message}
+                  />
+                </Stack>
+
+                <Controller
+                  name="bio"
+                  control={control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      id="bio"
+                      label="Bio / Papel"
+                      value={field.value}
+                      onChange={field.onChange}
+                      minRows={2}
+                      draftKey="supporter_header_bio"
+                      placeholder="Descreva seu papel ou como você apoia missões..."
+                      error={Boolean(errors.bio)}
+                      helperText={errors.bio?.message}
+                    />
+                  )}
                 />
-                <ProfileField
-                  id="displayName"
-                  label="Nome completo"
-                  defaultValue={profile.displayName}
-                />
-                <ProfileField id="bio" label="Bio / Papel" defaultValue={profile.roleDescription} />
-                <ProfileField
-                  id="currentLocation"
-                  label="Localização atual"
-                  defaultValue={profile.about.currentLocation}
-                  select
-                />
+
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="currentLocation"
+                    variant="body2"
+                    sx={{ color: 'primary.main', fontWeight: 600 }}
+                  >
+                    Localização atual:
+                  </Typography>
+                  <Controller
+                    name="currentLocation"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        id="currentLocation"
+                        select
+                        size="small"
+                        fullWidth
+                        error={Boolean(errors.currentLocation)}
+                        helperText={errors.currentLocation?.message}
+                      >
+                        {profileLocations.map((location) => (
+                          <MenuItem key={location} value={location}>
+                            {location}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  />
+                </Stack>
               </Stack>
 
               <Divider />
@@ -204,56 +243,121 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                   </Typography>
                 </Box>
 
-                <ProfileField
-                  id="publicEmail"
-                  label="E-mail de contato público"
-                  type="email"
-                  defaultValue={profile.contact?.publicEmail || ''}
-                  placeholder="exemplo@dominio.com"
-                  startAdornment={
-                    <EmailOutlinedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
-                  }
-                />
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="publicEmail"
+                    variant="body2"
+                    sx={{ color: 'primary.main', fontWeight: 600 }}
+                  >
+                    E-mail de contato público:
+                  </Typography>
+                  <TextField
+                    id="publicEmail"
+                    {...register('publicEmail')}
+                    type="email"
+                    size="small"
+                    fullWidth
+                    placeholder="exemplo@dominio.com"
+                    error={Boolean(errors.publicEmail)}
+                    helperText={errors.publicEmail?.message}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <EmailOutlinedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </Stack>
 
-                <ProfileField
-                  id="publicPhone"
-                  label="Telefone de contato público"
-                  type="tel"
-                  defaultValue={profile.contact?.publicPhone || ''}
-                  placeholder="+55 (21) 98765-4321"
-                  startAdornment={
-                    <PhoneOutlinedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
-                  }
-                />
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="publicPhone"
+                    variant="body2"
+                    sx={{ color: 'primary.main', fontWeight: 600 }}
+                  >
+                    Telefone de contato público:
+                  </Typography>
+                  <TextField
+                    id="publicPhone"
+                    {...register('publicPhone')}
+                    type="tel"
+                    size="small"
+                    fullWidth
+                    placeholder="+55 (21) 98765-4321"
+                    error={Boolean(errors.publicPhone)}
+                    helperText={errors.publicPhone?.message}
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <PhoneOutlinedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </Stack>
 
-                <ProfileField
-                  id="whatsappNumber"
-                  label="Número do WhatsApp"
-                  type="tel"
-                  defaultValue={profile.contact?.whatsappNumber || ''}
-                  placeholder="+5521987654321"
-                  helperText="Inclua o DDI e DDD (ex: +5521987654321) para facilitar o link direto"
-                  startAdornment={<WhatsAppIcon sx={{ fontSize: 20, color: '#25D366' }} />}
-                />
+                <Stack spacing={0.75}>
+                  <Typography
+                    component="label"
+                    htmlFor="whatsappNumber"
+                    variant="body2"
+                    sx={{ color: 'primary.main', fontWeight: 600 }}
+                  >
+                    Número do WhatsApp:
+                  </Typography>
+                  <TextField
+                    id="whatsappNumber"
+                    {...register('whatsappNumber')}
+                    type="tel"
+                    size="small"
+                    fullWidth
+                    placeholder="+5521987654321"
+                    error={Boolean(errors.whatsappNumber)}
+                    helperText={
+                      errors.whatsappNumber?.message ||
+                      'Inclua o DDI e DDD (ex: +5521987654321) para facilitar o link direto'
+                    }
+                    slotProps={{
+                      input: {
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <WhatsAppIcon sx={{ fontSize: 20, color: '#25D366' }} />
+                          </InputAdornment>
+                        ),
+                      },
+                    }}
+                  />
+                </Stack>
               </Stack>
 
               <Stack
-                direction="row"
-                spacing={1}
+                direction={{ xs: 'column-reverse', sm: 'row' }}
+                spacing={{ xs: 1.5, sm: 1.5 }}
                 sx={{
                   justifyContent: 'flex-end',
-                  pt: { xs: 1, sm: 3, md: 4 },
-                  '& .MuiButton-root': { flex: { xs: 1, sm: 'initial' } },
+                  pt: { xs: 2, sm: 3, md: 4 },
+                  '& .MuiButton-root': {
+                    minHeight: { xs: 48, sm: 42 },
+                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                    width: { xs: '100%', sm: 'auto' },
+                  },
                 }}
               >
                 <PillButton
                   href="/profile/supporter/missionarios"
                   tone="primarySoftOutline"
-                  size="small"
+                  size="medium"
                 >
                   Voltar
                 </PillButton>
-                <PillButton type="submit" tone="primaryFilled" size="small">
+                <PillButton type="submit" tone="primaryFilled" size="medium">
                   Salvar
                 </PillButton>
               </Stack>
@@ -273,13 +377,18 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: 'primary.main',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
             },
           }}
         >

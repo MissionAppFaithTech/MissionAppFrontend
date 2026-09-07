@@ -27,7 +27,7 @@ Object.defineProperty(window, 'IntersectionObserver', {
   configurable: true,
   value: MockIntersectionObserver,
 });
-Object.defineProperty(global, 'IntersectionObserver', {
+Object.defineProperty(globalThis, 'IntersectionObserver', {
   writable: true,
   configurable: true,
   value: MockIntersectionObserver,
@@ -59,3 +59,28 @@ vi.mock('next/font/google', () => ({
     variable: '--font-dm-sans',
   }),
 }));
+
+// Polyfill Range and Element getClientRects / getBoundingClientRect for ProseMirror & TipTap in JSDOM
+if (typeof window !== 'undefined') {
+  const mockDOMRect: DOMRect = {
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    width: 0,
+    x: 0,
+    y: 0,
+    toJSON: () => '',
+  };
+
+  const createMockDOMRectList = (): DOMRectList => {
+    const list = [mockDOMRect] as unknown as DOMRectList;
+    list.item = (index: number) => (index === 0 ? mockDOMRect : null);
+    return list;
+  };
+
+  Range.prototype.getClientRects = createMockDOMRectList;
+  Range.prototype.getBoundingClientRect = () => mockDOMRect;
+  Element.prototype.getClientRects = createMockDOMRectList;
+}

@@ -2,14 +2,13 @@
 
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Alert, Box, Stack, TextField, Typography } from '@mui/material';
 import Link from 'next/link';
-import { isValidEmail, normalizeEmail } from '@/lib/masks';
+import PillButton from '@/components/common/PillButton';
+import { normalizeEmail } from '@/lib/masks';
+import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/schemas/auth.schema';
 import { requestPasswordReset, RESET_PASSWORD_TOKEN_TTL_MINUTES } from '@/services/auth.service';
-
-type ForgotPasswordValues = {
-  login: string;
-};
 
 type SubmitState =
   | { status: 'idle' }
@@ -23,13 +22,14 @@ export default function ForgotPasswordForm() {
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isValid },
-  } = useForm<ForgotPasswordValues>({
-    mode: 'onChange',
+    formState: { errors, isSubmitting },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: 'onTouched',
     defaultValues: { login: '' },
   });
 
-  const onSubmit = async (values: ForgotPasswordValues) => {
+  const onSubmit = async (values: ForgotPasswordFormData) => {
     setFormError(null);
 
     try {
@@ -58,36 +58,35 @@ export default function ForgotPasswordForm() {
           Conta encontrada
         </Typography>
 
-        <Typography variant="body2" color="text.secondary">
-          Enviamos um link para redefinir a senha de <strong>{submitState.email}</strong>. O link
-          expira em {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos.
-        </Typography>
+        <Alert severity="success">
+          Enviamos um link com validade de {RESET_PASSWORD_TOKEN_TTL_MINUTES} minutos para{' '}
+          <strong>{submitState.email}</strong>.
+        </Alert>
 
         <Typography variant="body2" color="text.secondary">
-          Não encontrou o e-mail? Confira a caixa de spam ou lixo eletrônico.
+          Abra seu aplicativo de e-mail e clique no botão para escolher uma nova senha. Se não
+          encontrar na caixa de entrada, verifique a pasta de spam ou lixo eletrônico.
         </Typography>
 
         {submitState.resetPath ? (
-          <Button
-            component={Link}
-            href={submitState.resetPath}
-            variant="contained"
-            color="primary"
-            fullWidth
-          >
-            Abrir link de redefinição (mock)
-          </Button>
+          <Box sx={{ p: 1.5, bgcolor: 'action.hover', borderRadius: 2 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              Ambiente de desenvolvimento (mock de e-mail):
+            </Typography>
+            <Typography
+              component={Link}
+              href={submitState.resetPath}
+              variant="body2"
+              sx={{ wordBreak: 'break-all', color: 'primary.main', fontWeight: 600 }}
+            >
+              Clique aqui para simular o link do e-mail
+            </Typography>
+          </Box>
         ) : null}
 
-        <Button
-          component={Link}
-          href="/login"
-          variant={submitState.resetPath ? 'outlined' : 'contained'}
-          color="primary"
-          fullWidth
-        >
+        <PillButton href="/login" tone="cta" fullWidth sx={{ minHeight: 44 }}>
           Voltar para o login
-        </Button>
+        </PillButton>
       </Stack>
     );
   }
@@ -96,26 +95,34 @@ export default function ForgotPasswordForm() {
     return (
       <Stack spacing={2.5} sx={{ width: '100%' }}>
         <Typography variant="body1" sx={{ fontWeight: 600 }}>
-          Conta não encontrada
+          Não encontramos essa conta
         </Typography>
+
+        <Alert severity="warning">
+          Nenhuma conta com o e-mail <strong>{submitState.email}</strong> foi localizada em nossa
+          base.
+        </Alert>
 
         <Typography variant="body2" color="text.secondary">
-          Não encontramos uma conta com o e-mail <strong>{submitState.email}</strong>. Confira se
-          digitou corretamente ou cadastre-se.
+          Confira se digitou o endereço correto ou cadastre-se como apoiador ou missionário.
         </Typography>
 
-        <Button
-          type="button"
-          variant="outlined"
-          fullWidth
+        <PillButton
           onClick={() => setSubmitState({ status: 'idle' })}
+          tone="primaryOutline"
+          fullWidth
+          sx={{ minHeight: 44 }}
         >
           Tentar outro e-mail
-        </Button>
+        </PillButton>
 
-        <Button component={Link} href="/login" variant="contained" color="primary" fullWidth>
+        <PillButton href="/select-role" tone="missionFlat" fullWidth sx={{ minHeight: 44 }}>
+          Criar uma conta
+        </PillButton>
+
+        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
           Voltar para o login
-        </Button>
+        </PillButton>
       </Stack>
     );
   }
@@ -137,10 +144,6 @@ export default function ForgotPasswordForm() {
       <Controller
         name="login"
         control={control}
-        rules={{
-          required: 'Informe seu e-mail',
-          validate: (value) => isValidEmail(value) || 'E-mail inválido',
-        }}
         render={({ field }) => (
           <TextField
             {...field}
@@ -156,19 +159,19 @@ export default function ForgotPasswordForm() {
         )}
       />
 
-      <Button
+      <PillButton
         type="submit"
-        variant="contained"
-        color="primary"
+        tone="cta"
         fullWidth
-        disabled={!isValid || isSubmitting}
+        disabled={isSubmitting}
+        sx={{ minHeight: 48, fontWeight: 600 }}
       >
         {isSubmitting ? 'Verificando…' : 'Enviar link'}
-      </Button>
+      </PillButton>
 
-      <Button component={Link} href="/login" variant="text" fullWidth>
+      <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
         Voltar para o login
-      </Button>
+      </PillButton>
     </Stack>
   );
 }

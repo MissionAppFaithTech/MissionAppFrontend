@@ -36,3 +36,5 @@ minimumReleaseAgeExclude:
   - '@playwright/test@1.63.0'
   - playwright-core@1.63.0
   - playwright@1.63.0
+patchedDependencies:
+  '@stryker-mutator/vitest-runner@10.0.0': patches/@stryker-mutator__vitest-runner@10.0.0.patch

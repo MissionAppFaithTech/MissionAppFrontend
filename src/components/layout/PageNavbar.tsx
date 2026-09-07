@@ -24,7 +24,7 @@ const variantStyles = {
     color: colors.surface,
   },
   landing: {
-    color: roleColors.missionary,
+    color: (theme: { palette: { text: { primary: string } } }) => theme.palette.text.primary,
     backgroundColor: 'transparent',
     boxShadow: 'none',
   },
@@ -51,8 +51,9 @@ export default function PageNavbar({
         transition: 'border-color 0.2s ease, background-color 0.2s ease, backdrop-filter 0.2s ease',
         ...(isLanding &&
           scrolled && {
-            backgroundColor: 'rgba(247, 249, 252, 0.92)',
-            backdropFilter: 'blur(8px)',
+            backgroundColor: (t) =>
+              t.palette.mode === 'dark' ? 'rgba(8, 28, 58, 0.92)' : 'rgba(247, 249, 252, 0.92)',
+            backdropFilter: 'blur(10px)',
           }),
       }}
     >

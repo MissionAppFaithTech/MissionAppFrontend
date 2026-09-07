@@ -33,10 +33,15 @@ export default function CampaignVideoPlayer({
   return (
     <Stack spacing={1.5}>
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <PlayCircleOutlinedIcon sx={{ color: 'mission.main', fontSize: 20 }} />
+        <PlayCircleOutlinedIcon
+          sx={{
+            color: (theme) => (theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main'),
+            fontSize: 20,
+          }}
+        />
         <Typography
           variant="subtitle2"
-          color="primary.main"
+          color="text.primary"
           sx={{ fontWeight: 700, fontSize: '0.875rem' }}
         >
           Vídeo Oficial da Campanha

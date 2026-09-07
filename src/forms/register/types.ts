@@ -6,6 +6,7 @@ export type MissionariesStep1Values = {
   gender: Gender | '';
   document: string;
   phone: string;
+  email: string;
 };
 
 export type SupportersStep1Values = {
@@ -13,6 +14,7 @@ export type SupportersStep1Values = {
   birthDate: string;
   gender: Gender | '';
   phone: string;
+  email: string;
   /** Opcional — use SELECT_OTHER se não encontrar na lista */
   faithCommunity: string;
   communityPhone: string;
@@ -35,7 +37,7 @@ export type MissionariesStep2Values = {
 /** Dados de acesso — step 3 do missionário / step 2 do apoiador */
 export type AccessCredentialsValues = {
   username: string;
-  email: string;
+  email?: string;
   password: string;
   confirmPassword: string;
 };

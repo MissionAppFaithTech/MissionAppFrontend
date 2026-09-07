@@ -13,6 +13,20 @@ describe('VisitorProfilePostsSection Component', () => {
     expect(screen.getByText(/veja todas as postagens e orações/i)).toBeInTheDocument();
   });
 
+  it('renders EmptyState when posts array is empty', () => {
+    render(<VisitorProfilePostsSection posts={[]} />);
+
+    expect(
+      screen.getByRole('heading', { level: 3, name: /nenhuma publicação no momento/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /este missionário ainda não compartilhou atualizações públicas ou pedidos de oração/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /explorar outras missões/i })).toBeInTheDocument();
+  });
+
   it('copies current URL to clipboard and displays toast when clicking share button', async () => {
     const user = userEvent.setup();
     const writeTextMock = vi.fn().mockResolvedValue(undefined);

@@ -43,13 +43,6 @@ const baseSx = {
   },
 };
 
-const hoverLightSx = {
-  bgcolor: 'common.white',
-  color: 'primary.main',
-  borderColor: 'common.white',
-  boxShadow: 'none',
-};
-
 /** Figma profile actions — um pouco mais compactos que o default do MUI. */
 const figmaActionBase = {
   borderRadius: '10px',
@@ -71,119 +64,172 @@ const figmaActionBase = {
 
 const toneSx: Record<PillButtonTone, SxProps<Theme>> = {
   cta: {
-    border: '2px solid',
-    borderColor: 'primary.dark',
-    bgcolor: 'primary.main',
-    color: 'primary.contrastText',
+    '&&': {
+      border: '2px solid',
+      borderColor: (theme) => (theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark'),
+      bgcolor: 'primary.main',
+      color: (theme) => (theme.palette.mode === 'dark' ? 'primary.contrastText' : '#ffffff'),
+    },
     '&:hover': {
-      bgcolor: 'connection.main',
-      borderColor: 'connection.main',
-      color: 'common.white',
-      boxShadow: 'none',
+      '&&': {
+        bgcolor: 'connection.main',
+        borderColor: 'connection.main',
+        color: '#ffffff',
+        boxShadow: 'none',
+      },
     },
   },
   mission: {
-    border: '2px solid',
-    borderColor: 'mission.dark',
-    bgcolor: 'mission.main',
-    color: 'mission.contrastText',
+    '&&': {
+      border: '2px solid',
+      borderColor: 'mission.dark',
+      bgcolor: 'mission.main',
+      color: '#ffffff',
+    },
     '&:hover': {
-      bgcolor: 'connection.main',
-      borderColor: 'connection.main',
-      color: 'common.white',
-      boxShadow: 'none',
+      '&&': {
+        bgcolor: 'mission.dark',
+        borderColor: 'mission.dark',
+        color: '#ffffff',
+        boxShadow: 'none',
+      },
     },
   },
   missionFlat: {
-    border: '2px solid',
-    borderColor: 'mission.dark',
-    borderRadius: '6px',
-    bgcolor: 'mission.main',
-    color: 'mission.contrastText',
+    '&&': {
+      border: '2px solid',
+      borderColor: 'mission.dark',
+      borderRadius: '6px',
+      bgcolor: 'mission.main',
+      color: '#ffffff',
+    },
     '&:hover': {
-      bgcolor: 'connection.main',
-      borderColor: 'connection.main',
-      color: 'common.white',
-      boxShadow: 'none',
+      '&&': {
+        bgcolor: 'mission.dark',
+        borderColor: 'mission.dark',
+        color: '#ffffff',
+        boxShadow: 'none',
+      },
     },
   },
   missionOutline: {
-    border: '2px solid',
-    borderColor: 'mission.main',
-    borderRadius: '6px',
-    bgcolor: 'transparent',
-    color: 'mission.main',
+    '&&': {
+      border: '2px solid',
+      borderColor: (theme) => (theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main'),
+      borderRadius: '6px',
+      bgcolor: 'transparent',
+      color: (theme) => (theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main'),
+    },
     '&:hover': {
-      bgcolor: 'mission.main',
-      borderColor: 'mission.dark',
-      color: 'mission.contrastText',
-      boxShadow: 'none',
+      '&&': {
+        bgcolor: 'mission.main',
+        borderColor: 'mission.dark',
+        color: '#ffffff',
+        boxShadow: 'none',
+      },
     },
   },
   primaryOutline: {
-    border: '2px solid',
-    borderColor: 'primary.main',
-    borderRadius: '6px',
-    bgcolor: 'transparent',
-    color: 'primary.main',
+    '&&': {
+      border: '2px solid',
+      borderColor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.65)' : 'primary.main',
+      borderRadius: '6px',
+      bgcolor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+      color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+    },
     '&:hover': {
-      bgcolor: 'primary.main',
-      borderColor: 'primary.dark',
-      color: 'primary.contrastText',
-      boxShadow: 'none',
+      '&&': {
+        bgcolor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(13, 43, 92, 0.06)',
+        borderColor: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
+        color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
+        boxShadow: 'none',
+      },
     },
   },
   outline: {
-    bgcolor: 'transparent',
-    border: '2px solid',
-    borderColor: 'primary.main',
-    color: 'primary.main',
+    '&&': {
+      border: '2px solid',
+      borderColor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.65)' : 'primary.main',
+      bgcolor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+      color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+    },
     '&:hover': {
-      ...hoverLightSx,
-      borderColor: 'primary.main',
+      '&&': {
+        bgcolor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.18)' : 'rgba(13, 43, 92, 0.06)',
+        borderColor: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
+        color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
+      },
     },
   },
   ghost: {
-    bgcolor: 'transparent',
-    border: '1px solid rgba(255, 255, 255, 0.25)',
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-    color: 'white',
-    '&:hover': hoverLightSx,
+    '&&': {
+      border: '1px solid rgba(255, 255, 255, 0.35)',
+      bgcolor: 'transparent',
+      color: '#ffffff',
+    },
+    '&:hover': {
+      '&&': {
+        bgcolor: 'rgba(255, 255, 255, 0.15)',
+        borderColor: 'common.white',
+        color: '#ffffff',
+      },
+    },
   },
   /** Figma profile secondary actions: Contato / Compartilhar / Editar */
   primarySoftOutline: {
     ...figmaActionBase,
-    // `&&` beats MUI `variant="text"` which sets `border: 0`
     '&&': {
       border: '1.5px solid',
-      borderColor: 'primary.main',
-      bgcolor: 'common.white',
-      color: 'primary.main',
+      borderColor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(147, 197, 253, 0.4)' : 'primary.main',
+      bgcolor: (theme) =>
+        theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'common.white',
+      color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
     },
     '&:hover': {
       ...figmaActionBase['&:hover'],
-      bgcolor: 'rgba(13, 43, 92, 0.04)',
-      borderColor: 'primary.main',
+      '&&': {
+        bgcolor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.16)' : 'rgba(13, 43, 92, 0.05)',
+        borderColor: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
+        color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark'),
+      },
     },
   },
   primaryFilled: {
     ...figmaActionBase,
-    border: 'none',
-    bgcolor: 'primary.main',
-    color: 'common.white',
+    '&&': {
+      border: 'none',
+      bgcolor: 'primary.main',
+      color: (theme) => (theme.palette.mode === 'dark' ? 'primary.contrastText' : '#ffffff'),
+    },
     '&:hover': {
       ...figmaActionBase['&:hover'],
-      bgcolor: 'primary.dark',
+      '&&': {
+        bgcolor: 'primary.dark',
+        color: (theme) => (theme.palette.mode === 'dark' ? 'primary.contrastText' : '#ffffff'),
+      },
     },
   },
   missionFilled: {
     ...figmaActionBase,
-    border: 'none',
-    bgcolor: 'mission.main',
-    color: 'common.white',
+    '&&': {
+      border: 'none',
+      bgcolor: 'mission.main',
+      color: '#ffffff',
+    },
     '&:hover': {
       ...figmaActionBase['&:hover'],
-      bgcolor: 'mission.dark',
+      '&&': {
+        bgcolor: 'mission.dark',
+        color: '#ffffff',
+      },
     },
   },
 };
@@ -194,8 +240,8 @@ export default function PillButton({ href, tone = 'cta', sx, ...props }: PillBut
   const pillSx = [baseSx, toneSx[tone], sx] as SxProps<Theme>;
 
   if (href) {
-    return <Button component={Link} href={href} sx={pillSx} {...props} />;
+    return <Button component={Link} href={href} color="inherit" sx={pillSx} {...props} />;
   }
 
-  return <Button sx={pillSx} {...props} />;
+  return <Button color="inherit" sx={pillSx} {...props} />;
 }

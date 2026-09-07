@@ -191,7 +191,7 @@ export default function ImpactProjectCard({
                   variant="h6"
                   sx={{
                     fontWeight: 800,
-                    color: 'primary.main',
+                    color: 'text.primary',
                     lineHeight: 1.3,
                     fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.375rem' },
                   }}
@@ -266,7 +266,7 @@ export default function ImpactProjectCard({
                   <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'mission.main' }} />
                   <Typography
                     variant="subtitle2"
-                    sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem' }}
+                    sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.875rem' }}
                   >
                     Vídeo de apresentação
                   </Typography>

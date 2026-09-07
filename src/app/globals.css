@@ -12,6 +12,16 @@
   --color-gray-medium: #6b7280;
   --color-gray-dark: #374151;
   --brand-gradient: linear-gradient(135deg, #0d2b5c 0%, #2563eb 100%);
+
+  /* Modern OKLCH color space tokens (perceptually uniform across displays) */
+  --color-missionary-oklch: oklch(0.28 0.08 250);
+  --color-supporter-oklch: oklch(0.72 0.12 250);
+  --color-mission-oklch: oklch(0.68 0.18 45);
+  --color-intermediate-oklch: oklch(0.52 0.2 255);
+
+  /* Modern scrollbar tokens */
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-track: #f1f5f9;
 }
 
 @theme inline {
@@ -24,7 +34,75 @@
   :root {
     --background: #081c3a;
     --foreground: #ffffff;
+    --scrollbar-thumb: #334155;
+    --scrollbar-track: #0f172a;
   }
+}
+
+/* Modern standard scrollbar-color and scrollbar-width (Baseline) */
+* {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  scrollbar-width: thin;
+}
+
+/* Legacy fallback for WebKit browsers */
+@supports not (scrollbar-color: auto) {
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+  }
+  *::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+}
+
+/* Modern text wrapping per Google Chrome guidance */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: balance;
+}
+
+p,
+blockquote,
+li,
+.pretty-text {
+  text-wrap: pretty;
+}
+
+/* Modern auto-sizing textarea and multiline inputs */
+textarea,
+.field-sizing-content {
+  field-sizing: content;
+}
+
+/* Smooth entry animations */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.fade-in-entry {
+  animation: fadeInScale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* View transitions standard duration */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.2s;
 }
 
 html {

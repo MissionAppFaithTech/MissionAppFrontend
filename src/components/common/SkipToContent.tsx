@@ -15,13 +15,24 @@ export default function SkipToContent({
   contentId = 'main-content',
   label = 'Pular para o conteúdo principal',
 }: SkipToContentProps) {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById(contentId);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth' });
+      target.focus({ preventScroll: true });
+      e.currentTarget.blur();
+    }
+  };
+
   return (
     <Box
       component="a"
       href={`#${contentId}`}
+      onClick={handleClick}
       sx={{
         position: 'fixed',
-        top: -100,
+        top: 16,
         left: 16,
         zIndex: (theme) => theme.zIndex.tooltip + 100,
         bgcolor: 'primary.main',
@@ -32,13 +43,18 @@ export default function SkipToContent({
         fontWeight: 700,
         fontSize: '0.9375rem',
         textDecoration: 'none',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
         border: '2px solid',
         borderColor: 'common.white',
-        transition: 'top 0.2s ease-in-out',
-        '&:focus, &:focus-visible': {
-          top: 16,
-          outline: '3px solid #E65100',
+        opacity: 0,
+        pointerEvents: 'none',
+        transform: 'translateY(-200%)',
+        transition: 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease',
+        '&:focus-visible': {
+          transform: 'translateY(0)',
+          opacity: 1,
+          pointerEvents: 'auto',
+          outline: '3px solid #FB923C',
           outlineOffset: '2px',
         },
       }}
