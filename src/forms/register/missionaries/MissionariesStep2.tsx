@@ -1,32 +1,24 @@
 'use client';
 
 import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   TextField,
   Typography,
   Stack,
-  Button,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   FormHelperText,
+  CircularProgress,
 } from '@mui/material';
-import PhoneField, { isValidInternationalPhone } from '@/components/common/PhoneField';
-import type { MissionariesStep2Values } from '../types';
+import PillButton from '@/components/common/PillButton';
+import PhoneField from '@/components/common/PhoneField';
+import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
 import { SELECT_OTHER, faithCommunities, missionaryAgencies } from '@/forms/register/options';
-
-function phoneRules(message: string, required: boolean) {
-  return {
-    validate: (value: string) => {
-      if (!value.replace(/\D/g, '')) {
-        return required ? message : true;
-      }
-      return isValidInternationalPhone(value) || 'Informe um telefone válido';
-    },
-  };
-}
+import { yieldToMain } from '@/lib/scheduler';
 
 export default function MissionariesStep2() {
   const { formData, completeStep2, goBack } = useMissionaryRegisterWizard();
@@ -35,18 +27,19 @@ export default function MissionariesStep2() {
     handleSubmit,
     control,
     watch,
-    formState: { errors },
-  } = useForm<MissionariesStep2Values>({
+    formState: { errors, isSubmitting },
+  } = useForm<MissionaryStep2FormData>({
+    resolver: zodResolver(missionaryStep2Schema),
+    mode: 'onTouched',
     defaultValues: {
-      missionaryAgency: '',
-      agencyCustomName: '',
-      agencyPhone: '',
-      missionDescription: '',
-      faithCommunity: '',
-      communityPhone: '',
-      pastorName: '',
-      pastorPhone: '',
-      ...formData,
+      missionaryAgency: formData.missionaryAgency || '',
+      agencyCustomName: formData.agencyCustomName || '',
+      agencyPhone: formData.agencyPhone || '',
+      missionDescription: formData.missionDescription || '',
+      faithCommunity: formData.faithCommunity || '',
+      communityPhone: formData.communityPhone || '',
+      pastorName: formData.pastorName || '',
+      pastorPhone: formData.pastorPhone || '',
     },
   });
 
@@ -55,19 +48,24 @@ export default function MissionariesStep2() {
   const showAgencyDetails = missionaryAgency === SELECT_OTHER;
   const showCommunityDetails = faithCommunity === SELECT_OTHER;
 
+  const handleStepSubmit = async (data: MissionaryStep2FormData) => {
+    await yieldToMain();
+    completeStep2(data);
+  };
+
   return (
     <Stack
       component="form"
       spacing={2.5}
-      onSubmit={handleSubmit(completeStep2)}
+      onSubmit={handleSubmit(handleStepSubmit)}
       sx={{ width: '100%' }}
+      noValidate
     >
       <Typography variant="body1">Dados de missão</Typography>
 
       <Controller
         name="missionaryAgency"
         control={control}
-        rules={{ required: 'Selecione a agência missionária' }}
         render={({ field }) => (
           <FormControl fullWidth error={Boolean(errors.missionaryAgency)}>
             <InputLabel shrink>Agência missionária</InputLabel>
@@ -92,9 +90,7 @@ export default function MissionariesStep2() {
       {showAgencyDetails ? (
         <>
           <TextField
-            {...register('agencyCustomName', {
-              required: showAgencyDetails ? 'Informe o nome da agência' : false,
-            })}
+            {...register('agencyCustomName')}
             label="Nome da agência missionária"
             fullWidth
             placeholder="Nome da sua agência"
@@ -105,7 +101,6 @@ export default function MissionariesStep2() {
           <Controller
             name="agencyPhone"
             control={control}
-            rules={phoneRules('Informe o telefone da agência missionária', true)}
             render={({ field }) => (
               <PhoneField
                 label="Telefone da agência missionária"
@@ -122,9 +117,7 @@ export default function MissionariesStep2() {
       ) : null}
 
       <TextField
-        {...register('missionDescription', {
-          required: 'Descreva seu projeto ou atuação missionária',
-        })}
+        {...register('missionDescription')}
         label="Projeto ou atuação missionária"
         fullWidth
         multiline
@@ -139,7 +132,6 @@ export default function MissionariesStep2() {
       <Controller
         name="faithCommunity"
         control={control}
-        rules={{ required: 'Selecione a comunidade de fé' }}
         render={({ field }) => (
           <FormControl fullWidth error={Boolean(errors.faithCommunity)}>
             <InputLabel id="missionary-faith-community-label" shrink>
@@ -174,7 +166,6 @@ export default function MissionariesStep2() {
           <Controller
             name="communityPhone"
             control={control}
-            rules={phoneRules('Informe o telefone da comunidade de fé', true)}
             render={({ field }) => (
               <PhoneField
                 label="Telefone da comunidade de fé"
@@ -189,9 +180,7 @@ export default function MissionariesStep2() {
           />
 
           <TextField
-            {...register('pastorName', {
-              required: showCommunityDetails ? 'Informe o nome do pastor' : false,
-            })}
+            {...register('pastorName')}
             label="Nome do pastor"
             fullWidth
             placeholder="Pr. João Souza"
@@ -202,7 +191,6 @@ export default function MissionariesStep2() {
           <Controller
             name="pastorPhone"
             control={control}
-            rules={phoneRules('Informe o telefone do pastor', true)}
             render={({ field }) => (
               <PhoneField
                 label="Telefone do pastor"
@@ -219,12 +207,39 @@ export default function MissionariesStep2() {
       ) : null}
 
       <Stack direction="row" spacing={2}>
-        <Button type="button" variant="outlined" onClick={goBack} fullWidth>
+        <PillButton
+          type="button"
+          tone="primarySoftOutline"
+          onClick={goBack}
+          fullWidth
+          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
+        >
           Voltar
-        </Button>
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          Continuar
-        </Button>
+        </PillButton>
+        <PillButton
+          type="submit"
+          tone="cta"
+          disabled={isSubmitting}
+          fullWidth
+          sx={{
+            minHeight: 48,
+            fontSize: '1rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 1.5,
+          }}
+        >
+          {isSubmitting ? (
+            <>
+              <CircularProgress size={20} color="inherit" aria-label="Enviando dados" />
+              <span>Continuando...</span>
+            </>
+          ) : (
+            'Continuar'
+          )}
+        </PillButton>
       </Stack>
     </Stack>
   );

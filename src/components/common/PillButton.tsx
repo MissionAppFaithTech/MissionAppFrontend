@@ -391,10 +391,22 @@ const stateSx: ToneEntry = (theme) => ({
   },
 });
 
+/** Lifts a scalar `minHeight` to every breakpoint so it beats a tone's responsive value. */
+function normalizeMinHeight(sx: PillButtonProps['sx']): PillButtonProps['sx'] {
+  if (!sx || typeof sx !== 'object' || Array.isArray(sx)) return sx;
+  const value = (sx as Record<string, unknown>).minHeight;
+  if (typeof value !== 'number' && typeof value !== 'string') return sx;
+  return { ...(sx as object), minHeight: { xs: value, sm: value } } as PillButtonProps['sx'];
+}
+
 export type { PillButtonTone, PillButtonProps };
 
 export default function PillButton({ href, tone = 'cta', sx, ...props }: PillButtonProps) {
-  const pillSx = [baseSx, ...toneSx[tone], stateSx, sx] as SxProps<Theme>;
+  // The Figma tones carry a responsive `minHeight`, which outranks a plain scalar
+  // from the call site in MUI's responsive merge — a caller asking for 48px was
+  // silently rendering at 32px on desktop. Normalising it here lets the call site win.
+  const callerSx = normalizeMinHeight(sx);
+  const pillSx = [baseSx, ...toneSx[tone], stateSx, callerSx] as SxProps<Theme>;
 
   if (href) {
     return <Button component={Link} href={href} sx={pillSx} {...props} />;

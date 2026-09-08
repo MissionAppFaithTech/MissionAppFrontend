@@ -159,6 +159,10 @@ export default function ContactModal({
                     minHeight: 44,
                     px: 2,
                     fontSize: '0.8125rem',
+                    fontWeight: 700,
+                    color: '#FFFFFF !important',
+                    bgcolor: '#9A3412',
+                    '&:hover': { bgcolor: '#7C2D12' },
                     flex: { xs: 1, sm: 'initial' },
                   }}
                 >
@@ -255,13 +259,18 @@ export default function ContactModal({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
+            color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

@@ -1,5 +1,8 @@
 'use client';
 
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import MenuItem from '@mui/material/MenuItem';
@@ -7,13 +10,16 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { profileLocations } from '@/lib/profileOptions';
-import type { ReactNode } from 'react';
+import { profileAboutSchema, type ProfileAboutFormData } from '@/schemas/profile.schema';
 import type { ProfileAboutData } from '@/types/profile';
+import type { ReactNode } from 'react';
 
 type ProfileAboutEditSectionProps = {
   data: ProfileAboutData;
   onBack: () => void;
+  onSave?: (data: ProfileAboutFormData) => void;
 };
 
 const missionaryAgencies = [
@@ -46,7 +52,45 @@ function LabeledField({ children, htmlFor, label }: LabeledFieldProps) {
   );
 }
 
-export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEditSectionProps) {
+export default function ProfileAboutEditSection({
+  data,
+  onBack,
+  onSave,
+}: ProfileAboutEditSectionProps) {
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<ProfileAboutFormData>({
+    resolver: zodResolver(profileAboutSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      introduction: data.introduction || '',
+      missionHistory: data.missionHistory || '',
+      originLocation: data.originLocation || '',
+      currentLocation: data.currentLocation || '',
+      missionaryAgency: data.missionaryAgency || '',
+      faithCommunity: data.faithCommunity || '',
+      prayerRequests: data.prayerRequests || '',
+      lifeVerse: data.lifeVerse || '',
+    },
+  });
+
+  const onSubmit = (formData: ProfileAboutFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('draft_profile_about_intro');
+        localStorage.removeItem('draft_profile_about_mission_history');
+        localStorage.removeItem('draft_profile_about_prayer_requests');
+        localStorage.removeItem('draft_profile_about_life_verse');
+      } catch {
+        // Ignore
+      }
+    }
+    onSave?.(formData);
+    onBack();
+  };
+
   return (
     <Card
       component="section"
@@ -64,133 +108,197 @@ export default function ProfileAboutEditSection({ data, onBack }: ProfileAboutEd
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Stack spacing={{ xs: 2, sm: 2.5 }}>
-          <Typography variant="h6" color="primary.main">
-            Editar sobre
-          </Typography>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+          <Stack spacing={{ xs: 2, sm: 2.5 }}>
+            <Typography variant="h6" color="primary.main">
+              Editar sobre
+            </Typography>
 
-          <LabeledField htmlFor="profile-about-introduction" label="Sobre mim">
-            <TextField
-              id="profile-about-introduction"
-              defaultValue={data.introduction}
-              multiline
-              minRows={4}
-              fullWidth
+            <Controller
+              name="introduction"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-introduction"
+                  label="Sobre mim"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={4}
+                  draftKey="profile_about_intro"
+                  placeholder="Compartilhe sua trajetória, testemunho e dedicação ministerial..."
+                  error={Boolean(errors.introduction)}
+                  helperText={errors.introduction?.message}
+                />
+              )}
             />
-          </LabeledField>
 
-          <LabeledField
-            htmlFor="profile-about-mission-history"
-            label="Resumo da minha história em missões"
-          >
-            <TextField
-              id="profile-about-mission-history"
-              defaultValue={data.missionHistory}
-              multiline
-              minRows={4}
-              fullWidth
+            <Controller
+              name="missionHistory"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-mission-history"
+                  label="Resumo da minha história em missões"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={4}
+                  draftKey="profile_about_mission_history"
+                  placeholder="Conte sobre os países, comunidades e marcos por onde você serviu..."
+                  error={Boolean(errors.missionHistory)}
+                  helperText={errors.missionHistory?.message}
+                />
+              )}
             />
-          </LabeledField>
 
-          <LabeledField htmlFor="profile-about-origin" label="Local de origem">
-            <TextField
-              id="profile-about-origin"
-              select
-              defaultValue={data.originLocation}
-              fullWidth
-            >
-              {profileLocations.map((location) => (
-                <MenuItem key={location} value={location}>
-                  {location}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
+            <LabeledField htmlFor="profile-about-origin" label="Local de origem">
+              <Controller
+                name="originLocation"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-origin"
+                    select
+                    fullWidth
+                    error={Boolean(errors.originLocation)}
+                    helperText={errors.originLocation?.message}
+                  >
+                    {profileLocations.map((location) => (
+                      <MenuItem key={location} value={location}>
+                        {location}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
 
-          <LabeledField htmlFor="profile-about-current-location" label="Local de atuação atual">
-            <TextField
-              id="profile-about-current-location"
-              select
-              defaultValue={data.currentLocation}
-              fullWidth
-            >
-              {profileLocations.map((location) => (
-                <MenuItem key={location} value={location}>
-                  {location}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
+            <LabeledField htmlFor="profile-about-current-location" label="Local de atuação atual">
+              <Controller
+                name="currentLocation"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-current-location"
+                    select
+                    fullWidth
+                    error={Boolean(errors.currentLocation)}
+                    helperText={errors.currentLocation?.message}
+                  >
+                    {profileLocations.map((location) => (
+                      <MenuItem key={location} value={location}>
+                        {location}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
 
-          <LabeledField htmlFor="profile-about-agency" label="Agência missionária">
-            <TextField
-              id="profile-about-agency"
-              select
-              defaultValue={data.missionaryAgency}
-              fullWidth
-            >
-              {missionaryAgencies.map((agency) => (
-                <MenuItem key={agency} value={agency}>
-                  {agency}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
+            <LabeledField htmlFor="profile-about-agency" label="Agência missionária">
+              <Controller
+                name="missionaryAgency"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-agency"
+                    select
+                    fullWidth
+                    error={Boolean(errors.missionaryAgency)}
+                    helperText={errors.missionaryAgency?.message}
+                  >
+                    {missionaryAgencies.map((agency) => (
+                      <MenuItem key={agency} value={agency}>
+                        {agency}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
 
-          <LabeledField htmlFor="profile-about-faith-community" label="Comunidade de fé">
-            <TextField
-              id="profile-about-faith-community"
-              select
-              defaultValue={data.faithCommunity}
-              fullWidth
-            >
-              {faithCommunities.map((community) => (
-                <MenuItem key={community} value={community}>
-                  {community}
-                </MenuItem>
-              ))}
-            </TextField>
-          </LabeledField>
+            <LabeledField htmlFor="profile-about-faith-community" label="Comunidade de fé">
+              <Controller
+                name="faithCommunity"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="profile-about-faith-community"
+                    select
+                    fullWidth
+                    error={Boolean(errors.faithCommunity)}
+                    helperText={errors.faithCommunity?.message}
+                  >
+                    {faithCommunities.map((community) => (
+                      <MenuItem key={community} value={community}>
+                        {community}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </LabeledField>
 
-          <LabeledField htmlFor="profile-about-prayer-requests" label="Pedidos de oração">
-            <TextField
-              id="profile-about-prayer-requests"
-              defaultValue={data.prayerRequests}
-              multiline
-              minRows={3}
-              fullWidth
+            <Controller
+              name="prayerRequests"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-prayer-requests"
+                  label="Pedidos de oração"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={3}
+                  draftKey="profile_about_prayer_requests"
+                  placeholder="Liste pedidos de oração pelo seu ministério, saúde e família..."
+                  error={Boolean(errors.prayerRequests)}
+                  helperText={errors.prayerRequests?.message}
+                />
+              )}
             />
-          </LabeledField>
 
-          <LabeledField htmlFor="profile-about-life-verse" label="Versículo para a vida">
-            <TextField
-              id="profile-about-life-verse"
-              defaultValue={data.lifeVerse}
-              multiline
-              minRows={3}
-              fullWidth
+            <Controller
+              name="lifeVerse"
+              control={control}
+              render={({ field }) => (
+                <RichTextEditor
+                  id="profile-about-life-verse"
+                  label="Versículo para a vida"
+                  value={field.value}
+                  onChange={field.onChange}
+                  minRows={2}
+                  draftKey="profile_about_life_verse"
+                  placeholder="Insira sua citação bíblica ou lema de fé (ex: 'Tudo posso naquele que me fortalece')..."
+                  error={Boolean(errors.lifeVerse)}
+                  helperText={errors.lifeVerse?.message}
+                />
+              )}
             />
-          </LabeledField>
 
-          <Stack
-            direction="row"
-            spacing={1}
-            sx={{
-              pt: 1,
-              justifyContent: 'flex-end',
-              '& .MuiButton-root': {
-                flex: { xs: 1, sm: 'initial' },
-              },
-            }}
-          >
-            <PillButton type="button" tone="primarySoftOutline" size="small" onClick={onBack}>
-              Voltar
-            </PillButton>
-            <PillButton type="button" tone="primaryFilled" size="small">
-              Salvar
-            </PillButton>
+            <Stack
+              direction="row"
+              spacing={1.5}
+              sx={{
+                pt: 1.5,
+                justifyContent: 'flex-end',
+                '& .MuiButton-root': {
+                  minHeight: { xs: 48, sm: 40 },
+                  flex: { xs: 1, sm: 'initial' },
+                },
+              }}
+            >
+              <PillButton type="button" tone="primarySoftOutline" size="medium" onClick={onBack}>
+                Voltar
+              </PillButton>
+              <PillButton type="submit" tone="primaryFilled" size="medium">
+                Salvar
+              </PillButton>
+            </Stack>
           </Stack>
-        </Stack>
+        </Box>
       </CardContent>
     </Card>
   );

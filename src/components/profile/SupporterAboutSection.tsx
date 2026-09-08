@@ -51,7 +51,7 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
       >
         <Stack spacing={{ xs: 2, sm: 2.5 }}>
           <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
               Sobre
             </Typography>
             {onEditAction ? (
@@ -67,19 +67,49 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
                   px: { xs: 0, sm: 1.75 },
                   py: { xs: 0, sm: 0.5 },
                   gap: 0.5,
-                  // Colors come from the tone so they follow the color scheme;
-                  // this only carries the responsive structure.
                   '&&': {
                     border: { xs: 'none', sm: '1.5px solid' },
+                    borderColor: {
+                      xs: 'transparent',
+                      sm: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'var(--mui-palette-action2-borderStrong)'
+                          : 'primary.main',
+                    },
+                    bgcolor: {
+                      xs: 'transparent',
+                      sm: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'var(--mui-palette-action2-fieldBg)'
+                          : 'common.white',
+                    },
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
                     boxShadow: 'none',
                   },
-                  '@media (max-width:599.95px)': {
-                    '&&': { bgcolor: 'transparent', borderColor: 'transparent' },
-                    '&&:hover': { bgcolor: 'transparent', borderColor: 'transparent' },
+                  '&:hover': {
+                    bgcolor: {
+                      xs: 'transparent',
+                      sm: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'var(--mui-palette-action2-borderSubtle)'
+                          : 'rgba(13, 43, 92, 0.04)',
+                    },
+                    borderColor: {
+                      xs: 'transparent',
+                      sm: (theme) =>
+                        theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
+                    },
                   },
                 }}
               >
-                <EditOutlinedIcon sx={{ fontSize: { xs: 20, sm: 16 }, color: 'inherit' }} />
+                <EditOutlinedIcon
+                  sx={{
+                    fontSize: { xs: 20, sm: 16 },
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
+                  }}
+                />
                 <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                   Editar
                 </Box>

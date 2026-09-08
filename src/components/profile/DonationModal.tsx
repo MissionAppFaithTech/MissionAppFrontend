@@ -405,9 +405,6 @@ CPF/CNPJ: ${bankData.documento}`;
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
-            '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
-            },
           }}
         >
           {toastMessage}

@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useState, type ChangeEvent } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
@@ -22,7 +24,9 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
+import RichTextEditor from '@/components/common/RichTextEditor';
 import { getYouTubeEmbedUrl } from '@/components/profile/ImpactProjectCard';
+import { impactProjectEditSchema, type ImpactProjectEditFormData } from '@/schemas/content.schema';
 import type { ImpactProjectData } from '@/types/profile';
 
 type ImpactProjectEditFormProps = {
@@ -31,23 +35,37 @@ type ImpactProjectEditFormProps = {
 };
 
 export default function ImpactProjectEditForm({ project, onSave }: ImpactProjectEditFormProps) {
-  const [title, setTitle] = useState(project.title);
-  const [description, setDescription] = useState(project.description);
-  const [bannerUrl, setBannerUrl] = useState(project.bannerUrl || project.imageUrl);
-  const [videoUrl, setVideoUrl] = useState(project.videoUrl || project.youtubeUrl || '');
-  const [galleryImages, setGalleryImages] = useState<string[]>(
-    project.galleryImages ?? project.images ?? []
-  );
   const [toastOpen, setToastOpen] = useState(false);
 
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+  } = useForm<ImpactProjectEditFormData>({
+    resolver: zodResolver(impactProjectEditSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      title: project.title || '',
+      description: project.description || '',
+      bannerUrl: project.bannerUrl || project.imageUrl || '',
+      videoUrl: project.videoUrl || project.youtubeUrl || '',
+      galleryImages: project.galleryImages ?? project.images ?? [],
+    },
+  });
+
+  const [bannerUrl, videoUrl, galleryImages] = watch(['bannerUrl', 'videoUrl', 'galleryImages']);
+
   const isLinkedWithCampaign = Boolean(project.campaignBadge && project.campaignTitle);
-  const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl);
+  const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl || '');
 
   const handleBannerFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const previewUrl = URL.createObjectURL(file);
-      setBannerUrl(previewUrl);
+      setValue('bannerUrl', previewUrl, { shouldDirty: true, shouldValidate: true });
     }
   };
 
@@ -58,25 +76,38 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
       for (let i = 0; i < files.length; i++) {
         newUrls.push(URL.createObjectURL(files[i]));
       }
-      setGalleryImages((prev) => [...prev, ...newUrls]);
+      setValue('galleryImages', [...(galleryImages || []), ...newUrls], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
   };
 
   const handleRemoveGalleryImage = (indexToRemove: number) => {
-    setGalleryImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+    setValue(
+      'galleryImages',
+      (galleryImages || []).filter((_, idx) => idx !== indexToRemove),
+      { shouldDirty: true, shouldValidate: true }
+    );
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onSubmit = (data: ImpactProjectEditFormData) => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem(`draft_impact_project_${project.id}`);
+      } catch {
+        // Ignore
+      }
+    }
     const updated: ImpactProjectData = {
       ...project,
-      title,
-      description,
-      imageUrl: bannerUrl,
-      bannerUrl,
-      videoUrl: videoUrl.trim() ? videoUrl.trim() : undefined,
-      youtubeUrl: videoUrl.trim() ? videoUrl.trim() : undefined,
-      galleryImages,
+      title: data.title,
+      description: data.description,
+      imageUrl: data.bannerUrl,
+      bannerUrl: data.bannerUrl,
+      videoUrl: data.videoUrl.trim() ? data.videoUrl.trim() : undefined,
+      youtubeUrl: data.videoUrl.trim() ? data.videoUrl.trim() : undefined,
+      galleryImages: data.galleryImages,
     };
     onSave?.(updated);
     setToastOpen(true);
@@ -101,7 +132,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
             '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
           }}
         >
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
             <Stack spacing={{ xs: 3, sm: 4 }}>
               {/* Cabeçalho */}
               <Box>
@@ -215,37 +246,32 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   </Typography>
                   <TextField
                     id="project-title"
-                    name="title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
+                    {...register('title')}
                     fullWidth
                     size="small"
+                    error={Boolean(errors.title)}
+                    helperText={errors.title?.message}
                     placeholder="Ex: Projeto Social na África do Sul"
                   />
                 </Stack>
 
-                <Stack spacing={0.75}>
-                  <Typography
-                    component="label"
-                    htmlFor="project-description"
-                    variant="body2"
-                    sx={{ color: 'primary.main', fontWeight: 600 }}
-                  >
-                    Descrição Detalhada:
-                  </Typography>
-                  <TextField
-                    id="project-description"
-                    name="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    required
-                    multiline
-                    minRows={4}
-                    fullWidth
-                    placeholder="Conte sobre o objetivo, público alcançado e necessidades do projeto..."
-                  />
-                </Stack>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      id="project-description"
+                      label="Descrição Detalhada"
+                      value={field.value}
+                      onChange={field.onChange}
+                      minRows={5}
+                      draftKey={`impact_project_${project.id}`}
+                      placeholder="Conte sobre o objetivo, público alcançado, etapas e necessidades do projeto..."
+                      error={Boolean(errors.description)}
+                      helperText={errors.description?.message}
+                    />
+                  )}
+                />
               </Stack>
 
               <Divider />
@@ -350,12 +376,15 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                 <TextField
                   id="project-youtube-url"
                   label="Link do Vídeo no YouTube"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
+                  {...register('videoUrl')}
                   placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
                   fullWidth
                   size="small"
-                  helperText="Cole o link completo de um vídeo normal, Shorts ou embed do YouTube"
+                  error={Boolean(errors.videoUrl)}
+                  helperText={
+                    errors.videoUrl?.message ||
+                    'Cole o link completo de um vídeo normal, Shorts ou embed do YouTube'
+                  }
                 />
 
                 {youtubeEmbedUrl && (
@@ -454,7 +483,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                             bgcolor: 'rgba(0, 0, 0, 0.7)',
                             color: 'common.white',
                             p: 0.5,
-                            '&:hover': { bgcolor: 'error.dark' },
+                            '&:hover': { bgcolor: 'error.main' },
                           }}
                         >
                           <DeleteOutlinedIcon sx={{ fontSize: 16 }} />
@@ -508,22 +537,26 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
 
               {/* Ações Finais */}
               <Stack
-                direction="row"
-                spacing={1}
+                direction={{ xs: 'column-reverse', sm: 'row' }}
+                spacing={{ xs: 1.5, sm: 1.5 }}
                 sx={{
                   justifyContent: 'flex-end',
-                  pt: { xs: 1, sm: 2 },
-                  '& .MuiButton-root': { flex: { xs: 1, sm: 'initial' } },
+                  pt: { xs: 2, sm: 2 },
+                  '& .MuiButton-root': {
+                    minHeight: { xs: 48, sm: 40 },
+                    width: { xs: '100%', sm: 'auto' },
+                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                  },
                 }}
               >
                 <PillButton
                   href="/profile/projetos-de-impacto"
                   tone="primarySoftOutline"
-                  size="small"
+                  size="medium"
                 >
                   Voltar
                 </PillButton>
-                <PillButton type="submit" tone="primaryFilled" size="small">
+                <PillButton type="submit" tone="primaryFilled" size="medium">
                   Salvar
                 </PillButton>
               </Stack>
@@ -546,13 +579,18 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
+            color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

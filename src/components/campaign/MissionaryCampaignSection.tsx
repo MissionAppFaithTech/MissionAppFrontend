@@ -58,8 +58,9 @@ export default function MissionaryCampaignSection({
                 width: 64,
                 height: 64,
                 borderRadius: '50%',
-                bgcolor: 'rgba(230, 81, 0, 0.08)',
-                color: 'accent.main',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'var(--app-badge-bg)' : 'rgba(230, 81, 0, 0.08)',
+                color: (theme) => (theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -68,7 +69,7 @@ export default function MissionaryCampaignSection({
               <CampaignIcon sx={{ fontSize: 36 }} />
             </Box>
 
-            <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
+            <Typography variant="h6" color="text.primary" sx={{ fontWeight: 700 }}>
               Nenhuma campanha ativa no momento
             </Typography>
 
@@ -100,8 +101,10 @@ export default function MissionaryCampaignSection({
         sx={{
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
-          borderColor: 'divider',
-          boxShadow: 'var(--app-shadow-sm)',
+          borderColor: (theme) =>
+            theme.palette.mode === 'dark' ? 'var(--app-chip-info-bg)' : 'divider',
+          boxShadow: (theme) =>
+            theme.palette.mode === 'dark' ? 'var(--app-shadow-md)' : 'var(--app-shadow-sm)',
           overflow: 'hidden',
           bgcolor: 'background.paper',
         }}
@@ -137,7 +140,7 @@ export default function MissionaryCampaignSection({
               <Typography
                 variant="h5"
                 component="h2"
-                color="primary.main"
+                color="text.primary"
                 sx={{
                   fontWeight: 800,
                   fontSize: { xs: '1.25rem', sm: '1.5rem' },
@@ -175,19 +178,33 @@ export default function MissionaryCampaignSection({
                   spacing={1}
                   sx={{
                     alignItems: 'center',
-                    bgcolor: 'rgba(13, 43, 92, 0.04)',
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                        : 'rgba(13, 43, 92, 0.05)',
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-borderStrong)'
+                        : 'rgba(13, 43, 92, 0.15)',
                     borderRadius: 2,
                     px: 1.5,
                     py: 1,
                     width: 'fit-content',
+                    boxShadow: (theme) =>
+                      theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
                   }}
                 >
-                  <CalendarMonthIcon sx={{ fontSize: 18, color: 'primary.main' }} />
+                  <CalendarMonthIcon
+                    sx={{
+                      fontSize: 18,
+                      color: (theme) =>
+                        theme.palette.mode === 'dark' ? 'accent.light' : 'connection.main',
+                    }}
+                  />
                   <Typography
                     variant="caption"
-                    color="primary.main"
+                    color="text.primary"
                     sx={{ fontWeight: 700, fontSize: '0.8125rem' }}
                   >
                     Dia Oficial nas Igrejas: {campaign.churchDay}
@@ -233,7 +250,17 @@ export default function MissionaryCampaignSection({
                   px: 3.5,
                   fontSize: '0.95rem',
                   fontWeight: 700,
-                  boxShadow: 'var(--app-shadow-accent)',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                  color: 'common.white',
+                  '&:hover': {
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
+                  },
+                  boxShadow: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--app-shadow-accent)'
+                      : 'var(--app-shadow-accent)',
                 }}
               >
                 <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
@@ -252,10 +279,17 @@ export default function MissionaryCampaignSection({
                   px: 3,
                   fontSize: '0.95rem',
                   fontWeight: 700,
-                  color: 'primary.main',
-                  borderColor: 'primary.main',
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--mui-palette-action2-borderStrong)'
+                      : 'primary.main',
                   '&:hover': {
-                    bgcolor: 'rgba(13, 43, 92, 0.05)',
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                        : 'rgba(13, 43, 92, 0.05)',
                   },
                 }}
               >
@@ -289,13 +323,18 @@ export default function MissionaryCampaignSection({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
+            color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

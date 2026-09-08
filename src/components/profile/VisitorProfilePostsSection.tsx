@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
+import DynamicFeedOutlinedIcon from '@mui/icons-material/DynamicFeedOutlined';
 import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
@@ -16,6 +17,7 @@ import IconButton from '@mui/material/IconButton';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import EmptyState from '@/components/common/EmptyState';
 import LockedContentNotice from '@/components/common/LockedContentNotice';
 import PillButton from '@/components/common/PillButton';
 import type { SavedPost } from '@/types/profile';
@@ -33,6 +35,19 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
       setToastOpen(true);
     }
   };
+
+  if (!posts || posts.length === 0) {
+    return (
+      <EmptyState
+        icon={DynamicFeedOutlinedIcon}
+        title="Nenhuma publicação no momento"
+        description="Este missionário ainda não compartilhou atualizações públicas ou pedidos de oração."
+        actionLabel="Explorar outras missões"
+        actionHref="/#buscar"
+      />
+    );
+  }
+
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
       {posts.map((post) => (
@@ -103,8 +118,22 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                   }
                   size="small"
                   sx={{
-                    bgcolor: 'var(--app-chip-info-bg)',
-                    color: 'var(--app-chip-info-fg)',
+                    // Only the post type varies here: the light/dark half lives in
+                    // the CSS variables, so the chip is correct on the first paint
+                    // instead of waiting for the color scheme to reach React.
+                    bgcolor:
+                      post.type === 'campaign'
+                        ? 'var(--app-chip-warn-bg)'
+                        : 'var(--app-chip-info-bg)',
+                    color:
+                      post.type === 'campaign'
+                        ? 'var(--app-chip-warn-fg)'
+                        : 'var(--app-chip-info-fg)',
+                    border: '1px solid',
+                    borderColor:
+                      post.type === 'campaign'
+                        ? 'var(--app-chip-warn-border)'
+                        : 'var(--app-chip-info-border)',
                     fontWeight: 700,
                     fontSize: '0.7rem',
                     letterSpacing: '0.05em',
@@ -167,6 +196,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     aria-label="Curtir postagem (necessário login)"
                     size="small"
                     color="primary"
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <FavoriteBorderOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -184,6 +214,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     aria-label="Salvar postagem (necessário login)"
                     size="small"
                     color="primary"
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <BookmarkBorderOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -193,6 +224,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     size="small"
                     color="primary"
                     onClick={handleShare}
+                    sx={{ minWidth: 44, minHeight: 44 }}
                   >
                     <ShareOutlinedIcon sx={{ fontSize: 20 }} />
                   </IconButton>
@@ -208,6 +240,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                     fontWeight: 600,
                     borderColor: 'primary.main',
+                    minHeight: 44,
                   }}
                 >
                   Orei · {post.prayersCount ?? 0}
@@ -237,12 +270,18 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
+            color: 'common.white',
             fontWeight: 600,
-            boxShadow: 3,
+            borderRadius: 2,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

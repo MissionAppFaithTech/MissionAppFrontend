@@ -38,9 +38,10 @@ describe('masks and validations utility', () => {
       expect(maskCpfOrPassport('1234567890199')).toBe('123.456.789-01');
     });
 
-    it('handles passport alphanumeric inputs uppercase without special chars', () => {
+    it('handles passport alphanumeric inputs uppercase without special chars and limits to 20 chars', () => {
       expect(maskCpfOrPassport('ab123456')).toBe('AB123456');
       expect(maskCpfOrPassport('pass-1234')).toBe('PASS1234');
+      expect(maskCpfOrPassport('abcdef12345678901234567890')).toBe('ABCDEF12345678901234');
     });
   });
 
@@ -59,6 +60,8 @@ describe('masks and validations utility', () => {
       expect(isValidEmail('test@')).toBe(false);
       expect(isValidEmail('@example.com')).toBe(false);
       expect(isValidEmail('test@domain')).toBe(false);
+      expect(isValidEmail('a test@example.com')).toBe(false);
+      expect(isValidEmail('test@example.com b')).toBe(false);
     });
   });
 
@@ -70,9 +73,18 @@ describe('masks and validations utility', () => {
 
     it('rejects invalid or malformed dates', () => {
       expect(isValidBirthDate('31/02/2023')).toBe(false);
+      expect(isValidBirthDate('29/02/2023')).toBe(false);
+      expect(isValidBirthDate('31/04/2023')).toBe(false);
+      expect(isValidBirthDate('31/06/2023')).toBe(false);
+      expect(isValidBirthDate('31/09/2023')).toBe(false);
+      expect(isValidBirthDate('31/11/2023')).toBe(false);
       expect(isValidBirthDate('32/01/2020')).toBe(false);
       expect(isValidBirthDate('15/13/2020')).toBe(false);
+      expect(isValidBirthDate('15/00/2020')).toBe(false);
+      expect(isValidBirthDate('00/01/2020')).toBe(false);
       expect(isValidBirthDate('15-08-1990')).toBe(false);
+      expect(isValidBirthDate('x15/08/1990')).toBe(false);
+      expect(isValidBirthDate('15/08/1990x')).toBe(false);
       expect(isValidBirthDate('invalid')).toBe(false);
     });
   });

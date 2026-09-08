@@ -185,11 +185,12 @@ export default function ProfileSummaryCard({
               </Typography>
               <Typography
                 variant="body1"
-                color="primary.main"
                 sx={{
                   fontWeight: 700,
                   fontSize: { xs: '0.875rem', sm: '1rem' },
                   pt: 0.25,
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                 }}
               >
                 {roleDescription}
@@ -199,15 +200,21 @@ export default function ProfileSummaryCard({
               <Stack
                 direction="row"
                 spacing={0.5}
-                sx={{ alignItems: 'center', pt: 0.25, color: 'primary.main' }}
+                sx={{
+                  alignItems: 'center',
+                  pt: 0.25,
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
+                }}
               >
                 <PlaceOutlinedIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
                 <Typography
                   variant="body2"
-                  color="primary.main"
                   sx={{
                     fontWeight: 500,
                     fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
                   }}
                 >
                   {location}
@@ -246,7 +253,7 @@ export default function ProfileSummaryCard({
               >
                 <Typography
                   variant="h6"
-                  color="primary.main"
+                  color="text.primary"
                   sx={{
                     fontWeight: 700,
                     fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.375rem' },
@@ -289,9 +296,7 @@ export default function ProfileSummaryCard({
                   href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
                   tone="missionFilled"
                   size="medium"
-                  sx={{
-                    ...actionSx,
-                  }}
+                  sx={actionSx}
                 >
                   Editar perfil
                 </PillButton>
@@ -329,9 +334,7 @@ export default function ProfileSummaryCard({
                           onDonate?.();
                         }
                   }
-                  sx={{
-                    ...actionSx,
-                  }}
+                  sx={actionSx}
                 >
                   <VolunteerActivismIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Ofertar
@@ -420,13 +423,18 @@ export default function ProfileSummaryCard({
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
+            color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

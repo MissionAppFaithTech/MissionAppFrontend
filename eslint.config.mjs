@@ -19,6 +19,24 @@ const eslintConfig = defineConfig([
     rules: {
       // React Hook Form `watch()` — known React Compiler false positive
       'react-hooks/incompatible-library': 'off',
+
+      // Prevenção de código morto e variáveis não utilizadas
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      'no-unreachable': 'error',
+      'no-unused-expressions': 'error',
+      'no-constant-condition': ['error', { checkLoops: false }],
+      'no-duplicate-imports': 'error',
+
+      // Prevenção de código depreciado e duplicidades de importação
+      'import/no-deprecated': 'error',
+      'import/no-duplicates': 'error',
     },
   },
   globalIgnores([

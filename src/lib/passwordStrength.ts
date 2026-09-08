@@ -60,9 +60,5 @@ export function validateStrongPassword(password: string): true | string {
   const missing = passwordRequirements.filter((rule) => !rule.test(password));
   if (missing.length === 0) return true;
 
-  if (missing.length === passwordRequirements.length) {
-    return 'Informe sua senha';
-  }
-
   return `Senha fraca: inclua ${missing.map((r) => r.label.toLowerCase()).join(', ')}`;
 }

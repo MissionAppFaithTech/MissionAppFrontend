@@ -394,16 +394,21 @@ export default function SupporterMissionaryProfileView({
                           }
                           size="small"
                           sx={{
+                            // Only the post type varies here; the scheme half lives
+                            // in the CSS variables, so this is right on first paint.
                             bgcolor:
-                              post.type === 'prayer'
-                                ? 'var(--app-chip-info-bg)'
-                                : post.type === 'campaign'
-                                  ? 'var(--app-chip-warn-bg)'
-                                  : 'var(--app-chip-info-bg)',
+                              post.type === 'campaign'
+                                ? 'var(--app-chip-warn-bg)'
+                                : 'var(--app-chip-info-bg)',
                             color:
                               post.type === 'campaign'
                                 ? 'var(--app-chip-warn-fg)'
                                 : 'var(--app-chip-info-fg)',
+                            border: '1px solid',
+                            borderColor:
+                              post.type === 'campaign'
+                                ? 'var(--app-chip-warn-border)'
+                                : 'var(--app-chip-info-border)',
                             fontWeight: 700,
                             fontSize: '0.7rem',
                             letterSpacing: '0.05em',
@@ -513,7 +518,6 @@ export default function SupporterMissionaryProfileView({
                             py: 0.5,
                             fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                             fontWeight: 600,
-                            borderColor: 'primary.main',
                           }}
                         >
                           Orei · {prayer.count}
@@ -558,13 +562,18 @@ export default function SupporterMissionaryProfileView({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
+            color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
-            boxShadow: 3,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: 'brandFill.contrastText',
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

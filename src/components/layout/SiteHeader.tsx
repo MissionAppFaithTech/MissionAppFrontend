@@ -5,9 +5,11 @@ import { Box, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } f
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
+import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
+import { roleColors } from '@/theme/theme';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
@@ -17,22 +19,26 @@ const navLinks = [
   { label: 'Perguntas frequentes', href: '/#faq', sectionId: 'faq' },
 ];
 
-/**
- * Nav links used hardcoded brand navy, so on the dark canvas they rendered navy on
- * navy at 1.23:1. They now follow the scheme: resting text is the body color and the
- * current section is marked with the accent — orange in dark, brand blue in light.
- */
 const navLinkSx = (isActive: boolean) => ({
   position: 'relative' as const,
   display: 'inline-block',
   py: 0.5,
   textDecoration: 'none',
-  color: isActive ? 'accent.main' : 'text.primary',
-  fontWeight: isActive ? 600 : 400,
+  color: (theme: { palette: { mode: string } }) =>
+    isActive
+      ? theme.palette.mode === 'dark'
+        ? 'accent.light'
+        : roleColors.intermediate
+      : 'text.primary',
+  fontWeight: isActive ? 700 : 500,
   whiteSpace: 'nowrap' as const,
-  fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '1rem' },
+  fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '0.95rem' },
   transition: 'color 0.2s ease',
-  '&:hover': { color: 'accent.main' },
+  cursor: 'pointer',
+  '&:hover': {
+    color: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'dark' ? 'accent.light' : roleColors.intermediate,
+  },
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -40,7 +46,8 @@ const navLinkSx = (isActive: boolean) => ({
     bottom: 0,
     width: isActive ? '100%' : 0,
     height: 2,
-    bgcolor: 'accent.main',
+    bgcolor: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'dark' ? 'accent.light' : roleColors.intermediate,
     transition: 'width 0.2s ease',
   },
   '&:hover::after': {
@@ -52,13 +59,22 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   display: 'block',
   py: 1.5,
   textDecoration: 'none',
-  color: isActive ? 'accent.main' : 'text.primary',
-  fontWeight: isActive ? 600 : 500,
-  fontSize: '1.125rem',
+  color: (theme: { palette: { mode: string } }) =>
+    isActive
+      ? theme.palette.mode === 'dark'
+        ? 'accent.light'
+        : roleColors.intermediate
+      : 'text.primary',
+  fontWeight: isActive ? 700 : 500,
+  fontSize: '1.05rem',
   borderBottom: '1px solid',
   borderColor: 'divider',
   transition: 'color 0.2s ease',
-  '&:hover': { color: 'accent.main' },
+  cursor: 'pointer',
+  '&:hover': {
+    color: (theme: { palette: { mode: string } }) =>
+      theme.palette.mode === 'dark' ? 'accent.light' : roleColors.intermediate,
+  },
 });
 
 export default function SiteHeader() {
@@ -101,6 +117,24 @@ export default function SiteHeader() {
 
   const closeMobileMenu = () => setMobileOpen(false);
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (href.startsWith('/#') || href.startsWith('#')) {
+      const id = href.replace('/#', '').replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        e.preventDefault();
+        element.scrollIntoView({ behavior: 'smooth' });
+        window.history.pushState(null, '', `#${id}`);
+        closeMobileMenu();
+      }
+    } else if (href === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.history.pushState(null, '', '/');
+      closeMobileMenu();
+    }
+  };
+
   return (
     <>
       <PageNavbar variant="landing" scrolled={scrolled}>
@@ -112,7 +146,7 @@ export default function SiteHeader() {
             gap: { xs: 1, sm: 2, md: 3 },
           }}
         >
-          <Logo size={isDesktop ? 'lg' : 'md'} />
+          <Logo size={isDesktop ? 'lg' : 'md'} variant="auto" />
 
           <Box
             component="nav"
@@ -122,7 +156,7 @@ export default function SiteHeader() {
               display: { xs: 'none', md: 'flex' },
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 4,
+              gap: { md: 2.5, lg: 4 },
               minWidth: 0,
             }}
           >
@@ -132,6 +166,7 @@ export default function SiteHeader() {
                 variant="body1"
                 component={Link}
                 href={href}
+                onClick={(e) => handleNavClick(e, href)}
                 sx={navLinkSx(activeSection === sectionId)}
               >
                 {label}
@@ -139,25 +174,87 @@ export default function SiteHeader() {
             ))}
           </Box>
 
-          <PillButton
-            href="/login"
-            size="small"
-            sx={{ flexShrink: 0, display: { xs: 'none', md: 'inline-flex' } }}
-          >
-            Entrar
-          </PillButton>
-
-          <IconButton
-            aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
-            onClick={() => setMobileOpen((open) => !open)}
+          <Box
             sx={{
-              display: { xs: 'inline-flex', md: 'none' },
               ml: 'auto',
-              color: 'text.primary',
+              display: 'flex',
+              alignItems: 'center',
+              gap: { xs: 1, sm: 1.5 },
             }}
           >
-            {mobileOpen ? <CloseIcon /> : <MenuIcon />}
-          </IconButton>
+            <ThemeToggle />
+
+            <PillButton
+              href="/login"
+              size="small"
+              tone="primaryOutline"
+              sx={{
+                flexShrink: 0,
+                minHeight: 38,
+                px: { xs: 1.5, sm: 2.25 },
+                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                fontWeight: 600,
+                borderWidth: '1.5px',
+                borderColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                    : 'transparent',
+                color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+                boxShadow: (theme) =>
+                  theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
+                '&:hover': {
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--mui-palette-action2-borderSubtle)'
+                      : 'rgba(13, 43, 92, 0.08)',
+                },
+              }}
+            >
+              Entrar
+            </PillButton>
+
+            <PillButton
+              href="/select-role"
+              size="small"
+              tone="missionFilled"
+              sx={{
+                flexShrink: 0,
+                display: { xs: 'none', sm: 'inline-flex' },
+                minHeight: 38,
+                px: { sm: 1.75, md: 2.25 },
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                color: 'common.white',
+                boxShadow: '0 2px 8px rgba(230, 81, 0, 0.35)',
+                '&:hover': {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
+                  boxShadow: '0 4px 12px rgba(230, 81, 0, 0.45)',
+                },
+              }}
+            >
+              Cadastre-se
+            </PillButton>
+
+            <IconButton
+              aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
+              onClick={() => setMobileOpen((open) => !open)}
+              sx={{
+                display: { xs: 'inline-flex', md: 'none' },
+                color: 'text.primary',
+                minWidth: 44,
+                minHeight: 44,
+              }}
+            >
+              {mobileOpen ? <CloseIcon /> : <MenuIcon />}
+            </IconButton>
+          </Box>
         </Box>
       </PageNavbar>
 
@@ -172,16 +269,18 @@ export default function SiteHeader() {
           '& .MuiDrawer-paper': {
             width: 'min(100vw, 320px)',
             px: 2.5,
-            py: 2,
-            bgcolor: 'background.default',
+            py: 2.5,
+            bgcolor: 'background.paper',
+            color: 'text.primary',
           },
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Logo size="sm" variant="auto" />
           <IconButton
             aria-label="Fechar menu"
             onClick={closeMobileMenu}
-            sx={{ color: 'text.primary' }}
+            sx={{ color: 'text.primary', minWidth: 44, minHeight: 44 }}
           >
             <CloseIcon />
           </IconButton>
@@ -193,7 +292,7 @@ export default function SiteHeader() {
               key={href}
               component={Link}
               href={href}
-              onClick={closeMobileMenu}
+              onClick={(e) => handleNavClick(e, href)}
               sx={mobileNavLinkSx(activeSection === sectionId)}
             >
               {label}
@@ -201,9 +300,38 @@ export default function SiteHeader() {
           ))}
         </Stack>
 
-        <PillButton href="/login" fullWidth sx={{ mt: 3 }} onClick={closeMobileMenu}>
-          Entrar
-        </PillButton>
+        <Stack spacing={1.5} sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <PillButton
+            href="/select-role"
+            tone="missionFilled"
+            fullWidth
+            onClick={closeMobileMenu}
+            sx={{
+              minHeight: 44,
+              fontSize: '0.95rem',
+              fontWeight: 700,
+              bgcolor: 'accent.main',
+              color: 'common.white',
+              '&:hover': { bgcolor: 'accent.dark' },
+            }}
+          >
+            Cadastre-se
+          </PillButton>
+
+          <PillButton
+            href="/login"
+            tone="primaryOutline"
+            fullWidth
+            onClick={closeMobileMenu}
+            sx={{
+              minHeight: 44,
+              fontSize: '0.95rem',
+              fontWeight: 600,
+            }}
+          >
+            Entrar
+          </PillButton>
+        </Stack>
       </Drawer>
     </>
   );

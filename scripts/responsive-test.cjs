@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer-core');
 const fs = require('fs');
 const path = require('path');
+const { spawn } = require('child_process');
 
 const VIEWPORTS = [
   { name: 'Mobile SE (320px)', width: 320, height: 650 },
@@ -35,117 +36,180 @@ const ROUTES = [
 
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-async function run() {
-  console.log(`Starting Chrome Responsive Tests against: ${BASE_URL}`);
-  console.log(`Testing ${ROUTES.length} routes across ${VIEWPORTS.length} viewports...`);
+async function isServerReady(url) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    return res.status < 500;
+  } catch {
+    return false;
+  }
+}
 
-  const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/google-chrome',
-    headless: 'new',
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-  });
-
-  const report = [];
-  let totalIssues = 0;
-
-  for (const route of ROUTES) {
-    const url = `${BASE_URL}${route}`;
-    console.log(`\nTesting Route: ${route}`);
-    const page = await browser.newPage();
-
-    // Disable transitions to stabilize layout measurements
-    await page.setViewport({ width: 375, height: 812 });
-
-    try {
-      await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 });
-    } catch (e) {
-      try {
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
-      } catch (err) {
-        console.error(`Failed to load ${url}:`, err.message);
-        report.push({ route, error: err.message });
-        await page.close();
-        continue;
-      }
-    }
-
-    for (const vp of VIEWPORTS) {
-      await page.setViewport({ width: vp.width, height: vp.height });
-      // Short delay for resize / reflow
-      await new Promise((r) => setTimeout(r, 100));
-
-      const evaluation = await page.evaluate((vpWidth) => {
-        const docWidth = document.documentElement.scrollWidth;
-        const bodyWidth = document.body ? document.body.scrollWidth : 0;
-        const maxScroll = Math.max(docWidth, bodyWidth);
-        const hasHorizontalOverflow = maxScroll > vpWidth + 1; // 1px margin of error
-
-        // Find elements that bleed beyond the viewport width
-        let overflowingElements = [];
-        if (hasHorizontalOverflow) {
-          const allEls = document.querySelectorAll('*');
-          for (const el of allEls) {
-            const rect = el.getBoundingClientRect();
-            if (rect.right > vpWidth + 2 && rect.width > 0) {
-              const tag = el.tagName.toLowerCase();
-              const cls = typeof el.className === 'string' ? el.className.slice(0, 50) : '';
-              const id = el.id ? `#${el.id}` : '';
-              overflowingElements.push({
-                selector: `${tag}${id}${cls ? '.' + cls.replace(/\s+/g, '.') : ''}`,
-                right: Math.round(rect.right),
-                width: Math.round(rect.width),
-                overflowAmount: Math.round(rect.right - vpWidth),
-              });
-              if (overflowingElements.length >= 5) break;
-            }
-          }
-        }
-
-        return {
-          scrollWidth: maxScroll,
-          viewportWidth: vpWidth,
-          hasHorizontalOverflow,
-          overflowAmount: hasHorizontalOverflow ? maxScroll - vpWidth : 0,
-          overflowingElements,
-        };
-      }, vp.width);
-
-      if (evaluation.hasHorizontalOverflow) {
-        totalIssues++;
-        console.log(
-          `  ❌ [${vp.name}] OVERFLOW: scrollWidth=${evaluation.scrollWidth}px (exceeds ${vp.width}px by +${evaluation.overflowAmount}px)`
-        );
-        if (evaluation.overflowingElements.length > 0) {
-          evaluation.overflowingElements.forEach((el) => {
-            console.log(
-              `     -> Element: ${el.selector} (right: ${el.right}px, overflow: +${el.overflowAmount}px)`
-            );
-          });
-        }
-      } else {
-        console.log(`  ✓ [${vp.name}] Clean layout (scrollWidth: ${evaluation.scrollWidth}px)`);
-      }
-
-      report.push({
-        route,
-        viewport: vp.name,
-        width: vp.width,
-        ...evaluation,
-      });
-    }
-
-    await page.close();
+async function ensureServer() {
+  if (await isServerReady(BASE_URL)) {
+    console.log(`Server is already running at ${BASE_URL}`);
+    return null;
   }
 
-  await browser.close();
+  console.log(
+    `No running server detected at ${BASE_URL}. Launching Next.js server (pnpm start)...`
+  );
+  const server = spawn('pnpm', ['start'], {
+    stdio: 'ignore',
+    shell: true,
+    detached: false,
+    env: { ...process.env, PORT: '3000' },
+  });
 
-  console.log('\n=======================================');
-  console.log(`Chrome Responsive Test Completed!`);
-  console.log(`Total tests run: ${ROUTES.length * VIEWPORTS.length}`);
-  console.log(`Total overflow issues: ${totalIssues}`);
-  console.log('=======================================');
+  const startTime = Date.now();
+  while (Date.now() - startTime < 30000) {
+    await new Promise((r) => setTimeout(r, 1000));
+    if (await isServerReady(BASE_URL)) {
+      console.log(`Next.js server is ready at ${BASE_URL}!`);
+      return server;
+    }
+  }
 
-  fs.writeFileSync(path.join(__dirname, 'responsive-report.json'), JSON.stringify(report, null, 2));
+  server.kill('SIGTERM');
+  throw new Error(`Timeout waiting for server at ${BASE_URL} to start.`);
+}
+
+async function run() {
+  const serverProcess = await ensureServer();
+  try {
+    console.log(`Starting Chrome Responsive Tests against: ${BASE_URL}`);
+    console.log(`Testing ${ROUTES.length} routes across ${VIEWPORTS.length} viewports...`);
+
+    const browser = await puppeteer.launch({
+      executablePath: '/usr/bin/google-chrome',
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+      ],
+    });
+
+    const report = [];
+    let totalIssues = 0;
+
+    for (const route of ROUTES) {
+      const url = `${BASE_URL}${route}`;
+      console.log(`\nTesting Route: ${route}`);
+      const page = await browser.newPage();
+
+      // Disable transitions to stabilize layout measurements
+      await page.setViewport({ width: 375, height: 812 });
+
+      try {
+        await page.goto(url, { waitUntil: 'networkidle0', timeout: 15000 });
+      } catch (e) {
+        try {
+          await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 10000 });
+        } catch (err) {
+          console.error(`Failed to load ${url}:`, err.message);
+          totalIssues++;
+          report.push({ route, error: err.message });
+          await page.close();
+          continue;
+        }
+      }
+
+      for (const vp of VIEWPORTS) {
+        await page.setViewport({ width: vp.width, height: vp.height });
+        // Short delay for resize / reflow
+        await new Promise((r) => setTimeout(r, 100));
+
+        const evaluation = await page.evaluate((vpWidth) => {
+          const docWidth = document.documentElement.scrollWidth;
+          const bodyWidth = document.body ? document.body.scrollWidth : 0;
+          const maxScroll = Math.max(docWidth, bodyWidth);
+          const hasHorizontalOverflow = maxScroll > vpWidth + 1; // 1px margin of error
+
+          // Find elements that bleed beyond the viewport width
+          let overflowingElements = [];
+          if (hasHorizontalOverflow) {
+            const allEls = document.querySelectorAll('*');
+            for (const el of allEls) {
+              const rect = el.getBoundingClientRect();
+              if (rect.right > vpWidth + 2 && rect.width > 0) {
+                const tag = el.tagName.toLowerCase();
+                const cls = typeof el.className === 'string' ? el.className.slice(0, 50) : '';
+                const id = el.id ? `#${el.id}` : '';
+                overflowingElements.push({
+                  selector: `${tag}${id}${cls ? '.' + cls.replace(/\s+/g, '.') : ''}`,
+                  right: Math.round(rect.right),
+                  width: Math.round(rect.width),
+                  overflowAmount: Math.round(rect.right - vpWidth),
+                });
+                if (overflowingElements.length >= 5) break;
+              }
+            }
+          }
+
+          return {
+            scrollWidth: maxScroll,
+            viewportWidth: vpWidth,
+            hasHorizontalOverflow,
+            overflowAmount: hasHorizontalOverflow ? maxScroll - vpWidth : 0,
+            overflowingElements,
+          };
+        }, vp.width);
+
+        if (evaluation.hasHorizontalOverflow) {
+          totalIssues++;
+          console.log(
+            `  ❌ [${vp.name}] OVERFLOW: scrollWidth=${evaluation.scrollWidth}px (exceeds ${vp.width}px by +${evaluation.overflowAmount}px)`
+          );
+          if (evaluation.overflowingElements.length > 0) {
+            evaluation.overflowingElements.forEach((el) => {
+              console.log(
+                `     -> Element: ${el.selector} (right: ${el.right}px, overflow: +${el.overflowAmount}px)`
+              );
+            });
+          }
+        } else {
+          console.log(`  ✓ [${vp.name}] Clean layout (scrollWidth: ${evaluation.scrollWidth}px)`);
+        }
+
+        report.push({
+          route,
+          viewport: vp.name,
+          width: vp.width,
+          ...evaluation,
+        });
+      }
+
+      await page.close();
+    }
+
+    await browser.close();
+
+    console.log('\n=======================================');
+    console.log(`Chrome Responsive Test Completed!`);
+    console.log(`Total tests run: ${ROUTES.length * VIEWPORTS.length}`);
+    console.log(`Total overflow issues: ${totalIssues}`);
+    console.log('=======================================');
+
+    fs.writeFileSync(
+      path.join(__dirname, 'responsive-report.json'),
+      JSON.stringify(report, null, 2)
+    );
+
+    if (totalIssues > 0) {
+      console.error(`\n❌ Responsive test failed: ${totalIssues} issue(s) detected.`);
+      process.exit(1);
+    }
+  } finally {
+    if (serverProcess) {
+      console.log('Shutting down Next.js production server...');
+      serverProcess.kill('SIGTERM');
+    }
+  }
 }
 
 run().catch((err) => {

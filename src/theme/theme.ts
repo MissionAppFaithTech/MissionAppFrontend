@@ -155,8 +155,8 @@ export const darkTokens: ModeTokens = {
   fieldBgDisabled: 'rgba(255, 255, 255, 0.03)',
   brandFill: '#1E477A' /* raised navy: 8.18:1 with textPrimary, 1.81:1 against the canvas */,
   brandFillText: '#E9F0FA',
-  avatarFill: '#2E5486' /* 6.71:1 with avatarText */,
-  avatarText: '#E9F0FA',
+  avatarFill: colors.surface /* white circle, per request — 14.4:1 with avatarText */,
+  avatarText: colors.primary,
 };
 
 declare module '@mui/material/styles' {
@@ -540,7 +540,9 @@ export function createAppTheme() {
             backgroundColor: 'var(--mui-palette-background-default)',
             color: 'var(--mui-palette-text-primary)',
           },
-          a: {
+          // Scoped away from ButtonBase so a PillButton rendered as a link keeps
+          // its tone instead of picking up the global link color.
+          'a:not(.MuiButtonBase-root)': {
             color: 'var(--mui-palette-connection-main)',
             '&:hover': {
               color: 'var(--mui-palette-connection-light)',
@@ -694,6 +696,8 @@ export function createAppTheme() {
         styleOverrides: {
           indicator: {
             backgroundColor: 'var(--mui-palette-accent-main)',
+            height: 3,
+            borderRadius: '3px 3px 0 0',
           },
         },
       },
@@ -854,6 +858,30 @@ export function createAppTheme() {
               borderColor: v(theme, 'palette.action2.borderSubtle'),
             }),
         },
+      },
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+          },
+        },
+        variants: [
+          {
+            props: { variant: 'filled' as const, severity: 'success' as const },
+            style: ({ theme }: { theme: Theme }) => [
+              {
+                backgroundColor: v(theme, 'palette.brandFill.main'),
+                color: v(theme, 'palette.brandFill.contrastText'),
+                '& .MuiAlert-icon': { color: v(theme, 'palette.brandFill.contrastText') },
+              },
+              theme.applyStyles('dark', {
+                border: `1px solid ${v(theme, 'palette.action2.borderSubtle')}`,
+                boxShadow: 'var(--app-shadow-overlay)',
+                '& .MuiAlert-icon': { color: v(theme, 'palette.success.main') },
+              }),
+            ],
+          },
+        ],
       },
       MuiDivider: {
         styleOverrides: {
