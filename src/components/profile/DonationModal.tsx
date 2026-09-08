@@ -245,11 +245,16 @@ CPF/CNPJ: ${bankData.documento}`;
               <Stack spacing={2} sx={{ pt: 1, alignItems: 'center' }}>
                 <Box
                   sx={{
+                    // This card is white in both themes on purpose: a QR code needs a
+                    // light quiet zone to be scannable. So its contents do NOT follow
+                    // the color scheme — in dark they were inheriting the dark theme's
+                    // ink and rendering the code in light blue at 2.46:1.
                     bgcolor: 'common.white',
+                    color: 'common.black',
                     p: 2,
                     borderRadius: 2,
                     border: '1px solid',
-                    borderColor: 'divider',
+                    borderColor: 'rgba(0, 0, 0, 0.12)',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -267,11 +272,11 @@ CPF/CNPJ: ${bankData.documento}`;
                       />
                     </Box>
                   ) : (
-                    <QrCode2Icon sx={{ fontSize: 130, color: 'primary.main' }} />
+                    <QrCode2Icon sx={{ fontSize: 130, color: 'common.black' }} />
                   )}
                   <Typography
                     variant="caption"
-                    sx={{ color: 'text.secondary', textAlign: 'center' }}
+                    sx={{ color: 'rgba(0, 0, 0, 0.66)', textAlign: 'center' }}
                   >
                     Escaneie o QR Code no app do seu banco
                   </Typography>

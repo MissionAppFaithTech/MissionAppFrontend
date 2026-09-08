@@ -97,9 +97,8 @@ const HERO_NAVBAR_OVERLAP = {
 } as const;
 
 function HeroHeadline() {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const headingPrimaryColor = isDark ? 'common.white' : 'primary.main';
+  // Scheme-driven, so the hero reads correctly on the very first paint.
+  const headingPrimaryColor = 'var(--app-hero-ink)';
 
   return (
     <Stack
@@ -280,7 +279,7 @@ function LandingHero() {
             sx={{
               position: 'absolute',
               inset: 0,
-              background: 'rgba(8, 28, 58, 0.7)',
+              background: 'rgba(0, 0, 0, 0.72)',
               pointerEvents: 'none',
             }}
           />
@@ -313,7 +312,7 @@ function LandingHero() {
               position: 'absolute',
               inset: 0,
               background:
-                'linear-gradient(90deg, rgba(8, 28, 58, 0.94) 0%, rgba(8, 28, 58, 0.8) 42%, rgba(8, 28, 58, 0.35) 68%, rgba(8, 28, 58, 0.08) 100%)',
+                'linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.82) 42%, rgba(0, 0, 0, 0.4) 68%, rgba(0, 0, 0, 0.1) 100%)',
               pointerEvents: 'none',
             }}
           />
@@ -489,7 +488,7 @@ export default function LandingPage() {
                         >
                           <Typography
                             sx={{
-                              color: 'common.white',
+                              color: 'mission.contrastText',
                               fontWeight: 800,
                               lineHeight: 1,
                               fontSize: '1.5rem',

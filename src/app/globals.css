@@ -45,6 +45,7 @@
   --app-navbar-scrim: rgba(247, 249, 252, 0.92);
   /* Resting label of a navigation tab. The selected one is the accent. */
   --app-nav-rest: #0d2b5c;
+  --app-nav-active: #2563eb;
   /* Ink for content sitting on the hero. */
   --app-hero-ink: #0d2b5c;
   --app-hero-wash: rgba(13, 43, 92, 0.08);
@@ -63,50 +64,40 @@
 }
 
 :root.dark {
-  --background: #081c3a;
-  --foreground: #e9f0fa;
+  --background: #000000;
+  --foreground: #ffffff;
 
-  /* On a dark ground a navy shadow is invisible; depth has to come from black. */
-  --app-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.4);
-  --app-shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.45);
-  --app-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
-  --app-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.55);
-  --app-shadow-overlay: 0 12px 36px rgba(0, 0, 0, 0.6);
-  --app-shadow-accent: 0 3px 12px rgba(249, 115, 22, 0.32);
-  /* A white inset reads as a hairline crack on dark surfaces. */
-  --app-card-inset: inset 0 1px 0 rgba(233, 240, 250, 0.06);
-  --app-navbar-scrim: rgba(8, 28, 58, 0.92);
-  /* Muted, so the orange selected tab is the only thing that stands out. */
-  --app-nav-rest: #a8bbd4;
-  /* On phones the hero image sits at 30% over the dark canvas, so the ink lightens. */
-  --app-hero-ink: #8fbeff;
-  --app-hero-wash: rgba(147, 197, 253, 0.14);
-  /* One step up from the canvas so the band still reads as a footer. */
-  --app-footer-bg: #0f2a4c;
-  --app-badge-bg: rgba(249, 115, 22, 0.14);
-  --app-badge-border: rgba(249, 115, 22, 0.4);
-  /* Tinted fills instead of pastels, so the label keeps AA on the dark surface. */
-  --app-chip-info-bg: rgba(143, 190, 255, 0.16);
-  --app-chip-info-fg: #b9d5ff;
-  --app-chip-warn-bg: rgba(251, 191, 36, 0.16);
+  /* Depth on black comes from elevation, so the shadows stay black and soft. */
+  --app-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --app-shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.65);
+  --app-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.7);
+  --app-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.75);
+  --app-shadow-overlay: 0 12px 36px rgba(0, 0, 0, 0.8);
+  --app-shadow-accent: 0 3px 12px rgba(249, 115, 22, 0.35);
+  /* A white inset reads as a hairline crack on a black surface. */
+  --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --app-navbar-scrim: rgba(0, 0, 0, 0.92);
+  /* White; the selected tab is told apart by the orange and the weight. */
+  --app-nav-rest: #ffffff;
+  --app-nav-active: #fb923c;
+  /* The hero photo is scrimmed to black in this theme, so its ink is light. */
+  --app-hero-ink: #ffffff;
+  --app-hero-wash: rgba(107, 166, 255, 0.16);
+  /* One neutral step above the canvas so the band still reads as a footer. */
+  --app-footer-bg: #121212;
+  --app-badge-bg: rgba(249, 115, 22, 0.16);
+  --app-badge-border: rgba(249, 115, 22, 0.45);
+  /* Tinted fills over black; the labels clear AA against the composited surface. */
+  --app-chip-info-bg: rgba(107, 166, 255, 0.18);
+  --app-chip-info-fg: #93c5fd;
+  --app-chip-warn-bg: rgba(251, 191, 36, 0.18);
   --app-chip-warn-fg: #fbbf24;
-  --app-chip-info-border: rgba(147, 197, 253, 0.35);
-  --app-chip-warn-border: rgba(251, 146, 60, 0.4);
+  --app-chip-info-border: rgba(107, 166, 255, 0.4);
+  --app-chip-warn-border: rgba(251, 146, 60, 0.45);
   /* Dark scrollbar values, moved out of the prefers-color-scheme block so the
      explicit toggle drives them like everything else. */
-  --scrollbar-thumb: #334155;
-  --scrollbar-track: #0f172a;
-}
-
-/*
- * From `md` up the hero is a full-bleed light photograph in both schemes, so its
- * content keeps light-mode ink no matter which theme is active.
- */
-@media (min-width: 900px) {
-  :root.dark {
-    --app-hero-ink: #0d2b5c;
-    --app-hero-wash: rgba(13, 43, 92, 0.08);
-  }
+  --scrollbar-thumb: #3a3a3a;
+  --scrollbar-track: #0d0d0d;
 }
 
 /* Modern standard scrollbar-color and scrollbar-width (Baseline) */

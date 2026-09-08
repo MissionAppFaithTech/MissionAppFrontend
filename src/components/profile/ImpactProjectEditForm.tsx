@@ -309,7 +309,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                           size="small"
                           sx={{
                             bgcolor: 'accent.main',
-                            color: 'common.white',
+                            color: 'mission.contrastText',
                             fontWeight: 700,
                             fontSize: '0.75rem',
                           }}

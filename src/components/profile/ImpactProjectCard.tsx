@@ -149,10 +149,12 @@ export default function ImpactProjectCard({
                 label="Campanha Ativa"
                 size="small"
                 sx={{
-                  // Opaque: at 90% over a photo the composite fell to 3.37:1 with
-                  // white text. The solid brand orange holds 5.18:1 whatever is behind.
+                  // Opaque: at 90% over a photo the composite fell to 3.37:1.
+                  // A solid fill holds its ratio whatever the photo is behind it.
                   bgcolor: 'mission.main',
-                  color: 'common.white',
+                  // The token, not hardcoded white: the fill is deep orange in light
+                  // and vivid orange in dark, and each carries its own ink.
+                  color: 'mission.contrastText',
                   fontWeight: 700,
                   fontSize: { xs: '0.7rem', sm: '0.75rem' },
                   backdropFilter: 'blur(4px)',

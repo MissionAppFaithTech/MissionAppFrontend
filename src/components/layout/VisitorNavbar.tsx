@@ -33,7 +33,10 @@ export default function VisitorNavbar({ maxWidth = 'lg' }: VisitorNavbarProps) {
             color: 'common.white',
             '&:hover': {
               bgcolor: 'common.white',
-              color: 'primary.main',
+              // On a white fill the ink must stay dark in both themes. `primary.main`
+              // is a light blue in dark (2.46:1) and `primary.dark` is barely better
+              // (3.27:1), so this pins to black.
+              color: 'common.black',
               borderColor: 'common.white',
             },
           }}

@@ -127,35 +127,45 @@ export const lightTokens: ModeTokens = {
 };
 
 export const darkTokens: ModeTokens = {
-  canvas: colors.textPrimary /* #081C3A — unchanged, it is the brand ground */,
-  surface1: '#0F2A4C' /* white 14.2:1 */,
-  surface2: '#16375E' /* white 12.3:1 */,
-  borderSubtle: 'rgba(147, 197, 253, 0.18)',
-  borderStrong: '#6B8CB5' /* 3.48:1 on the field fill, 4.15:1 on surface1 — SC 1.4.11 */,
-  textPrimary: '#E9F0FA' /* 14.8:1 on canvas */,
-  textSecondary: '#A8BBD4' /* 8.67:1 on canvas, 7.37:1 on surface1 */,
-  textDisabled: 'rgba(233, 240, 250, 0.38)',
-  actionFill: roleColors.mission /* #C2410C — white text 5.18:1 */,
-  actionFillHover: '#C64510' /* white text 4.93:1, paired with an accent halo */,
-  actionFillActive: '#A8380A',
-  actionFillText: colors.surface,
-  accent: '#F97316' /* 6.05:1 on canvas, 5.15:1 on surface1 */,
+  /**
+   * A true black ground. The brand navy belongs to the light theme; here the page
+   * is neutral and the only chromatic elements are the two brand accents, which
+   * read stronger on black than they ever did on navy (orange 7.49:1 vs 6.05:1).
+   */
+  canvas: '#000000',
+  surface1: '#121212' /* cards — 17.18:1 with textPrimary */,
+  surface2: '#1C1C1C' /* dialogs, menus, inputs, hover */,
+  borderSubtle: 'rgba(255, 255, 255, 0.12)' /* hairline between surfaces */,
+  borderStrong: 'rgba(255, 255, 255, 0.42)' /* 4.12:1 on surface1 — SC 1.4.11 */,
+  textPrimary: '#FFFFFF' /* 21:1 on canvas */,
+  /* White too: on black the hierarchy is carried by size and weight, not by
+     dimming the text. Only the disabled state stays muted, so it still reads
+     as unavailable. */
+  textSecondary: '#FFFFFF' /* 21:1 on canvas */,
+  textDisabled: 'rgba(245, 245, 245, 0.38)',
+  /** Black ink on vivid orange — 7.06:1, which the navy ground never allowed. */
+  actionFill: '#F97316',
+  actionFillHover: '#FB923C' /* 8.75:1 with the same ink */,
+  actionFillActive: '#EA580C' /* 5.56:1 */,
+  actionFillText: '#0A0A0A',
+  accent: '#F97316' /* 7.49:1 on canvas, 5.54:1 on the raised surface */,
   accentSoft: '#FB923C',
-  accentWash: 'rgba(249, 115, 22, 0.25)',
-  link: '#8FBEFF' /* 8.87:1 on canvas, 6.30:1 on surface2 */,
-  linkHover: '#B9D5FF',
-  secondaryHoverWash: 'rgba(143, 190, 255, 0.12)',
+  accentWash: 'rgba(249, 115, 22, 0.28)',
+  link: roleColors.supporter /* #6BA6FF — 8.52:1 on canvas */,
+  linkHover: shades.supporterLight /* #93C5FD — 11.65:1 */,
+  secondaryHoverWash: 'rgba(107, 166, 255, 0.14)',
   focusRing: '#F97316',
-  disabledFill: 'rgba(233, 240, 250, 0.08)',
-  disabledText: 'rgba(233, 240, 250, 0.38)',
-  disabledBorder: 'rgba(233, 240, 250, 0.16)',
-  danger: '#F87171' /* 6.13:1 on canvas, 5.21:1 on surface1 */,
+  disabledFill: 'rgba(255, 255, 255, 0.08)',
+  disabledText: 'rgba(245, 245, 245, 0.38)',
+  disabledBorder: 'rgba(255, 255, 255, 0.16)',
+  danger: '#F87171' /* 7.59:1 on canvas */,
   dangerFill: colors.error /* #DC2626 — white text 4.83:1 */,
   fieldBg: 'rgba(255, 255, 255, 0.06)',
   fieldBgDisabled: 'rgba(255, 255, 255, 0.03)',
-  brandFill: '#1E477A' /* raised navy: 8.18:1 with textPrimary, 1.81:1 against the canvas */,
-  brandFillText: '#E9F0FA',
-  avatarFill: colors.surface /* white circle, per request — 14.4:1 with avatarText */,
+  /** Toasts and badges sit a neutral step above the card, so color stays reserved. */
+  brandFill: '#242424',
+  brandFillText: '#FFFFFF',
+  avatarFill: colors.surface /* white circle with a navy figure — 13.84:1 */,
   avatarText: colors.primary,
 };
 
@@ -319,7 +329,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: roleColors.supporter,
           light: shades.supporterLight,
           dark: shades.supporterDark,
-          contrastText: colors.textPrimary,
+          contrastText: t.actionFillText,
         },
     secondary: isLight
       ? {
@@ -345,7 +355,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: t.link,
           light: t.linkHover,
           dark: roleColors.supporter,
-          contrastText: colors.textPrimary,
+          contrastText: t.actionFillText,
         },
     supporter: isLight
       ? {
@@ -358,7 +368,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: roleColors.supporter,
           light: shades.supporterLight,
           dark: shades.supporterDark,
-          contrastText: colors.textPrimary,
+          contrastText: t.actionFillText,
         },
     mission: isLight
       ? {
@@ -389,8 +399,8 @@ function buildPalette(mode: 'light' | 'dark') {
      * Orange as a *mark*: eyebrows, icons, indicators, badges.
      *
      * Light mirrors `mission` exactly so swapping a component from `mission.*` to
-     * `accent.*` cannot shift the light theme. Dark runs the bright end of the
-     * family, because the fill orange only reaches 3.27:1 as text on the canvas.
+     * `accent.*` cannot shift the light theme. On black the whole orange family
+     * clears AA, so dark simply runs its brighter end.
      */
     accent: isLight
       ? {
@@ -403,7 +413,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: t.accent,
           light: t.accentSoft,
           dark: t.accentSoft,
-          contrastText: colors.textPrimary,
+          contrastText: t.actionFillText,
         },
     surface: isLight
       ? {
@@ -430,7 +440,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: '#22C55E',
           light: '#4ADE80',
           dark: colors.success,
-          contrastText: colors.textPrimary,
+          contrastText: t.actionFillText,
         },
     warning: isLight
       ? { main: colors.warning, contrastText: colors.surface }
@@ -438,14 +448,14 @@ function buildPalette(mode: 'light' | 'dark') {
           main: '#FBBF24',
           light: '#FCD34D',
           dark: colors.warning,
-          contrastText: colors.textPrimary,
+          contrastText: t.actionFillText,
         },
     error: isLight
       ? { main: colors.error, contrastText: colors.surface }
-      : { main: t.danger, light: '#FCA5A5', dark: t.dangerFill, contrastText: colors.textPrimary },
+      : { main: t.danger, light: '#FCA5A5', dark: t.dangerFill, contrastText: t.actionFillText },
     info: isLight
       ? { main: roleColors.intermediate, contrastText: colors.surface }
-      : { main: t.link, contrastText: colors.textPrimary },
+      : { main: t.link, contrastText: t.actionFillText },
     background: {
       default: t.canvas,
       paper: t.surface1,
@@ -540,9 +550,11 @@ export function createAppTheme() {
             backgroundColor: 'var(--mui-palette-background-default)',
             color: 'var(--mui-palette-text-primary)',
           },
-          // Scoped away from ButtonBase so a PillButton rendered as a link keeps
-          // its tone instead of picking up the global link color.
-          'a:not(.MuiButtonBase-root)': {
+          // Scoped away from ButtonBase so a PillButton rendered as a link keeps its
+          // tone. `:where()` keeps the selector at specificity (0,0,1) — with a bare
+          // `:not()` it was (0,1,1) and outranked every `sx` color on a plain <a>,
+          // which silently painted links like the bottom nav blue.
+          'a:where(:not(.MuiButtonBase-root))': {
             color: 'var(--mui-palette-connection-main)',
             '&:hover': {
               color: 'var(--mui-palette-connection-light)',
@@ -802,8 +814,11 @@ export function createAppTheme() {
           input: ({ theme }) =>
             theme.applyStyles('dark', {
               color: v(theme, 'palette.text.primary'),
+              // The one text that stays dimmed. Body copy is white, but a
+              // placeholder has to read as "not filled in yet" — at the same white
+              // as a typed value it looks like the field already has content.
               '&::placeholder': {
-                color: v(theme, 'palette.text.secondary'),
+                color: 'rgba(255, 255, 255, 0.55)',
                 opacity: 1,
               },
             }),

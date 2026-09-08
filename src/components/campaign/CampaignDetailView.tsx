@@ -372,7 +372,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                             theme.palette.mode === 'dark'
                                               ? 'accent.main'
                                               : 'mission.main',
-                                          color: 'common.white',
+                                          color: 'mission.contrastText',
                                           '&:hover': {
                                             bgcolor: (theme) =>
                                               theme.palette.mode === 'dark'
@@ -573,7 +573,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           fontWeight: 700,
                           bgcolor: (theme) =>
                             theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                          color: 'common.white',
+                          color: 'mission.contrastText',
                           '&:hover': {
                             bgcolor: (theme) =>
                               theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',

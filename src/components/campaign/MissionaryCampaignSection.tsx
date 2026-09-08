@@ -252,7 +252,7 @@ export default function MissionaryCampaignSection({
                   fontWeight: 700,
                   bgcolor: (theme) =>
                     theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                  color: 'common.white',
+                  color: 'mission.contrastText',
                   '&:hover': {
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',

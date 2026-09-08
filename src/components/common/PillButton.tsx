@@ -95,27 +95,28 @@ const darkPrimaryFill: ToneEntry = (theme) =>
   });
 
 /**
- * The navy CTA, kept navy in dark.
+ * The second CTA tier, in light blue.
  *
- * Collapsing the navy and orange tones onto one orange fill measured at 5.4% of the
- * viewport on post-heavy pages (vs 0.6% in light) and put two competing orange
- * primaries in a single view. Raising the navy instead preserves the two-tier CTA
- * language the app already has, and keeps orange scarce enough to still mean something.
+ * In the light theme this tone is the navy CTA. The black theme has no navy, so it
+ * takes the palette's light blue instead — which keeps the two-tier CTA language
+ * the app already had, gives "navigation" actions like Continuar and the role
+ * choice a fill of their own, and leaves orange scarce enough to still mean
+ * "the primary action". Black ink on the blue reads at 8.52:1.
  */
 const darkBrandFill: ToneEntry = (theme) =>
   theme.applyStyles('dark', {
-    backgroundColor: v(theme, 'palette.brandFill.main'),
-    borderColor: v(theme, 'palette.action2.borderStrong'),
-    color: v(theme, 'palette.brandFill.contrastText'),
-    '--pill-fg': v(theme, 'palette.brandFill.contrastText'),
+    backgroundColor: v(theme, 'palette.primary.main'),
+    borderColor: v(theme, 'palette.primary.main'),
+    color: v(theme, 'palette.primary.contrastText'),
+    '--pill-fg': v(theme, 'palette.primary.contrastText'),
     '&:hover': {
-      backgroundColor: v(theme, 'palette.brandFill.light'),
-      borderColor: v(theme, 'palette.connection.main'),
-      color: v(theme, 'palette.brandFill.contrastText'),
-      boxShadow: 'none',
+      backgroundColor: v(theme, 'palette.primary.light'),
+      borderColor: v(theme, 'palette.primary.light'),
+      color: v(theme, 'palette.primary.contrastText'),
+      boxShadow: `0 0 0 3px ${v(theme, 'palette.action2.secondaryHoverWash')}`,
     },
     '&:active': {
-      backgroundColor: v(theme, 'palette.brandFill.dark'),
+      backgroundColor: v(theme, 'palette.primary.dark'),
     },
   });
 
@@ -323,7 +324,7 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
       ...figmaActionBase,
       border: 'none',
       bgcolor: 'accent.main',
-      color: 'common.white',
+      color: 'mission.contrastText',
       '--pill-fg': 'var(--mui-palette-common-white)',
       '&:hover': {
         bgcolor: 'accent.dark',

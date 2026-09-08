@@ -520,7 +520,8 @@ export default function FinancialSettingsForm({
                               borderRadius: 2,
                               overflow: 'hidden',
                               border: '1px solid',
-                              borderColor: 'divider',
+                              // White in both themes so the code stays scannable.
+                              borderColor: 'rgba(0, 0, 0, 0.12)',
                               bgcolor: 'common.white',
                             }}
                           >
