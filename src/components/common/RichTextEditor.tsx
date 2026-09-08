@@ -80,11 +80,25 @@ export default function RichTextEditor({
   const [history, setHistory] = useState<string[]>([currentValue]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const prevValueRef = useRef<string>(currentValue);
+  /**
+   * Whether the newest history entry is still open to absorb more typing.
+   *
+   * Undo works per word, not per keystroke: consecutive characters keep rewriting
+   * the same entry, and the entry is sealed once the word is closed with
+   * whitespace. So one undo takes back "world", not "d".
+   */
+  const isEntryOpenRef = useRef(false);
+
+  const sealHistoryEntry = () => {
+    isEntryOpenRef.current = false;
+  };
 
   // Sync external controlled value changes safely without re-render loop
   useEffect(() => {
     if (isControlled && value !== undefined && value !== prevValueRef.current) {
       prevValueRef.current = value;
+      // An external change is its own step; never fold it into the open entry.
+      sealHistoryEntry();
       setHistory((prev) => {
         if (prev[prev.length - 1] === value) return prev;
         return [...prev, value];
@@ -119,8 +133,31 @@ export default function RichTextEditor({
     }
     onChange?.(newValue);
 
-    setHistory((prev) => [...prev.slice(0, historyIndex + 1), newValue]);
-    setHistoryIndex((prev) => prev + 1);
+    const previousValue = currentValue;
+    const isSingleInsert =
+      newValue.length === previousValue.length + 1 && newValue.startsWith(previousValue);
+    const isSingleDelete =
+      newValue.length === previousValue.length - 1 && previousValue.startsWith(newValue);
+    const editedChar = isSingleInsert
+      ? newValue.slice(-1)
+      : isSingleDelete
+        ? previousValue.slice(-1)
+        : null;
+    // Anything that is not a single character at the end — a paste, or an edit in
+    // the middle of the text — is a step of its own.
+    const isTyping = editedChar !== null;
+    const closesWord = isTyping && /\s/.test(editedChar);
+
+    if (isEntryOpenRef.current && isTyping) {
+      // Keep rewriting the entry this word is being typed into.
+      setHistory((prev) => [...prev.slice(0, historyIndex), newValue]);
+    } else {
+      setHistory((prev) => [...prev.slice(0, historyIndex + 1), newValue]);
+      setHistoryIndex((prev) => prev + 1);
+    }
+    // Whitespace is absorbed by the word it closes, so the next character opens a
+    // fresh entry and undo lands on a word boundary.
+    isEntryOpenRef.current = isTyping && !closesWord;
 
     // Autosave draft to localStorage
     if (draftKey && typeof window !== 'undefined') {
@@ -137,6 +174,8 @@ export default function RichTextEditor({
 
   const handleUndo = () => {
     if (!canUndo) return;
+    // Typing after an undo starts a new word rather than reopening the old one.
+    sealHistoryEntry();
     const nextIndex = historyIndex - 1;
     const targetValue = history[nextIndex] ?? '';
     setHistoryIndex(nextIndex);
@@ -149,6 +188,8 @@ export default function RichTextEditor({
 
   const handleRedo = () => {
     if (!canRedo) return;
+    // Typing after an undo starts a new word rather than reopening the old one.
+    sealHistoryEntry();
     const nextIndex = historyIndex + 1;
     const targetValue = history[nextIndex] ?? '';
     setHistoryIndex(nextIndex);
@@ -177,6 +218,7 @@ export default function RichTextEditor({
   // Restore draft handler
   const handleRestoreDraft = useCallback(() => {
     if (savedDraftContent) {
+      sealHistoryEntry();
       prevValueRef.current = savedDraftContent;
       if (!isControlled) {
         setInternalValue(savedDraftContent);
