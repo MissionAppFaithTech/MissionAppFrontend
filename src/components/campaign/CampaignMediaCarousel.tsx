@@ -71,7 +71,7 @@ export default function CampaignMediaCarousel({
           borderRadius: 2.5,
           overflow: 'hidden',
           bgcolor: 'surface.main',
-          boxShadow: '0 4px 14px rgba(13, 43, 92, 0.12)',
+          boxShadow: 'var(--app-shadow-lg)',
         }}
       >
         {/* Active Image */}

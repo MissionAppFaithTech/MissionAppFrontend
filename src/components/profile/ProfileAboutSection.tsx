@@ -40,7 +40,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
+        boxShadow: 'var(--app-shadow-md)',
       }}
     >
       <CardContent
@@ -68,19 +68,19 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
                 py: { xs: 0, sm: 0.5 },
                 gap: 0.5,
                 // Mobile: só o lápis, sem caixa/borda. sm+: outline + label.
+                // Colors come from the tone so they follow the color scheme; this only
+                // carries the responsive structure.
                 '&&': {
                   border: { xs: 'none', sm: '1.5px solid' },
-                  borderColor: { xs: 'transparent', sm: 'primary.main' },
-                  bgcolor: { xs: 'transparent', sm: 'common.white' },
                   boxShadow: 'none',
                 },
-                '&:hover': {
-                  bgcolor: { xs: 'transparent', sm: 'rgba(13, 43, 92, 0.04)' },
-                  borderColor: { xs: 'transparent', sm: 'primary.main' },
+                '@media (max-width:599.95px)': {
+                  '&&': { bgcolor: 'transparent', borderColor: 'transparent' },
+                  '&&:hover': { bgcolor: 'transparent', borderColor: 'transparent' },
                 },
               }}
             >
-              <EditOutlinedIcon sx={{ fontSize: { xs: 20, sm: 16 }, color: 'primary.main' }} />
+              <EditOutlinedIcon sx={{ fontSize: { xs: 20, sm: 16 }, color: 'inherit' }} />
               <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                 Editar
               </Box>

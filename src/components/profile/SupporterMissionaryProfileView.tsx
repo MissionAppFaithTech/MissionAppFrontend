@@ -68,7 +68,7 @@ function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        boxShadow: 'var(--app-shadow-sm)',
         bgcolor: 'background.paper',
       }}
     >
@@ -232,7 +232,7 @@ export default function SupporterMissionaryProfileView({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           overflow: 'hidden',
           bgcolor: 'background.paper',
         }}
@@ -247,20 +247,20 @@ export default function SupporterMissionaryProfileView({
             minHeight: { xs: 48, sm: 52 },
             '& .MuiTabs-indicator': {
               height: 3,
-              bgcolor: 'mission.main',
+              bgcolor: 'accent.main',
             },
             '& .MuiTab-root': {
               minHeight: { xs: 48, sm: 52 },
               minWidth: { xs: 'max-content', md: 0 },
               px: { xs: 2.5, sm: 3.5 },
-              color: 'primary.main',
+              color: 'var(--app-nav-rest)',
               fontSize: { xs: '0.8125rem', sm: '0.875rem' },
               fontWeight: 700,
               flex: { md: 1 },
               maxWidth: 'none',
             },
             '& .Mui-selected': {
-              color: 'mission.main',
+              color: 'accent.main',
             },
           }}
         >
@@ -331,7 +331,7 @@ export default function SupporterMissionaryProfileView({
                     borderRadius: { xs: 2, sm: 3 },
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+                    boxShadow: 'var(--app-shadow-sm)',
                     bgcolor: 'background.paper',
                   }}
                 >
@@ -357,8 +357,8 @@ export default function SupporterMissionaryProfileView({
                             sx={{
                               width: { xs: 44, sm: 48 },
                               height: { xs: 44, sm: 48 },
-                              bgcolor: 'supporter.light',
-                              color: 'common.black',
+                              bgcolor: 'avatar.main',
+                              color: 'avatar.contrastText',
                               border: '1.5px solid',
                               borderColor: 'divider',
                               flexShrink: 0,
@@ -396,11 +396,14 @@ export default function SupporterMissionaryProfileView({
                           sx={{
                             bgcolor:
                               post.type === 'prayer'
-                                ? 'rgba(234, 241, 250, 0.85)'
+                                ? 'var(--app-chip-info-bg)'
                                 : post.type === 'campaign'
-                                  ? 'rgba(254, 243, 199, 0.9)'
-                                  : 'rgba(234, 241, 250, 0.85)',
-                            color: post.type === 'campaign' ? 'warning.dark' : 'primary.main',
+                                  ? 'var(--app-chip-warn-bg)'
+                                  : 'var(--app-chip-info-bg)',
+                            color:
+                              post.type === 'campaign'
+                                ? 'var(--app-chip-warn-fg)'
+                                : 'var(--app-chip-info-fg)',
                             fontWeight: 700,
                             fontSize: '0.7rem',
                             letterSpacing: '0.05em',
@@ -555,13 +558,13 @@ export default function SupporterMissionaryProfileView({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

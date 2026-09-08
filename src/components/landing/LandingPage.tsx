@@ -123,26 +123,26 @@ function HeroHeadline() {
           },
         }}
       >
-        <Box component="span" sx={{ display: 'block', color: 'primary.main' }}>
+        <Box component="span" sx={{ display: 'block', color: 'var(--app-hero-ink)' }}>
           Conectando
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'mission.main' }}>
+          <Box component="span" sx={{ color: 'accent.main' }}>
             missionários
           </Box>
-          <Box component="span" sx={{ color: 'primary.main' }}>
+          <Box component="span" sx={{ color: 'var(--app-hero-ink)' }}>
             {' '}
             e
           </Box>
         </Box>
-        <Box component="span" sx={{ display: 'block', color: 'primary.main' }}>
+        <Box component="span" sx={{ display: 'block', color: 'var(--app-hero-ink)' }}>
           apoiadores ao
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'primary.main' }}>
+          <Box component="span" sx={{ color: 'var(--app-hero-ink)' }}>
             redor do{' '}
           </Box>
-          <Box component="span" sx={{ color: 'mission.main' }}>
+          <Box component="span" sx={{ color: 'accent.main' }}>
             mundo
           </Box>
         </Box>
@@ -161,7 +161,7 @@ function HeroHeadline() {
             width: { xs: 'clamp(2.5rem, 4vw, 4rem)', md: 'clamp(2rem, 2vw, 3rem)' },
             height: { xs: 'clamp(3px, 0.3vw, 4px)', md: 'clamp(2px, 0.25vw, 3px)' },
             borderRadius: 1,
-            bgcolor: 'mission.main',
+            bgcolor: 'accent.main',
           }}
         />
 
@@ -176,7 +176,24 @@ function HeroHeadline() {
           <PillButton href="/select-role" tone="missionFlat" sx={heroCtaButtonSx}>
             Comece agora
           </PillButton>
-          <PillButton href="#como-funciona" tone="primaryOutline" sx={heroCtaButtonSx}>
+          <PillButton
+            href="#como-funciona"
+            tone="primaryOutline"
+            sx={{
+              ...heroCtaButtonSx,
+              // Pinned to the hero ink so it stays legible on the light photograph.
+              '&&': {
+                borderColor: 'var(--app-hero-ink)',
+                color: 'var(--app-hero-ink)',
+                backgroundColor: 'transparent',
+              },
+              '&&:hover': {
+                borderColor: 'var(--app-hero-ink)',
+                color: 'var(--app-hero-ink)',
+                backgroundColor: 'var(--app-hero-wash)',
+              },
+            }}
+          >
             Saiba mais
           </PillButton>
         </Stack>
@@ -342,15 +359,15 @@ export default function LandingPage() {
                         textAlign: 'center',
                         border: 'none',
                         boxShadow: `
-                        0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                        0 14px 28px rgba(13, 43, 92, 0.1)
+                        var(--app-card-inset),
+                        var(--app-shadow-lg)
                       `,
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                         '&:hover': {
                           transform: 'translateY(-3px)',
                           boxShadow: `
-                          0 1px 0 rgba(255, 255, 255, 0.95) inset,
-                          0 18px 32px rgba(13, 43, 92, 0.12)
+                          var(--app-card-inset),
+                          var(--app-shadow-overlay)
                         `,
                         },
                       }}
@@ -388,7 +405,7 @@ export default function LandingPage() {
                         >
                           <Typography
                             sx={{
-                              color: 'mission.dark',
+                              color: 'accent.dark',
                               fontWeight: 800,
                               lineHeight: 1,
                               fontSize: '1.5rem',
@@ -584,8 +601,8 @@ export default function LandingPage() {
         aria-label="Rodapé do site"
         sx={{
           py: { xs: 3, md: 4 },
-          bgcolor: 'primary.dark',
-          color: 'white',
+          bgcolor: 'var(--app-footer-bg)',
+          color: 'common.white',
         }}
       >
         <Container maxWidth={false} sx={landingContainerSx}>

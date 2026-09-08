@@ -32,7 +32,7 @@ export default function SectionHeader({
       <Typography
         variant="overline"
         sx={{
-          color: 'mission.main',
+          color: 'accent.main',
           fontWeight: 700,
           letterSpacing: '0.12em',
           textTransform: 'uppercase',

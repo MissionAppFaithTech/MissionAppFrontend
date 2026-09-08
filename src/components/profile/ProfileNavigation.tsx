@@ -63,7 +63,7 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        boxShadow: 'var(--app-shadow-sm)',
         overflow: 'hidden',
       }}
     >
@@ -76,20 +76,20 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
           minHeight: { xs: 48, sm: 52 },
           '& .MuiTabs-indicator': {
             height: 3,
-            bgcolor: 'mission.main',
+            bgcolor: 'accent.main',
           },
           '& .MuiTab-root': {
             minHeight: { xs: 48, sm: 52 },
             minWidth: isSupporterRoute ? 0 : { xs: 'max-content', md: 0 },
             px: { xs: 2, sm: 3 },
-            color: 'primary.main',
+            color: 'var(--app-nav-rest)',
             fontSize: { xs: '0.8125rem', sm: '0.875rem' },
             fontWeight: 700,
             flex: isSupporterRoute ? 1 : { md: 1 },
             maxWidth: 'none',
           },
           '& .Mui-selected': {
-            color: 'mission.main',
+            color: 'accent.main',
           },
         }}
       >

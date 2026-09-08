@@ -29,7 +29,7 @@ export default function GuestCtaBanner({
         border: '1px solid',
         borderColor: 'divider',
         bgcolor: 'background.paper',
-        boxShadow: '0 2px 8px rgba(13, 43, 92, 0.08)',
+        boxShadow: 'var(--app-shadow-xs)',
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
@@ -39,7 +39,7 @@ export default function GuestCtaBanner({
           left: 0,
           right: 0,
           height: 3,
-          bgcolor: 'mission.main',
+          bgcolor: 'accent.main',
         },
       }}
     >
@@ -59,7 +59,7 @@ export default function GuestCtaBanner({
                 height: 44,
                 borderRadius: '50%',
                 bgcolor: 'rgba(249, 115, 22, 0.12)',
-                color: 'mission.main',
+                color: 'accent.main',
                 display: 'grid',
                 placeItems: 'center',
                 flexShrink: 0,

@@ -18,14 +18,14 @@ export default function CampaignBadge({
 
   return (
     <Chip
-      icon={<VerifiedIcon sx={{ fontSize: isSmall ? 16 : 18, color: 'mission.main !important' }} />}
+      icon={<VerifiedIcon sx={{ fontSize: isSmall ? 16 : 18, color: 'accent.main !important' }} />}
       label={label}
       size={size}
       sx={{
-        bgcolor: 'rgba(230, 81, 0, 0.08)',
-        color: 'mission.dark',
+        bgcolor: 'var(--app-badge-bg)',
+        color: 'accent.dark',
         border: '1px solid',
-        borderColor: 'rgba(230, 81, 0, 0.28)',
+        borderColor: 'var(--app-badge-border)',
         fontWeight: 700,
         fontSize: isSmall ? '0.75rem' : '0.8125rem',
         letterSpacing: '0.02em',

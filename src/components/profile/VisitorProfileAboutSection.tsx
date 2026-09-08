@@ -37,7 +37,7 @@ export default function VisitorProfileAboutSection({ data }: VisitorProfileAbout
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        boxShadow: 'var(--app-shadow-sm)',
       }}
     >
       <CardContent

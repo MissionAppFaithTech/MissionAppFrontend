@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
 import { validateStrongPassword } from '@/lib/passwordStrength';
@@ -199,9 +200,11 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         variant="contained"
         color="primary"
         fullWidth
-        disabled={!canSubmit || isSubmitting}
+        loading={isSubmitting}
+        loadingIndicator={<CircularProgress size={18} aria-label="Salvando" />}
+        disabled={!canSubmit}
       >
-        {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
+        Salvar nova senha
       </Button>
 
       <Button component={Link} href="/login" variant="text" fullWidth>

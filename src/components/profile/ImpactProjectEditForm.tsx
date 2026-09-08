@@ -91,7 +91,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
+          boxShadow: 'var(--app-shadow-md)',
           bgcolor: 'background.paper',
         }}
       >
@@ -282,7 +282,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                           label="Campanha Ativa"
                           size="small"
                           sx={{
-                            bgcolor: 'mission.main',
+                            bgcolor: 'accent.main',
                             color: 'common.white',
                             fontWeight: 700,
                             fontSize: '0.75rem',
@@ -341,7 +341,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
               {/* 4. Vídeo do YouTube (Opcional - Suporta URL) */}
               <Stack spacing={2}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'mission.main' }} />
+                  <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'accent.main' }} />
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
                     Vídeo de Apresentação (YouTube)
                   </Typography>
@@ -454,7 +454,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                             bgcolor: 'rgba(0, 0, 0, 0.7)',
                             color: 'common.white',
                             p: 0.5,
-                            '&:hover': { bgcolor: 'error.main' },
+                            '&:hover': { bgcolor: 'error.dark' },
                           }}
                         >
                           <DeleteOutlinedIcon sx={{ fontSize: 16 }} />
@@ -546,13 +546,13 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

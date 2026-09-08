@@ -60,11 +60,13 @@ export default function VisitorBottomNav() {
               minHeight: 48,
               gap: 0.25,
               textDecoration: 'none',
-              color: isActive ? 'primary.main' : 'text.secondary',
+              // Orange marks where you are; the resting label uses the
+              // corrected secondary text token (the old one sat at 4.23:1).
+              color: isActive ? 'accent.main' : 'text.secondary',
               transition: 'color 0.15s ease',
               py: 0.5,
               '&:hover': {
-                color: 'primary.main',
+                color: 'accent.main',
               },
             }}
           >

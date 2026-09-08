@@ -155,7 +155,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                   borderRadius: { xs: 2, sm: 3 },
                   border: '1px solid',
                   borderColor: 'divider',
-                  boxShadow: '0 4px 14px rgba(13, 43, 92, 0.1)',
+                  boxShadow: 'var(--app-shadow-lg)',
                   p: { xs: 2.5, sm: 3.5 },
                   bgcolor: 'background.paper',
                 }}
@@ -234,7 +234,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                     borderRadius: { xs: 2, sm: 3 },
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 4px 14px rgba(13, 43, 92, 0.1)',
+                    boxShadow: 'var(--app-shadow-lg)',
                     p: { xs: 2.5, sm: 3.5 },
                     bgcolor: 'background.paper',
                   }}
@@ -276,7 +276,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
                                   borderColor: 'primary.main',
-                                  boxShadow: '0 4px 12px rgba(13, 43, 92, 0.08)',
+                                  boxShadow: 'var(--app-shadow-lg)',
                                 },
                               }}
                             >
@@ -363,9 +363,6 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                           minHeight: 44,
                                           py: 0.5,
                                           px: 2,
-                                          bgcolor: 'mission.main',
-                                          color: 'common.white',
-                                          '&:hover': { bgcolor: 'mission.dark' },
                                           justifyContent: 'center',
                                         }}
                                       >
@@ -418,7 +415,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                   borderRadius: { xs: 2, sm: 3 },
                   border: '1px solid',
                   borderColor: 'divider',
-                  boxShadow: '0 4px 14px rgba(13, 43, 92, 0.1)',
+                  boxShadow: 'var(--app-shadow-lg)',
                   p: { xs: 2.5, sm: 3 },
                   bgcolor: 'background.paper',
                 }}
@@ -433,7 +430,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           height: 48,
                           borderRadius: '12px',
                           bgcolor: 'rgba(194, 65, 12, 0.08)',
-                          color: 'mission.main',
+                          color: 'accent.main',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -442,7 +439,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           borderColor: 'divider',
                         }}
                       >
-                        <CampaignIcon sx={{ fontSize: 26, color: 'mission.main' }} />
+                        <CampaignIcon sx={{ fontSize: 26, color: 'accent.main' }} />
                       </Box>
                       <Box sx={{ minWidth: 0, flex: 1 }}>
                         <Stack
@@ -487,9 +484,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
 
                       {campaign.churchDay && (
                         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-                          <CalendarMonthIcon
-                            sx={{ color: 'mission.main', fontSize: 20, mt: 0.2 }}
-                          />
+                          <CalendarMonthIcon sx={{ color: 'accent.main', fontSize: 20, mt: 0.2 }} />
                           <div>
                             <Typography variant="caption" color="text.secondary">
                               Dia nas Igrejas
@@ -535,10 +530,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           minHeight: 48,
                           fontSize: '1rem',
                           fontWeight: 700,
-                          bgcolor: 'mission.main',
-                          color: 'common.white',
-                          '&:hover': { bgcolor: 'mission.dark' },
-                          boxShadow: '0 3px 12px rgba(230, 81, 0, 0.3)',
+                          boxShadow: 'var(--app-shadow-accent)',
                         }}
                       >
                         <VolunteerActivismIcon sx={{ fontSize: 22, mr: 1 }} />
@@ -619,13 +611,13 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

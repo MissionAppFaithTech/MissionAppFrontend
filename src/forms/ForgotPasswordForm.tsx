@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Alert, Button, Stack, TextField, Typography } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import Link from 'next/link';
 import { isValidEmail, normalizeEmail } from '@/lib/masks';
 import { requestPasswordReset, RESET_PASSWORD_TOKEN_TTL_MINUTES } from '@/services/auth.service';
@@ -161,9 +162,11 @@ export default function ForgotPasswordForm() {
         variant="contained"
         color="primary"
         fullWidth
-        disabled={!isValid || isSubmitting}
+        loading={isSubmitting}
+        loadingIndicator={<CircularProgress size={18} aria-label="Verificando" />}
+        disabled={!isValid}
       >
-        {isSubmitting ? 'Verificando…' : 'Enviar link'}
+        Enviar link
       </Button>
 
       <Button component={Link} href="/login" variant="text" fullWidth>

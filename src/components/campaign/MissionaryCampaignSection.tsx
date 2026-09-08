@@ -45,7 +45,7 @@ export default function MissionaryCampaignSection({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           p: { xs: 3, sm: 4 },
           textAlign: 'center',
           bgcolor: 'background.paper',
@@ -59,7 +59,7 @@ export default function MissionaryCampaignSection({
                 height: 64,
                 borderRadius: '50%',
                 bgcolor: 'rgba(230, 81, 0, 0.08)',
-                color: 'mission.main',
+                color: 'accent.main',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -101,7 +101,7 @@ export default function MissionaryCampaignSection({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           overflow: 'hidden',
           bgcolor: 'background.paper',
         }}
@@ -233,10 +233,7 @@ export default function MissionaryCampaignSection({
                   px: 3.5,
                   fontSize: '0.95rem',
                   fontWeight: 700,
-                  bgcolor: 'mission.main',
-                  color: 'common.white',
-                  '&:hover': { bgcolor: 'mission.dark' },
-                  boxShadow: '0 3px 10px rgba(230, 81, 0, 0.28)',
+                  boxShadow: 'var(--app-shadow-accent)',
                 }}
               >
                 <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
@@ -292,13 +289,13 @@ export default function MissionaryCampaignSection({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

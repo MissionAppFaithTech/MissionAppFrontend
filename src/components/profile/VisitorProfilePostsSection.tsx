@@ -44,7 +44,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
             borderRadius: { xs: 2, sm: 3 },
             border: '1px solid',
             borderColor: 'divider',
-            boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+            boxShadow: 'var(--app-shadow-sm)',
             bgcolor: 'background.paper',
           }}
         >
@@ -66,8 +66,8 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     sx={{
                       width: { xs: 44, sm: 48 },
                       height: { xs: 44, sm: 48 },
-                      bgcolor: 'supporter.light',
-                      color: 'common.black',
+                      bgcolor: 'avatar.main',
+                      color: 'avatar.contrastText',
                       border: '1.5px solid',
                       borderColor: 'divider',
                       flexShrink: 0,
@@ -103,8 +103,8 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                   }
                   size="small"
                   sx={{
-                    bgcolor: 'rgba(234, 241, 250, 0.85)',
-                    color: 'primary.main',
+                    bgcolor: 'var(--app-chip-info-bg)',
+                    color: 'var(--app-chip-info-fg)',
                     fontWeight: 700,
                     fontSize: '0.7rem',
                     letterSpacing: '0.05em',
@@ -237,12 +237,12 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

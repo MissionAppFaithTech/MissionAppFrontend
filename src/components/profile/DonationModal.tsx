@@ -123,7 +123,7 @@ CPF/CNPJ: ${bankData.documento}`;
               p: { xs: 1, sm: 1.5 },
               m: { xs: 1.5, sm: 2 },
               width: { xs: 'calc(100% - 24px)', sm: 'auto' },
-              boxShadow: '0 8px 30px rgba(13, 43, 92, 0.18)',
+              boxShadow: 'var(--app-shadow-overlay)',
             },
           },
         }}
@@ -218,7 +218,7 @@ CPF/CNPJ: ${bankData.documento}`;
                   p: 0.5,
                   '& .MuiTabs-indicator': {
                     height: '100%',
-                    bgcolor: 'mission.main',
+                    bgcolor: 'accent.main',
                     borderRadius: 1.5,
                     zIndex: 0,
                   },
@@ -230,7 +230,7 @@ CPF/CNPJ: ${bankData.documento}`;
                     color: 'text.secondary',
                     transition: 'color 0.2s ease',
                     '&.Mui-selected': {
-                      color: 'common.white',
+                      color: 'brandFill.contrastText',
                     },
                   },
                 }}
@@ -400,13 +400,13 @@ CPF/CNPJ: ${bankData.documento}`;
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

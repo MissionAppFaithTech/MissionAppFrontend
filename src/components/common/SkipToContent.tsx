@@ -1,6 +1,7 @@
 'use client';
 
 import Box from '@mui/material/Box';
+import { focusRingSx } from '@/theme/theme';
 
 type SkipToContentProps = {
   contentId?: string;
@@ -24,23 +25,23 @@ export default function SkipToContent({
         top: -100,
         left: 16,
         zIndex: (theme) => theme.zIndex.tooltip + 100,
-        bgcolor: 'primary.main',
-        color: 'common.white',
+        bgcolor: 'brandFill.main',
+        color: 'brandFill.contrastText',
         px: 3,
         py: 1.5,
         borderRadius: 2,
         fontWeight: 700,
         fontSize: '0.9375rem',
         textDecoration: 'none',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3)',
+        boxShadow: 'var(--app-shadow-overlay)',
         border: '2px solid',
-        borderColor: 'common.white',
+        borderColor: 'brandFill.contrastText',
         transition: 'top 0.2s ease-in-out',
-        '&:focus, &:focus-visible': {
+        // Not a ButtonBase, so the theme-level focus ring does not reach it.
+        '&:focus, &:focus-visible': (theme) => ({
           top: 16,
-          outline: '3px solid #E65100',
-          outlineOffset: '2px',
-        },
+          ...focusRingSx(theme),
+        }),
       }}
     >
       {label}

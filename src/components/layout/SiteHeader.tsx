@@ -8,7 +8,6 @@ import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
-import { roleColors } from '@/theme/theme';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
@@ -18,17 +17,22 @@ const navLinks = [
   { label: 'Perguntas frequentes', href: '/#faq', sectionId: 'faq' },
 ];
 
+/**
+ * Nav links used hardcoded brand navy, so on the dark canvas they rendered navy on
+ * navy at 1.23:1. They now follow the scheme: resting text is the body color and the
+ * current section is marked with the accent — orange in dark, brand blue in light.
+ */
 const navLinkSx = (isActive: boolean) => ({
   position: 'relative' as const,
   display: 'inline-block',
   py: 0.5,
   textDecoration: 'none',
-  color: isActive ? roleColors.intermediate : roleColors.missionary,
+  color: isActive ? 'accent.main' : 'text.primary',
   fontWeight: isActive ? 600 : 400,
   whiteSpace: 'nowrap' as const,
   fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '1rem' },
   transition: 'color 0.2s ease',
-  '&:hover': { color: roleColors.intermediate },
+  '&:hover': { color: 'accent.main' },
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -36,7 +40,7 @@ const navLinkSx = (isActive: boolean) => ({
     bottom: 0,
     width: isActive ? '100%' : 0,
     height: 2,
-    bgcolor: roleColors.intermediate,
+    bgcolor: 'accent.main',
     transition: 'width 0.2s ease',
   },
   '&:hover::after': {
@@ -48,13 +52,13 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   display: 'block',
   py: 1.5,
   textDecoration: 'none',
-  color: isActive ? roleColors.intermediate : roleColors.missionary,
+  color: isActive ? 'accent.main' : 'text.primary',
   fontWeight: isActive ? 600 : 500,
   fontSize: '1.125rem',
   borderBottom: '1px solid',
   borderColor: 'divider',
   transition: 'color 0.2s ease',
-  '&:hover': { color: roleColors.intermediate },
+  '&:hover': { color: 'accent.main' },
 });
 
 export default function SiteHeader() {
@@ -108,7 +112,7 @@ export default function SiteHeader() {
             gap: { xs: 1, sm: 2, md: 3 },
           }}
         >
-          <Logo size={isDesktop ? 'lg' : 'md'} variant="light" />
+          <Logo size={isDesktop ? 'lg' : 'md'} />
 
           <Box
             component="nav"
@@ -149,7 +153,7 @@ export default function SiteHeader() {
             sx={{
               display: { xs: 'inline-flex', md: 'none' },
               ml: 'auto',
-              color: roleColors.missionary,
+              color: 'text.primary',
             }}
           >
             {mobileOpen ? <CloseIcon /> : <MenuIcon />}
@@ -177,7 +181,7 @@ export default function SiteHeader() {
           <IconButton
             aria-label="Fechar menu"
             onClick={closeMobileMenu}
-            sx={{ color: roleColors.missionary }}
+            sx={{ color: 'text.primary' }}
           >
             <CloseIcon />
           </IconButton>

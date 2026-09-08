@@ -72,7 +72,7 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
               borderRadius: { xs: 2, sm: 3 },
               border: '1px solid',
               borderColor: 'divider',
-              boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+              boxShadow: 'var(--app-shadow-sm)',
               bgcolor: 'background.paper',
             }}
           >
@@ -94,8 +94,8 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       sx={{
                         width: { xs: 44, sm: 48 },
                         height: { xs: 44, sm: 48 },
-                        bgcolor: 'supporter.light',
-                        color: 'common.black',
+                        bgcolor: 'avatar.main',
+                        color: 'avatar.contrastText',
                         border: '1.5px solid',
                         borderColor: 'divider',
                         flexShrink: 0,
@@ -126,8 +126,8 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       label="ORAÇÃO"
                       size="small"
                       sx={{
-                        bgcolor: 'rgba(234, 241, 250, 0.85)',
-                        color: 'primary.main',
+                        bgcolor: 'var(--app-chip-info-bg)',
+                        color: 'var(--app-chip-info-fg)',
                         fontWeight: 700,
                         fontSize: '0.7rem',
                         letterSpacing: '0.05em',
@@ -140,8 +140,8 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       label="NOVA CAMPANHA"
                       size="small"
                       sx={{
-                        bgcolor: 'rgba(254, 243, 199, 0.9)',
-                        color: 'warning.dark',
+                        bgcolor: 'var(--app-chip-warn-bg)',
+                        color: 'var(--app-chip-warn-fg)',
                         fontWeight: 700,
                         fontSize: '0.7rem',
                         letterSpacing: '0.05em',
@@ -154,8 +154,8 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       label="ATUALIZAÇÃO"
                       size="small"
                       sx={{
-                        bgcolor: 'rgba(234, 241, 250, 0.85)',
-                        color: 'primary.main',
+                        bgcolor: 'var(--app-chip-info-bg)',
+                        color: 'var(--app-chip-info-fg)',
                         fontWeight: 700,
                         fontSize: '0.7rem',
                         letterSpacing: '0.05em',
@@ -275,12 +275,12 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

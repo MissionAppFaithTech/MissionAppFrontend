@@ -62,7 +62,7 @@ export default function ContactModal({
               p: { xs: 1, sm: 1.5 },
               m: { xs: 1.5, sm: 2 },
               width: { xs: 'calc(100% - 24px)', sm: 'auto' },
-              boxShadow: '0 8px 30px rgba(13, 43, 92, 0.18)',
+              boxShadow: 'var(--app-shadow-overlay)',
             },
           },
         }}
@@ -255,13 +255,13 @@ export default function ContactModal({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

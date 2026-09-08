@@ -126,8 +126,8 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                     sx={{
                       width: { xs: 88, sm: 104 },
                       height: { xs: 88, sm: 104 },
-                      bgcolor: 'supporter.light',
-                      color: 'common.black',
+                      bgcolor: 'avatar.main',
+                      color: 'avatar.contrastText',
                       border: '1px solid',
                       borderColor: 'primary.main',
                       boxShadow: 2,
@@ -146,11 +146,11 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                       bottom: 2,
                       width: 30,
                       height: 30,
-                      bgcolor: 'primary.main',
-                      color: 'common.white',
+                      bgcolor: 'brandFill.main',
+                      color: 'brandFill.contrastText',
                       border: '2px solid',
                       borderColor: 'background.paper',
-                      '&:hover': { bgcolor: 'primary.dark', color: 'common.white' },
+                      '&:hover': { bgcolor: 'brandFill.light', color: 'brandFill.contrastText' },
                     }}
                   >
                     <AddIcon sx={{ fontSize: 20 }} />
@@ -273,13 +273,13 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

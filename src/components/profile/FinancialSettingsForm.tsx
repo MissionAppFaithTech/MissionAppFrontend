@@ -170,7 +170,7 @@ export default function FinancialSettingsForm({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           bgcolor: 'background.paper',
         }}
       >
@@ -325,7 +325,7 @@ export default function FinancialSettingsForm({
                 sx={{
                   borderRadius: 2,
                   borderColor: pixEnabled ? 'primary.light' : 'divider',
-                  boxShadow: pixEnabled ? '0 2px 8px rgba(13, 43, 92, 0.06)' : 'none',
+                  boxShadow: pixEnabled ? 'var(--app-shadow-xs)' : 'none',
                   p: { xs: 2, sm: 2.5 },
                 }}
               >
@@ -506,7 +506,7 @@ export default function FinancialSettingsForm({
                             {pixQrCodeUrl && (
                               <PillButton
                                 type="button"
-                                tone="outline"
+                                tone="dangerOutline"
                                 size="small"
                                 onClick={handleRemoveQrCode}
                                 sx={{ minHeight: 44, px: 1.5, justifyContent: 'center' }}
@@ -538,7 +538,7 @@ export default function FinancialSettingsForm({
                 sx={{
                   borderRadius: 2,
                   borderColor: bankEnabled ? 'primary.light' : 'divider',
-                  boxShadow: bankEnabled ? '0 2px 8px rgba(13, 43, 92, 0.06)' : 'none',
+                  boxShadow: bankEnabled ? 'var(--app-shadow-xs)' : 'none',
                   p: { xs: 2, sm: 2.5 },
                 }}
               >

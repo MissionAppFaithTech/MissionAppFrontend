@@ -3,8 +3,6 @@
 import Box from '@mui/material/Box';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useTheme } from 'next-themes';
-import useHasMounted from '@/lib/useHasMounted';
 
 const LOGO_PATHS = {
   light: '/logos/logo_light.PNG',
@@ -44,33 +42,49 @@ function resolveVariant(variant: LogoVariant, onDark: boolean): LogoVariant {
 }
 
 export default function Logo({ href = '/', size, variant = 'auto', onDark = false }: LogoProps) {
-  const { resolvedTheme } = useTheme();
-  const mounted = useHasMounted();
   const resolvedSize = resolveSize(size);
   const { height, maxWidth } = sizes[resolvedSize];
   const logoVariant = resolveVariant(variant, onDark);
 
-  const useDarkLogo =
-    logoVariant === 'dark' || (logoVariant === 'auto' && mounted && resolvedTheme === 'dark');
+  const imageStyle = {
+    height,
+    width: 'auto',
+    maxWidth,
+    objectFit: 'contain' as const,
+    display: 'block',
+  };
 
-  const src = useDarkLogo ? LOGO_PATHS.dark : LOGO_PATHS.light;
-
-  const image = (
+  const renderImage = (src: string) => (
     <Image
       src={src}
       alt="Mission App"
       width={280}
       height={280}
       priority={resolvedSize !== 'sm'}
-      style={{
-        height,
-        width: 'auto',
-        maxWidth,
-        objectFit: 'contain',
-        display: 'block',
-      }}
+      style={imageStyle}
     />
   );
+
+  /**
+   * `auto` renders both marks and lets CSS pick one.
+   *
+   * Choosing in JS meant the server always emitted the light logo, so the dark
+   * theme showed a navy wordmark on a navy ground until hydration caught up —
+   * the last piece of the theme flash.
+   */
+  const image =
+    logoVariant === 'auto' ? (
+      <>
+        <Box sx={{ lineHeight: 0, display: 'block', '.dark &': { display: 'none' } }}>
+          {renderImage(LOGO_PATHS.light)}
+        </Box>
+        <Box sx={{ lineHeight: 0, display: 'none', '.dark &': { display: 'block' } }}>
+          {renderImage(LOGO_PATHS.dark)}
+        </Box>
+      </>
+    ) : (
+      renderImage(logoVariant === 'dark' ? LOGO_PATHS.dark : LOGO_PATHS.light)
+    );
 
   if (href) {
     return (

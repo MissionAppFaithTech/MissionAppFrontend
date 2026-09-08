@@ -108,7 +108,7 @@ export default function ProfileSummaryCard({
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        boxShadow: 'var(--app-shadow-sm)',
         bgcolor: 'background.paper',
       }}
     >
@@ -131,8 +131,8 @@ export default function ProfileSummaryCard({
                 sx={{
                   width: { xs: 72, sm: 88, md: 100 },
                   height: { xs: 72, sm: 88, md: 100 },
-                  bgcolor: 'supporter.light',
-                  color: 'common.black',
+                  bgcolor: 'avatar.main',
+                  color: 'avatar.contrastText',
                   border: '1.5px solid',
                   borderColor: 'divider',
                 }}
@@ -291,9 +291,6 @@ export default function ProfileSummaryCard({
                   size="medium"
                   sx={{
                     ...actionSx,
-                    bgcolor: 'mission.main',
-                    color: 'common.white',
-                    '&:hover': { bgcolor: 'mission.dark' },
                   }}
                 >
                   Editar perfil
@@ -334,9 +331,6 @@ export default function ProfileSummaryCard({
                   }
                   sx={{
                     ...actionSx,
-                    bgcolor: 'mission.main',
-                    color: 'common.white',
-                    '&:hover': { bgcolor: 'mission.dark' },
                   }}
                 >
                   <VolunteerActivismIcon sx={{ fontSize: 18, mr: 0.75 }} />
@@ -426,13 +420,13 @@ export default function ProfileSummaryCard({
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: 'primary.main',
-            color: 'common.white',
+            bgcolor: 'brandFill.main',
+            color: 'brandFill.contrastText',
             fontWeight: 600,
             borderRadius: 2,
             boxShadow: 3,
             '& .MuiAlert-icon': {
-              color: 'common.white',
+              color: 'brandFill.contrastText',
             },
           }}
         >

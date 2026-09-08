@@ -106,7 +106,7 @@ export default function ImpactProjectCard({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
+          boxShadow: 'var(--app-shadow-md)',
           overflow: 'hidden',
           bgcolor: 'background.paper',
         }}
@@ -177,7 +177,7 @@ export default function ImpactProjectCard({
                   <Typography
                     variant="caption"
                     sx={{
-                      color: 'mission.main',
+                      color: 'accent.main',
                       fontWeight: 700,
                       textTransform: 'uppercase',
                       display: 'block',
@@ -236,6 +236,7 @@ export default function ImpactProjectCard({
                 </MenuItem>
               ) : (
                 <MenuItem
+                  sx={{ color: 'error.main' }}
                   onClick={() => {
                     handleCloseMenu();
                     alert('Denúncia recebida para análise da moderação.');
@@ -263,7 +264,7 @@ export default function ImpactProjectCard({
             {youtubeEmbedUrl && (
               <Stack spacing={1}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'mission.main' }} />
+                  <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'accent.main' }} />
                   <Typography
                     variant="subtitle2"
                     sx={{ fontWeight: 700, color: 'primary.main', fontSize: '0.875rem' }}
@@ -334,10 +335,10 @@ export default function ImpactProjectCard({
                     aspectRatio: { xs: '16 / 10', sm: '16 / 9' },
                     borderRadius: { xs: 2, sm: 2.5 },
                     overflow: 'hidden',
-                    bgcolor: 'neutral.900',
+                    bgcolor: 'common.black',
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 2px 8px rgba(13, 43, 92, 0.08)',
+                    boxShadow: 'var(--app-shadow-xs)',
                   }}
                 >
                   {/* Foto Ativa do Carrossel (Clicável para abrir visualização completa) */}
@@ -503,10 +504,7 @@ export default function ImpactProjectCard({
                   px: 3,
                   fontSize: '0.9375rem',
                   fontWeight: 700,
-                  bgcolor: 'mission.main',
-                  color: 'common.white',
-                  '&:hover': { bgcolor: 'mission.dark' },
-                  boxShadow: '0 2px 8px rgba(230, 81, 0, 0.25)',
+                  boxShadow: 'var(--app-shadow-accent)',
                 }}
               >
                 <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />

@@ -27,7 +27,7 @@ export default function FollowedMissionariesSection({
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        boxShadow: 'var(--app-shadow-sm)',
         bgcolor: 'background.paper',
       }}
     >
@@ -77,8 +77,8 @@ export default function FollowedMissionariesSection({
                     sx={{
                       width: { xs: 44, sm: 52 },
                       height: { xs: 44, sm: 52 },
-                      bgcolor: 'supporter.light',
-                      color: 'common.black',
+                      bgcolor: 'avatar.main',
+                      color: 'avatar.contrastText',
                       border: '1.5px solid',
                       borderColor: 'divider',
                       flexShrink: 0,
