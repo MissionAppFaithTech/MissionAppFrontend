@@ -190,7 +190,8 @@ export default function SiteHeader() {
               tone="primaryOutline"
               sx={{
                 flexShrink: 0,
-                minHeight: 38,
+                // 44px on phones per AGENTS.md; the desktop header stays compact.
+                minHeight: { xs: 44, sm: 38 },
                 px: { xs: 1.5, sm: 2.25 },
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                 fontWeight: 600,

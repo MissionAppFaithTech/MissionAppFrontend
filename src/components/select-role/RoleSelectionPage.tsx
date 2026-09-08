@@ -52,7 +52,7 @@ export default function RoleSelectionPage() {
           ))}
         </Stack>
 
-        <Stack spacing={1.5} sx={{ width: '100%', alignItems: 'center' }}>
+        <Stack spacing={0} sx={{ width: '100%', alignItems: 'center' }}>
           <Typography
             component={Link}
             href="/login"
@@ -60,6 +60,10 @@ export default function RoleSelectionPage() {
               color: 'text.secondary',
               textDecoration: 'none',
               fontSize: '0.875rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: 44,
+              px: 1,
               '&:hover': {
                 color: 'connection.main',
                 textDecoration: 'underline',
@@ -76,6 +80,10 @@ export default function RoleSelectionPage() {
               color: 'text.secondary',
               textDecoration: 'none',
               fontSize: '0.75rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: 44,
+              px: 1,
               '&:hover': {
                 color: 'connection.main',
                 textDecoration: 'underline',

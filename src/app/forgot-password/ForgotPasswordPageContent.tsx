@@ -49,6 +49,11 @@ export default function ForgotPasswordPageContent() {
               color: 'text.secondary',
               textDecoration: 'none',
               fontSize: '0.875rem',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              minHeight: 44,
+              pl: 1,
             }}
           >
             Voltar
