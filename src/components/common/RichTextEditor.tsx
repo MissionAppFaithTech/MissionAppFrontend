@@ -429,116 +429,112 @@ export default function RichTextEditor({
             }}
           >
             {/* Botão Desfazer em formato Pill Tátil Mobile-First */}
-            <Tooltip title="Desfazer última alteração (Ctrl + Z)" arrow>
-              <Button
-                variant="outlined"
-                size="small"
-                aria-label="Desfazer alteração"
-                disabled={!canUndo}
-                onClick={handleUndo}
-                startIcon={<UndoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
-                sx={{
-                  flex: { xs: 1, sm: 'initial' },
-                  minHeight: { xs: 44, sm: 38 },
-                  px: { xs: 2, sm: 1.75 },
-                  borderRadius: '9999px',
-                  fontSize: { xs: '0.875rem', sm: '0.8125rem' },
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: canUndo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'var(--mui-palette-action2-borderStrong)'
-                          : 'rgba(13, 43, 92, 0.35)'
-                    : 'divider',
-                  color: canUndo
-                    ? (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main')
-                    : 'text.disabled',
-                  bgcolor: canUndo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                          : 'rgba(255, 255, 255, 0.95)'
-                    : 'transparent',
-                  boxShadow: canUndo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
-                  '&:hover': {
-                    bgcolor: (theme) =>
+            <Button
+              variant="outlined"
+              size="small"
+              aria-label="Desfazer alteração"
+              disabled={!canUndo}
+              onClick={handleUndo}
+              startIcon={<UndoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
+              sx={{
+                flex: { xs: 1, sm: 'initial' },
+                minHeight: { xs: 44, sm: 38 },
+                px: { xs: 2, sm: 1.75 },
+                borderRadius: '9999px',
+                fontSize: { xs: '0.875rem', sm: '0.8125rem' },
+                fontWeight: 600,
+                textTransform: 'none',
+                borderColor: canUndo
+                  ? (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'var(--app-chip-info-bg)'
-                        : 'rgba(13, 43, 92, 0.08)',
-                    borderColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
-                  },
-                  '&:active': {
-                    transform: 'scale(0.97)',
-                  },
-                  '&.Mui-disabled': {
-                    borderColor: 'divider',
-                    bgcolor: 'transparent',
-                    color: 'text.disabled',
-                    boxShadow: 'none',
-                  },
-                }}
-              >
-                Desfazer
-              </Button>
-            </Tooltip>
+                        ? 'var(--mui-palette-action2-borderStrong)'
+                        : 'rgba(13, 43, 92, 0.35)'
+                  : 'divider',
+                color: canUndo
+                  ? (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main')
+                  : 'text.disabled',
+                bgcolor: canUndo
+                  ? (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                        : 'rgba(255, 255, 255, 0.95)'
+                  : 'transparent',
+                boxShadow: canUndo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
+                '&:hover': {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--app-chip-info-bg)'
+                      : 'rgba(13, 43, 92, 0.08)',
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
+                },
+                '&:active': {
+                  transform: 'scale(0.97)',
+                },
+                '&.Mui-disabled': {
+                  borderColor: 'divider',
+                  bgcolor: 'transparent',
+                  color: 'text.disabled',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Desfazer
+            </Button>
 
             {/* Botão Refazer em formato Pill Tátil Mobile-First */}
-            <Tooltip title="Refazer alteração (Ctrl + Y)" arrow>
-              <Button
-                variant="outlined"
-                size="small"
-                aria-label="Refazer alteração"
-                disabled={!canRedo}
-                onClick={handleRedo}
-                startIcon={<RedoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
-                sx={{
-                  flex: { xs: 1, sm: 'initial' },
-                  minHeight: { xs: 44, sm: 38 },
-                  px: { xs: 2, sm: 1.75 },
-                  borderRadius: '9999px',
-                  fontSize: { xs: '0.875rem', sm: '0.8125rem' },
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: canRedo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'var(--mui-palette-action2-borderStrong)'
-                          : 'rgba(13, 43, 92, 0.35)'
-                    : 'divider',
-                  color: canRedo
-                    ? (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main')
-                    : 'text.disabled',
-                  bgcolor: canRedo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                          : 'rgba(255, 255, 255, 0.95)'
-                    : 'transparent',
-                  boxShadow: canRedo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
-                  '&:hover': {
-                    bgcolor: (theme) =>
+            <Button
+              variant="outlined"
+              size="small"
+              aria-label="Refazer alteração"
+              disabled={!canRedo}
+              onClick={handleRedo}
+              startIcon={<RedoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
+              sx={{
+                flex: { xs: 1, sm: 'initial' },
+                minHeight: { xs: 44, sm: 38 },
+                px: { xs: 2, sm: 1.75 },
+                borderRadius: '9999px',
+                fontSize: { xs: '0.875rem', sm: '0.8125rem' },
+                fontWeight: 600,
+                textTransform: 'none',
+                borderColor: canRedo
+                  ? (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'var(--app-chip-info-bg)'
-                        : 'rgba(13, 43, 92, 0.08)',
-                    borderColor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
-                  },
-                  '&:active': {
-                    transform: 'scale(0.97)',
-                  },
-                  '&.Mui-disabled': {
-                    borderColor: 'divider',
-                    bgcolor: 'transparent',
-                    color: 'text.disabled',
-                    boxShadow: 'none',
-                  },
-                }}
-              >
-                Refazer
-              </Button>
-            </Tooltip>
+                        ? 'var(--mui-palette-action2-borderStrong)'
+                        : 'rgba(13, 43, 92, 0.35)'
+                  : 'divider',
+                color: canRedo
+                  ? (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main')
+                  : 'text.disabled',
+                bgcolor: canRedo
+                  ? (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                        : 'rgba(255, 255, 255, 0.95)'
+                  : 'transparent',
+                boxShadow: canRedo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
+                '&:hover': {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--app-chip-info-bg)'
+                      : 'rgba(13, 43, 92, 0.08)',
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
+                },
+                '&:active': {
+                  transform: 'scale(0.97)',
+                },
+                '&.Mui-disabled': {
+                  borderColor: 'divider',
+                  bgcolor: 'transparent',
+                  color: 'text.disabled',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Refazer
+            </Button>
           </Stack>
 
           {/* Ações e Informações Secundárias */}
