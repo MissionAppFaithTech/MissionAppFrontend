@@ -94,8 +94,8 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                     sx={{
                       width: { xs: 88, sm: 104 },
                       height: { xs: 88, sm: 104 },
-                      bgcolor: 'supporter.light',
-                      color: 'common.black',
+                      bgcolor: 'avatar.main',
+                      color: 'avatar.contrastText',
                       border: '1px solid',
                       borderColor: 'primary.main',
                       boxShadow: 2,
@@ -377,18 +377,18 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

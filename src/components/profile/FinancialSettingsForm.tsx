@@ -220,7 +220,7 @@ export default function FinancialSettingsForm({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           bgcolor: 'background.paper',
         }}
       >
@@ -393,7 +393,7 @@ export default function FinancialSettingsForm({
                 sx={{
                   borderRadius: 2,
                   borderColor: pixEnabled ? 'primary.light' : 'divider',
-                  boxShadow: pixEnabled ? '0 2px 8px rgba(13, 43, 92, 0.06)' : 'none',
+                  boxShadow: pixEnabled ? 'var(--app-shadow-xs)' : 'none',
                   p: { xs: 2, sm: 2.5 },
                 }}
               >
@@ -520,7 +520,8 @@ export default function FinancialSettingsForm({
                               borderRadius: 2,
                               overflow: 'hidden',
                               border: '1px solid',
-                              borderColor: 'divider',
+                              // White in both themes so the code stays scannable.
+                              borderColor: 'rgba(0, 0, 0, 0.12)',
                               bgcolor: 'common.white',
                             }}
                           >
@@ -586,7 +587,7 @@ export default function FinancialSettingsForm({
                             {pixQrCodeUrl && (
                               <PillButton
                                 type="button"
-                                tone="outline"
+                                tone="dangerOutline"
                                 size="small"
                                 onClick={handleRemoveQrCode}
                                 sx={{ minHeight: 44, px: 1.5, justifyContent: 'center' }}
@@ -618,7 +619,7 @@ export default function FinancialSettingsForm({
                 sx={{
                   borderRadius: 2,
                   borderColor: bankEnabled ? 'primary.light' : 'divider',
-                  boxShadow: bankEnabled ? '0 2px 8px rgba(13, 43, 92, 0.06)' : 'none',
+                  boxShadow: bankEnabled ? 'var(--app-shadow-xs)' : 'none',
                   p: { xs: 2, sm: 2.5 },
                 }}
               >
@@ -851,18 +852,20 @@ export default function FinancialSettingsForm({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
             boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
+                ? 'var(--app-shadow-overlay)'
                 : '0 3px 8px rgba(13, 43, 92, 0.14)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

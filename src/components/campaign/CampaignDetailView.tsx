@@ -185,7 +185,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                   borderRadius: { xs: 2, sm: 3 },
                   border: '1px solid',
                   borderColor: 'divider',
-                  boxShadow: '0 4px 14px rgba(13, 43, 92, 0.1)',
+                  boxShadow: 'var(--app-shadow-lg)',
                   p: { xs: 2.5, sm: 3.5 },
                   bgcolor: 'background.paper',
                 }}
@@ -236,7 +236,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                     borderRadius: { xs: 2, sm: 3 },
                     border: '1px solid',
                     borderColor: 'divider',
-                    boxShadow: '0 4px 14px rgba(13, 43, 92, 0.1)',
+                    boxShadow: 'var(--app-shadow-lg)',
                     p: { xs: 2.5, sm: 3.5 },
                     bgcolor: 'background.paper',
                   }}
@@ -278,8 +278,10 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                 transition: 'all 0.2s ease',
                                 '&:hover': {
                                   borderColor: (theme) =>
-                                    theme.palette.mode === 'dark' ? '#60A5FA' : 'primary.main',
-                                  boxShadow: '0 4px 12px rgba(13, 43, 92, 0.08)',
+                                    theme.palette.mode === 'dark'
+                                      ? 'connection.main'
+                                      : 'primary.main',
+                                  boxShadow: 'var(--app-shadow-lg)',
                                 },
                               }}
                             >
@@ -368,13 +370,13 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                           px: 2,
                                           bgcolor: (theme) =>
                                             theme.palette.mode === 'dark'
-                                              ? '#EA580C'
+                                              ? 'accent.main'
                                               : 'mission.main',
-                                          color: 'common.white',
+                                          color: 'mission.contrastText',
                                           '&:hover': {
                                             bgcolor: (theme) =>
                                               theme.palette.mode === 'dark'
-                                                ? '#C2410C'
+                                                ? 'mission.main'
                                                 : 'mission.dark',
                                           },
                                           justifyContent: 'center',
@@ -429,7 +431,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                   borderRadius: { xs: 2, sm: 3 },
                   border: '1px solid',
                   borderColor: 'divider',
-                  boxShadow: '0 4px 14px rgba(13, 43, 92, 0.1)',
+                  boxShadow: 'var(--app-shadow-lg)',
                   p: { xs: 2.5, sm: 3 },
                   bgcolor: 'background.paper',
                 }}
@@ -445,24 +447,24 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           borderRadius: '12px',
                           bgcolor: (theme) =>
                             theme.palette.mode === 'dark'
-                              ? 'rgba(249, 115, 22, 0.2)'
+                              ? 'var(--app-chip-warn-bg)'
                               : 'rgba(194, 65, 12, 0.08)',
                           color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main',
+                            theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
                           border: '1.5px solid',
                           borderColor: (theme) =>
-                            theme.palette.mode === 'dark' ? 'rgba(249, 115, 22, 0.35)' : 'divider',
+                            theme.palette.mode === 'dark' ? 'var(--app-badge-border)' : 'divider',
                         }}
                       >
                         <CampaignIcon
                           sx={{
                             fontSize: 26,
                             color: (theme) =>
-                              theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main',
+                              theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
                           }}
                         />
                       </Box>
@@ -512,7 +514,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           <CalendarMonthIcon
                             sx={{
                               color: (theme) =>
-                                theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main',
+                                theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
                               fontSize: 20,
                               mt: 0.2,
                             }}
@@ -536,7 +538,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                         <EventAvailableIcon
                           sx={{
                             color: (theme) =>
-                              theme.palette.mode === 'dark' ? '#60A5FA' : 'connection.main',
+                              theme.palette.mode === 'dark' ? 'connection.main' : 'connection.main',
                             fontSize: 20,
                             mt: 0.2,
                           }}
@@ -570,16 +572,16 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           fontSize: '1rem',
                           fontWeight: 700,
                           bgcolor: (theme) =>
-                            theme.palette.mode === 'dark' ? '#EA580C' : 'mission.main',
-                          color: 'common.white',
+                            theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                          color: 'mission.contrastText',
                           '&:hover': {
                             bgcolor: (theme) =>
-                              theme.palette.mode === 'dark' ? '#C2410C' : 'mission.dark',
+                              theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
                           },
                           boxShadow: (theme) =>
                             theme.palette.mode === 'dark'
-                              ? '0 4px 16px rgba(234, 88, 12, 0.45)'
-                              : '0 3px 12px rgba(230, 81, 0, 0.3)',
+                              ? 'var(--app-shadow-accent)'
+                              : 'var(--app-shadow-accent)',
                         }}
                       >
                         <VolunteerActivismIcon sx={{ fontSize: 22, mr: 1 }} />
@@ -597,14 +599,14 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           fontWeight: 700,
                           borderColor: (theme) =>
                             theme.palette.mode === 'dark'
-                              ? 'rgba(255, 255, 255, 0.35)'
+                              ? 'var(--mui-palette-action2-borderStrong)'
                               : 'primary.main',
                           color: (theme) =>
-                            theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main',
+                            theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
                           '&:hover': {
                             bgcolor: (theme) =>
                               theme.palette.mode === 'dark'
-                                ? 'rgba(255, 255, 255, 0.1)'
+                                ? 'var(--mui-palette-action2-secondaryHoverWash)'
                                 : 'rgba(13, 43, 92, 0.05)',
                           },
                         }}
@@ -670,18 +672,18 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

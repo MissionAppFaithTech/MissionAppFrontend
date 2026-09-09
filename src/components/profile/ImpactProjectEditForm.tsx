@@ -122,7 +122,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
+          boxShadow: 'var(--app-shadow-md)',
           bgcolor: 'background.paper',
         }}
       >
@@ -308,8 +308,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                           label="Campanha Ativa"
                           size="small"
                           sx={{
-                            bgcolor: 'mission.main',
-                            color: 'common.white',
+                            bgcolor: 'accent.main',
+                            color: 'mission.contrastText',
                             fontWeight: 700,
                             fontSize: '0.75rem',
                           }}
@@ -367,7 +367,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
               {/* 4. Vídeo do YouTube (Opcional - Suporta URL) */}
               <Stack spacing={2}>
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'mission.main' }} />
+                  <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'accent.main' }} />
                   <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
                     Vídeo de Apresentação (YouTube)
                   </Typography>
@@ -579,18 +579,18 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

@@ -63,11 +63,9 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(147, 197, 253, 0.2)' : 'divider',
+          theme.palette.mode === 'dark' ? 'var(--app-chip-info-bg)' : 'divider',
         boxShadow: (theme) =>
-          theme.palette.mode === 'dark'
-            ? '0 4px 14px rgba(0, 0, 0, 0.35)'
-            : '0 3px 8px rgba(13, 43, 92, 0.14)',
+          theme.palette.mode === 'dark' ? 'var(--app-shadow-md)' : 'var(--app-shadow-sm)',
         overflow: 'hidden',
       }}
     >
@@ -81,26 +79,27 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
           '& .MuiTabs-indicator': {
             height: 3,
             borderRadius: '3px 3px 0 0',
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main'),
           },
           '& .MuiTab-root': {
             minHeight: { xs: 48, sm: 52 },
             minWidth: isSupporterRoute ? 0 : { xs: 'max-content', md: 0 },
             px: { xs: 2, sm: 3 },
-            color: (theme) =>
-              theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
+            color: (theme) => (theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main'),
             fontSize: { xs: '0.8125rem', sm: '0.875rem' },
             fontWeight: 700,
             flex: isSupporterRoute ? 1 : { md: 1 },
             maxWidth: 'none',
             transition: 'color 0.2s ease',
             '&:hover': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.dark'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.dark'),
             },
           },
           '& .MuiTab-root.Mui-selected': {
             color: (theme) =>
-              theme.palette.mode === 'dark' ? '#FB923C !important' : 'mission.main !important',
+              theme.palette.mode === 'dark'
+                ? 'var(--mui-palette-accent-light) !important'
+                : 'mission.main !important',
           },
         }}
       >

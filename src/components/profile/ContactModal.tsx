@@ -62,7 +62,7 @@ export default function ContactModal({
               p: { xs: 1, sm: 1.5 },
               m: { xs: 1.5, sm: 2 },
               width: { xs: 'calc(100% - 24px)', sm: 'auto' },
-              boxShadow: '0 8px 30px rgba(13, 43, 92, 0.18)',
+              boxShadow: 'var(--app-shadow-overlay)',
             },
           },
         }}
@@ -259,18 +259,18 @@ export default function ContactModal({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

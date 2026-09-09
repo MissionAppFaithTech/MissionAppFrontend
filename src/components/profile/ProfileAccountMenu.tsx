@@ -43,8 +43,8 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
           sx={{
             width: { xs: 36, sm: 42 },
             height: { xs: 36, sm: 42 },
-            bgcolor: 'supporter.light',
-            color: 'common.black',
+            bgcolor: 'avatar.main',
+            color: 'avatar.contrastText',
           }}
         >
           <PersonIcon />
@@ -67,7 +67,7 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
               borderRadius: 2,
               border: '1px solid',
               borderColor: 'divider',
-              boxShadow: '0 12px 32px rgba(8, 28, 58, 0.18)',
+              boxShadow: 'var(--app-shadow-overlay)',
             },
           },
         }}
@@ -78,8 +78,8 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
               sx={{
                 width: 76,
                 height: 76,
-                bgcolor: 'supporter.light',
-                color: 'common.black',
+                bgcolor: 'avatar.main',
+                color: 'avatar.contrastText',
                 border: '1px solid',
                 borderColor: 'primary.main',
               }}

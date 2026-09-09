@@ -1,8 +1,22 @@
 @import 'tailwindcss';
 
+/*
+ * Scheme-aware app tokens.
+ *
+ * Keyed off the `.dark` class that next-themes writes on <html>, matching
+ * `darkMode: 'class'` in tailwind.config.ts and the MUI colorSchemeSelector.
+ * The previous block keyed off `prefers-color-scheme`, so an explicit toggle
+ * left these values out of sync with the rest of the app.
+ *
+ * Elevation lives here rather than in the MUI palette because shadows are not
+ * palette entries: components reference them as `var(--app-shadow-*)`, which
+ * switches with the scheme instead of freezing the navy tints of the light theme.
+ */
 :root {
   --background: #f7f9fc;
   --foreground: #0d2b5c;
+
+  /* From main: brand aliases, OKLCH tokens and scrollbar colors. */
   --color-missionary: #0d2b5c;
   --color-supporter: #6ba6ff;
   --color-mission: #f97316;
@@ -12,31 +26,78 @@
   --color-gray-medium: #6b7280;
   --color-gray-dark: #374151;
   --brand-gradient: linear-gradient(135deg, #0d2b5c 0%, #2563eb 100%);
-
   /* Modern OKLCH color space tokens (perceptually uniform across displays) */
   --color-missionary-oklch: oklch(0.28 0.08 250);
   --color-supporter-oklch: oklch(0.72 0.12 250);
   --color-mission-oklch: oklch(0.68 0.18 45);
   --color-intermediate-oklch: oklch(0.52 0.2 255);
-
   /* Modern scrollbar tokens */
   --scrollbar-thumb: #cbd5e1;
   --scrollbar-track: #f1f5f9;
+
+  --app-shadow-xs: 0 2px 8px rgba(13, 43, 92, 0.08);
+  --app-shadow-sm: 0 3px 8px rgba(13, 43, 92, 0.14);
+  --app-shadow-md: 0 3px 8px rgba(13, 43, 92, 0.16);
+  --app-shadow-lg: 0 4px 14px rgba(13, 43, 92, 0.12);
+  --app-shadow-overlay: 0 8px 30px rgba(13, 43, 92, 0.18);
+  --app-shadow-accent: 0 3px 10px rgba(230, 81, 0, 0.28);
+  --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --app-navbar-scrim: rgba(247, 249, 252, 0.92);
+  /* Resting label of a navigation tab. The selected one is the accent. */
+  --app-nav-rest: #0d2b5c;
+  --app-nav-active: #2563eb;
+  /* Ink for content sitting on the hero. */
+  --app-hero-ink: #0d2b5c;
+  --app-hero-wash: rgba(13, 43, 92, 0.08);
+  /* Footer band. `primary.dark` inverts to a pale blue in dark, so it is pinned here. */
+  --app-footer-bg: #081c3a;
+  --app-badge-bg: rgba(230, 81, 0, 0.08);
+  --app-badge-border: rgba(230, 81, 0, 0.28);
+  /* Post-type chips. */
+  --app-chip-info-bg: rgba(234, 241, 250, 0.85);
+  --app-chip-info-fg: #0d2b5c;
+  --app-chip-warn-bg: rgba(254, 243, 199, 0.9);
+  --app-chip-warn-fg: #b45309;
+  /* No border in light: the pastel fill is enough separation. */
+  --app-chip-info-border: transparent;
+  --app-chip-warn-border: transparent;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-dm-sans);
-}
+:root.dark {
+  --background: #000000;
+  --foreground: #ffffff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #081c3a;
-    --foreground: #ffffff;
-    --scrollbar-thumb: #334155;
-    --scrollbar-track: #0f172a;
-  }
+  /* Depth on black comes from elevation, so the shadows stay black and soft. */
+  --app-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --app-shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.65);
+  --app-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.7);
+  --app-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.75);
+  --app-shadow-overlay: 0 12px 36px rgba(0, 0, 0, 0.8);
+  --app-shadow-accent: 0 3px 12px rgba(249, 115, 22, 0.35);
+  /* A white inset reads as a hairline crack on a black surface. */
+  --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --app-navbar-scrim: rgba(0, 0, 0, 0.92);
+  /* White; the selected tab is told apart by the orange and the weight. */
+  --app-nav-rest: #ffffff;
+  --app-nav-active: #fb923c;
+  /* The hero photo is scrimmed to black in this theme, so its ink is light. */
+  --app-hero-ink: #ffffff;
+  --app-hero-wash: rgba(107, 166, 255, 0.16);
+  /* One neutral step above the canvas so the band still reads as a footer. */
+  --app-footer-bg: #121212;
+  --app-badge-bg: rgba(249, 115, 22, 0.16);
+  --app-badge-border: rgba(249, 115, 22, 0.45);
+  /* Tinted fills over black; the labels clear AA against the composited surface. */
+  --app-chip-info-bg: rgba(107, 166, 255, 0.18);
+  --app-chip-info-fg: #93c5fd;
+  --app-chip-warn-bg: rgba(251, 191, 36, 0.18);
+  --app-chip-warn-fg: #fbbf24;
+  --app-chip-info-border: rgba(107, 166, 255, 0.4);
+  --app-chip-warn-border: rgba(251, 146, 60, 0.45);
+  /* Dark scrollbar values, moved out of the prefers-color-scheme block so the
+     explicit toggle drives them like everything else. */
+  --scrollbar-thumb: #3a3a3a;
+  --scrollbar-track: #0d0d0d;
 }
 
 /* Modern standard scrollbar-color and scrollbar-width (Baseline) */

@@ -45,7 +45,7 @@ export default function MissionaryCampaignSection({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           p: { xs: 3, sm: 4 },
           textAlign: 'center',
           bgcolor: 'background.paper',
@@ -59,10 +59,8 @@ export default function MissionaryCampaignSection({
                 height: 64,
                 borderRadius: '50%',
                 bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(249, 115, 22, 0.18)'
-                    : 'rgba(230, 81, 0, 0.08)',
-                color: (theme) => (theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main'),
+                  theme.palette.mode === 'dark' ? 'var(--app-badge-bg)' : 'rgba(230, 81, 0, 0.08)',
+                color: (theme) => (theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -104,11 +102,9 @@ export default function MissionaryCampaignSection({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: (theme) =>
-            theme.palette.mode === 'dark' ? 'rgba(147, 197, 253, 0.2)' : 'divider',
+            theme.palette.mode === 'dark' ? 'var(--app-chip-info-bg)' : 'divider',
           boxShadow: (theme) =>
-            theme.palette.mode === 'dark'
-              ? '0 4px 14px rgba(0, 0, 0, 0.35)'
-              : '0 3px 8px rgba(13, 43, 92, 0.14)',
+            theme.palette.mode === 'dark' ? 'var(--app-shadow-md)' : 'var(--app-shadow-sm)',
           overflow: 'hidden',
           bgcolor: 'background.paper',
         }}
@@ -184,26 +180,26 @@ export default function MissionaryCampaignSection({
                     alignItems: 'center',
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(37, 99, 235, 0.18)'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
                         : 'rgba(13, 43, 92, 0.05)',
                     border: '1px solid',
                     borderColor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(147, 197, 253, 0.4)'
+                        ? 'var(--mui-palette-action2-borderStrong)'
                         : 'rgba(13, 43, 92, 0.15)',
                     borderRadius: 2,
                     px: 1.5,
                     py: 1,
                     width: 'fit-content',
                     boxShadow: (theme) =>
-                      theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.25)' : 'none',
+                      theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
                   }}
                 >
                   <CalendarMonthIcon
                     sx={{
                       fontSize: 18,
                       color: (theme) =>
-                        theme.palette.mode === 'dark' ? '#FB923C' : 'connection.main',
+                        theme.palette.mode === 'dark' ? 'accent.light' : 'connection.main',
                     }}
                   />
                   <Typography
@@ -254,16 +250,17 @@ export default function MissionaryCampaignSection({
                   px: 3.5,
                   fontSize: '0.95rem',
                   fontWeight: 700,
-                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#EA580C' : 'mission.main'),
-                  color: 'common.white',
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                  color: 'mission.contrastText',
                   '&:hover': {
                     bgcolor: (theme) =>
-                      theme.palette.mode === 'dark' ? '#C2410C' : 'mission.dark',
+                      theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
                   },
                   boxShadow: (theme) =>
                     theme.palette.mode === 'dark'
-                      ? '0 4px 14px rgba(234, 88, 12, 0.45)'
-                      : '0 3px 10px rgba(230, 81, 0, 0.28)',
+                      ? 'var(--app-shadow-accent)'
+                      : 'var(--app-shadow-accent)',
                 }}
               >
                 <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
@@ -282,13 +279,16 @@ export default function MissionaryCampaignSection({
                   px: 3,
                   fontSize: '0.95rem',
                   fontWeight: 700,
-                  color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main'),
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
                   borderColor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.35)' : 'primary.main',
+                    theme.palette.mode === 'dark'
+                      ? 'var(--mui-palette-action2-borderStrong)'
+                      : 'primary.main',
                   '&:hover': {
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.1)'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
                         : 'rgba(13, 43, 92, 0.05)',
                   },
                 }}
@@ -323,18 +323,18 @@ export default function MissionaryCampaignSection({
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

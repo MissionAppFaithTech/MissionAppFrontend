@@ -2,6 +2,11 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import RichTextEditor from './RichTextEditor';
 
+/** Expands a phrase into the sequence of values a textarea holds while it is typed. */
+function buildKeystrokes(phrase: string): string[] {
+  return Array.from({ length: phrase.length }, (_, i) => phrase.slice(0, i + 1));
+}
+
 describe('RichTextEditor component', () => {
   beforeEach(() => {
     localStorage.clear();
@@ -100,5 +105,63 @@ describe('RichTextEditor component', () => {
     expect(
       screen.queryByText(/existe um rascunho salvo anteriormente deste texto no seu aparelho/i)
     ).not.toBeInTheDocument();
+  });
+
+  it('undoes one whole word at a time, not one character', () => {
+    render(<RichTextEditor label="Mensagem" />);
+
+    const editor = screen.getByRole('textbox');
+    // one event per keystroke, the way a person types
+    for (const value of buildKeystrokes('Deus abencoe a missao')) {
+      fireEvent.change(editor, { target: { value } });
+    }
+    expect(editor).toHaveValue('Deus abencoe a missao');
+
+    const undo = screen.getByRole('button', { name: /desfazer alteração/i });
+
+    fireEvent.click(undo);
+    expect(editor).toHaveValue('Deus abencoe a ');
+
+    fireEvent.click(undo);
+    expect(editor).toHaveValue('Deus abencoe ');
+
+    fireEvent.click(undo);
+    expect(editor).toHaveValue('Deus ');
+
+    fireEvent.click(undo);
+    expect(editor).toHaveValue('');
+  });
+
+  it('redoes a word at a time as well', () => {
+    render(<RichTextEditor label="Mensagem" />);
+
+    const editor = screen.getByRole('textbox');
+    for (const value of buildKeystrokes('Paz e bem')) {
+      fireEvent.change(editor, { target: { value } });
+    }
+
+    const undo = screen.getByRole('button', { name: /desfazer alteração/i });
+    const redo = screen.getByRole('button', { name: /refazer alteração/i });
+
+    fireEvent.click(undo);
+    fireEvent.click(undo);
+    expect(editor).toHaveValue('Paz ');
+
+    fireEvent.click(redo);
+    expect(editor).toHaveValue('Paz e ');
+  });
+
+  it('treats a paste as a single undo step', () => {
+    render(<RichTextEditor label="Mensagem" />);
+
+    const editor = screen.getByRole('textbox');
+    for (const value of buildKeystrokes('Ola ')) {
+      fireEvent.change(editor, { target: { value } });
+    }
+    // a paste arrives as one change carrying many characters
+    fireEvent.change(editor, { target: { value: 'Ola mundo inteiro de uma vez' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /desfazer alteração/i }));
+    expect(editor).toHaveValue('Ola ');
   });
 });

@@ -9,7 +9,6 @@ import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
-import { roleColors } from '@/theme/theme';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
@@ -24,20 +23,14 @@ const navLinkSx = (isActive: boolean) => ({
   display: 'inline-block',
   py: 0.5,
   textDecoration: 'none',
-  color: (theme: { palette: { mode: string } }) =>
-    isActive
-      ? theme.palette.mode === 'dark'
-        ? '#FB923C'
-        : roleColors.intermediate
-      : 'text.primary',
+  color: isActive ? 'var(--app-nav-active)' : 'text.primary',
   fontWeight: isActive ? 700 : 500,
   whiteSpace: 'nowrap' as const,
   fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '0.95rem' },
   transition: 'color 0.2s ease',
   cursor: 'pointer',
   '&:hover': {
-    color: (theme: { palette: { mode: string } }) =>
-      theme.palette.mode === 'dark' ? '#FB923C' : roleColors.intermediate,
+    color: 'var(--app-nav-active)',
   },
   '&::after': {
     content: '""',
@@ -46,8 +39,7 @@ const navLinkSx = (isActive: boolean) => ({
     bottom: 0,
     width: isActive ? '100%' : 0,
     height: 2,
-    bgcolor: (theme: { palette: { mode: string } }) =>
-      theme.palette.mode === 'dark' ? '#FB923C' : roleColors.intermediate,
+    bgcolor: 'var(--app-nav-active)',
     transition: 'width 0.2s ease',
   },
   '&:hover::after': {
@@ -59,12 +51,7 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   display: 'block',
   py: 1.5,
   textDecoration: 'none',
-  color: (theme: { palette: { mode: string } }) =>
-    isActive
-      ? theme.palette.mode === 'dark'
-        ? '#FB923C'
-        : roleColors.intermediate
-      : 'text.primary',
+  color: isActive ? 'var(--app-nav-active)' : 'text.primary',
   fontWeight: isActive ? 700 : 500,
   fontSize: '1.05rem',
   borderBottom: '1px solid',
@@ -72,8 +59,7 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   transition: 'color 0.2s ease',
   cursor: 'pointer',
   '&:hover': {
-    color: (theme: { palette: { mode: string } }) =>
-      theme.palette.mode === 'dark' ? '#FB923C' : roleColors.intermediate,
+    color: 'var(--app-nav-active)',
   },
 });
 
@@ -190,24 +176,27 @@ export default function SiteHeader() {
               tone="primaryOutline"
               sx={{
                 flexShrink: 0,
-                minHeight: 38,
+                // 44px on phones per AGENTS.md; the desktop header stays compact.
+                minHeight: { xs: 44, sm: 38 },
                 px: { xs: 1.5, sm: 2.25 },
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                 fontWeight: 600,
                 borderWidth: '1.5px',
                 borderColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
+                  theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
                 bgcolor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                  theme.palette.mode === 'dark'
+                    ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                    : 'transparent',
                 color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
                 boxShadow: (theme) =>
-                  theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                  theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
                 '&:hover': {
                   borderColor: (theme) =>
                     theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
                   bgcolor: (theme) =>
                     theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.22)'
+                      ? 'var(--mui-palette-action2-borderSubtle)'
                       : 'rgba(13, 43, 92, 0.08)',
                 },
               }}
@@ -226,11 +215,13 @@ export default function SiteHeader() {
                 px: { sm: 1.75, md: 2.25 },
                 fontSize: '0.875rem',
                 fontWeight: 700,
-                bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#EA580C' : 'mission.main'),
-                color: 'common.white',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                color: 'mission.contrastText',
                 boxShadow: '0 2px 8px rgba(230, 81, 0, 0.35)',
                 '&:hover': {
-                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#C2410C' : 'mission.dark'),
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
                   boxShadow: '0 4px 12px rgba(230, 81, 0, 0.45)',
                 },
               }}
@@ -306,9 +297,9 @@ export default function SiteHeader() {
               minHeight: 44,
               fontSize: '0.95rem',
               fontWeight: 700,
-              bgcolor: 'mission.main',
-              color: 'common.white',
-              '&:hover': { bgcolor: 'mission.dark' },
+              bgcolor: 'accent.main',
+              color: 'mission.contrastText',
+              '&:hover': { bgcolor: 'accent.dark' },
             }}
           >
             Cadastre-se

@@ -91,7 +91,7 @@ describe('SEO & GEO (Generative Engine Optimization) Infrastructure Files', () =
       expect(manifestResult.start_url).toBe('/');
       expect(manifestResult.display).toBe('standalone');
       expect(manifestResult.theme_color).toBe('#0D2B5C');
-      expect(manifestResult.background_color).toBe('#081C3A');
+      expect(manifestResult.background_color).toBe('#F7F9FC');
       expect(manifestResult.lang).toBe('pt-BR');
       expect(manifestResult.icons?.length).toBeGreaterThanOrEqual(2);
     });

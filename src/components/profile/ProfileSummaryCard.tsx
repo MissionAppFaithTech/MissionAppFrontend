@@ -108,7 +108,7 @@ export default function ProfileSummaryCard({
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+        boxShadow: 'var(--app-shadow-sm)',
         bgcolor: 'background.paper',
       }}
     >
@@ -131,8 +131,8 @@ export default function ProfileSummaryCard({
                 sx={{
                   width: { xs: 72, sm: 88, md: 100 },
                   height: { xs: 72, sm: 88, md: 100 },
-                  bgcolor: 'supporter.light',
-                  color: 'common.black',
+                  bgcolor: 'avatar.main',
+                  color: 'avatar.contrastText',
                   border: '1.5px solid',
                   borderColor: 'divider',
                 }}
@@ -189,7 +189,8 @@ export default function ProfileSummaryCard({
                   fontWeight: 700,
                   fontSize: { xs: '0.875rem', sm: '1rem' },
                   pt: 0.25,
-                  color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                 }}
               >
                 {roleDescription}
@@ -203,7 +204,7 @@ export default function ProfileSummaryCard({
                   alignItems: 'center',
                   pt: 0.25,
                   color: (theme) =>
-                    theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.85)' : 'primary.main',
+                    theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
                 }}
               >
                 <PlaceOutlinedIcon sx={{ fontSize: { xs: 18, sm: 20 } }} />
@@ -213,7 +214,7 @@ export default function ProfileSummaryCard({
                     fontWeight: 500,
                     fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                     color: (theme) =>
-                      theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.85)' : 'primary.main',
+                      theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
                   }}
                 >
                   {location}
@@ -422,18 +423,18 @@ export default function ProfileSummaryCard({
           severity="success"
           variant="filled"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

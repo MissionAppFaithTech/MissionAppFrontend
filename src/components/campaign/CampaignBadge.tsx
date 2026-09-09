@@ -56,17 +56,15 @@ export default function CampaignBadge({
             }
           : {
               bgcolor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(249, 115, 22, 0.18)'
-                  : 'rgba(230, 81, 0, 0.08)',
-              color: (theme) => (theme.palette.mode === 'dark' ? '#FED7AA' : 'mission.dark'),
+                theme.palette.mode === 'dark' ? 'var(--app-badge-bg)' : 'rgba(230, 81, 0, 0.08)',
+              color: 'accent.dark',
               border: '1px solid',
               borderColor: (theme) =>
                 theme.palette.mode === 'dark'
-                  ? 'rgba(251, 146, 60, 0.55)'
+                  ? 'var(--app-badge-border)'
                   : 'rgba(230, 81, 0, 0.28)',
               boxShadow: (theme) =>
-                theme.palette.mode === 'dark' ? '0 2px 8px rgba(249, 115, 22, 0.25)' : 'none',
+                theme.palette.mode === 'dark' ? 'var(--app-shadow-accent)' : 'none',
             }),
         ...sx,
       }}

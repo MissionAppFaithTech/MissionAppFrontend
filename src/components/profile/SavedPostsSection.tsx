@@ -72,7 +72,7 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
               borderRadius: { xs: 2, sm: 3 },
               border: '1px solid',
               borderColor: 'divider',
-              boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+              boxShadow: 'var(--app-shadow-sm)',
               bgcolor: 'background.paper',
             }}
           >
@@ -94,8 +94,8 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       sx={{
                         width: { xs: 44, sm: 48 },
                         height: { xs: 44, sm: 48 },
-                        bgcolor: 'supporter.light',
-                        color: 'common.black',
+                        bgcolor: 'avatar.main',
+                        color: 'avatar.contrastText',
                         border: '1.5px solid',
                         borderColor: 'divider',
                         flexShrink: 0,
@@ -128,14 +128,11 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       sx={{
                         bgcolor: (theme) =>
                           theme.palette.mode === 'dark'
-                            ? 'rgba(59, 130, 246, 0.2)'
-                            : 'rgba(234, 241, 250, 0.85)',
-                        color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
-                        border: (theme) =>
-                          theme.palette.mode === 'dark'
-                            ? '1px solid rgba(147, 197, 253, 0.35)'
-                            : 'none',
+                            ? 'var(--app-chip-info-bg)'
+                            : 'var(--app-chip-info-bg)',
+                        color: 'var(--app-chip-info-fg)',
+                        border: '1px solid',
+                        borderColor: 'var(--app-chip-info-border)',
                         fontWeight: 700,
                         fontSize: '0.7rem',
                         letterSpacing: '0.05em',
@@ -150,14 +147,11 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       sx={{
                         bgcolor: (theme) =>
                           theme.palette.mode === 'dark'
-                            ? 'rgba(249, 115, 22, 0.2)'
-                            : 'rgba(254, 243, 199, 0.9)',
-                        color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#FB923C' : 'warning.dark',
-                        border: (theme) =>
-                          theme.palette.mode === 'dark'
-                            ? '1px solid rgba(251, 146, 60, 0.4)'
-                            : 'none',
+                            ? 'var(--app-chip-warn-bg)'
+                            : 'var(--app-chip-warn-bg)',
+                        color: 'var(--app-chip-warn-fg)',
+                        border: '1px solid',
+                        borderColor: 'var(--app-chip-warn-border)',
                         fontWeight: 700,
                         fontSize: '0.7rem',
                         letterSpacing: '0.05em',
@@ -172,14 +166,11 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       sx={{
                         bgcolor: (theme) =>
                           theme.palette.mode === 'dark'
-                            ? 'rgba(59, 130, 246, 0.2)'
-                            : 'rgba(234, 241, 250, 0.85)',
-                        color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
-                        border: (theme) =>
-                          theme.palette.mode === 'dark'
-                            ? '1px solid rgba(147, 197, 253, 0.35)'
-                            : 'none',
+                            ? 'var(--app-chip-info-bg)'
+                            : 'var(--app-chip-info-bg)',
+                        color: 'var(--app-chip-info-fg)',
+                        border: '1px solid',
+                        borderColor: 'var(--app-chip-info-border)',
                         fontWeight: 700,
                         fontSize: '0.7rem',
                         letterSpacing: '0.05em',
@@ -299,18 +290,18 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
           role="status"
           aria-live="polite"
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1E293B' : 'primary.main'),
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
             color: 'common.white',
             fontWeight: 600,
             borderRadius: 2,
             border: (theme) =>
-              theme.palette.mode === 'dark' ? '1px solid rgba(147, 197, 253, 0.3)' : 'none',
-            boxShadow: (theme) =>
               theme.palette.mode === 'dark'
-                ? '0 8px 24px rgba(0, 0, 0, 0.5)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
             '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#4ADE80' : 'common.white'),
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
             },
           }}
         >

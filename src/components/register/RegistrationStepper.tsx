@@ -15,7 +15,13 @@ export default function RegistrationStepper({
   stepLabels,
   tone = 'mission',
 }: RegistrationStepperProps) {
-  const activeColor = tone === 'mission' ? 'mission.main' : 'primary.main';
+  // Two roles, two tokens: `fill` is a filled surface and `ink` is a mark read
+  // against the page. A single value cannot satisfy both on a dark ground.
+  // `fillInk` comes from the fill's own contrastText, because the fill is a deep
+  // orange in light and a vivid one in dark, and each carries a different ink.
+  const fillColor = tone === 'mission' ? 'mission.main' : 'brandFill.main';
+  const fillInk = tone === 'mission' ? 'mission.contrastText' : 'brandFill.contrastText';
+  const inkColor = tone === 'mission' ? 'accent.main' : 'connection.main';
   const progressPercent = Math.min(100, Math.max(0, (currentStep / totalSteps) * 100));
 
   return (
@@ -46,7 +52,7 @@ export default function RegistrationStepper({
           variant="caption"
           sx={{
             fontWeight: 700,
-            color: activeColor,
+            color: inkColor,
             fontSize: '0.8125rem',
           }}
         >
@@ -74,7 +80,7 @@ export default function RegistrationStepper({
           sx={{
             height: '100%',
             width: `${progressPercent}%`,
-            bgcolor: activeColor,
+            bgcolor: inkColor,
             borderRadius: 3,
             transition: 'width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
@@ -100,10 +106,10 @@ export default function RegistrationStepper({
                 textAlign: 'center',
                 fontSize: '0.75rem',
                 fontWeight: isCurrent ? 700 : 600,
-                color: isCurrent ? '#ffffff' : isCompleted ? 'text.primary' : 'text.secondary',
-                bgcolor: isCurrent ? activeColor : isCompleted ? 'action.hover' : 'transparent',
+                color: isCurrent ? fillInk : isCompleted ? 'text.primary' : 'text.secondary',
+                bgcolor: isCurrent ? fillColor : isCompleted ? 'action.hover' : 'transparent',
                 border: '1px solid',
-                borderColor: isCurrent ? activeColor : 'divider',
+                borderColor: isCurrent ? inkColor : 'divider',
                 transition: 'all 0.2s ease',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',

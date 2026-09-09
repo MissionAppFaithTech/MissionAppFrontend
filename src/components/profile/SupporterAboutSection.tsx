@@ -40,7 +40,7 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
+        boxShadow: 'var(--app-shadow-md)',
       }}
     >
       <CardContent
@@ -72,13 +72,15 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
                     borderColor: {
                       xs: 'transparent',
                       sm: (theme) =>
-                        theme.palette.mode === 'dark' ? 'rgba(147, 197, 253, 0.4)' : 'primary.main',
+                        theme.palette.mode === 'dark'
+                          ? 'var(--mui-palette-action2-borderStrong)'
+                          : 'primary.main',
                     },
                     bgcolor: {
                       xs: 'transparent',
                       sm: (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.08)'
+                          ? 'var(--mui-palette-action2-fieldBg)'
                           : 'common.white',
                     },
                     color: (theme) =>
@@ -90,12 +92,13 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
                       xs: 'transparent',
                       sm: (theme) =>
                         theme.palette.mode === 'dark'
-                          ? 'rgba(255, 255, 255, 0.16)'
+                          ? 'var(--mui-palette-action2-borderSubtle)'
                           : 'rgba(13, 43, 92, 0.04)',
                     },
                     borderColor: {
                       xs: 'transparent',
-                      sm: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
+                      sm: (theme) =>
+                        theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                     },
                   },
                 }}

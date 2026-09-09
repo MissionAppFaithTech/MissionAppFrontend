@@ -5,7 +5,6 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Toolbar from '@mui/material/Toolbar';
-import { colors, roleColors } from '@/theme/theme';
 
 export type PageNavbarVariant = 'default' | 'landing';
 
@@ -17,14 +16,17 @@ type PageNavbarProps = {
   scrolled?: boolean;
 };
 
+/**
+ * `palette.mode` is no longer readable at render time — one theme now serves both
+ * schemes — so these branch through tokens instead of a JS ternary.
+ */
 const variantStyles = {
   default: {
-    background: (theme: { palette: { mode: string } }) =>
-      theme.palette.mode === 'light' ? roleColors.missionary : colors.textPrimary,
-    color: colors.surface,
+    backgroundColor: 'brandFill.main',
+    color: 'brandFill.contrastText',
   },
   landing: {
-    color: (theme: { palette: { text: { primary: string } } }) => theme.palette.text.primary,
+    color: 'text.primary',
     backgroundColor: 'transparent',
     boxShadow: 'none',
   },
@@ -51,9 +53,10 @@ export default function PageNavbar({
         transition: 'border-color 0.2s ease, background-color 0.2s ease, backdrop-filter 0.2s ease',
         ...(isLanding &&
           scrolled && {
-            backgroundColor: (t) =>
-              t.palette.mode === 'dark' ? 'rgba(8, 28, 58, 0.92)' : 'rgba(247, 249, 252, 0.92)',
-            backdropFilter: 'blur(10px)',
+            // The scrolled scrim was a fixed light wash, which painted a white bar
+            // across the top of the dark landing page.
+            backgroundColor: 'var(--app-navbar-scrim)',
+            backdropFilter: 'blur(8px)',
           }),
       }}
     >

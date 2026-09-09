@@ -25,8 +25,7 @@ export default function ProfileSearchField({
               <SearchIcon
                 sx={{
                   fontSize: 18,
-                  color: (t) =>
-                    t.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.85)' : 'primary.main',
+                  color: (t) => (t.palette.mode === 'dark' ? 'text.primary' : 'primary.main'),
                 }}
               />
             </InputAdornment>
@@ -40,21 +39,21 @@ export default function ProfileSearchField({
         '& .MuiOutlinedInput-root': {
           height: { xs: 34, sm: 36 },
           bgcolor: (t) =>
-            t.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'background.paper',
+            t.palette.mode === 'dark' ? 'var(--mui-palette-action2-fieldBg)' : 'background.paper',
           borderRadius: 2,
           fontSize: { xs: '0.7rem', sm: '0.8rem' },
           px: { xs: 0.5, sm: 1 },
           border: (t) =>
-            t.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.22)' : 'none',
+            t.palette.mode === 'dark'
+              ? '1px solid var(--mui-palette-action2-borderSubtle)'
+              : 'none',
           '&:hover': {
-            borderColor: (t) =>
-              t.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.45)' : undefined,
+            borderColor: (t) => (t.palette.mode === 'dark' ? 'text.secondary' : undefined),
           },
           '& input': {
             color: (t) => (t.palette.mode === 'dark' ? 'common.white' : 'text.primary'),
             '&::placeholder': {
-              color: (t) =>
-                t.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'text.secondary',
+              color: (t) => (t.palette.mode === 'dark' ? 'text.secondary' : 'text.secondary'),
               opacity: 1,
             },
           },

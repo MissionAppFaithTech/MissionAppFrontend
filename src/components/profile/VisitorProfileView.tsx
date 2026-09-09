@@ -83,7 +83,7 @@ export default function VisitorProfileView({
           borderRadius: { xs: 2, sm: 3 },
           border: '1px solid',
           borderColor: 'divider',
-          boxShadow: '0 3px 8px rgba(13, 43, 92, 0.14)',
+          boxShadow: 'var(--app-shadow-sm)',
           overflow: 'hidden',
           bgcolor: 'background.paper',
         }}
@@ -98,13 +98,13 @@ export default function VisitorProfileView({
             minHeight: { xs: 48, sm: 52 },
             '& .MuiTabs-indicator': {
               height: 3,
-              bgcolor: 'mission.main',
+              bgcolor: 'accent.main',
             },
             '& .MuiTab-root': {
               minHeight: { xs: 48, sm: 52 },
               minWidth: { xs: 'max-content', md: 0 },
               px: { xs: 2, sm: 3 },
-              color: 'primary.main',
+              color: 'var(--app-nav-rest)',
               fontSize: { xs: '0.8125rem', sm: '0.875rem' },
               fontWeight: 700,
               flex: { md: 1 },
@@ -115,7 +115,7 @@ export default function VisitorProfileView({
               },
             },
             '& .Mui-selected': {
-              color: 'mission.main',
+              color: 'accent.main',
             },
           }}
         >

@@ -35,7 +35,7 @@ export default function CampaignVideoPlayer({
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
         <PlayCircleOutlinedIcon
           sx={{
-            color: (theme) => (theme.palette.mode === 'dark' ? '#FB923C' : 'mission.main'),
+            color: (theme) => (theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main'),
             fontSize: 20,
           }}
         />
@@ -56,7 +56,7 @@ export default function CampaignVideoPlayer({
           borderRadius: 2.5,
           overflow: 'hidden',
           bgcolor: 'common.black',
-          boxShadow: '0 4px 14px rgba(13, 43, 92, 0.12)',
+          boxShadow: 'var(--app-shadow-lg)',
         }}
       >
         <Box

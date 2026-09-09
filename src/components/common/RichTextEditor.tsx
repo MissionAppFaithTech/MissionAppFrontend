@@ -80,11 +80,25 @@ export default function RichTextEditor({
   const [history, setHistory] = useState<string[]>([currentValue]);
   const [historyIndex, setHistoryIndex] = useState<number>(0);
   const prevValueRef = useRef<string>(currentValue);
+  /**
+   * Whether the newest history entry is still open to absorb more typing.
+   *
+   * Undo works per word, not per keystroke: consecutive characters keep rewriting
+   * the same entry, and the entry is sealed once the word is closed with
+   * whitespace. So one undo takes back "world", not "d".
+   */
+  const isEntryOpenRef = useRef(false);
+
+  const sealHistoryEntry = () => {
+    isEntryOpenRef.current = false;
+  };
 
   // Sync external controlled value changes safely without re-render loop
   useEffect(() => {
     if (isControlled && value !== undefined && value !== prevValueRef.current) {
       prevValueRef.current = value;
+      // An external change is its own step; never fold it into the open entry.
+      sealHistoryEntry();
       setHistory((prev) => {
         if (prev[prev.length - 1] === value) return prev;
         return [...prev, value];
@@ -119,8 +133,31 @@ export default function RichTextEditor({
     }
     onChange?.(newValue);
 
-    setHistory((prev) => [...prev.slice(0, historyIndex + 1), newValue]);
-    setHistoryIndex((prev) => prev + 1);
+    const previousValue = currentValue;
+    const isSingleInsert =
+      newValue.length === previousValue.length + 1 && newValue.startsWith(previousValue);
+    const isSingleDelete =
+      newValue.length === previousValue.length - 1 && previousValue.startsWith(newValue);
+    const editedChar = isSingleInsert
+      ? newValue.slice(-1)
+      : isSingleDelete
+        ? previousValue.slice(-1)
+        : null;
+    // Anything that is not a single character at the end — a paste, or an edit in
+    // the middle of the text — is a step of its own.
+    const isTyping = editedChar !== null;
+    const closesWord = isTyping && /\s/.test(editedChar);
+
+    if (isEntryOpenRef.current && isTyping) {
+      // Keep rewriting the entry this word is being typed into.
+      setHistory((prev) => [...prev.slice(0, historyIndex), newValue]);
+    } else {
+      setHistory((prev) => [...prev.slice(0, historyIndex + 1), newValue]);
+      setHistoryIndex((prev) => prev + 1);
+    }
+    // Whitespace is absorbed by the word it closes, so the next character opens a
+    // fresh entry and undo lands on a word boundary.
+    isEntryOpenRef.current = isTyping && !closesWord;
 
     // Autosave draft to localStorage
     if (draftKey && typeof window !== 'undefined') {
@@ -137,6 +174,8 @@ export default function RichTextEditor({
 
   const handleUndo = () => {
     if (!canUndo) return;
+    // Typing after an undo starts a new word rather than reopening the old one.
+    sealHistoryEntry();
     const nextIndex = historyIndex - 1;
     const targetValue = history[nextIndex] ?? '';
     setHistoryIndex(nextIndex);
@@ -149,6 +188,8 @@ export default function RichTextEditor({
 
   const handleRedo = () => {
     if (!canRedo) return;
+    // Typing after an undo starts a new word rather than reopening the old one.
+    sealHistoryEntry();
     const nextIndex = historyIndex + 1;
     const targetValue = history[nextIndex] ?? '';
     setHistoryIndex(nextIndex);
@@ -177,6 +218,7 @@ export default function RichTextEditor({
   // Restore draft handler
   const handleRestoreDraft = useCallback(() => {
     if (savedDraftContent) {
+      sealHistoryEntry();
       prevValueRef.current = savedDraftContent;
       if (!isControlled) {
         setInternalValue(savedDraftContent);
@@ -251,12 +293,11 @@ export default function RichTextEditor({
             border: '1.5px solid',
             borderColor: (theme) =>
               theme.palette.mode === 'dark'
-                ? 'rgba(147, 197, 253, 0.35)'
+                ? 'var(--mui-palette-action2-borderStrong)'
                 : 'rgba(37, 99, 235, 0.25)',
             bgcolor: (theme) =>
-              theme.palette.mode === 'dark' ? 'rgba(30, 41, 59, 0.85)' : 'rgba(37, 99, 235, 0.05)',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? '0 4px 12px rgba(0, 0, 0, 0.3)' : 'none',
+              theme.palette.mode === 'dark' ? 'brandFill.main' : 'rgba(37, 99, 235, 0.05)',
+            boxShadow: (theme) => (theme.palette.mode === 'dark' ? 'var(--app-shadow-md)' : 'none'),
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: { xs: 'stretch', sm: 'center' },
@@ -276,7 +317,8 @@ export default function RichTextEditor({
             <RestoreIcon
               sx={{
                 fontSize: 22,
-                color: (theme) => (theme.palette.mode === 'dark' ? '#60A5FA' : 'connection.main'),
+                color: (theme) =>
+                  theme.palette.mode === 'dark' ? 'connection.main' : 'connection.main',
                 mt: { xs: 0.25, sm: 0 },
                 flexShrink: 0,
               }}
@@ -301,12 +343,13 @@ export default function RichTextEditor({
               sx={{
                 display: { xs: 'inline-flex', sm: 'none' },
                 color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'text.secondary',
+                  theme.palette.mode === 'dark' ? 'text.secondary' : 'text.secondary',
                 minWidth: 44,
                 minHeight: 44,
                 m: -1,
                 '&:hover': {
-                  color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'text.primary'),
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'text.primary' : 'text.primary',
                 },
               }}
             >
@@ -337,11 +380,13 @@ export default function RichTextEditor({
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                 textTransform: 'none',
                 borderRadius: 2,
-                bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#2563EB' : 'primary.main'),
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                 color: '#FFFFFF',
                 boxShadow: 'none',
                 '&:hover': {
-                  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#1D4ED8' : 'primary.dark'),
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.light' : 'primary.dark',
                   boxShadow: 'none',
                 },
               }}
@@ -356,11 +401,12 @@ export default function RichTextEditor({
               sx={{
                 display: { xs: 'none', sm: 'inline-flex' },
                 color: (theme) =>
-                  theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'text.secondary',
+                  theme.palette.mode === 'dark' ? 'text.secondary' : 'text.secondary',
                 minWidth: 44,
                 minHeight: 44,
                 '&:hover': {
-                  color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'text.primary'),
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'text.primary' : 'text.primary',
                 },
               }}
             >
@@ -385,7 +431,7 @@ export default function RichTextEditor({
                 ? '0 0 0 3px rgba(211, 47, 47, 0.2)'
                 : `0 0 0 3px ${
                     theme.palette.mode === 'dark'
-                      ? 'rgba(144, 202, 249, 0.25)'
+                      ? 'var(--mui-palette-action2-secondaryHoverWash)'
                       : 'rgba(13, 43, 92, 0.2)'
                   }`,
           },
@@ -406,7 +452,7 @@ export default function RichTextEditor({
             py: { xs: 1, sm: 0.875 },
             bgcolor: (theme) =>
               theme.palette.mode === 'dark'
-                ? 'rgba(255, 255, 255, 0.05)'
+                ? 'var(--mui-palette-action2-fieldBg)'
                 : 'rgba(13, 43, 92, 0.04)',
             borderBottom: '1px solid',
             borderColor: 'divider',
@@ -425,116 +471,112 @@ export default function RichTextEditor({
             }}
           >
             {/* Botão Desfazer em formato Pill Tátil Mobile-First */}
-            <Tooltip title="Desfazer última alteração (Ctrl + Z)" arrow>
-              <Button
-                variant="outlined"
-                size="small"
-                aria-label="Desfazer alteração"
-                disabled={!canUndo}
-                onClick={handleUndo}
-                startIcon={<UndoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
-                sx={{
-                  flex: { xs: 1, sm: 'initial' },
-                  minHeight: { xs: 44, sm: 38 },
-                  px: { xs: 2, sm: 1.75 },
-                  borderRadius: '9999px',
-                  fontSize: { xs: '0.875rem', sm: '0.8125rem' },
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: canUndo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(147, 197, 253, 0.5)'
-                          : 'rgba(13, 43, 92, 0.35)'
-                    : 'divider',
-                  color: canUndo
-                    ? (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main')
-                    : 'text.disabled',
-                  bgcolor: canUndo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(147, 197, 253, 0.12)'
-                          : 'rgba(255, 255, 255, 0.95)'
-                    : 'transparent',
-                  boxShadow: canUndo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
-                  '&:hover': {
-                    bgcolor: (theme) =>
+            <Button
+              variant="outlined"
+              size="small"
+              aria-label="Desfazer alteração"
+              disabled={!canUndo}
+              onClick={handleUndo}
+              startIcon={<UndoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
+              sx={{
+                flex: { xs: 1, sm: 'initial' },
+                minHeight: { xs: 44, sm: 38 },
+                px: { xs: 2, sm: 1.75 },
+                borderRadius: '9999px',
+                fontSize: { xs: '0.875rem', sm: '0.8125rem' },
+                fontWeight: 600,
+                textTransform: 'none',
+                borderColor: canUndo
+                  ? (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(147, 197, 253, 0.2)'
-                        : 'rgba(13, 43, 92, 0.08)',
-                    borderColor: (theme) =>
-                      theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
-                  },
-                  '&:active': {
-                    transform: 'scale(0.97)',
-                  },
-                  '&.Mui-disabled': {
-                    borderColor: 'divider',
-                    bgcolor: 'transparent',
-                    color: 'text.disabled',
-                    boxShadow: 'none',
-                  },
-                }}
-              >
-                Desfazer
-              </Button>
-            </Tooltip>
+                        ? 'var(--mui-palette-action2-borderStrong)'
+                        : 'rgba(13, 43, 92, 0.35)'
+                  : 'divider',
+                color: canUndo
+                  ? (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main')
+                  : 'text.disabled',
+                bgcolor: canUndo
+                  ? (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                        : 'rgba(255, 255, 255, 0.95)'
+                  : 'transparent',
+                boxShadow: canUndo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
+                '&:hover': {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--app-chip-info-bg)'
+                      : 'rgba(13, 43, 92, 0.08)',
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
+                },
+                '&:active': {
+                  transform: 'scale(0.97)',
+                },
+                '&.Mui-disabled': {
+                  borderColor: 'divider',
+                  bgcolor: 'transparent',
+                  color: 'text.disabled',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Desfazer
+            </Button>
 
             {/* Botão Refazer em formato Pill Tátil Mobile-First */}
-            <Tooltip title="Refazer alteração (Ctrl + Y)" arrow>
-              <Button
-                variant="outlined"
-                size="small"
-                aria-label="Refazer alteração"
-                disabled={!canRedo}
-                onClick={handleRedo}
-                startIcon={<RedoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
-                sx={{
-                  flex: { xs: 1, sm: 'initial' },
-                  minHeight: { xs: 44, sm: 38 },
-                  px: { xs: 2, sm: 1.75 },
-                  borderRadius: '9999px',
-                  fontSize: { xs: '0.875rem', sm: '0.8125rem' },
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  borderColor: canRedo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(147, 197, 253, 0.5)'
-                          : 'rgba(13, 43, 92, 0.35)'
-                    : 'divider',
-                  color: canRedo
-                    ? (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : 'primary.main')
-                    : 'text.disabled',
-                  bgcolor: canRedo
-                    ? (theme) =>
-                        theme.palette.mode === 'dark'
-                          ? 'rgba(147, 197, 253, 0.12)'
-                          : 'rgba(255, 255, 255, 0.95)'
-                    : 'transparent',
-                  boxShadow: canRedo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
-                  '&:hover': {
-                    bgcolor: (theme) =>
+            <Button
+              variant="outlined"
+              size="small"
+              aria-label="Refazer alteração"
+              disabled={!canRedo}
+              onClick={handleRedo}
+              startIcon={<RedoIcon sx={{ fontSize: { xs: 20, sm: 18 } }} />}
+              sx={{
+                flex: { xs: 1, sm: 'initial' },
+                minHeight: { xs: 44, sm: 38 },
+                px: { xs: 2, sm: 1.75 },
+                borderRadius: '9999px',
+                fontSize: { xs: '0.875rem', sm: '0.8125rem' },
+                fontWeight: 600,
+                textTransform: 'none',
+                borderColor: canRedo
+                  ? (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(147, 197, 253, 0.2)'
-                        : 'rgba(13, 43, 92, 0.08)',
-                    borderColor: (theme) =>
-                      theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
-                  },
-                  '&:active': {
-                    transform: 'scale(0.97)',
-                  },
-                  '&.Mui-disabled': {
-                    borderColor: 'divider',
-                    bgcolor: 'transparent',
-                    color: 'text.disabled',
-                    boxShadow: 'none',
-                  },
-                }}
-              >
-                Refazer
-              </Button>
-            </Tooltip>
+                        ? 'var(--mui-palette-action2-borderStrong)'
+                        : 'rgba(13, 43, 92, 0.35)'
+                  : 'divider',
+                color: canRedo
+                  ? (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main')
+                  : 'text.disabled',
+                bgcolor: canRedo
+                  ? (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                        : 'rgba(255, 255, 255, 0.95)'
+                  : 'transparent',
+                boxShadow: canRedo ? '0 1px 3px rgba(13, 43, 92, 0.08)' : 'none',
+                '&:hover': {
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--app-chip-info-bg)'
+                      : 'rgba(13, 43, 92, 0.08)',
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
+                },
+                '&:active': {
+                  transform: 'scale(0.97)',
+                },
+                '&.Mui-disabled': {
+                  borderColor: 'divider',
+                  bgcolor: 'transparent',
+                  color: 'text.disabled',
+                  boxShadow: 'none',
+                },
+              }}
+            >
+              Refazer
+            </Button>
           </Stack>
 
           {/* Ações e Informações Secundárias */}
@@ -590,15 +632,16 @@ export default function RichTextEditor({
                   minWidth: 44,
                   minHeight: 44,
                   borderRadius: '9999px',
-                  color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
+                  color: (theme) =>
+                    theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                   bgcolor: (theme) =>
                     theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.06)'
+                      ? 'var(--mui-palette-action2-fieldBg)'
                       : 'rgba(13, 43, 92, 0.05)',
                   '&:hover': {
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'rgba(255, 255, 255, 0.12)'
+                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
                         : 'rgba(13, 43, 92, 0.12)',
                   },
                 }}
@@ -691,7 +734,7 @@ export default function RichTextEditor({
                 borderRadius: 2.5,
                 bgcolor: (theme) =>
                   theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.05)'
+                    ? 'var(--mui-palette-action2-fieldBg)'
                     : 'rgba(13, 43, 92, 0.04)',
                 border: '1px solid',
                 borderColor: 'divider',
@@ -718,7 +761,8 @@ export default function RichTextEditor({
                     borderColor: 'divider',
                     fontSize: '0.8125rem',
                     fontWeight: 600,
-                    color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 0.5,
@@ -736,7 +780,8 @@ export default function RichTextEditor({
                     borderColor: 'divider',
                     fontSize: '0.8125rem',
                     fontWeight: 600,
-                    color: (theme) => (theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main'),
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: 0.5,
@@ -754,7 +799,7 @@ export default function RichTextEditor({
                 borderRadius: 2.5,
                 bgcolor: (theme) =>
                   theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.05)'
+                    ? 'var(--mui-palette-action2-fieldBg)'
                     : 'rgba(13, 43, 92, 0.04)',
                 border: '1px solid',
                 borderColor: 'divider',
@@ -791,7 +836,7 @@ export default function RichTextEditor({
                         fontSize: '0.8rem',
                         fontWeight: 700,
                         color: (theme) =>
-                          theme.palette.mode === 'dark' ? '#93C5FD' : 'primary.main',
+                          theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
                         minWidth: 72,
                         textAlign: 'center',
                       }}

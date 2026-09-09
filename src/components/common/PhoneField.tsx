@@ -1,6 +1,7 @@
 'use client';
 
 import { Box, FormHelperText, InputLabel, useTheme } from '@mui/material';
+import { v } from '@/theme/theme';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 
@@ -31,9 +32,11 @@ export default function PhoneField({
   defaultCountry = 'br',
 }: PhoneFieldProps) {
   const theme = useTheme();
-  const borderColor = error ? theme.palette.error.main : theme.palette.divider;
-  const backgroundColor =
-    theme.palette.mode === 'light' ? (theme.palette.surface?.main ?? '#EAF1FA') : undefined;
+  // `v` reads through `theme.vars` so values follow the active color scheme —
+  // reading `theme.palette.*` directly would freeze the default scheme — and it
+  // tolerates the custom palette keys being absent, which is the case in unit
+  // tests that render against MUI's default theme.
+  const borderColor = error ? v(theme, 'palette.error.main') : v(theme, 'palette.divider');
 
   const displayValue = isOnlyDialCode(value) ? '' : value;
 
@@ -53,12 +56,15 @@ export default function PhoneField({
           border: '1px solid',
           borderColor,
           borderRadius: 1,
-          bgcolor: backgroundColor,
+          // Matches the field fill used by every other input in the app.
+          bgcolor: 'var(--mui-palette-action2-fieldBg)',
           px: 1,
           py: 0.25,
           transition: 'border-color 0.2s ease',
           '&:focus-within': {
-            borderColor: error ? theme.palette.error.main : theme.palette.primary.main,
+            borderColor: error
+              ? v(theme, 'palette.error.main')
+              : v(theme, 'palette.connection.main'),
             borderWidth: 2,
             px: '7px',
             py: '1px',
@@ -73,7 +79,7 @@ export default function PhoneField({
             border: 'none',
             background: 'transparent',
             padding: '8px 4px',
-            height: 'auto',
+            minHeight: 44,
           },
           '& .react-international-phone-input': {
             flex: 1,
@@ -84,9 +90,10 @@ export default function PhoneField({
             fontSize: '1rem',
             py: 1.25,
             px: 0.5,
-            color: theme.palette.text.primary,
+            minHeight: 44,
+            color: v(theme, 'palette.text.primary'),
             '&::placeholder': {
-              color: theme.palette.text.secondary,
+              color: v(theme, 'palette.text.secondary'),
               opacity: 1,
             },
           },

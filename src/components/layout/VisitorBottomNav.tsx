@@ -68,7 +68,7 @@ export default function VisitorBottomNav() {
               borderRadius: 1.5,
               position: 'relative',
               '&:hover': {
-                color: 'mission.main',
+                color: 'accent.main',
               },
               '&:focus-visible': {
                 outline: '2px solid',
@@ -96,7 +96,7 @@ export default function VisitorBottomNav() {
                   width: 20,
                   height: 3,
                   borderRadius: 1.5,
-                  bgcolor: 'mission.main',
+                  bgcolor: 'accent.main',
                 }}
               />
             )}

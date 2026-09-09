@@ -99,7 +99,7 @@ export default function ProfileAboutEditSection({
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 3px 8px rgba(13, 43, 92, 0.16)',
+        boxShadow: 'var(--app-shadow-md)',
       }}
     >
       <CardContent

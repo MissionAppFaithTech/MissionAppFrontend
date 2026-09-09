@@ -97,9 +97,8 @@ const HERO_NAVBAR_OVERLAP = {
 } as const;
 
 function HeroHeadline() {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
-  const headingPrimaryColor = isDark ? 'common.white' : 'primary.main';
+  // Scheme-driven, so the hero reads correctly on the very first paint.
+  const headingPrimaryColor = 'var(--app-hero-ink)';
 
   return (
     <Stack
@@ -132,7 +131,7 @@ function HeroHeadline() {
           Conectando
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'mission.main' }}>
+          <Box component="span" sx={{ color: 'accent.main' }}>
             missionários
           </Box>
           <Box component="span" sx={{ color: headingPrimaryColor }}>
@@ -147,7 +146,7 @@ function HeroHeadline() {
           <Box component="span" sx={{ color: headingPrimaryColor }}>
             redor do{' '}
           </Box>
-          <Box component="span" sx={{ color: 'mission.main' }}>
+          <Box component="span" sx={{ color: 'accent.main' }}>
             mundo
           </Box>
         </Box>
@@ -166,7 +165,7 @@ function HeroHeadline() {
             width: { xs: 'clamp(2.5rem, 4vw, 4rem)', md: 'clamp(2rem, 2vw, 3rem)' },
             height: { xs: 'clamp(3px, 0.3vw, 4px)', md: 'clamp(2px, 0.25vw, 3px)' },
             borderRadius: 1,
-            bgcolor: 'mission.main',
+            bgcolor: 'accent.main',
           }}
         />
 
@@ -208,18 +207,20 @@ function HeroHeadline() {
               borderRadius: '12px',
               borderWidth: '2px',
               borderColor: (theme) =>
-                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.75)' : 'primary.main',
+                theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
               bgcolor: (theme) =>
-                theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+                theme.palette.mode === 'dark'
+                  ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                  : 'transparent',
               color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
               boxShadow: (theme) =>
-                theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
               '&:hover': {
                 borderColor: (theme) =>
                   theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
                 bgcolor: (theme) =>
                   theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.22)'
+                    ? 'var(--mui-palette-action2-borderSubtle)'
                     : 'rgba(13, 43, 92, 0.08)',
               },
             }}
@@ -278,7 +279,7 @@ function LandingHero() {
             sx={{
               position: 'absolute',
               inset: 0,
-              background: 'rgba(8, 28, 58, 0.7)',
+              background: 'rgba(0, 0, 0, 0.72)',
               pointerEvents: 'none',
             }}
           />
@@ -311,7 +312,7 @@ function LandingHero() {
               position: 'absolute',
               inset: 0,
               background:
-                'linear-gradient(90deg, rgba(8, 28, 58, 0.94) 0%, rgba(8, 28, 58, 0.8) 42%, rgba(8, 28, 58, 0.35) 68%, rgba(8, 28, 58, 0.08) 100%)',
+                'linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.82) 42%, rgba(0, 0, 0, 0.4) 68%, rgba(0, 0, 0, 0.1) 100%)',
               pointerEvents: 'none',
             }}
           />
@@ -434,17 +435,19 @@ export default function LandingPage() {
                         justifyContent: 'center',
                         textAlign: 'center',
                         border: (t) =>
-                          t.palette.mode === 'dark' ? '1px solid rgba(107, 166, 255, 0.2)' : 'none',
+                          t.palette.mode === 'dark'
+                            ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                            : 'none',
                         boxShadow: (t) =>
                           t.palette.mode === 'dark'
-                            ? '0 10px 30px rgba(0, 0, 0, 0.4)'
+                            ? 'var(--app-shadow-overlay)'
                             : `0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 14px 28px rgba(13, 43, 92, 0.1)`,
                         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                         '&:hover': {
                           transform: 'translateY(-3px)',
                           boxShadow: (t) =>
                             t.palette.mode === 'dark'
-                              ? '0 14px 36px rgba(0, 0, 0, 0.55)'
+                              ? 'var(--app-shadow-overlay)'
                               : `0 1px 0 rgba(255, 255, 255, 0.95) inset, 0 18px 32px rgba(13, 43, 92, 0.12)`,
                         },
                       }}
@@ -477,13 +480,15 @@ export default function LandingPage() {
                             alignItems: 'center',
                             justifyContent: 'center',
                             borderRadius: '50%',
+                            // A fill behind white text needs the deep orange:
+                            // the bright accent only reaches 2.8:1 with white.
                             bgcolor: 'mission.main',
-                            boxShadow: '0 2px 8px rgba(234, 88, 12, 0.35)',
+                            boxShadow: 'var(--app-shadow-accent)',
                           }}
                         >
                           <Typography
                             sx={{
-                              color: 'common.white',
+                              color: 'mission.contrastText',
                               fontWeight: 800,
                               lineHeight: 1,
                               fontSize: '1.5rem',
@@ -666,8 +671,9 @@ export default function LandingPage() {
         aria-label="Rodapé do site"
         sx={{
           py: { xs: 3, md: 4 },
-          bgcolor: 'primary.dark',
-          color: 'white',
+          // `primary.dark` is a pale blue in dark mode; this stays a deep band.
+          bgcolor: 'var(--app-footer-bg)',
+          color: 'common.white',
         }}
       >
         <Container maxWidth={false} sx={landingContainerSx}>

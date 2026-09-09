@@ -71,7 +71,7 @@ export default function CampaignMediaCarousel({
           borderRadius: 2.5,
           overflow: 'hidden',
           bgcolor: 'surface.main',
-          boxShadow: '0 4px 14px rgba(13, 43, 92, 0.12)',
+          boxShadow: 'var(--app-shadow-lg)',
         }}
       >
         {/* Active Image */}
@@ -231,7 +231,9 @@ export default function CampaignMediaCarousel({
                 borderRadius: 1,
                 '&:focus-visible': {
                   outline: (theme) =>
-                    theme.palette.mode === 'dark' ? '2px solid #60A5FA' : '2px solid #0D2B5C',
+                    theme.palette.mode === 'dark'
+                      ? '2px solid var(--mui-palette-action2-focusRing)'
+                      : '2px solid #0D2B5C',
                   outlineOffset: 2,
                 },
               }}
@@ -244,7 +246,7 @@ export default function CampaignMediaCarousel({
                   bgcolor: (theme) =>
                     idx === activeIndex
                       ? theme.palette.mode === 'dark'
-                        ? '#FB923C'
+                        ? 'accent.light'
                         : 'mission.main'
                       : 'divider',
                   transition: 'all 0.3s ease',

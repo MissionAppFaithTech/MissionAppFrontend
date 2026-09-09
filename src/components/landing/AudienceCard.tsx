@@ -161,7 +161,7 @@ export default function AudienceCard({
         transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
         '&:hover': {
           borderColor: accentColor,
-          boxShadow: '0 12px 40px rgba(13, 43, 92, 0.08)',
+          boxShadow: 'var(--app-shadow-overlay)',
         },
       }}
     >
