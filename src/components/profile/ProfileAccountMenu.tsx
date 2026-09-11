@@ -37,17 +37,17 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
         aria-haspopup="true"
         aria-expanded={isOpen ? 'true' : undefined}
         onClick={handleOpen}
-        sx={{ p: 0, minWidth: 44, minHeight: 44 }}
+        sx={{ p: 0.5, minWidth: 44, minHeight: 44 }}
       >
         <Avatar
           sx={{
-            width: { xs: 36, sm: 42 },
-            height: { xs: 36, sm: 42 },
+            width: { xs: 32, sm: 40 },
+            height: { xs: 32, sm: 40 },
             bgcolor: 'avatar.main',
             color: 'avatar.contrastText',
           }}
         >
-          <PersonIcon />
+          <PersonIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
         </Avatar>
       </IconButton>
 

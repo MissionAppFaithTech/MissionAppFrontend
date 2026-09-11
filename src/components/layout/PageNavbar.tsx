@@ -76,8 +76,8 @@ export default function PageNavbar({
           disableGutters
           sx={{
             gap: { xs: 1, sm: 2 },
-            py: 0.5,
-            minHeight: { xs: 56, sm: 64 },
+            py: { xs: 0.25, sm: 0.5 },
+            minHeight: { xs: 48, sm: 56, md: 64 },
             px: { xs: 1, sm: 0 },
           }}
         >
