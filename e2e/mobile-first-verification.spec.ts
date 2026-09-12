@@ -16,7 +16,7 @@ test.describe('Mobile-First Layout & Touch Targets Verification', () => {
 
     if (isMobile) {
       // Mobile bottom navigation is visible
-      const bottomNav = page.locator('nav[aria-label="Navegação inferior do visitante"]');
+      const bottomNav = page.locator('nav[aria-label="Navegação móvel do visitante"]');
       await expect(bottomNav).toBeVisible();
 
       // Touch targets are at least 44px high
