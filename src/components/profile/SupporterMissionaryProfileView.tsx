@@ -508,7 +508,7 @@ export default function SupporterMissionaryProfileView({
                           </IconButton>
                         </Stack>
 
-                        {/* Botão de Ação "Orei · {count}" */}
+                        {/* Botão de Ação "Orar · {count}" */}
                         <PillButton
                           tone={prayer.active ? 'cta' : 'primarySoftOutline'}
                           size="small"
@@ -520,7 +520,7 @@ export default function SupporterMissionaryProfileView({
                             fontWeight: 600,
                           }}
                         >
-                          Orei · {prayer.count}
+                          Orar · {prayer.count}
                         </PillButton>
                       </Stack>
                     </Stack>

@@ -243,7 +243,7 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                     minHeight: 44,
                   }}
                 >
-                  Orei · {post.prayersCount ?? 0}
+                  Orar · {post.prayersCount ?? 0}
                 </PillButton>
               </Stack>
             </Stack>

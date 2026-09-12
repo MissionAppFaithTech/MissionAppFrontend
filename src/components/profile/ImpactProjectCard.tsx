@@ -309,6 +309,37 @@ export default function ImpactProjectCard({
               </Stack>
             )}
 
+            {/* 6. Ação de Ofertar (Movida para cima, entre vídeo e fotos) */}
+            <Box sx={{ pt: 1, pb: 1, display: 'flex', justifyContent: 'center' }}>
+              <PillButton
+                tone="missionFilled"
+                size="medium"
+                onClick={() => setDonationModalOpen(true)}
+                sx={{
+                  minHeight: 46,
+                  width: { xs: '100%', sm: 'auto' },
+                  minWidth: { sm: 200 },
+                  px: 4,
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                  bgcolor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                  color: 'mission.contrastText',
+                  '&:hover': {
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
+                  },
+                  boxShadow: (theme) =>
+                    theme.palette.mode === 'dark'
+                      ? 'var(--app-shadow-accent)'
+                      : 'var(--app-shadow-accent)',
+                }}
+              >
+                <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
+                Ofertar
+              </PillButton>
+            </Box>
+
             {/* 5. Carrossel de Fotos do Projeto */}
             {galleryPhotos.length > 0 && (
               <Stack spacing={1.5}>
@@ -496,25 +527,7 @@ export default function ImpactProjectCard({
               </Stack>
             )}
 
-            {/* 6. Ação de Ofertar */}
-            <Box sx={{ pt: 1 }}>
-              <PillButton
-                tone="missionFilled"
-                size="medium"
-                onClick={() => setDonationModalOpen(true)}
-                sx={{
-                  minHeight: 44,
-                  width: { xs: '100%', sm: 'auto' },
-                  px: 3,
-                  fontSize: '0.9375rem',
-                  fontWeight: 700,
-                  boxShadow: 'var(--app-shadow-accent)',
-                }}
-              >
-                <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
-                Ofertar
-              </PillButton>
-            </Box>
+
           </Stack>
         </CardContent>
       </Card>
