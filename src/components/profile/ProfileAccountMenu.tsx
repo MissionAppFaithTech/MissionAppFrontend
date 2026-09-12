@@ -186,31 +186,7 @@ export default function ProfileAccountMenu({
             '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
           }}
         >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Dados cadastrais</Typography>
-        </Box>
-
-        <Divider />
-
-        <Box
-          component={Link}
-          href={
-            role === 'supporter'
-              ? '/profile/supporter/configuracoes#ecclesiastical-section'
-              : '/profile/configuracoes#ecclesiastical-section'
-          }
-          onClick={handleClose}
-          sx={{
-            display: 'block',
-            px: 2.5,
-            py: 1.5,
-            color: 'text.primary',
-            textDecoration: 'none',
-            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
-          }}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-            Dados eclesiásticos
-          </Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Editar perfil</Typography>
         </Box>
 
         <Divider />
