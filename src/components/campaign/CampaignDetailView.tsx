@@ -469,27 +469,23 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                         />
                       </Box>
                       <Box sx={{ minWidth: 0, flex: 1 }}>
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          sx={{ alignItems: 'center', mb: 0.25, flexWrap: 'wrap' }}
-                        >
+                        <Stack spacing={0.75} sx={{ alignItems: 'flex-start' }}>
                           <Typography
                             variant="subtitle2"
                             color="text.primary"
-                            sx={{ fontWeight: 800, lineHeight: 1.2 }}
+                            sx={{ fontWeight: 800, lineHeight: 1.2, fontSize: '1rem' }}
                           >
                             Campanha Oficial
                           </Typography>
                           <CampaignBadge label={campaign.badge || 'Oficial'} size="small" />
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block', pt: 0.25, fontSize: '0.85rem' }}
+                          >
+                            Mission App Brasil · Mobilização Nacional
+                          </Typography>
                         </Stack>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ display: 'block' }}
-                        >
-                          Mission App Brasil · Mobilização Nacional
-                        </Typography>
                       </Box>
                     </Stack>
 

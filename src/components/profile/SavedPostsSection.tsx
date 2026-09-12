@@ -254,7 +254,7 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                     </IconButton>
                   </Stack>
 
-                  {/* Prayer Action Button "Orei · count" */}
+                  {/* Prayer Action Button "Orar · count" */}
                   <PillButton
                     tone={prayerState.active ? 'cta' : 'primarySoftOutline'}
                     size="small"
@@ -267,7 +267,7 @@ export default function SavedPostsSection({ posts }: SavedPostsSectionProps) {
                       borderColor: 'primary.main',
                     }}
                   >
-                    Orei · {prayerState.count}
+                    Orar · {prayerState.count}
                   </PillButton>
                 </Stack>
               </Stack>

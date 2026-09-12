@@ -170,133 +170,144 @@ export default function MissionaryCampaignSection({
               <CampaignMediaCarousel images={campaign.images} title={campaign.title} />
             )}
 
-            {/* 3. Detalhes e Descrição da Campanha */}
-            <Stack spacing={1.5}>
+            {/* Ações e Data Oficial Centralizadas (Movidas para cima, entre as fotos e a descrição/vídeo) */}
+            <Stack spacing={2.5} sx={{ alignItems: 'center', pt: 1, pb: 1 }}>
               {campaign.churchDay && (
                 <Stack
                   direction="row"
-                  spacing={1}
+                  spacing={1.5}
                   sx={{
                     alignItems: 'center',
+                    justifyContent: 'center',
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                        : 'rgba(13, 43, 92, 0.05)',
+                        ? 'rgba(251, 146, 60, 0.15)'
+                        : 'rgba(230, 81, 0, 0.1)',
                     border: '1px solid',
                     borderColor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-borderStrong)'
-                        : 'rgba(13, 43, 92, 0.15)',
-                    borderRadius: 2,
-                    px: 1.5,
-                    py: 1,
-                    width: 'fit-content',
-                    boxShadow: (theme) =>
-                      theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
+                      theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                    borderRadius: 3,
+                    px: { xs: 2, sm: 3 },
+                    py: { xs: 1.25, sm: 1.5 },
+                    width: '100%',
+                    maxWidth: 480,
+                    boxShadow: 'var(--app-shadow-xs)',
                   }}
                 >
                   <CalendarMonthIcon
                     sx={{
-                      fontSize: 18,
+                      fontSize: 24,
                       color: (theme) =>
-                        theme.palette.mode === 'dark' ? 'accent.light' : 'connection.main',
+                        theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
                     }}
                   />
                   <Typography
-                    variant="caption"
-                    color="text.primary"
-                    sx={{ fontWeight: 700, fontSize: '0.8125rem' }}
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 800,
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      color: (theme) =>
+                        theme.palette.mode === 'dark' ? 'accent.light' : 'mission.dark',
+                      textAlign: 'center',
+                    }}
                   >
                     Dia Oficial nas Igrejas: {campaign.churchDay}
                   </Typography>
                 </Stack>
               )}
 
-              <Typography
-                variant="body1"
-                color="text.primary"
+              {/* Botões de Ação Principais: Ofertar e Página da Campanha */}
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={1.5}
                 sx={{
-                  fontSize: { xs: '0.9375rem', sm: '1rem' },
-                  lineHeight: 1.7,
-                  pt: 0.5,
-                  whiteSpace: 'pre-line',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '100%',
                 }}
               >
-                {campaign.description}
-              </Typography>
+                {/* Botão OFERTAR */}
+                <PillButton
+                  tone="missionFilled"
+                  size="medium"
+                  onClick={() => setDonationModalOpen(true)}
+                  aria-label="Ofertar na campanha"
+                  sx={{
+                    minHeight: 46,
+                    px: 4,
+                    width: { xs: '100%', sm: 'auto' },
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
+                    color: 'mission.contrastText',
+                    '&:hover': {
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
+                    },
+                    boxShadow: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--app-shadow-accent)'
+                        : 'var(--app-shadow-accent)',
+                  }}
+                >
+                  <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
+                  Ofertar
+                </PillButton>
+
+                {/* Botão Página da Campanha */}
+                <PillButton
+                  component={Link}
+                  href={`/campanha/${campaign.id}`}
+                  tone="primarySoftOutline"
+                  size="medium"
+                  aria-label="Ver Página da Campanha"
+                  sx={{
+                    minHeight: 46,
+                    px: 3,
+                    width: { xs: '100%', sm: 'auto' },
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                    color: (theme) =>
+                      theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
+                    borderColor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? 'var(--mui-palette-action2-borderStrong)'
+                        : 'primary.main',
+                    '&:hover': {
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark'
+                          ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                          : 'rgba(13, 43, 92, 0.05)',
+                    },
+                  }}
+                >
+                  <OpenInNewIcon sx={{ fontSize: 18, mr: 1 }} />
+                  Ver Página da Campanha
+                </PillButton>
+              </Stack>
             </Stack>
+
+            <Divider sx={{ my: 0.5 }} />
+
+            {/* 3. Detalhes e Descrição da Campanha */}
+            <Typography
+              variant="body1"
+              color="text.primary"
+              sx={{
+                fontSize: { xs: '0.9375rem', sm: '1rem' },
+                lineHeight: 1.7,
+                pt: 0.5,
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {campaign.description}
+            </Typography>
 
             {/* 4. Vídeo da Campanha */}
             {campaign.videoUrl && (
               <CampaignVideoPlayer videoUrl={campaign.videoUrl} title={campaign.title} />
             )}
-
-            <Divider sx={{ my: 0.5 }} />
-
-            {/* Botões de Ação Principais: Ofertar e Página da Campanha */}
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={1.5}
-              sx={{ alignItems: { xs: 'stretch', sm: 'center' } }}
-            >
-              {/* Botão OFERTAR */}
-              <PillButton
-                tone="missionFilled"
-                size="medium"
-                onClick={() => setDonationModalOpen(true)}
-                aria-label="Ofertar na campanha"
-                sx={{
-                  minHeight: 46,
-                  px: 3.5,
-                  fontSize: '0.95rem',
-                  fontWeight: 700,
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                  color: 'mission.contrastText',
-                  '&:hover': {
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
-                  },
-                  boxShadow: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'var(--app-shadow-accent)'
-                      : 'var(--app-shadow-accent)',
-                }}
-              >
-                <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />
-                Ofertar
-              </PillButton>
-
-              {/* Botão Página da Campanha */}
-              <PillButton
-                component={Link}
-                href={`/campanha/${campaign.id}`}
-                tone="primarySoftOutline"
-                size="medium"
-                aria-label="Ver Página da Campanha"
-                sx={{
-                  minHeight: 46,
-                  px: 3,
-                  fontSize: '0.95rem',
-                  fontWeight: 700,
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? 'text.primary' : 'primary.main',
-                  borderColor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'var(--mui-palette-action2-borderStrong)'
-                      : 'primary.main',
-                  '&:hover': {
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                        : 'rgba(13, 43, 92, 0.05)',
-                  },
-                }}
-              >
-                <OpenInNewIcon sx={{ fontSize: 18, mr: 1 }} />
-                Ver Página da Campanha
-              </PillButton>
-            </Stack>
           </Stack>
         </CardContent>
       </Card>

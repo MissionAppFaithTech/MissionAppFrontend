@@ -12,7 +12,7 @@ describe('SavedPostsSection Component', () => {
     expect(screen.getAllByText(mockSavedPosts[0].authorName).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText(mockSavedPosts[0].content)).toBeInTheDocument();
 
-    const prayButtons = screen.getAllByRole('button', { name: /orei/i });
+    const prayButtons = screen.getAllByRole('button', { name: /orar/i });
     expect(prayButtons.length).toBeGreaterThan(0);
     await user.click(prayButtons[0]);
   });
