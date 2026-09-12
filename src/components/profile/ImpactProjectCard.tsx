@@ -526,8 +526,6 @@ export default function ImpactProjectCard({
                 )}
               </Stack>
             )}
-
-
           </Stack>
         </CardContent>
       </Card>

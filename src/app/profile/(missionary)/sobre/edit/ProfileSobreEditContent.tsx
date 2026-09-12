@@ -8,9 +8,9 @@ export default function ProfileSobreEditContent() {
   const router = useRouter();
 
   return (
-    <ProfileAboutEditSection 
-      data={mockProfile.about} 
-      onBack={() => router.push('/profile/sobre')} 
+    <ProfileAboutEditSection
+      data={mockProfile.about}
+      onBack={() => router.push('/profile/sobre')}
     />
   );
 }

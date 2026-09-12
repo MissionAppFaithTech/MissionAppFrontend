@@ -813,14 +813,15 @@ export function createAppTheme() {
           ],
           input: ({ theme }) => [
             {
-              '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active': {
-                WebkitBoxShadow: '0 0 0 1000px #ffffff inset !important',
-                boxShadow: '0 0 0 1000px #ffffff inset !important',
-                WebkitTextFillColor: 'var(--mui-palette-text-primary, #081c3a) !important',
-                caretColor: 'var(--mui-palette-text-primary, #081c3a) !important',
-                transition: 'background-color 5000s ease-in-out 0s',
-                borderRadius: 'inherit',
-              },
+              '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active':
+                {
+                  WebkitBoxShadow: '0 0 0 1000px #ffffff inset !important',
+                  boxShadow: '0 0 0 1000px #ffffff inset !important',
+                  WebkitTextFillColor: 'var(--mui-palette-text-primary, #081c3a) !important',
+                  caretColor: 'var(--mui-palette-text-primary, #081c3a) !important',
+                  transition: 'background-color 5000s ease-in-out 0s',
+                  borderRadius: 'inherit',
+                },
               '&::selection': {
                 backgroundColor: 'rgba(249, 115, 22, 0.25) !important',
                 color: 'inherit !important',
@@ -835,14 +836,15 @@ export function createAppTheme() {
                 color: 'rgba(255, 255, 255, 0.55)',
                 opacity: 1,
               },
-              '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active': {
-                WebkitBoxShadow: '0 0 0 1000px #1c1c1c inset !important',
-                boxShadow: '0 0 0 1000px #1c1c1c inset !important',
-                WebkitTextFillColor: '#ffffff !important',
-                caretColor: '#ffffff !important',
-                transition: 'background-color 5000s ease-in-out 0s',
-                borderRadius: 'inherit',
-              },
+              '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active':
+                {
+                  WebkitBoxShadow: '0 0 0 1000px #1c1c1c inset !important',
+                  boxShadow: '0 0 0 1000px #1c1c1c inset !important',
+                  WebkitTextFillColor: '#ffffff !important',
+                  caretColor: '#ffffff !important',
+                  transition: 'background-color 5000s ease-in-out 0s',
+                  borderRadius: 'inherit',
+                },
               '&::selection': {
                 backgroundColor: 'rgba(249, 115, 22, 0.35) !important',
                 color: '#ffffff !important',

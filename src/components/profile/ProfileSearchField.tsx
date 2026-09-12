@@ -26,7 +26,7 @@ export default function ProfileSearchField({
     setIsNavigating(true);
     // The route change might take a short moment, leaving the spinner active
     router.push(href);
-    
+
     // Fallback: reset state if component stays mounted (e.g., navigated to same page or back)
     setTimeout(() => {
       setIsNavigating(false);
@@ -53,12 +53,12 @@ export default function ProfileSearchField({
           startAdornment: (
             <InputAdornment position="start">
               {isNavigating ? (
-                <CircularProgress 
-                  size={16} 
-                  sx={{ 
+                <CircularProgress
+                  size={16}
+                  sx={{
                     color: (t) => (t.palette.mode === 'dark' ? 'accent.main' : 'primary.main'),
                     ml: 0.5,
-                  }} 
+                  }}
                 />
               ) : (
                 <SearchIcon
@@ -109,7 +109,7 @@ export default function ProfileSearchField({
             transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
           },
           '&:hover fieldset': {
-            borderColor: (t) => 
+            borderColor: (t) =>
               t.palette.mode === 'dark' ? 'text.secondary' : 'rgba(0, 0, 0, 0.2)',
           },
           '&.Mui-focused fieldset': {
@@ -123,7 +123,7 @@ export default function ProfileSearchField({
             boxShadow: 'var(--app-shadow-md)',
             '& .MuiSvgIcon-root': {
               color: (t) => (t.palette.mode === 'dark' ? 'accent.light' : 'accent.main'),
-            }
+            },
           },
           '& input': {
             cursor: 'pointer',

@@ -1,6 +1,7 @@
 @AGENTS.md
 
 ## ⚠️ CRITICAL REQUIREMENT SOURCE OF TRUTH
+
 O site (https://missionappfaithtech.github.io/MissionAppRequirementsList/) contém todos os requisitos a serem implementados. Tais requisitos devem ser lidos e consultados antes de qualquer agente de IA ou IA fazer qualquer coisa.
 
 ## Mobile-First Responsiveness Guidelines

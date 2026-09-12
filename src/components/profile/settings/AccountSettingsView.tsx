@@ -24,21 +24,22 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
         pb: 8,
         '& .MuiOutlinedInput-root': {
           bgcolor: (t) => (t.palette.mode === 'dark' ? 'action2.fieldBg' : 'background.paper'),
-          '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active': {
-            WebkitBoxShadow: (t) =>
-              t.palette.mode === 'dark'
-                ? '0 0 0 1000px #1c1c1c inset !important'
-                : '0 0 0 1000px #ffffff inset !important',
-            boxShadow: (t) =>
-              t.palette.mode === 'dark'
-                ? '0 0 0 1000px #1c1c1c inset !important'
-                : '0 0 0 1000px #ffffff inset !important',
-            WebkitTextFillColor: (t) =>
-              t.palette.mode === 'dark' ? '#ffffff !important' : '#081c3a !important',
-            caretColor: (t) =>
-              t.palette.mode === 'dark' ? '#ffffff !important' : '#081c3a !important',
-            transition: 'background-color 5000s ease-in-out 0s',
-          },
+          '& input:-webkit-autofill, & input:-webkit-autofill:hover, & input:-webkit-autofill:focus, & input:-webkit-autofill:active':
+            {
+              WebkitBoxShadow: (t) =>
+                t.palette.mode === 'dark'
+                  ? '0 0 0 1000px #1c1c1c inset !important'
+                  : '0 0 0 1000px #ffffff inset !important',
+              boxShadow: (t) =>
+                t.palette.mode === 'dark'
+                  ? '0 0 0 1000px #1c1c1c inset !important'
+                  : '0 0 0 1000px #ffffff inset !important',
+              WebkitTextFillColor: (t) =>
+                t.palette.mode === 'dark' ? '#ffffff !important' : '#081c3a !important',
+              caretColor: (t) =>
+                t.palette.mode === 'dark' ? '#ffffff !important' : '#081c3a !important',
+              transition: 'background-color 5000s ease-in-out 0s',
+            },
           '& input::selection': {
             backgroundColor: 'rgba(249, 115, 22, 0.25) !important',
             color: 'inherit !important',
@@ -49,7 +50,10 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
       <Stack spacing={4}>
         {/* Credenciais de Acesso */}
         <Card variant="outlined" sx={{ borderRadius: 3 }}>
-          <CardHeader title="Credenciais de Acesso" slotProps={{ title: { sx: { fontWeight: 700 } } }} />
+          <CardHeader
+            title="Credenciais de Acesso"
+            slotProps={{ title: { sx: { fontWeight: 700 } } }}
+          />
           <Divider />
           <CardContent>
             <Stack spacing={4}>
@@ -58,22 +62,24 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
                   Alteração de E-mail
                 </Typography>
                 <Stack spacing={2}>
-                  <TextField 
-                    label="Novo E-mail" 
-                    type="email" 
-                    size="small" 
-                    fullWidth 
-                    autoComplete="off" 
+                  <TextField
+                    label="Novo E-mail"
+                    type="email"
+                    size="small"
+                    fullWidth
+                    autoComplete="off"
                   />
-                  <TextField 
-                    label="Senha Atual (para confirmar)" 
-                    type="password" 
-                    size="small" 
-                    fullWidth 
-                    autoComplete="current-password" 
+                  <TextField
+                    label="Senha Atual (para confirmar)"
+                    type="password"
+                    size="small"
+                    fullWidth
+                    autoComplete="current-password"
                   />
                   <Box>
-                    <PillButton tone="primaryFilled" size="small">Atualizar E-mail</PillButton>
+                    <PillButton tone="primaryFilled" size="small">
+                      Atualizar E-mail
+                    </PillButton>
                   </Box>
                 </Stack>
               </Box>
@@ -85,29 +91,31 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
                   Redefinição de Senha
                 </Typography>
                 <Stack spacing={2}>
-                  <TextField 
-                    label="Senha Atual" 
-                    type="password" 
-                    size="small" 
-                    fullWidth 
-                    autoComplete="current-password" 
+                  <TextField
+                    label="Senha Atual"
+                    type="password"
+                    size="small"
+                    fullWidth
+                    autoComplete="current-password"
                   />
-                  <TextField 
-                    label="Nova Senha" 
-                    type="password" 
-                    size="small" 
-                    fullWidth 
-                    autoComplete="new-password" 
+                  <TextField
+                    label="Nova Senha"
+                    type="password"
+                    size="small"
+                    fullWidth
+                    autoComplete="new-password"
                   />
-                  <TextField 
-                    label="Confirmar Nova Senha" 
-                    type="password" 
-                    size="small" 
-                    fullWidth 
-                    autoComplete="new-password" 
+                  <TextField
+                    label="Confirmar Nova Senha"
+                    type="password"
+                    size="small"
+                    fullWidth
+                    autoComplete="new-password"
                   />
                   <Box>
-                    <PillButton tone="primaryFilled" size="small">Alterar Senha</PillButton>
+                    <PillButton tone="primaryFilled" size="small">
+                      Alterar Senha
+                    </PillButton>
                   </Box>
                 </Stack>
               </Box>
@@ -117,7 +125,10 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
 
         {/* Dados Eclesiásticos */}
         <Card variant="outlined" sx={{ borderRadius: 3 }}>
-          <CardHeader title="Dados Eclesiásticos" slotProps={{ title: { sx: { fontWeight: 700 } } }} />
+          <CardHeader
+            title="Dados Eclesiásticos"
+            slotProps={{ title: { sx: { fontWeight: 700 } } }}
+          />
           <Divider />
           <CardContent>
             <Stack spacing={3}>
@@ -126,11 +137,11 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
                   Comunidade de Fé (Igreja)
                 </Typography>
                 <Stack spacing={2}>
-                  <TextField 
-                    label="Nome da Comunidade de Fé" 
-                    defaultValue="Igreja Batista Central" 
-                    size="small" 
-                    fullWidth 
+                  <TextField
+                    label="Nome da Comunidade de Fé"
+                    defaultValue="Igreja Batista Central"
+                    size="small"
+                    fullWidth
                   />
                 </Stack>
               </Box>
@@ -170,7 +181,9 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
               </Box>
 
               <Box sx={{ pt: 1 }}>
-                <PillButton tone="primaryFilled" size="small">Salvar Dados Eclesiásticos</PillButton>
+                <PillButton tone="primaryFilled" size="small">
+                  Salvar Dados Eclesiásticos
+                </PillButton>
               </Box>
             </Stack>
           </CardContent>
@@ -179,7 +192,10 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
         {/* Agência Missionária (Only for missionaries) */}
         {role === 'missionary' && (
           <Card variant="outlined" sx={{ borderRadius: 3 }}>
-            <CardHeader title="Agência Missionária" slotProps={{ title: { sx: { fontWeight: 700 } } }} />
+            <CardHeader
+              title="Agência Missionária"
+              slotProps={{ title: { sx: { fontWeight: 700 } } }}
+            />
             <Divider />
             <CardContent>
               <Stack spacing={3}>
@@ -201,7 +217,9 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
                   <TextField label="Telefone de contato" size="small" fullWidth />
                 </Stack>
                 <Box>
-                  <PillButton tone="primaryFilled" size="small">Salvar Agência Missionária</PillButton>
+                  <PillButton tone="primaryFilled" size="small">
+                    Salvar Agência Missionária
+                  </PillButton>
                 </Box>
               </Stack>
             </CardContent>
@@ -210,17 +228,16 @@ export default function AccountSettingsView({ role }: AccountSettingsViewProps) 
 
         {/* Danger Zone */}
         <Card variant="outlined" sx={{ borderRadius: 3, borderColor: 'error.main' }}>
-          <CardHeader 
-            title="Zona de Perigo" 
-            slotProps={{ title: { sx: { fontWeight: 700, color: 'error.main' } } }} 
+          <CardHeader
+            title="Zona de Perigo"
+            slotProps={{ title: { sx: { fontWeight: 700, color: 'error.main' } } }}
           />
           <Divider sx={{ borderColor: 'error.light', opacity: 0.2 }} />
           <CardContent>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              {role === 'missionary' 
+              {role === 'missionary'
                 ? 'Ao encerrar sua conta de missionário, seu perfil será ocultado e ficará inacessível ao público (Soft Delete), mas seus dados serão preservados internamente para integridade.'
-                : 'Ao excluir sua conta de apoiador, todos os seus dados pessoais serão removidos definitivamente do sistema (Hard Delete).'
-              }
+                : 'Ao excluir sua conta de apoiador, todos os seus dados pessoais serão removidos definitivamente do sistema (Hard Delete).'}
             </Typography>
             <Button variant="outlined" color="error">
               {role === 'missionary' ? 'Desativar Conta' : 'Excluir Conta'}

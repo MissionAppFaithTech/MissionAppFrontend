@@ -18,7 +18,10 @@ type ProfileAccountMenuProps = {
   role?: 'missionary' | 'supporter' | 'visitor';
 };
 
-export default function ProfileAccountMenu({ profile, role = 'missionary' }: ProfileAccountMenuProps) {
+export default function ProfileAccountMenu({
+  profile,
+  role = 'missionary',
+}: ProfileAccountMenuProps) {
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const isOpen = Boolean(anchorElement);
 
@@ -190,7 +193,9 @@ export default function ProfileAccountMenu({ profile, role = 'missionary' }: Pro
 
         <Box
           component={Link}
-          href={role === 'supporter' ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
+          href={
+            role === 'supporter' ? '/profile/supporter/configuracoes' : '/profile/configuracoes'
+          }
           onClick={handleClose}
           sx={{
             display: 'block',
@@ -201,7 +206,9 @@ export default function ProfileAccountMenu({ profile, role = 'missionary' }: Pro
             '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
           }}
         >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Configurações de conta</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+            Configurações de conta
+          </Typography>
         </Box>
       </Popover>
     </>
