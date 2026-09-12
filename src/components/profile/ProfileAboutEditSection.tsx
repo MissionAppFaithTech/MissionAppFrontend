@@ -230,7 +230,10 @@ export default function ProfileAboutEditSection({
                     select
                     fullWidth
                     error={Boolean(errors.faithCommunity)}
-                    helperText={errors.faithCommunity?.message}
+                    helperText={
+                      errors.faithCommunity?.message ||
+                      'Para gerenciar os dados eclesiásticos completos da igreja e liderança pastoral, acesse Configurações de Conta.'
+                    }
                   >
                     {faithCommunities.map((community) => (
                       <MenuItem key={community} value={community}>

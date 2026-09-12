@@ -175,7 +175,10 @@ export default function SupporterAboutEditSection({
                 fullWidth
                 size="small"
                 error={Boolean(errors.faithCommunity)}
-                helperText={errors.faithCommunity?.message}
+                helperText={
+                  errors.faithCommunity?.message ||
+                  'Opcional. Para gerenciar os dados eclesiásticos completos da igreja e pastor, acesse Configurações de Conta.'
+                }
               />
             </LabeledField>
 
