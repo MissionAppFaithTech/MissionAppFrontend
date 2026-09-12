@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import type { KeyboardEvent } from 'react';
 import InputAdornment from '@mui/material/InputAdornment';
 import TextField from '@mui/material/TextField';
 import CircularProgress from '@mui/material/CircularProgress';

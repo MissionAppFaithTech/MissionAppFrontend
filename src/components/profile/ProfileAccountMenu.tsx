@@ -15,9 +15,10 @@ import type { ProfileData } from '@/types/profile';
 
 type ProfileAccountMenuProps = {
   profile: Pick<ProfileData, 'username' | 'displayName'>;
+  role?: 'missionary' | 'supporter' | 'visitor';
 };
 
-export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps) {
+export default function ProfileAccountMenu({ profile, role = 'missionary' }: ProfileAccountMenuProps) {
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const isOpen = Boolean(anchorElement);
 
@@ -169,15 +170,38 @@ export default function ProfileAccountMenu({ profile }: ProfileAccountMenuProps)
         </Box>
 
         <Divider />
-
-        <Box sx={{ px: 2.5, py: 2 }}>
-          <Typography sx={{ fontWeight: 700 }}>Dados cadastrais</Typography>
+        <Box
+          component={Link}
+          href={role === 'supporter' ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
+          onClick={handleClose}
+          sx={{
+            display: 'block',
+            px: 2.5,
+            py: 1.5,
+            color: 'text.primary',
+            textDecoration: 'none',
+            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
+          }}
+        >
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Dados cadastrais</Typography>
         </Box>
 
         <Divider />
 
-        <Box sx={{ px: 2.5, py: 2 }}>
-          <Typography sx={{ fontWeight: 700 }}>Configurações de conta</Typography>
+        <Box
+          component={Link}
+          href={role === 'supporter' ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
+          onClick={handleClose}
+          sx={{
+            display: 'block',
+            px: 2.5,
+            py: 2,
+            color: 'text.primary',
+            textDecoration: 'none',
+            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
+          }}
+        >
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Configurações de conta</Typography>
         </Box>
       </Popover>
     </>

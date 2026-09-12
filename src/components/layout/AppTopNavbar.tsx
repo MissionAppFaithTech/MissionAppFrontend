@@ -110,7 +110,7 @@ export default function AppTopNavbar({
           </>
         ) : (
           /* When logged in: Profile account menu / avatar */
-          <ProfileAccountMenu profile={resolvedProfile} />
+          <ProfileAccountMenu profile={resolvedProfile} role={role} />
         )}
       </PageNavbarActions>
     </PageNavbar>

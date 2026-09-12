@@ -34,7 +34,8 @@ export default function ProfileLayoutShell({
   const isFreePage =
     Boolean(pathname?.includes('/edit')) ||
     Boolean(pathname?.endsWith('/edit-profile')) ||
-    Boolean(pathname?.includes('/financeiro'));
+    Boolean(pathname?.includes('/financeiro')) ||
+    Boolean(pathname?.includes('/configuracoes'));
 
   // Calculate back button destination for free pages
   const backHref =
@@ -54,9 +55,11 @@ export default function ProfileLayoutShell({
         ? 'Editar Sobre'
         : pathname?.includes('/financeiro')
           ? 'Configurações Financeiras'
-          : role === 'supporter'
-            ? 'Editar Perfil de Apoiador'
-            : 'Editar Perfil';
+          : pathname?.includes('/configuracoes')
+            ? 'Configurações de Conta'
+            : role === 'supporter'
+              ? 'Editar Perfil de Apoiador'
+              : 'Editar Perfil';
 
   if (isFreePage) {
     return (
