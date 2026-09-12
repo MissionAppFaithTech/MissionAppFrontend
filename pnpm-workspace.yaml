@@ -2,6 +2,7 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
 minimumReleaseAgeExclude:
+  - '@types/node@24.13.4'
   - '@types/react-dom'
   - zod@4.5.4
   - eslint@10.9.1
