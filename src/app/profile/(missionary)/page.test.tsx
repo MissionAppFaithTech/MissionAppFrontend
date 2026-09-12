@@ -11,6 +11,11 @@ vi.mock('next/navigation', async () => {
     ...actual,
     redirect: (url: string) => mockRedirect(url),
     usePathname: () => '/profile/sobre',
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+    }),
   };
 });
 

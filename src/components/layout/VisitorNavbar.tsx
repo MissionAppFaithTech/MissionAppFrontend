@@ -1,65 +1,20 @@
 'use client';
 
-import Logo from '@/components/common/Logo';
-import PillButton from '@/components/common/PillButton';
-import ThemeToggle from '@/components/ThemeToggle';
-import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
+import AppTopNavbar, { type AppTopNavbarProps } from '@/components/layout/AppTopNavbar';
 
-type VisitorNavbarProps = {
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | false;
+export type VisitorNavbarProps = AppTopNavbarProps & {
   onSearchClick?: () => void;
 };
 
-export default function VisitorNavbar({ maxWidth = 'lg' }: VisitorNavbarProps) {
-  return (
-    <PageNavbar maxWidth={maxWidth}>
-      <Logo size="sm" href="/" variant="dark" />
-
-      <PageNavbarActions>
-        <ThemeToggle />
-
-        <PillButton
-          href="/login"
-          tone="ghost"
-          size="small"
-          sx={{
-            px: { xs: 1.5, sm: 2 },
-            py: { xs: 0.4, sm: 0.6 },
-            fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-            fontWeight: 600,
-            borderRadius: '14px',
-            border: '1px solid rgba(255, 255, 255, 0.35)',
-            bgcolor: 'rgba(255, 255, 255, 0.12)',
-            color: 'common.white',
-            '&:hover': {
-              bgcolor: 'common.white',
-              // On a white fill the ink must stay dark in both themes. `primary.main`
-              // is a light blue in dark (2.46:1) and `primary.dark` is barely better
-              // (3.27:1), so this pins to black.
-              color: 'common.black',
-              borderColor: 'common.white',
-            },
-          }}
-        >
-          Entrar
-        </PillButton>
-
-        <PillButton
-          href="/select-role"
-          tone="missionFlat"
-          size="small"
-          sx={{
-            display: { xs: 'none', sm: 'inline-flex' },
-            px: 2,
-            py: 0.6,
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            borderRadius: '14px',
-          }}
-        >
-          Cadastre-se
-        </PillButton>
-      </PageNavbarActions>
-    </PageNavbar>
-  );
+/**
+ * VisitorNavbar component with support for both non-registered visitors and logged-in users.
+ * Controlled cleanly via the `isLoggedIn: boolean` property.
+ */
+export default function VisitorNavbar({
+  isLoggedIn = false,
+  maxWidth = 'lg',
+  role = 'visitor',
+  ...rest
+}: VisitorNavbarProps) {
+  return <AppTopNavbar isLoggedIn={isLoggedIn} maxWidth={maxWidth} role={role} {...rest} />;
 }

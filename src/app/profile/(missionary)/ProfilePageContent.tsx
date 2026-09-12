@@ -1,21 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import ProfileAboutEditSection from '@/components/profile/ProfileAboutEditSection';
+import { useRouter } from 'next/navigation';
 import ProfileAboutSection from '@/components/profile/ProfileAboutSection';
 import { mockProfile } from '@/mocks/profile';
 
-type ProfileView = 'about' | 'edit-about';
-
 export default function ProfilePageContent() {
-  const [profileView, setProfileView] = useState<ProfileView>('about');
+  const router = useRouter();
 
-  return profileView === 'about' ? (
+  return (
     <ProfileAboutSection
       data={mockProfile.about}
-      onEditAction={() => setProfileView('edit-about')}
+      onEditAction={() => router.push('/profile/sobre/edit')}
     />
-  ) : (
-    <ProfileAboutEditSection data={mockProfile.about} onBack={() => setProfileView('about')} />
   );
 }
