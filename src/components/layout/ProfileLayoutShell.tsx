@@ -50,11 +50,13 @@ export default function ProfileLayoutShell({
   const pageTitle =
     pathname === '/profile/projetos-de-impacto/edit'
       ? 'Editar Projeto de Impacto'
-      : pathname?.includes('/financeiro')
-        ? 'Configurações Financeiras'
-        : role === 'supporter'
-          ? 'Editar Perfil de Apoiador'
-          : 'Editar Perfil';
+      : pathname === '/profile/sobre/edit'
+        ? 'Editar Sobre'
+        : pathname?.includes('/financeiro')
+          ? 'Configurações Financeiras'
+          : role === 'supporter'
+            ? 'Editar Perfil de Apoiador'
+            : 'Editar Perfil';
 
   if (isFreePage) {
     return (
