@@ -51,11 +51,23 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           O link de redefinição informado não é válido. Solicite um novo link para continuar.
         </Alert>
 
-        <PillButton href="/forgot-password" tone="cta" fullWidth sx={{ minHeight: 44 }} startIcon={<EmailOutlinedIcon />}>
+        <PillButton
+          href="/forgot-password"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<EmailOutlinedIcon />}
+        >
           Solicitar novo link
         </PillButton>
 
-        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }} startIcon={<ArrowBackIcon />}>
+        <PillButton
+          href="/login"
+          tone="outline"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -74,11 +86,23 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           minutos). Por motivos de segurança, solicite um novo link.
         </Alert>
 
-        <PillButton href="/forgot-password" tone="cta" fullWidth sx={{ minHeight: 44 }} startIcon={<EmailOutlinedIcon />}>
+        <PillButton
+          href="/forgot-password"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<EmailOutlinedIcon />}
+        >
           Solicitar novo link
         </PillButton>
 
-        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }} startIcon={<ArrowBackIcon />}>
+        <PillButton
+          href="/login"
+          tone="outline"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -96,7 +120,13 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           Sua nova senha foi salva. Você já pode acessar sua conta com as novas credenciais.
         </Alert>
 
-        <PillButton href="/login" tone="cta" fullWidth sx={{ minHeight: 44 }} startIcon={<LoginIcon />}>
+        <PillButton
+          href="/login"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<LoginIcon />}
+        >
           Entrar com a nova senha
         </PillButton>
       </Stack>
@@ -196,7 +226,13 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
       </PillButton>
 
-      <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }} startIcon={<ArrowBackIcon />}>
+      <PillButton
+        href="/login"
+        tone="outline"
+        fullWidth
+        sx={{ minHeight: 44 }}
+        startIcon={<ArrowBackIcon />}
+      >
         Voltar para o login
       </PillButton>
     </Stack>

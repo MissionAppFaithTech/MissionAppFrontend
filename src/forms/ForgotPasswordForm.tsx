@@ -90,7 +90,13 @@ export default function ForgotPasswordForm() {
           </Box>
         ) : null}
 
-        <PillButton href="/login" tone="cta" fullWidth sx={{ minHeight: 44 }} startIcon={<ArrowBackIcon />}>
+        <PillButton
+          href="/login"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -123,11 +129,23 @@ export default function ForgotPasswordForm() {
           Tentar outro e-mail
         </PillButton>
 
-        <PillButton href="/select-role" tone="missionFlat" fullWidth sx={{ minHeight: 44 }} startIcon={<PersonAddIcon />}>
+        <PillButton
+          href="/select-role"
+          tone="missionFlat"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<PersonAddIcon />}
+        >
           Criar uma conta
         </PillButton>
 
-        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }} startIcon={<ArrowBackIcon />}>
+        <PillButton
+          href="/login"
+          tone="outline"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -186,7 +204,13 @@ export default function ForgotPasswordForm() {
         {isSubmitting ? 'Verificando…' : 'Enviar link'}
       </PillButton>
 
-      <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }} startIcon={<ArrowBackIcon />}>
+      <PillButton
+        href="/login"
+        tone="outline"
+        fullWidth
+        sx={{ minHeight: 44 }}
+        startIcon={<ArrowBackIcon />}
+      >
         Voltar para o login
       </PillButton>
     </Stack>

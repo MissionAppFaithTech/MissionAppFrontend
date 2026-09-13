@@ -62,9 +62,7 @@ describe('AccountSettingsView Component', () => {
     expect(screen.queryByRole('heading', { name: /agência missionária/i })).not.toBeInTheDocument();
 
     // Section 4: Supporter has Hard Delete
-    expect(
-      screen.getByText(/exclusão definitiva de conta de apoiador/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/exclusão definitiva de conta de apoiador/i)).toBeInTheDocument();
     expect(screen.getAllByText(/hard delete/i).length).toBeGreaterThan(0);
     expect(screen.queryByText(/desativação de conta missionária/i)).not.toBeInTheDocument();
     expect(
