@@ -39,7 +39,7 @@ describe('AccountSettingsView Component', () => {
 
     // Section 4: Zona de Perigo (Soft delete for missionary)
     expect(screen.getByRole('heading', { name: /zona de perigo/i })).toBeInTheDocument();
-    expect(screen.getByText(/desativação de conta missionária \(rf 15.5\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/desativação de conta missionária/i)).toBeInTheDocument();
     expect(screen.getAllByText(/soft delete/i).length).toBeGreaterThan(0);
     expect(
       screen.getByRole('button', { name: /desativar conta de missionário/i })
@@ -63,9 +63,10 @@ describe('AccountSettingsView Component', () => {
 
     // Section 4: Supporter has Hard Delete
     expect(
-      screen.getByText(/exclusão definitiva de conta de apoiador \(rf 15.5\)/i)
+      screen.getByText(/exclusão definitiva de conta de apoiador/i)
     ).toBeInTheDocument();
     expect(screen.getAllByText(/hard delete/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/desativação de conta missionária/i)).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /excluir conta definitivamente/i })
     ).toBeInTheDocument();

@@ -14,6 +14,7 @@ import {
   FormHelperText,
   CircularProgress,
 } from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PillButton from '@/components/common/PillButton';
 import PhoneField from '@/components/common/PhoneField';
 import { maskBirthDate, maskCpfOrPassport } from '@/lib/masks';
@@ -172,7 +173,10 @@ export default function MissionariesStep1() {
             <span>Continuando...</span>
           </>
         ) : (
-          'Continuar'
+          <>
+            <ArrowForwardIcon />
+            <span>Continuar</span>
+          </>
         )}
       </PillButton>
     </Stack>

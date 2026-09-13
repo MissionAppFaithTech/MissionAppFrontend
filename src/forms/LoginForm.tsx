@@ -14,6 +14,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LoginIcon from '@mui/icons-material/Login';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PillButton from '@/components/common/PillButton';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
 
@@ -101,6 +103,15 @@ export default function LoginForm() {
         disabled={isSubmitting}
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <EmailOutlinedIcon color="action" />
+              </InputAdornment>
+            ),
+          },
+        }}
       />
 
       <TextField
@@ -196,7 +207,10 @@ export default function LoginForm() {
             <span>Entrando...</span>
           </>
         ) : (
-          'Entrar'
+          <>
+            <LoginIcon />
+            <span>Entrar</span>
+          </>
         )}
       </PillButton>
     </Stack>

@@ -17,6 +17,7 @@ import {
   MenuItem,
   CircularProgress,
 } from '@mui/material';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PillButton from '@/components/common/PillButton';
 import PhoneField from '@/components/common/PhoneField';
 import { maskBirthDate } from '@/lib/masks';
@@ -241,7 +242,10 @@ export default function SupportersStep1() {
             <span>Continuando...</span>
           </>
         ) : (
-          'Continuar'
+          <>
+            <ArrowForwardIcon />
+            <span>Continuar</span>
+          </>
         )}
       </PillButton>
     </Stack>

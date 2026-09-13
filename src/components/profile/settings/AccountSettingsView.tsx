@@ -362,7 +362,7 @@ export default function AccountSettingsView({
               {/* 1.1 Alteração de E-mail de Login */}
               <Box component="form" onSubmit={handleUpdateEmail} noValidate>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
-                  Alteração de E-mail de Login (RF 15.2.1)
+                  Alteração de E-mail de Login
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
                   E-mail atual cadastrado: <strong>{currentEmail}</strong>. Por motivos de
@@ -430,7 +430,7 @@ export default function AccountSettingsView({
               {/* 1.2 Redefinição de Senha (RF 15.2.2) */}
               <Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
-                  Redefinição de Senha (RF 15.2.2)
+                  Redefinição de Senha
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
                   Deseja alterar ou redefinir sua senha? Enviaremos um link de redefinição exclusivo
@@ -901,8 +901,8 @@ export default function AccountSettingsView({
               // Missionary: Soft Delete (RF 15.5)
               <Stack spacing={2}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    Desativação de Conta Missionária (RF 15.5)
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                    Desativação de Conta Missionária
                   </Typography>
                   <Chip label="Soft Delete" size="small" color="warning" sx={{ fontWeight: 700 }} />
                 </Box>
@@ -929,8 +929,8 @@ export default function AccountSettingsView({
               // Supporter: Hard Delete (RF 15.5)
               <Stack spacing={2}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                    Exclusão Definitiva de Conta de Apoiador (RF 15.5)
+                  <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                    Exclusão Definitiva de Conta de Apoiador
                   </Typography>
                   <Chip label="Hard Delete" size="small" color="error" sx={{ fontWeight: 700 }} />
                 </Box>
@@ -979,7 +979,7 @@ export default function AccountSettingsView({
           >
             Tem certeza de que deseja desativar sua conta de missionário? Seu perfil público,
             projetos e postagens ficarão ocultos imediatamente. Seus dados cadastrais serão
-            preservados internamente para integridade do sistema (RF 15.5).
+            preservados internamente para integridade do sistema.
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
@@ -1019,7 +1019,7 @@ export default function AccountSettingsView({
         <DialogContent>
           <DialogContentText id="delete-dialog-description" sx={{ color: 'text.primary', mb: 2 }}>
             Esta ação é irreversível. Todos os seus dados pessoais e histórico de apoiador serão
-            apagados permanentemente dos servidores (RF 15.5).
+            apagados permanentemente dos servidores.
           </DialogContentText>
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
             Para confirmar, digite <strong>EXCLUIR</strong> no campo abaixo:

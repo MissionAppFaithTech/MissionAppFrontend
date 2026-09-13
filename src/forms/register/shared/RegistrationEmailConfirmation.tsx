@@ -2,6 +2,8 @@
 
 import { Stack, Typography } from '@mui/material';
 import Link from 'next/link';
+import LoginIcon from '@mui/icons-material/Login';
+import HomeIcon from '@mui/icons-material/Home';
 import PillButton from '@/components/common/PillButton';
 
 type RegistrationEmailConfirmationProps = {
@@ -51,6 +53,7 @@ export default function RegistrationEmailConfirmation({
           tone="primarySoftOutline"
           fullWidth
           sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
+          startIcon={<LoginIcon />}
         >
           Ir para login
         </PillButton>
@@ -60,6 +63,7 @@ export default function RegistrationEmailConfirmation({
           tone="cta"
           fullWidth
           sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 600 }}
+          startIcon={<HomeIcon />}
         >
           Ir para início
         </PillButton>
