@@ -11,9 +11,16 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
+  Tooltip,
+  Box,
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import PillButton from '@/components/common/PillButton';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
 import { yieldToMain } from '@/lib/scheduler';
@@ -150,7 +157,18 @@ export default function AccessCredentialsStep({
         render={({ field }) => (
           <TextField
             {...field}
-            label="Nome de usuário"
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                Nome de usuário
+                <Tooltip
+                  title="Use apenas letras minúsculas, números e sublinhado (_)."
+                  arrow
+                  placement="top"
+                >
+                  <HelpOutlineIcon fontSize="inherit" color="action" />
+                </Tooltip>
+              </Box>
+            }
             fullWidth
             placeholder="exemplo_usuario"
             error={Boolean(errors.username) || usernameStatus === 'taken'}
@@ -162,13 +180,20 @@ export default function AccessCredentialsStep({
                 spellCheck: false,
               },
               input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonOutlineIcon color="action" />
+                  </InputAdornment>
+                ),
                 endAdornment:
                   usernameStatus === 'checking' ? (
-                    <CircularProgress
-                      color="inherit"
-                      size={18}
-                      aria-label="Verificando disponibilidade do nome de usuário"
-                    />
+                    <InputAdornment position="end">
+                      <CircularProgress
+                        color="inherit"
+                        size={18}
+                        aria-label="Verificando disponibilidade do nome de usuário"
+                      />
+                    </InputAdornment>
                   ) : undefined,
               },
             }}
@@ -201,7 +226,18 @@ export default function AccessCredentialsStep({
 
       <TextField
         {...register('password')}
-        label="Senha"
+        label={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            Senha
+            <Tooltip
+              title="A senha deve ter no mínimo 8 caracteres com letras maiúsculas, números e símbolos."
+              arrow
+              placement="top"
+            >
+              <HelpOutlineIcon fontSize="inherit" color="action" />
+            </Tooltip>
+          </Box>
+        }
         type={showPassword ? 'text' : 'password'}
         fullWidth
         placeholder="Ex: Senha@123"
@@ -216,6 +252,11 @@ export default function AccessCredentialsStep({
             spellCheck: false,
           },
           input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <LockOutlinedIcon color="action" />
+              </InputAdornment>
+            ),
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
@@ -249,6 +290,11 @@ export default function AccessCredentialsStep({
             spellCheck: false,
           },
           input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <LockOutlinedIcon color="action" />
+              </InputAdornment>
+            ),
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
@@ -278,6 +324,7 @@ export default function AccessCredentialsStep({
           onClick={onBack}
           fullWidth
           sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
+          startIcon={<ArrowBackIcon />}
         >
           Voltar
         </PillButton>
@@ -295,6 +342,7 @@ export default function AccessCredentialsStep({
             justifyContent: 'center',
             gap: 1.5,
           }}
+          startIcon={isSubmitting ? undefined : <ArrowForwardIcon />}
         >
           {isSubmitting ? (
             <>

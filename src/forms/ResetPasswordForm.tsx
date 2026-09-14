@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Alert, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Stack, TextField, Typography, Tooltip, Box, CircularProgress } from '@mui/material';
+import SaveIcon from '@mui/icons-material/Save';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LoginIcon from '@mui/icons-material/Login';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
 import PillButton from '@/components/common/PillButton';
 import { resetPasswordSchema, type ResetPasswordFormData } from '@/schemas/auth.schema';
@@ -42,15 +47,27 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           Link inválido
         </Typography>
 
-        <Alert severity="error">
+        <Alert severity="error" role="alert" aria-live="assertive">
           O link de redefinição informado não é válido. Solicite um novo link para continuar.
         </Alert>
 
-        <PillButton href="/forgot-password" tone="cta" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/forgot-password"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<EmailOutlinedIcon />}
+        >
           Solicitar novo link
         </PillButton>
 
-        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/login"
+          tone="outline"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -64,16 +81,28 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           Link expirado
         </Typography>
 
-        <Alert severity="warning">
+        <Alert severity="warning" role="alert" aria-live="assertive">
           Este link de redefinição expirou (validade máxima de {RESET_PASSWORD_TOKEN_TTL_MINUTES}{' '}
           minutos). Por motivos de segurança, solicite um novo link.
         </Alert>
 
-        <PillButton href="/forgot-password" tone="cta" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/forgot-password"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<EmailOutlinedIcon />}
+        >
           Solicitar novo link
         </PillButton>
 
-        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/login"
+          tone="outline"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -87,11 +116,17 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           Senha alterada com sucesso!
         </Typography>
 
-        <Alert severity="success">
+        <Alert severity="success" role="alert" aria-live="assertive">
           Sua nova senha foi salva. Você já pode acessar sua conta com as novas credenciais.
         </Alert>
 
-        <PillButton href="/login" tone="cta" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/login"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<LoginIcon />}
+        >
           Entrar com a nova senha
         </PillButton>
       </Stack>
@@ -139,7 +174,18 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         render={({ field }) => (
           <TextField
             {...field}
-            label="Nova senha"
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                Nova senha
+                <Tooltip
+                  title="Mínimo de 8 caracteres contendo letras maiúsculas, números e símbolos."
+                  arrow
+                  placement="top"
+                >
+                  <HelpOutlineIcon fontSize="inherit" color="action" />
+                </Tooltip>
+              </Box>
+            }
             type="password"
             fullWidth
             autoComplete="new-password"
@@ -175,11 +221,18 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         fullWidth
         disabled={isSubmitting}
         sx={{ minHeight: 48, fontWeight: 600 }}
+        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
       >
         {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
       </PillButton>
 
-      <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
+      <PillButton
+        href="/login"
+        tone="outline"
+        fullWidth
+        sx={{ minHeight: 44 }}
+        startIcon={<ArrowBackIcon />}
+      >
         Voltar para o login
       </PillButton>
     </Stack>

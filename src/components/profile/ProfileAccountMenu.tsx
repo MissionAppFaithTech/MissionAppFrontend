@@ -186,7 +186,7 @@ export default function ProfileAccountMenu({
             '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
           }}
         >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Dados cadastrais</Typography>
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Editar perfil</Typography>
         </Box>
 
         <Divider />

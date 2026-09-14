@@ -13,6 +13,8 @@ import {
   FormHelperText,
   CircularProgress,
 } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PillButton from '@/components/common/PillButton';
 import PhoneField from '@/components/common/PhoneField';
 import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
@@ -213,6 +215,7 @@ export default function MissionariesStep2() {
           onClick={goBack}
           fullWidth
           sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
+          startIcon={<ArrowBackIcon />}
         >
           Voltar
         </PillButton>
@@ -237,7 +240,10 @@ export default function MissionariesStep2() {
               <span>Continuando...</span>
             </>
           ) : (
-            'Continuar'
+            <>
+              <ArrowForwardIcon />
+              <span>Continuar</span>
+            </>
           )}
         </PillButton>
       </Stack>

@@ -5,6 +5,12 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Stack, TextField, Typography } from '@mui/material';
 import Link from 'next/link';
+import SendIcon from '@mui/icons-material/Send';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CircularProgress from '@mui/material/CircularProgress';
+import InputAdornment from '@mui/material/InputAdornment';
 import PillButton from '@/components/common/PillButton';
 import { normalizeEmail } from '@/lib/masks';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/schemas/auth.schema';
@@ -84,7 +90,13 @@ export default function ForgotPasswordForm() {
           </Box>
         ) : null}
 
-        <PillButton href="/login" tone="cta" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/login"
+          tone="cta"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -112,15 +124,28 @@ export default function ForgotPasswordForm() {
           tone="primaryOutline"
           fullWidth
           sx={{ minHeight: 44 }}
+          startIcon={<EmailOutlinedIcon />}
         >
           Tentar outro e-mail
         </PillButton>
 
-        <PillButton href="/select-role" tone="missionFlat" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/select-role"
+          tone="missionFlat"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<PersonAddIcon />}
+        >
           Criar uma conta
         </PillButton>
 
-        <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
+        <PillButton
+          href="/login"
+          tone="outline"
+          fullWidth
+          sx={{ minHeight: 44 }}
+          startIcon={<ArrowBackIcon />}
+        >
           Voltar para o login
         </PillButton>
       </Stack>
@@ -155,6 +180,15 @@ export default function ForgotPasswordForm() {
             error={Boolean(errors.login)}
             helperText={errors.login?.message}
             onChange={(event) => field.onChange(normalizeEmail(event.target.value))}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailOutlinedIcon color="action" />
+                  </InputAdornment>
+                ),
+              },
+            }}
           />
         )}
       />
@@ -165,11 +199,18 @@ export default function ForgotPasswordForm() {
         fullWidth
         disabled={isSubmitting}
         sx={{ minHeight: 48, fontWeight: 600 }}
+        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
       >
         {isSubmitting ? 'Verificando…' : 'Enviar link'}
       </PillButton>
 
-      <PillButton href="/login" tone="outline" fullWidth sx={{ minHeight: 44 }}>
+      <PillButton
+        href="/login"
+        tone="outline"
+        fullWidth
+        sx={{ minHeight: 44 }}
+        startIcon={<ArrowBackIcon />}
+      >
         Voltar para o login
       </PillButton>
     </Stack>

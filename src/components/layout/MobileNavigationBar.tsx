@@ -67,7 +67,8 @@ export default function MobileNavigationBar({
   const isFreePage =
     Boolean(pathname?.includes('/edit')) ||
     Boolean(pathname?.endsWith('/edit-profile')) ||
-    Boolean(pathname?.includes('/financeiro'));
+    Boolean(pathname?.includes('/financeiro')) ||
+    Boolean(pathname?.includes('/configuracoes'));
 
   if (hideOnEditPages && !forceShow && isFreePage) {
     return null;
