@@ -1,0 +1,23 @@
+---
+description: Every change must include unit tests, accessibility, and responsiveness
+alwaysApply: true
+---
+
+# Quality bar (required on every task)
+
+Do not finish a change without all three:
+
+1. **Unit tests** — new/changed logic or UI gets Vitest + Testing Library coverage (roles, labels, submit, errors). Run the affected specs before saying done. See `.agents/skills/frontend-testing/SKILL.md`.
+2. **Accessibility** — semantic landmarks, localized `aria-label`, keyboard + `:focus-visible`, form errors via `aria-invalid` / `aria-describedby`. Include color-blind users: never use color as the only cue. See [`AGENTS.md`](../../AGENTS.md) → Accessibility.
+3. **Responsiveness** — mobile-first (`xs` first), MUI breakpoints, no horizontal overflow, 44px touch targets. See [`AGENTS.md`](../../AGENTS.md) → Responsiveness.
+
+**Buttons:** `PillButton` + `tone`, shared `BUTTON_BORDER_RADIUS` (`10px`). Never a stadium / “super boleado” primary next to a rectangular secondary.
+
+```tsx
+// ❌ BAD — stadium pill
+sx={{ borderRadius: 9999 }}
+
+// ✅ GOOD — same rounded rectangle as Voltar
+import { BUTTON_BORDER_RADIUS } from '@/theme/theme';
+sx={{ borderRadius: BUTTON_BORDER_RADIUS }}
+```

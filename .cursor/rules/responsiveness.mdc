@@ -7,6 +7,8 @@ alwaysApply: true
 
 Every UI change must work on **phone, tablet, and desktop**. Do not ship desktop-only layouts.
 
+Pair with unit tests and accessibility — see `.cursor/rules/quality-bar.mdc`.
+
 Full guidance: [`AGENTS.md`](../../AGENTS.md) → **Responsiveness**.
 
 ## Checklist before finishing UI work

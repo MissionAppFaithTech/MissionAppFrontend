@@ -1,10 +1,9 @@
 'use client';
 
-import { Box, Card, CardContent, Link, Stack, Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import ThemeToggle from '@/components/ThemeToggle';
-import Logo from '@/components/common/Logo';
-import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
+import AuthLayout from '@/components/common/AuthLayout';
 import ResetPasswordForm from '@/forms/ResetPasswordForm';
 
 export default function ResetPasswordPageContent() {
@@ -12,69 +11,31 @@ export default function ResetPasswordPageContent() {
   const token = searchParams.get('token');
 
   return (
-    <Box
-      component="main"
-      id="main-content"
-      tabIndex={-1}
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: { xs: 2, sm: 3 },
-        pt: { xs: 3, sm: 6 },
-        pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', sm: 6 },
-        position: 'relative',
-        outline: 'none',
-      }}
-    >
-      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-        <ThemeToggle />
-      </Box>
-
-      <Box sx={{ width: '100%', maxWidth: 420 }}>
-        <Box sx={{ mb: 3 }}>
-          <Logo size="md" />
-        </Box>
-
-        <Stack
-          direction="row"
+    <AuthLayout
+      logoSize="md"
+      title="Nova senha"
+      subFooter={
+        <Typography
+          component={Link}
+          href="/login"
+          variant="body2"
           sx={{
-            mb: 2,
-            justifyContent: 'space-between',
+            color: 'text.secondary',
+            textDecoration: 'none',
+            display: 'inline-flex',
             alignItems: 'center',
+            justifyContent: 'center',
+            alignSelf: 'center',
+            minHeight: 44,
+            px: 1,
+            '&:hover': { color: 'primary.main', textDecoration: 'underline' },
           }}
         >
-          <Typography variant="h6">Nova senha</Typography>
-          <Link
-            href="/login"
-            sx={{
-              color: 'text.secondary',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-            }}
-          >
-            Voltar
-          </Link>
-        </Stack>
-
-        <Card
-          elevation={0}
-          sx={{
-            borderRadius: 3,
-            border: '1px solid',
-            bgcolor: 'transparent',
-            boxShadow: 'none',
-          }}
-        >
-          <CardContent>
-            <ResetPasswordForm token={token} />
-          </CardContent>
-        </Card>
-      </Box>
-
-      <VisitorBottomNav />
-    </Box>
+          Voltar
+        </Typography>
+      }
+    >
+      <ResetPasswordForm token={token} />
+    </AuthLayout>
   );
 }

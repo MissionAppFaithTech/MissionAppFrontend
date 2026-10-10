@@ -15,9 +15,10 @@ import Link from 'next/link';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LoginIcon from '@mui/icons-material/Login';
-import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PillButton from '@/components/common/PillButton';
+import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
+import { login } from '@/services/auth.service';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -28,22 +29,25 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    trigger,
+    clearErrors,
+    getFieldState,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    mode: 'onTouched',
+    ...validateOnSubmit,
     defaultValues: {
       email: '',
       password: '',
     },
   });
 
-  const onSubmit = async (_data: LoginFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     setSubmitError(null);
     try {
-      // Simula pequeno delay para feedback tátil/visual adequado
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await login({ login: data.email, password: data.password });
       router.push('/profile');
+      router.refresh();
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'Falha ao autenticar');
     }
@@ -94,7 +98,7 @@ export default function LoginForm() {
       )}
 
       <TextField
-        {...register('email')}
+        {...withLiveEmailFormat(register('email'), { trigger, clearErrors, getFieldState })}
         label="E-mail"
         type="email"
         fullWidth
@@ -103,15 +107,6 @@ export default function LoginForm() {
         disabled={isSubmitting}
         error={Boolean(errors.email)}
         helperText={errors.email?.message}
-        slotProps={{
-          input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <EmailOutlinedIcon color="action" />
-              </InputAdornment>
-            ),
-          },
-        }}
       />
 
       <TextField
@@ -141,7 +136,15 @@ export default function LoginForm() {
                   onMouseDown={(event) => event.preventDefault()}
                   edge="end"
                   size="medium"
-                  sx={{ minWidth: 44, minHeight: 44 }}
+                  sx={{
+                    minWidth: 44,
+                    minHeight: 44,
+                    color: 'text.secondary',
+                    '&:hover': {
+                      color: 'primary.main',
+                      backgroundColor: 'action.hover',
+                    },
+                  }}
                 >
                   {showPassword ? <VisibilityOff /> : <Visibility />}
                 </IconButton>
@@ -169,10 +172,8 @@ export default function LoginForm() {
             color: 'primary.main',
             textDecoration: 'none',
             fontWeight: 500,
-            py: 0.5,
             px: 1,
             borderRadius: 1,
-            minHeight: 44,
             display: 'inline-flex',
             alignItems: 'center',
             '&:hover': { textDecoration: 'underline' },
@@ -190,9 +191,8 @@ export default function LoginForm() {
         type="submit"
         tone="cta"
         disabled={isSubmitting}
-        fullWidth
         sx={{
-          minHeight: 48,
+          minHeight: 40,
           fontSize: '1rem',
           fontWeight: 600,
           display: 'flex',
@@ -203,12 +203,12 @@ export default function LoginForm() {
       >
         {isSubmitting ? (
           <>
-            <CircularProgress size={20} color="inherit" />
+            <CircularProgress size={16} color="inherit" />
             <span>Entrando...</span>
           </>
         ) : (
           <>
-            <LoginIcon />
+            <LoginIcon sx={{ fontSize: 18 }} />
             <span>Entrar</span>
           </>
         )}

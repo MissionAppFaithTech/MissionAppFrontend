@@ -1,12 +1,10 @@
 import { z } from 'zod';
 import { isValidEmail } from '@/lib/masks';
 import { validateStrongPassword } from '@/lib/passwordStrength';
+import { requiredEmailSchema } from '@/schemas/email';
 
 export const loginSchema = z.object({
-  email: z
-    .string()
-    .min(1, 'Informe seu e-mail')
-    .refine((val) => isValidEmail(val), { message: 'Informe um e-mail válido' }),
+  email: requiredEmailSchema,
   password: z.string().min(1, 'Informe sua senha'),
 });
 

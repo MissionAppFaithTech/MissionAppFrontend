@@ -215,15 +215,6 @@ export default function SiteHeader() {
                 px: { sm: 1.75, md: 2.25 },
                 fontSize: '0.875rem',
                 fontWeight: 700,
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                color: 'mission.contrastText',
-                boxShadow: '0 2px 8px rgba(230, 81, 0, 0.35)',
-                '&:hover': {
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
-                  boxShadow: '0 4px 12px rgba(230, 81, 0, 0.45)',
-                },
               }}
             >
               Cadastre-se
@@ -297,9 +288,6 @@ export default function SiteHeader() {
               minHeight: 44,
               fontSize: '0.95rem',
               fontWeight: 700,
-              bgcolor: 'accent.main',
-              color: 'mission.contrastText',
-              '&:hover': { bgcolor: 'accent.dark' },
             }}
           >
             Cadastre-se

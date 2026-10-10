@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { isValidInternationalPhone } from '@/components/common/PhoneField';
-import { isValidBirthDate, isValidEmail } from '@/lib/masks';
+import { isValidBirthDate } from '@/lib/masks';
 import { validateStrongPassword } from '@/lib/passwordStrength';
+import { requiredEmailSchema } from '@/schemas/email';
 
 export const missionaryStep1Schema = z.object({
   fullName: z.string().trim().min(1, 'Informe seu nome completo'),
@@ -23,11 +24,7 @@ export const missionaryStep1Schema = z.object({
       },
       { message: 'Informe um telefone válido' }
     ),
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Informe seu e-mail')
-    .refine((val) => isValidEmail(val), { message: 'Informe um e-mail válido' }),
+  email: requiredEmailSchema,
 });
 
 export type MissionaryStep1FormData = z.infer<typeof missionaryStep1Schema>;
@@ -129,11 +126,7 @@ export const supporterStep1Schema = z
         },
         { message: 'Informe um telefone válido' }
       ),
-    email: z
-      .string()
-      .trim()
-      .min(1, 'Informe seu e-mail')
-      .refine((val) => isValidEmail(val), { message: 'Informe um e-mail válido' }),
+    email: requiredEmailSchema,
     faithCommunity: z.string(),
     communityPhone: z.string(),
     pastorName: z.string(),
@@ -200,7 +193,7 @@ export const accessCredentialsSchema = z
     confirmPassword: z.string().min(1, 'Confirme sua senha'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'As senhas não coincidem',
+    message: 'As senhas precisam ser iguais',
     path: ['confirmPassword'],
   });
 

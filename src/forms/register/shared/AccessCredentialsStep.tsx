@@ -11,26 +11,24 @@ import {
   CircularProgress,
   IconButton,
   InputAdornment,
-  Tooltip,
   Box,
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutlined';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
-import PillButton from '@/components/common/PillButton';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
+import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
+import { validateOnSubmit } from '@/lib/formValidation';
 import { yieldToMain } from '@/lib/scheduler';
 import type { AccessCredentialsValues } from '@/forms/register/types';
 import { accessCredentialsSchema, type AccessCredentialsFormData } from '@/schemas/register.schema';
 import { checkUsernameAvailability } from '@/services/username.service';
+import { colors } from '@/theme/theme';
 
 type AccessCredentialsStepProps = {
   defaultValues?: Partial<AccessCredentialsValues>;
-  onSubmit: (values: AccessCredentialsValues) => void;
+  onSubmit: (values: AccessCredentialsValues) => void | Promise<void>;
   onBack: () => void;
   submitLabel?: string;
 };
@@ -58,7 +56,7 @@ export default function AccessCredentialsStep({
     formState: { errors, isSubmitting },
   } = useForm<AccessCredentialsFormData>({
     resolver: zodResolver(accessCredentialsSchema),
-    mode: 'onTouched',
+    ...validateOnSubmit,
     defaultValues: {
       username: '',
       password: '',
@@ -67,11 +65,13 @@ export default function AccessCredentialsStep({
     },
   });
 
-  const [username, password] = watch(['username', 'password']);
+  const [username, password, confirmPassword] = watch(['username', 'password', 'confirmPassword']);
+  const passwordsMismatch = Boolean(confirmPassword) && confirmPassword !== password;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle');
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const requestIdRef = useRef(0);
 
   useEffect(() => {
@@ -124,9 +124,9 @@ export default function AccessCredentialsStep({
     if (usernameStatus === 'available') return 'Nome de usuário disponível';
     if (usernameStatus === 'taken') return 'Este nome de usuário já está em uso';
     if (usernameStatus === 'error') {
-      return 'Verificação online indisponível no momento (ok enquanto o back não estiver ligado).';
+      return 'Não foi possível verificar o nome de usuário';
     }
-    return 'Use letras minúsculas, números e _';
+    return undefined;
   })();
 
   const handleFormSubmit = async (values: AccessCredentialsFormData) => {
@@ -137,19 +137,41 @@ export default function AccessCredentialsStep({
       });
       return;
     }
+    setSubmitError(null);
     await yieldToMain();
-    onSubmit(values);
+    try {
+      await onSubmit(values);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Não foi possível concluir o cadastro');
+    }
   };
 
   return (
-    <Stack
-      component="form"
-      spacing={2.5}
+    <RegisterStepForm
       onSubmit={handleSubmit(handleFormSubmit)}
-      sx={{ width: '100%' }}
-      noValidate
+      sectionTitle="Dados de acesso"
+      onBack={onBack}
+      submitLabel={submitLabel}
+      submittingLabel="Finalizando..."
+      isSubmitting={isSubmitting}
     >
-      <Typography variant="body1">Dados de acesso</Typography>
+
+      {submitError ? (
+        <Box
+          role="alert"
+          aria-live="assertive"
+          sx={{
+            p: 1.5,
+            borderRadius: 2,
+            bgcolor: 'error.main',
+            color: 'common.white',
+            fontSize: '0.875rem',
+            fontWeight: 500,
+          }}
+        >
+          {submitError}
+        </Box>
+      ) : null}
 
       <Controller
         name="username"
@@ -157,18 +179,7 @@ export default function AccessCredentialsStep({
         render={({ field }) => (
           <TextField
             {...field}
-            label={
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                Nome de usuário
-                <Tooltip
-                  title="Use apenas letras minúsculas, números e sublinhado (_)."
-                  arrow
-                  placement="top"
-                >
-                  <HelpOutlineIcon fontSize="inherit" color="action" />
-                </Tooltip>
-              </Box>
-            }
+            label="Nome de usuário"
             fullWidth
             placeholder="exemplo_usuario"
             error={Boolean(errors.username) || usernameStatus === 'taken'}
@@ -180,21 +191,22 @@ export default function AccessCredentialsStep({
                 spellCheck: false,
               },
               input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonOutlineIcon color="action" />
-                  </InputAdornment>
-                ),
                 endAdornment:
-                  usernameStatus === 'checking' ? (
+                  usernameStatus === 'idle' ? undefined : (
                     <InputAdornment position="end">
-                      <CircularProgress
-                        color="inherit"
-                        size={18}
-                        aria-label="Verificando disponibilidade do nome de usuário"
-                      />
+                      {usernameStatus === 'checking' ? (
+                        <CircularProgress
+                          color="inherit"
+                          size={18}
+                          aria-label="Verificando disponibilidade do nome de usuário"
+                        />
+                      ) : usernameStatus === 'available' ? (
+                        <CheckIcon aria-hidden sx={{ fontSize: 20, color: colors.success }} />
+                      ) : (
+                        <CloseIcon aria-hidden sx={{ fontSize: 20, color: colors.error }} />
+                      )}
                     </InputAdornment>
-                  ) : undefined,
+                  ),
               },
             }}
             onChange={(event) =>
@@ -229,34 +241,19 @@ export default function AccessCredentialsStep({
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             Senha
-            <Tooltip
-              title="A senha deve ter no mínimo 8 caracteres com letras maiúsculas, números e símbolos."
-              arrow
-              placement="top"
-            >
-              <HelpOutlineIcon fontSize="inherit" color="action" />
-            </Tooltip>
           </Box>
         }
         type={showPassword ? 'text' : 'password'}
         fullWidth
         placeholder="Ex: Senha@123"
         error={Boolean(errors.password)}
-        helperText={
-          errors.password?.message ??
-          'Use maiúscula, minúscula, número e caractere especial (mín. 8)'
-        }
+        helperText={errors.password?.message}
         slotProps={{
           htmlInput: {
             autoComplete: 'new-password',
             spellCheck: false,
           },
           input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <LockOutlinedIcon color="action" />
-              </InputAdornment>
-            ),
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
@@ -282,19 +279,17 @@ export default function AccessCredentialsStep({
         type={showConfirmPassword ? 'text' : 'password'}
         fullWidth
         placeholder="Repita a senha"
-        error={Boolean(errors.confirmPassword)}
-        helperText={errors.confirmPassword?.message}
+        error={Boolean(errors.confirmPassword) || passwordsMismatch}
+        helperText={
+          errors.confirmPassword?.message ??
+          (passwordsMismatch ? 'As senhas precisam ser iguais' : undefined)
+        }
         slotProps={{
           htmlInput: {
             autoComplete: 'new-password',
             spellCheck: false,
           },
           input: {
-            startAdornment: (
-              <InputAdornment position="start">
-                <LockOutlinedIcon color="action" />
-              </InputAdornment>
-            ),
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
@@ -317,43 +312,6 @@ export default function AccessCredentialsStep({
         }}
       />
 
-      <Stack direction="row" spacing={2}>
-        <PillButton
-          type="button"
-          tone="primarySoftOutline"
-          onClick={onBack}
-          fullWidth
-          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar
-        </PillButton>
-        <PillButton
-          type="submit"
-          tone="cta"
-          fullWidth
-          disabled={isSubmitting}
-          sx={{
-            minHeight: 48,
-            fontSize: '1rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1.5,
-          }}
-          startIcon={isSubmitting ? undefined : <ArrowForwardIcon />}
-        >
-          {isSubmitting ? (
-            <>
-              <CircularProgress size={20} color="inherit" aria-label="Enviando cadastro" />
-              <span>Finalizando...</span>
-            </>
-          ) : (
-            submitLabel
-          )}
-        </PillButton>
-      </Stack>
-    </Stack>
+    </RegisterStepForm>
   );
 }

@@ -25,6 +25,9 @@ export const roleColors = {
   mission: '#C2410C',
 } as const;
 
+/** Product button corner — rounded rectangle, never a stadium / pill. */
+export const BUTTON_BORDER_RADIUS = '10px';
+
 /** Derived shades for MUI palette variants */
 const shades = {
   primaryLight: '#1A3D6E',
@@ -127,45 +130,36 @@ export const lightTokens: ModeTokens = {
 };
 
 export const darkTokens: ModeTokens = {
-  /**
-   * A true black ground. The brand navy belongs to the light theme; here the page
-   * is neutral and the only chromatic elements are the two brand accents, which
-   * read stronger on black than they ever did on navy (orange 7.49:1 vs 6.05:1).
-   */
-  canvas: '#000000',
-  surface1: '#121212' /* cards — 17.18:1 with textPrimary */,
-  surface2: '#1C1C1C' /* dialogs, menus, inputs, hover */,
-  borderSubtle: 'rgba(255, 255, 255, 0.12)' /* hairline between surfaces */,
-  borderStrong: 'rgba(255, 255, 255, 0.42)' /* 4.12:1 on surface1 — SC 1.4.11 */,
-  textPrimary: '#FFFFFF' /* 21:1 on canvas */,
-  /* White too: on black the hierarchy is carried by size and weight, not by
-     dimming the text. Only the disabled state stays muted, so it still reads
-     as unavailable. */
-  textSecondary: '#FFFFFF' /* 21:1 on canvas */,
-  textDisabled: 'rgba(245, 245, 245, 0.38)',
-  /** Black ink on vivid orange — 7.06:1, which the navy ground never allowed. */
-  actionFill: '#F97316',
-  actionFillHover: '#FB923C' /* 8.75:1 with the same ink */,
-  actionFillActive: '#EA580C' /* 5.56:1 */,
-  actionFillText: '#0A0A0A',
-  accent: '#F97316' /* 7.49:1 on canvas, 5.54:1 on the raised surface */,
-  accentSoft: '#FB923C',
-  accentWash: 'rgba(249, 115, 22, 0.28)',
-  link: roleColors.supporter /* #6BA6FF — 8.52:1 on canvas */,
-  linkHover: shades.supporterLight /* #93C5FD — 11.65:1 */,
-  secondaryHoverWash: 'rgba(107, 166, 255, 0.14)',
-  focusRing: '#F97316',
+  /** Navy ground — the dark scheme from before the black experiment. */
+  canvas: colors.textPrimary,
+  surface1: shades.primaryLight,
+  surface2: '#204878',
+  borderSubtle: 'rgba(147, 197, 253, 0.18)',
+  borderStrong: 'rgba(147, 197, 253, 0.35)',
+  textPrimary: colors.surface,
+  textSecondary: '#94A3B8',
+  textDisabled: 'rgba(255, 255, 255, 0.38)',
+  actionFill: roleColors.mission,
+  actionFillHover: shades.missionDark,
+  actionFillActive: shades.missionDark,
+  actionFillText: colors.surface,
+  accent: '#FB923C',
+  accentSoft: '#FED7AA',
+  accentWash: 'rgba(194, 65, 12, 0.22)',
+  link: shades.supporterLight,
+  linkHover: '#BFDBFE',
+  secondaryHoverWash: 'rgba(147, 197, 253, 0.12)',
+  focusRing: '#60A5FA',
   disabledFill: 'rgba(255, 255, 255, 0.08)',
-  disabledText: 'rgba(245, 245, 245, 0.38)',
-  disabledBorder: 'rgba(255, 255, 255, 0.16)',
-  danger: '#F87171' /* 7.59:1 on canvas */,
-  dangerFill: colors.error /* #DC2626 — white text 4.83:1 */,
+  disabledText: 'rgba(255, 255, 255, 0.55)',
+  disabledBorder: 'rgba(147, 197, 253, 0.22)',
+  danger: '#F87171',
+  dangerFill: colors.error,
   fieldBg: 'rgba(255, 255, 255, 0.06)',
   fieldBgDisabled: 'rgba(255, 255, 255, 0.03)',
-  /** Toasts and badges sit a neutral step above the card, so color stays reserved. */
-  brandFill: '#242424',
-  brandFillText: '#FFFFFF',
-  avatarFill: colors.surface /* white circle with a navy figure — 13.84:1 */,
+  brandFill: '#1E293B',
+  brandFillText: colors.surface,
+  avatarFill: colors.surface,
   avatarText: colors.primary,
 };
 
@@ -291,6 +285,11 @@ function createTypography(): ThemeOptions['typography'] {
       fontSize: '0.875rem',
       lineHeight: 1.6,
     },
+    caption: {
+      fontWeight: 400,
+      fontSize: '0.75rem',
+      lineHeight: 1.35,
+    },
     overline: {
       fontWeight: 700,
       letterSpacing: '0.12em',
@@ -326,10 +325,10 @@ function buildPalette(mode: 'light' | 'dark') {
           contrastText: colors.surface,
         }
       : {
-          main: roleColors.supporter,
-          light: shades.supporterLight,
-          dark: shades.supporterDark,
-          contrastText: t.actionFillText,
+          main: shades.supporterLight,
+          light: '#BFDBFE',
+          dark: roleColors.intermediate,
+          contrastText: colors.textPrimary,
         },
     secondary: isLight
       ? {
@@ -342,7 +341,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: t.actionFill,
           light: t.accent,
           dark: t.actionFillActive,
-          contrastText: t.actionFillText,
+          contrastText: colors.surface,
         },
     connection: isLight
       ? {
@@ -355,7 +354,7 @@ function buildPalette(mode: 'light' | 'dark') {
           main: t.link,
           light: t.linkHover,
           dark: roleColors.supporter,
-          contrastText: t.actionFillText,
+          contrastText: colors.surface,
         },
     supporter: isLight
       ? {
@@ -368,21 +367,14 @@ function buildPalette(mode: 'light' | 'dark') {
           main: roleColors.supporter,
           light: shades.supporterLight,
           dark: shades.supporterDark,
-          contrastText: t.actionFillText,
+          contrastText: roleColors.missionary,
         },
-    mission: isLight
-      ? {
-          main: roleColors.mission,
-          light: shades.missionLight,
-          dark: shades.missionDark,
-          contrastText: colors.surface,
-        }
-      : {
-          main: t.actionFill,
-          light: t.accent,
-          dark: t.actionFillActive,
-          contrastText: t.actionFillText,
-        },
+    mission: {
+      main: roleColors.mission,
+      light: shades.missionLight,
+      dark: shades.missionDark,
+      contrastText: colors.surface,
+    },
     brandFill: {
       main: t.brandFill,
       light: t.surface2,
@@ -399,8 +391,8 @@ function buildPalette(mode: 'light' | 'dark') {
      * Orange as a *mark*: eyebrows, icons, indicators, badges.
      *
      * Light mirrors `mission` exactly so swapping a component from `mission.*` to
-     * `accent.*` cannot shift the light theme. On black the whole orange family
-     * clears AA, so dark simply runs its brighter end.
+     * `accent.*` cannot shift the light theme. Dark uses a brighter orange so the
+     * mark still reads on navy.
      */
     accent: isLight
       ? {
@@ -412,8 +404,8 @@ function buildPalette(mode: 'light' | 'dark') {
       : {
           main: t.accent,
           light: t.accentSoft,
-          dark: t.accentSoft,
-          contrastText: t.actionFillText,
+          dark: shades.missionLight,
+          contrastText: colors.surface,
         },
     surface: isLight
       ? {
@@ -576,7 +568,7 @@ export function createAppTheme() {
           root: ({ theme }) => ({
             textTransform: 'none',
             fontWeight: 500,
-            borderRadius: 4,
+            borderRadius: BUTTON_BORDER_RADIUS,
             minHeight: 38,
             '@media (max-width:600px)': {
               minHeight: 44,
@@ -599,7 +591,7 @@ export function createAppTheme() {
                 color: v(theme, 'palette.action2.fillText'),
                 '&:hover': {
                   backgroundColor: v(theme, 'palette.action2.fillHover'),
-                  boxShadow: `0 0 0 3px ${v(theme, 'palette.action2.accentWash')}`,
+                  boxShadow: 'none',
                 },
                 '&:active': {
                   backgroundColor: v(theme, 'palette.action2.fillActive'),
@@ -673,8 +665,8 @@ export function createAppTheme() {
               },
               theme.applyStyles('dark', {
                 '&:hover': {
-                  backgroundColor: v(theme, 'palette.action2.fillHover'),
-                  boxShadow: `0 0 0 3px ${v(theme, 'palette.action2.accentWash')}`,
+                  backgroundColor: v(theme, 'palette.mission.dark'),
+                  boxShadow: 'none',
                 },
               }),
             ],
@@ -833,13 +825,13 @@ export function createAppTheme() {
               // placeholder has to read as "not filled in yet" — at the same white
               // as a typed value it looks like the field already has content.
               '&::placeholder': {
-                color: 'rgba(255, 255, 255, 0.55)',
+                color: '#94A3B8',
                 opacity: 1,
               },
               '&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus, &:-webkit-autofill:active':
                 {
-                  WebkitBoxShadow: '0 0 0 1000px #1c1c1c inset !important',
-                  boxShadow: '0 0 0 1000px #1c1c1c inset !important',
+                  WebkitBoxShadow: '0 0 0 1000px #1a3d6e inset !important',
+                  boxShadow: '0 0 0 1000px #1a3d6e inset !important',
                   WebkitTextFillColor: '#ffffff !important',
                   caretColor: '#ffffff !important',
                   transition: 'background-color 5000s ease-in-out 0s',
@@ -869,13 +861,17 @@ export function createAppTheme() {
       },
       MuiFormHelperText: {
         styleOverrides: {
-          root: ({ theme }) =>
-            theme.applyStyles('dark', {
+          root: ({ theme }) => ({
+            fontSize: '0.75rem',
+            lineHeight: 1.3,
+            marginTop: 4,
+            ...theme.applyStyles('dark', {
               color: v(theme, 'palette.text.secondary'),
               '&.Mui-error': {
                 color: v(theme, 'palette.error.main'),
               },
             }),
+          }),
         },
       },
       MuiTextField: {

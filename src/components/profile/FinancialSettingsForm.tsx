@@ -4,7 +4,6 @@ import { useState, type ChangeEvent } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
@@ -286,7 +285,6 @@ export default function FinancialSettingsForm({
                       width: { xs: '100%', sm: 'auto' },
                     }}
                   >
-                    <ArrowBackIcon sx={{ fontSize: 18, mr: 0.75 }} />
                     Voltar
                   </PillButton>
 
@@ -804,7 +802,6 @@ export default function FinancialSettingsForm({
                   aria-label="Voltar para o perfil"
                   sx={{ px: 3 }}
                 >
-                  <ArrowBackIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Voltar
                 </PillButton>
 

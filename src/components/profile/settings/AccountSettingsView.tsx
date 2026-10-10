@@ -257,11 +257,11 @@ export default function AccountSettingsView({
             {
               WebkitBoxShadow: (t) =>
                 t.palette.mode === 'dark'
-                  ? '0 0 0 1000px #1c1c1c inset !important'
+                  ? '0 0 0 1000px #1a3d6e inset !important'
                   : '0 0 0 1000px #ffffff inset !important',
               boxShadow: (t) =>
                 t.palette.mode === 'dark'
-                  ? '0 0 0 1000px #1c1c1c inset !important'
+                  ? '0 0 0 1000px #1a3d6e inset !important'
                   : '0 0 0 1000px #ffffff inset !important',
               WebkitTextFillColor: (t) =>
                 t.palette.mode === 'dark' ? '#ffffff !important' : '#081c3a !important',

@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
@@ -78,13 +77,11 @@ export default function ProfileLayoutShell({
               href={backHref}
               tone="ghost"
               size="small"
-              startIcon={<ArrowBackIcon />}
               sx={{
                 fontWeight: 600,
                 px: { xs: 1.5, sm: 2 },
                 py: { xs: 0.5, sm: 0.6 },
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                borderRadius: '14px',
                 border: '1px solid rgba(255, 255, 255, 0.35)',
                 bgcolor: 'rgba(255, 255, 255, 0.12)',
                 color: 'common.white',

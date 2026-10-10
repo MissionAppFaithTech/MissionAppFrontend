@@ -10,6 +10,18 @@ Guidance for AI agents operating in this repository (Cursor, Claude Code, Codex,
 
 ---
 
+## Quality bar (mandatory on every change)
+
+Do **not** finish a task without all three. This is the default reminder for every agent session:
+
+1. **Unit tests** — new or changed logic/UI needs Vitest + Testing Library coverage (roles, labels, submit, errors). Run the affected specs before declaring done. See `.agents/skills/frontend-testing/SKILL.md`.
+2. **Accessibility** — WCAG 2.2 AA: landmarks, localized `aria-label`, keyboard + `:focus-visible`, form errors via `aria-invalid` / `aria-describedby`. See **Accessibility** below.
+3. **Responsiveness** — mobile-first (`xs` first), MUI breakpoints, no horizontal overflow, 44px touch targets. See **Responsiveness** below.
+
+**Buttons:** use `PillButton` + `tone`. Shared corner is `BUTTON_BORDER_RADIUS` (`10px`) — a rounded rectangle like **Voltar**. Never `9999`, stadium, or a more rounded primary than the outline secondary.
+
+---
+
 ## Mandatory contribution standards
 
 **Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).**
@@ -78,7 +90,7 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 - Forms: `src/forms/`
 - API client / BFF helpers: `src/services/`, `src/app/api/`, `src/lib/api/`
 - Brand colors via theme tokens — avoid hardcoding outside `src/theme/`
-- **Responsiveness is mandatory** on every UI change (see section below)
+- **Unit tests, accessibility, and responsiveness** are mandatory on every change (see Quality bar)
 - Identifiers in code: **English**
 - Commit messages: **English** (Conventional Commits)
 - Contributor docs / PR discussion with the team: **pt-BR** when writing for humans; agent chat: **pt-BR**
@@ -125,10 +137,10 @@ This project may use Next.js APIs that differ from older training data. Prefer p
    - All form inputs must have associated `<label>` elements via `htmlFor` / `id` or `aria-labelledby`.
    - Error messages must be linked to inputs via `aria-describedby` and `aria-invalid="true"`.
    - Dynamic validation updates and toast notifications must use ARIA live regions (`role="status"`, `aria-live="polite"` or `role="alert"`).
-6. **Touch Targets & Color Contrast:**
+6. **Touch Targets, Contrast & Color Blindness:**
    - Minimum 44x44px touch targets on mobile viewports.
    - Color contrast must meet or exceed WCAG AA standards (minimum 4.5:1 for normal text, 3:1 for large text and UI components).
-   - Never use color alone as the single visual cue for status or errors (always pair with icons or explicit text).
+   - **Daltonism (WCAG 1.4.1):** never use color as the only cue for status, errors, success, or required fields. Always pair color with text, an icon, or a pattern so the meaning stays clear in protanopia, deuteranopia, and tritanopia.
 7. **Automated Verification:**
    - Run automated accessibility tests via `@axe-core/playwright` across all routes. Zero tolerance for critical or serious accessibility violations.
 
@@ -149,7 +161,7 @@ Before adding a new component or one-off MUI styling for a repeated pattern:
 
 | Component                   | When to use                            | Notes                                                                                                   |
 | --------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `PillButton`                | Any branded button / CTA / link-button | Prefer over raw MUI `Button` for product UI. Pick a `tone` — do **not** invent a second button wrapper. |
+| `PillButton`                | Any branded button / CTA / link-button | Prefer over raw MUI `Button`. Same `10px` radius for every tone — never a stadium pill. |
 | `Logo`                      | Brand mark                             | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`.                            |
 | `SectionHeader`             | Section title + optional subtitle      | Landing and content blocks.                                                                             |
 | `PhoneField`                | International phone inputs             | Also exports `isValidInternationalPhone`.                                                               |
@@ -166,7 +178,7 @@ Before adding a new component or one-off MUI styling for a repeated pattern:
 | `primarySoftOutline`                         | Profile secondary actions (Contato, Compartilhar, Editar)           |
 | `primaryFilled` / `missionFilled`            | Profile primary actions (Editar perfil / Seguidores) — Figma filled |
 
-Landing/header tones must keep their current look when changing profile tones.
+Landing/header tones must keep their current look when changing profile tones. All tones share `BUTTON_BORDER_RADIUS` (`10px`) from `src/theme/theme.ts` — do not override `borderRadius` at the call site.
 
 ### Layout / chrome
 

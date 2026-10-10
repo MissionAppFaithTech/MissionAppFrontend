@@ -2,41 +2,35 @@
 
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  TextField,
-  Typography,
-  Stack,
-  FormControl,
-  FormLabel,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  FormHelperText,
-  InputLabel,
-  Select,
-  MenuItem,
-  CircularProgress,
-} from '@mui/material';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PillButton from '@/components/common/PillButton';
+import { TextField } from '@mui/material';
 import PhoneField from '@/components/common/PhoneField';
+import GenderField from '@/forms/register/shared/GenderField';
+import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
+import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
+import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
 import { maskBirthDate } from '@/lib/masks';
+import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { supporterStep1Schema, type SupporterStep1FormData } from '@/schemas/register.schema';
 import { useSupporterRegisterWizard } from '@/components/register/supporters/SupporterRegisterWizardContext';
-import { SELECT_OTHER, faithCommunities } from '@/forms/register/options';
+import { SELECT_OTHER } from '@/forms/register/options';
+import { listFaithCommunities } from '@/services/catalog.service';
 import { yieldToMain } from '@/lib/scheduler';
 
 export default function SupportersStep1() {
   const { formData, completeStep1 } = useSupporterRegisterWizard();
+  const communities = useCatalogItems(listFaithCommunities);
   const {
     register,
     handleSubmit,
     control,
     watch,
+    trigger,
+    clearErrors,
+    getFieldState,
     formState: { errors, isSubmitting },
   } = useForm<SupporterStep1FormData>({
     resolver: zodResolver(supporterStep1Schema),
-    mode: 'onTouched',
+    ...validateOnSubmit,
     defaultValues: {
       fullName: formData.fullName || '',
       email: formData.email || '',
@@ -59,14 +53,11 @@ export default function SupportersStep1() {
   };
 
   return (
-    <Stack
-      component="form"
-      spacing={2.5}
+    <RegisterStepForm
       onSubmit={handleSubmit(handleStepSubmit)}
-      sx={{ width: '100%' }}
-      noValidate
+      sectionTitle="Dados pessoais"
+      isSubmitting={isSubmitting}
     >
-      <Typography variant="body1">Dados pessoais</Typography>
 
       <TextField
         {...register('fullName')}
@@ -81,7 +72,7 @@ export default function SupportersStep1() {
       />
 
       <TextField
-        {...register('email')}
+        {...withLiveEmailFormat(register('email'), { trigger, clearErrors, getFieldState })}
         label="E-mail"
         type="email"
         fullWidth
@@ -116,19 +107,13 @@ export default function SupportersStep1() {
         name="gender"
         control={control}
         render={({ field }) => (
-          <FormControl error={Boolean(errors.gender)} component="fieldset" fullWidth>
-            <FormLabel
-              component="legend"
-              sx={{ typography: 'body2', color: 'text.primary', mb: 0.5 }}
-            >
-              Gênero
-            </FormLabel>
-            <RadioGroup row {...field} value={field.value ?? ''}>
-              <FormControlLabel value="feminino" control={<Radio />} label="Feminino" />
-              <FormControlLabel value="masculino" control={<Radio />} label="Masculino" />
-            </RadioGroup>
-            {errors.gender ? <FormHelperText>{errors.gender.message}</FormHelperText> : null}
-          </FormControl>
+          <GenderField
+            value={field.value}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            error={Boolean(errors.gender)}
+            helperText={errors.gender?.message}
+          />
         )}
       />
 
@@ -151,28 +136,17 @@ export default function SupportersStep1() {
         name="faithCommunity"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth>
-            <InputLabel id="supporter-faith-community-label" shrink>
-              Comunidade de fé (opcional)
-            </InputLabel>
-            <Select
-              {...field}
-              labelId="supporter-faith-community-label"
-              id="faithCommunity"
-              label="Comunidade de fé (opcional)"
-              displayEmpty
-            >
-              <MenuItem value="">
-                <em>Nenhuma</em>
-              </MenuItem>
-              {faithCommunities.map((community) => (
-                <MenuItem key={community.value} value={community.value}>
-                  {community.label}
-                </MenuItem>
-              ))}
-              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
-            </Select>
-          </FormControl>
+          <RegisterCatalogSelect
+            id="faithCommunity"
+            label="Comunidade de fé (opcional)"
+            value={field.value}
+            onChange={field.onChange}
+            options={communities.items}
+            isLoading={communities.isLoading}
+            loadError={communities.error}
+            emptyValueLabel="Nenhuma"
+            allowEmpty
+          />
         )}
       />
 
@@ -221,33 +195,6 @@ export default function SupportersStep1() {
         </>
       ) : null}
 
-      <PillButton
-        type="submit"
-        tone="cta"
-        disabled={isSubmitting}
-        fullWidth
-        sx={{
-          minHeight: 48,
-          fontSize: '1rem',
-          fontWeight: 600,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 1.5,
-        }}
-      >
-        {isSubmitting ? (
-          <>
-            <CircularProgress size={20} color="inherit" aria-label="Enviando dados" />
-            <span>Continuando...</span>
-          </>
-        ) : (
-          <>
-            <ArrowForwardIcon />
-            <span>Continuar</span>
-          </>
-        )}
-      </PillButton>
-    </Stack>
+    </RegisterStepForm>
   );
 }

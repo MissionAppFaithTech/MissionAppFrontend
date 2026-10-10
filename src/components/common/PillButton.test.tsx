@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
+import { BUTTON_BORDER_RADIUS } from '@/theme/theme';
 import PillButton from './PillButton';
 
 describe('PillButton component', () => {
@@ -27,5 +28,42 @@ describe('PillButton component', () => {
     await user.click(screen.getByRole('button', { name: /ação/i }));
 
     expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the same rounded-rectangle radius for outline and filled actions', () => {
+    render(
+      <>
+        <PillButton tone="primarySoftOutline">Voltar</PillButton>
+        <PillButton tone="cta">Continuar</PillButton>
+      </>
+    );
+
+    const back = screen.getByRole('button', { name: /voltar/i });
+    const next = screen.getByRole('button', { name: /continuar/i });
+    const backRadius = getComputedStyle(back).borderRadius;
+    const nextRadius = getComputedStyle(next).borderRadius;
+
+    expect(backRadius).toBe(nextRadius);
+    expect(nextRadius).toBe(BUTTON_BORDER_RADIUS);
+  });
+
+  it('keeps the CTA fill tokens while loading instead of a blank disabled wash', () => {
+    render(
+      <>
+        <PillButton tone="cta">Continuar</PillButton>
+        <PillButton tone="cta" loading>
+          Continuando
+        </PillButton>
+      </>
+    );
+
+    const enabled = screen.getByRole('button', { name: /continuar/i });
+    const loading = screen.getByRole('button', { name: /continuando/i });
+    const fill = getComputedStyle(enabled).getPropertyValue('--pill-bg').trim();
+
+    expect(loading).toHaveClass('MuiButton-loading');
+    expect(fill).not.toBe('');
+    expect(getComputedStyle(loading).getPropertyValue('--pill-bg').trim()).toBe(fill);
+    expect(getComputedStyle(loading).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
   });
 });

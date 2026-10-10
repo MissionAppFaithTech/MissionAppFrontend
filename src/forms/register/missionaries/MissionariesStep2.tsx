@@ -2,28 +2,22 @@
 
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  TextField,
-  Typography,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-  CircularProgress,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PillButton from '@/components/common/PillButton';
+import { TextField, Typography } from '@mui/material';
 import PhoneField from '@/components/common/PhoneField';
+import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
+import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
+import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
+import { validateOnSubmit } from '@/lib/formValidation';
 import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
-import { SELECT_OTHER, faithCommunities, missionaryAgencies } from '@/forms/register/options';
+import { SELECT_OTHER } from '@/forms/register/options';
+import { listFaithCommunities, listMissionaryAgencies } from '@/services/catalog.service';
 import { yieldToMain } from '@/lib/scheduler';
 
 export default function MissionariesStep2() {
   const { formData, completeStep2, goBack } = useMissionaryRegisterWizard();
+  const agencies = useCatalogItems(listMissionaryAgencies);
+  const communities = useCatalogItems(listFaithCommunities);
   const {
     register,
     handleSubmit,
@@ -32,7 +26,7 @@ export default function MissionariesStep2() {
     formState: { errors, isSubmitting },
   } = useForm<MissionaryStep2FormData>({
     resolver: zodResolver(missionaryStep2Schema),
-    mode: 'onTouched',
+    ...validateOnSubmit,
     defaultValues: {
       missionaryAgency: formData.missionaryAgency || '',
       agencyCustomName: formData.agencyCustomName || '',
@@ -56,36 +50,28 @@ export default function MissionariesStep2() {
   };
 
   return (
-    <Stack
-      component="form"
-      spacing={2.5}
+    <RegisterStepForm
       onSubmit={handleSubmit(handleStepSubmit)}
-      sx={{ width: '100%' }}
-      noValidate
+      sectionTitle="Dados ministeriais"
+      onBack={goBack}
+      isSubmitting={isSubmitting}
     >
-      <Typography variant="body1">Dados de missão</Typography>
 
       <Controller
         name="missionaryAgency"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth error={Boolean(errors.missionaryAgency)}>
-            <InputLabel shrink>Agência missionária</InputLabel>
-            <Select {...field} label="Agência missionária" displayEmpty>
-              <MenuItem value="" disabled>
-                Selecione...
-              </MenuItem>
-              {missionaryAgencies.map((agency) => (
-                <MenuItem key={agency.value} value={agency.value}>
-                  {agency.label}
-                </MenuItem>
-              ))}
-              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
-            </Select>
-            {errors.missionaryAgency ? (
-              <FormHelperText>{errors.missionaryAgency.message}</FormHelperText>
-            ) : null}
-          </FormControl>
+          <RegisterCatalogSelect
+            id="missionaryAgency"
+            label="Agência missionária"
+            value={field.value}
+            onChange={field.onChange}
+            options={agencies.items}
+            isLoading={agencies.isLoading}
+            loadError={agencies.error}
+            error={Boolean(errors.missionaryAgency)}
+            helperText={errors.missionaryAgency?.message}
+          />
         )}
       />
 
@@ -135,31 +121,17 @@ export default function MissionariesStep2() {
         name="faithCommunity"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth error={Boolean(errors.faithCommunity)}>
-            <InputLabel id="missionary-faith-community-label" shrink>
-              Comunidade de fé
-            </InputLabel>
-            <Select
-              {...field}
-              labelId="missionary-faith-community-label"
-              id="faithCommunity"
-              label="Comunidade de fé"
-              displayEmpty
-            >
-              <MenuItem value="" disabled>
-                Selecione...
-              </MenuItem>
-              {faithCommunities.map((community) => (
-                <MenuItem key={community.value} value={community.value}>
-                  {community.label}
-                </MenuItem>
-              ))}
-              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
-            </Select>
-            {errors.faithCommunity ? (
-              <FormHelperText>{errors.faithCommunity.message}</FormHelperText>
-            ) : null}
-          </FormControl>
+          <RegisterCatalogSelect
+            id="faithCommunity"
+            label="Comunidade de fé"
+            value={field.value}
+            onChange={field.onChange}
+            options={communities.items}
+            isLoading={communities.isLoading}
+            loadError={communities.error}
+            error={Boolean(errors.faithCommunity)}
+            helperText={errors.faithCommunity?.message}
+          />
         )}
       />
 
@@ -208,45 +180,6 @@ export default function MissionariesStep2() {
         </>
       ) : null}
 
-      <Stack direction="row" spacing={2}>
-        <PillButton
-          type="button"
-          tone="primarySoftOutline"
-          onClick={goBack}
-          fullWidth
-          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar
-        </PillButton>
-        <PillButton
-          type="submit"
-          tone="cta"
-          disabled={isSubmitting}
-          fullWidth
-          sx={{
-            minHeight: 48,
-            fontSize: '1rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1.5,
-          }}
-        >
-          {isSubmitting ? (
-            <>
-              <CircularProgress size={20} color="inherit" aria-label="Enviando dados" />
-              <span>Continuando...</span>
-            </>
-          ) : (
-            <>
-              <ArrowForwardIcon />
-              <span>Continuar</span>
-            </>
-          )}
-        </PillButton>
-      </Stack>
-    </Stack>
+    </RegisterStepForm>
   );
 }

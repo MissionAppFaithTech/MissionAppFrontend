@@ -3,10 +3,11 @@
 import Button, { type ButtonProps } from '@mui/material/Button';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Link from 'next/link';
-import { v } from '@/theme/theme';
+import { BUTTON_BORDER_RADIUS, v } from '@/theme/theme';
 
 /**
  * Branded button — prefer this over raw MUI Button for product CTAs.
+ * Every tone shares `BUTTON_BORDER_RADIUS` (rounded rectangle, not a stadium).
  * Extend with a new `tone` before creating another button component.
  * See AGENTS.md → UI component reuse.
  *
@@ -38,9 +39,11 @@ type PillButtonProps = ButtonProps & {
 type ToneEntry = (theme: Theme) => Record<string, unknown>;
 
 const baseSx = () => ({
-  // Fallback label color for the loading spinner; tones override it.
+  // Fallback label / fill colors for the loading spinner; tones override them.
   '--pill-fg': 'currentColor',
-  borderRadius: '16px',
+  '--pill-bg': 'var(--mui-palette-primary-main)',
+  '--pill-bd': 'var(--mui-palette-primary-dark)',
+  borderRadius: BUTTON_BORDER_RADIUS,
   py: 0.5,
   px: 2,
   fontWeight: 500,
@@ -60,7 +63,7 @@ const baseSx = () => ({
 
 /** Figma profile actions — um pouco mais compactos que o default do MUI. */
 const figmaActionBase = {
-  borderRadius: '10px',
+  borderRadius: BUTTON_BORDER_RADIUS,
   minHeight: { xs: 44, sm: 32 },
   py: 0.5,
   px: 1.75,
@@ -71,37 +74,34 @@ const figmaActionBase = {
 } as const;
 
 /**
- * Primary action in dark: the brand orange fill.
- *
- * Hover lifts the fill only slightly — anything lighter drops white text below
- * 4.5:1 — so the perceptible change comes from an accent halo instead.
+ * Primary action in dark: the same dark brand orange as light (`mission.main`).
+ * Hover only deepens the fill — no halo or drop-shadow.
  */
 const darkPrimaryFill: ToneEntry = (theme) =>
   theme.applyStyles('dark', {
-    backgroundColor: v(theme, 'palette.action2.fill'),
-    borderColor: v(theme, 'palette.action2.fill'),
-    color: v(theme, 'palette.action2.fillText'),
-    '--pill-fg': v(theme, 'palette.action2.fillText'),
+    backgroundColor: v(theme, 'palette.mission.main'),
+    borderColor: v(theme, 'palette.mission.main'),
+    color: v(theme, 'palette.mission.contrastText'),
+    '--pill-fg': v(theme, 'palette.mission.contrastText'),
+    '--pill-bg': v(theme, 'palette.mission.main'),
+    '--pill-bd': v(theme, 'palette.mission.main'),
     '&:hover': {
-      backgroundColor: v(theme, 'palette.action2.fillHover'),
-      borderColor: v(theme, 'palette.action2.fillHover'),
-      color: v(theme, 'palette.action2.fillText'),
-      boxShadow: `0 0 0 3px ${v(theme, 'palette.action2.accentWash')}`,
+      backgroundColor: v(theme, 'palette.mission.dark'),
+      borderColor: v(theme, 'palette.mission.dark'),
+      color: v(theme, 'palette.mission.contrastText'),
+      boxShadow: 'none',
     },
     '&:active': {
-      backgroundColor: v(theme, 'palette.action2.fillActive'),
-      borderColor: v(theme, 'palette.action2.fillActive'),
+      backgroundColor: v(theme, 'palette.mission.dark'),
+      borderColor: v(theme, 'palette.mission.dark'),
     },
   });
 
 /**
  * The second CTA tier, in light blue.
  *
- * In the light theme this tone is the navy CTA. The black theme has no navy, so it
- * takes the palette's light blue instead — which keeps the two-tier CTA language
- * the app already had, gives "navigation" actions like Continuar and the role
- * choice a fill of their own, and leaves orange scarce enough to still mean
- * "the primary action". Black ink on the blue reads at 8.52:1.
+ * In the light theme this tone is the navy CTA. In dark it becomes the light
+ * blue (`primary.main`) so the button still reads on the navy ground.
  */
 const darkBrandFill: ToneEntry = (theme) =>
   theme.applyStyles('dark', {
@@ -109,6 +109,8 @@ const darkBrandFill: ToneEntry = (theme) =>
     borderColor: v(theme, 'palette.primary.main'),
     color: v(theme, 'palette.primary.contrastText'),
     '--pill-fg': v(theme, 'palette.primary.contrastText'),
+    '--pill-bg': v(theme, 'palette.primary.main'),
+    '--pill-bd': v(theme, 'palette.primary.main'),
     '&:hover': {
       backgroundColor: v(theme, 'palette.primary.light'),
       borderColor: v(theme, 'palette.primary.light'),
@@ -127,6 +129,8 @@ const darkSecondaryOutline: ToneEntry = (theme) =>
     borderColor: v(theme, 'palette.action2.borderStrong'),
     color: v(theme, 'palette.text.primary'),
     '--pill-fg': v(theme, 'palette.text.primary'),
+    '--pill-bg': 'transparent',
+    '--pill-bd': v(theme, 'palette.action2.borderStrong'),
     '&:hover': {
       backgroundColor: v(theme, 'palette.action2.secondaryHoverWash'),
       borderColor: v(theme, 'palette.connection.main'),
@@ -153,6 +157,8 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
       bgcolor: 'primary.main',
       color: 'primary.contrastText',
       '--pill-fg': 'var(--mui-palette-primary-contrastText)',
+      '--pill-bg': 'var(--mui-palette-primary-main)',
+      '--pill-bd': 'var(--mui-palette-primary-dark)',
       '&:hover': {
         bgcolor: 'connection.main',
         borderColor: 'connection.main',
@@ -166,13 +172,15 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     () => ({
       border: '2px solid',
       borderColor: 'mission.dark',
-      bgcolor: 'accent.main',
+      bgcolor: 'mission.main',
       color: 'mission.contrastText',
       '--pill-fg': 'var(--mui-palette-mission-contrastText)',
+      '--pill-bg': 'var(--mui-palette-mission-main)',
+      '--pill-bd': 'var(--mui-palette-mission-dark)',
       '&:hover': {
-        bgcolor: 'connection.main',
-        borderColor: 'connection.main',
-        color: 'common.white',
+        bgcolor: 'mission.dark',
+        borderColor: 'mission.dark',
+        color: 'mission.contrastText',
         boxShadow: 'none',
       },
     }),
@@ -182,14 +190,15 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     () => ({
       border: '2px solid',
       borderColor: 'mission.dark',
-      borderRadius: '6px',
-      bgcolor: 'accent.main',
+      bgcolor: 'mission.main',
       color: 'mission.contrastText',
       '--pill-fg': 'var(--mui-palette-mission-contrastText)',
+      '--pill-bg': 'var(--mui-palette-mission-main)',
+      '--pill-bd': 'var(--mui-palette-mission-dark)',
       '&:hover': {
-        bgcolor: 'connection.main',
-        borderColor: 'connection.main',
-        color: 'common.white',
+        bgcolor: 'mission.dark',
+        borderColor: 'mission.dark',
+        color: 'mission.contrastText',
         boxShadow: 'none',
       },
     }),
@@ -199,7 +208,6 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     () => ({
       border: '2px solid',
       borderColor: 'mission.main',
-      borderRadius: '6px',
       bgcolor: 'transparent',
       color: 'accent.main',
       '&:hover': {
@@ -225,10 +233,11 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     () => ({
       border: '2px solid',
       borderColor: 'primary.main',
-      borderRadius: '6px',
       bgcolor: 'transparent',
       color: 'primary.main',
       '--pill-fg': 'var(--mui-palette-primary-main)',
+      '--pill-bg': 'transparent',
+      '--pill-bd': 'var(--mui-palette-primary-main)',
       '&:hover': {
         bgcolor: 'primary.main',
         borderColor: 'primary.dark',
@@ -244,6 +253,8 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
       border: '2px solid',
       borderColor: 'primary.main',
       color: 'primary.main',
+      '--pill-bg': 'transparent',
+      '--pill-bd': 'var(--mui-palette-primary-main)',
       '&:hover': {
         ...hoverLightSx,
         borderColor: 'primary.main',
@@ -287,11 +298,15 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
         bgcolor: 'common.white',
         color: 'primary.main',
         '--pill-fg': 'var(--mui-palette-primary-main)',
+        '--pill-bg': 'var(--mui-palette-common-white)',
+        '--pill-bd': 'var(--mui-palette-primary-main)',
         ...theme.applyStyles('dark', {
           borderColor: v(theme, 'palette.action2.borderStrong'),
           backgroundColor: 'transparent',
           color: v(theme, 'palette.text.primary'),
           '--pill-fg': v(theme, 'palette.text.primary'),
+          '--pill-bg': 'transparent',
+          '--pill-bd': v(theme, 'palette.action2.borderStrong'),
         }),
       },
       '&&:hover': {
@@ -312,6 +327,8 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
       bgcolor: 'primary.main',
       color: 'common.white',
       '--pill-fg': 'var(--mui-palette-common-white)',
+      '--pill-bg': 'var(--mui-palette-primary-main)',
+      '--pill-bd': 'var(--mui-palette-primary-main)',
       '&:hover': {
         bgcolor: 'primary.dark',
         boxShadow: 'none',
@@ -323,11 +340,13 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     () => ({
       ...figmaActionBase,
       border: 'none',
-      bgcolor: 'accent.main',
+      bgcolor: 'mission.main',
       color: 'mission.contrastText',
-      '--pill-fg': 'var(--mui-palette-common-white)',
+      '--pill-fg': 'var(--mui-palette-mission-contrastText)',
+      '--pill-bg': 'var(--mui-palette-mission-main)',
+      '--pill-bd': 'var(--mui-palette-mission-main)',
       '&:hover': {
-        bgcolor: 'accent.dark',
+        bgcolor: 'mission.dark',
         boxShadow: 'none',
       },
     }),
@@ -384,6 +403,13 @@ const stateSx: ToneEntry = (theme) => ({
     boxShadow: 'none',
     cursor: 'not-allowed',
     pointerEvents: 'auto',
+  },
+  // MUI marks `loading` as `disabled` and paints `action.disabledBackground`
+  // (near-white in dark mode). Keep the tone fill so the CTA does not vanish.
+  '&&.MuiButton-loading': {
+    backgroundColor: 'var(--pill-bg)',
+    borderColor: 'var(--pill-bd)',
+    opacity: 1,
   },
   // MUI paints the root `color: transparent` to hide the label while loading, so
   // the indicator cannot inherit it — each tone publishes its label color instead.
