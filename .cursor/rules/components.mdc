@@ -17,6 +17,7 @@ Full catalog: [`AGENTS.md`](../../AGENTS.md) → **UI component reuse**.
 | Logo | `Logo` (`sm` \| `md` \| `lg` \| `xl`, `variant`) |
 | Section title + subtitle | `SectionHeader` |
 | Phone input | `PhoneField` |
+| Profile multiline text | `StyledTextArea` — keep `RichTextEditor` for posts only |
 | Password strength UI | `PasswordStrengthIndicator` + `validateStrongPassword` |
 | App chrome / navbar | `PageNavbar`, `SiteHeader` |
 | Theme switch | `ThemeToggle` |

@@ -15,6 +15,7 @@ import PillButton from '@/components/common/PillButton';
 import { normalizeEmail } from '@/lib/masks';
 import { forgotPasswordSchema, type ForgotPasswordFormData } from '@/schemas/auth.schema';
 import { requestPasswordReset, RESET_PASSWORD_TOKEN_TTL_MINUTES } from '@/services/auth.service';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 type SubmitState =
   | { status: 'idle' }
@@ -94,7 +95,7 @@ export default function ForgotPasswordForm() {
           href="/login"
           tone="cta"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<ArrowBackIcon />}
         >
           Voltar para o login
@@ -123,7 +124,7 @@ export default function ForgotPasswordForm() {
           onClick={() => setSubmitState({ status: 'idle' })}
           tone="primaryOutline"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<EmailOutlinedIcon />}
         >
           Tentar outro e-mail
@@ -133,7 +134,7 @@ export default function ForgotPasswordForm() {
           href="/select-role"
           tone="missionFlat"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<PersonAddIcon />}
         >
           Criar uma conta
@@ -143,7 +144,7 @@ export default function ForgotPasswordForm() {
           href="/login"
           tone="outline"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<ArrowBackIcon />}
         >
           Voltar para o login
@@ -198,7 +199,7 @@ export default function ForgotPasswordForm() {
         tone="cta"
         fullWidth
         disabled={isSubmitting}
-        sx={{ minHeight: 48, fontWeight: 600 }}
+        sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
         startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
       >
         {isSubmitting ? 'Verificando…' : 'Enviar link'}
@@ -208,7 +209,7 @@ export default function ForgotPasswordForm() {
         href="/login"
         tone="outline"
         fullWidth
-        sx={{ minHeight: 44 }}
+        sx={FORM_ACTION_BUTTON_SX}
         startIcon={<ArrowBackIcon />}
       >
         Voltar para o login

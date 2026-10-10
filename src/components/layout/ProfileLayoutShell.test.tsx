@@ -14,6 +14,14 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
+function expectStandardNavbar() {
+  expect(screen.getByAltText(/mission app/i)).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /abrir menu do perfil/i })).toBeInTheDocument();
+  expect(screen.queryByRole('link', { name: /^voltar$/i })).not.toBeInTheDocument();
+  expect(screen.queryByText('Editar Perfil')).not.toBeInTheDocument();
+  expect(screen.queryByText('Editar Perfil de Apoiador')).not.toBeInTheDocument();
+}
+
 describe('ProfileLayoutShell component', () => {
   beforeEach(() => {
     mockPathname = '/profile';
@@ -28,25 +36,17 @@ describe('ProfileLayoutShell component', () => {
         </ProfileLayoutShell>
       );
 
-      // Top navbar elements
-      expect(screen.getByAltText(/mission app/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /abrir menu do perfil/i })).toBeInTheDocument();
-
-      // Profile summary card elements
+      expectStandardNavbar();
       expect(screen.getByText(mockProfile.displayName)).toBeInTheDocument();
-
-      // Main content
       expect(screen.getByText('Profile Tab Content')).toBeInTheDocument();
-
-      // Mobile Bottom Nav Bar present
       expect(
         screen.getByRole('navigation', { name: /navegação móvel do missionário/i })
       ).toBeInTheDocument();
     });
   });
 
-  describe('Edit pages (Free, unobstructed layout with only Back button)', () => {
-    it('does NOT render bottom nav bar or summary card on missionary edit profile page', () => {
+  describe('Edit pages (same navbar, no summary card or bottom nav)', () => {
+    it('keeps the standard navbar on missionary edit profile page', () => {
       mockPathname = '/profile/edit-profile';
       render(
         <ProfileLayoutShell profile={mockProfile} role="missionary">
@@ -54,30 +54,15 @@ describe('ProfileLayoutShell component', () => {
         </ProfileLayoutShell>
       );
 
-      // NO bottom nav bar
+      expectStandardNavbar();
       expect(
         screen.queryByRole('navigation', { name: /navegação móvel/i })
       ).not.toBeInTheDocument();
-
-      // NO summary card
       expect(screen.queryByText(mockProfile.roleDescription!)).not.toBeInTheDocument();
-
-      // NO account menu avatar dropdown
-      expect(
-        screen.queryByRole('button', { name: /abrir menu do perfil/i })
-      ).not.toBeInTheDocument();
-
-      // ONLY Back button and title
-      const backBtn = screen.getByRole('link', { name: /voltar/i });
-      expect(backBtn).toBeInTheDocument();
-      expect(backBtn).toHaveAttribute('href', '/profile/sobre');
-      expect(screen.getByText('Editar Perfil')).toBeInTheDocument();
-
-      // Form rendered freely
       expect(screen.getByText('Formulário de Edição de Perfil')).toBeInTheDocument();
     });
 
-    it('does NOT render bottom nav bar or summary card on impact project edit page', () => {
+    it('keeps the standard navbar on impact project edit page', () => {
       mockPathname = '/profile/projetos-de-impacto/edit';
       render(
         <ProfileLayoutShell profile={mockProfile} role="missionary">
@@ -85,22 +70,14 @@ describe('ProfileLayoutShell component', () => {
         </ProfileLayoutShell>
       );
 
-      // NO bottom nav bar
+      expectStandardNavbar();
       expect(
         screen.queryByRole('navigation', { name: /navegação móvel/i })
       ).not.toBeInTheDocument();
-
-      // ONLY Back button pointing to impact projects and title
-      const backBtn = screen.getByRole('link', { name: /voltar/i });
-      expect(backBtn).toBeInTheDocument();
-      expect(backBtn).toHaveAttribute('href', '/profile/projetos-de-impacto');
-      expect(screen.getByText('Editar Projeto de Impacto')).toBeInTheDocument();
-
-      // Form rendered freely
       expect(screen.getByText('Formulário de Edição de Projeto')).toBeInTheDocument();
     });
 
-    it('does NOT render bottom nav bar or summary card on supporter edit profile page', () => {
+    it('keeps the standard navbar on supporter edit profile page', () => {
       mockPathname = '/profile/supporter/edit-profile';
       render(
         <ProfileLayoutShell profile={mockSupporterProfile} role="supporter">
@@ -108,22 +85,14 @@ describe('ProfileLayoutShell component', () => {
         </ProfileLayoutShell>
       );
 
-      // NO bottom nav bar
+      expectStandardNavbar();
       expect(
         screen.queryByRole('navigation', { name: /navegação móvel/i })
       ).not.toBeInTheDocument();
-
-      // ONLY Back button pointing to supporter home and title
-      const backBtn = screen.getByRole('link', { name: /voltar/i });
-      expect(backBtn).toBeInTheDocument();
-      expect(backBtn).toHaveAttribute('href', '/profile/supporter');
-      expect(screen.getByText('Editar Perfil de Apoiador')).toBeInTheDocument();
-
-      // Form rendered freely
       expect(screen.getByText('Formulário de Edição do Apoiador')).toBeInTheDocument();
     });
 
-    it('does NOT render bottom nav bar or summary card on financial settings page (/profile/financeiro)', () => {
+    it('keeps the standard navbar on financial settings page', () => {
       mockPathname = '/profile/financeiro';
       render(
         <ProfileLayoutShell profile={mockProfile} role="missionary">
@@ -131,26 +100,11 @@ describe('ProfileLayoutShell component', () => {
         </ProfileLayoutShell>
       );
 
-      // NO bottom nav bar
+      expectStandardNavbar();
       expect(
         screen.queryByRole('navigation', { name: /navegação móvel/i })
       ).not.toBeInTheDocument();
-
-      // NO summary card
       expect(screen.queryByText(mockProfile.roleDescription!)).not.toBeInTheDocument();
-
-      // NO account menu avatar dropdown
-      expect(
-        screen.queryByRole('button', { name: /abrir menu do perfil/i })
-      ).not.toBeInTheDocument();
-
-      // ONLY Back button pointing to profile and title
-      const backBtn = screen.getByRole('link', { name: /voltar/i });
-      expect(backBtn).toBeInTheDocument();
-      expect(backBtn).toHaveAttribute('href', '/profile/sobre');
-      expect(screen.getByText('Configurações Financeiras')).toBeInTheDocument();
-
-      // Form rendered freely
       expect(screen.getByText('Formulário de Configurações Financeiras')).toBeInTheDocument();
     });
   });

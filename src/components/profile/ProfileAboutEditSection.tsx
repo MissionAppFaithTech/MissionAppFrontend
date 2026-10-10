@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState, type ReactNode } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -10,13 +12,20 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
-import RichTextEditor from '@/components/common/RichTextEditor';
+import StyledTextArea from '@/components/common/StyledTextArea';
+import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
 import { profileLocations } from '@/lib/profileOptions';
 import { profileAboutSchema, type ProfileAboutFormData } from '@/schemas/profile.schema';
+import { listFaithCommunities } from '@/services/catalog.service';
+import {
+  toUpdateMissionaryAboutPayload,
+  updateMissionaryAbout,
+} from '@/services/missionary.service';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileAboutData } from '@/types/profile';
-import type { ReactNode } from 'react';
 
 type ProfileAboutEditSectionProps = {
+  missionaryId: string;
   data: ProfileAboutData;
   onBack: () => void;
   onSave?: (data: ProfileAboutFormData) => void;
@@ -53,14 +62,18 @@ function LabeledField({ children, htmlFor, label }: LabeledFieldProps) {
 }
 
 export default function ProfileAboutEditSection({
+  missionaryId,
   data,
   onBack,
   onSave,
 }: ProfileAboutEditSectionProps) {
+  const communities = useCatalogItems(listFaithCommunities);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const {
     handleSubmit,
     control,
-    formState: { errors },
+    setValue,
+    formState: { errors, isSubmitting },
   } = useForm<ProfileAboutFormData>({
     resolver: zodResolver(profileAboutSchema),
     mode: 'onTouched',
@@ -76,7 +89,26 @@ export default function ProfileAboutEditSection({
     },
   });
 
-  const onSubmit = (formData: ProfileAboutFormData) => {
+  useEffect(() => {
+    const match = communities.items.find(
+      (item) => item.id === data.faithCommunity || item.name === data.faithCommunity
+    );
+    if (match) {
+      setValue('faithCommunity', match.id);
+    }
+  }, [communities.items, data.faithCommunity, setValue]);
+
+  const onSubmit = async (formData: ProfileAboutFormData) => {
+    setSubmitError(null);
+    try {
+      await updateMissionaryAbout(missionaryId, toUpdateMissionaryAboutPayload(formData));
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : 'Não foi possível salvar as informações do sobre'
+      );
+      return;
+    }
+
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem('draft_profile_about_intro');
@@ -114,17 +146,22 @@ export default function ProfileAboutEditSection({
               Editar sobre
             </Typography>
 
+            {submitError ? (
+              <Alert severity="error" role="alert">
+                {submitError}
+              </Alert>
+            ) : null}
+
             <Controller
               name="introduction"
               control={control}
               render={({ field }) => (
-                <RichTextEditor
+                <StyledTextArea
                   id="profile-about-introduction"
                   label="Sobre mim"
                   value={field.value}
                   onChange={field.onChange}
                   minRows={4}
-                  draftKey="profile_about_intro"
                   placeholder="Compartilhe sua trajetória, testemunho e dedicação ministerial..."
                   error={Boolean(errors.introduction)}
                   helperText={errors.introduction?.message}
@@ -136,13 +173,12 @@ export default function ProfileAboutEditSection({
               name="missionHistory"
               control={control}
               render={({ field }) => (
-                <RichTextEditor
+                <StyledTextArea
                   id="profile-about-mission-history"
                   label="Resumo da minha história em missões"
                   value={field.value}
                   onChange={field.onChange}
                   minRows={4}
-                  draftKey="profile_about_mission_history"
                   placeholder="Conte sobre os países, comunidades e marcos por onde você serviu..."
                   error={Boolean(errors.missionHistory)}
                   helperText={errors.missionHistory?.message}
@@ -230,14 +266,14 @@ export default function ProfileAboutEditSection({
                     select
                     fullWidth
                     error={Boolean(errors.faithCommunity)}
-                    helperText={
-                      errors.faithCommunity?.message ||
-                      'Para gerenciar os dados eclesiásticos completos da igreja e liderança pastoral, acesse Configurações de Conta.'
-                    }
+                    helperText={errors.faithCommunity?.message}
                   >
-                    {faithCommunities.map((community) => (
-                      <MenuItem key={community} value={community}>
-                        {community}
+                    {(communities.items.length > 0
+                      ? communities.items
+                      : faithCommunities.map((name) => ({ id: name, name }))
+                    ).map((community) => (
+                      <MenuItem key={community.id} value={community.id}>
+                        {community.name}
                       </MenuItem>
                     ))}
                   </TextField>
@@ -249,13 +285,12 @@ export default function ProfileAboutEditSection({
               name="prayerRequests"
               control={control}
               render={({ field }) => (
-                <RichTextEditor
+                <StyledTextArea
                   id="profile-about-prayer-requests"
                   label="Pedidos de oração"
                   value={field.value}
                   onChange={field.onChange}
                   minRows={3}
-                  draftKey="profile_about_prayer_requests"
                   placeholder="Liste pedidos de oração pelo seu ministério, saúde e família..."
                   error={Boolean(errors.prayerRequests)}
                   helperText={errors.prayerRequests?.message}
@@ -267,13 +302,12 @@ export default function ProfileAboutEditSection({
               name="lifeVerse"
               control={control}
               render={({ field }) => (
-                <RichTextEditor
+                <StyledTextArea
                   id="profile-about-life-verse"
                   label="Versículo para a vida"
                   value={field.value}
                   onChange={field.onChange}
                   minRows={2}
-                  draftKey="profile_about_life_verse"
                   placeholder="Insira sua citação bíblica ou lema de fé (ex: 'Tudo posso naquele que me fortalece')..."
                   error={Boolean(errors.lifeVerse)}
                   helperText={errors.lifeVerse?.message}
@@ -288,7 +322,7 @@ export default function ProfileAboutEditSection({
                 pt: 1.5,
                 justifyContent: 'flex-end',
                 '& .MuiButton-root': {
-                  minHeight: { xs: 48, sm: 40 },
+                  ...FORM_ACTION_BUTTON_SX,
                   flex: { xs: 1, sm: 'initial' },
                 },
               }}
@@ -296,8 +330,13 @@ export default function ProfileAboutEditSection({
               <PillButton type="button" tone="primarySoftOutline" size="medium" onClick={onBack}>
                 Voltar
               </PillButton>
-              <PillButton type="submit" tone="primaryFilled" size="medium">
-                Salvar
+              <PillButton
+                type="submit"
+                tone="primaryFilled"
+                size="medium"
+                loading={isSubmitting}
+              >
+                {isSubmitting ? 'Salvando...' : 'Salvar'}
               </PillButton>
             </Stack>
           </Stack>

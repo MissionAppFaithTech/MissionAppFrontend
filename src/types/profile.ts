@@ -49,10 +49,14 @@ export type ImpactProjectData = {
 export type ProfileContactData = {
   publicEmail: string;
   publicPhone: string;
+  showPublicEmail?: boolean;
+  showPublicPhone?: boolean;
+  allowWhatsappContact?: boolean;
   whatsappNumber?: string;
 };
 
 export type ProfileData = {
+  missionaryId?: string;
   username: string;
   displayName: string;
   roleDescription: string;

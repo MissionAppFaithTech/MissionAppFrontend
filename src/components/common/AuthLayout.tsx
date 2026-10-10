@@ -91,11 +91,7 @@ export default function AuthLayout({
 
         {header}
 
-        <Stack
-          direction="column"
-          spacing={2.5}
-          sx={{ width: '100%', alignItems: 'stretch' }}
-        >
+        <Stack direction="column" spacing={2.5} sx={{ width: '100%', alignItems: 'stretch' }}>
           <AuthCard className={className}>
             <CardContent sx={{ p: { xs: 3, sm: 3.5 }, '&:last-child': { pb: { xs: 3, sm: 3.5 } } }}>
               {title ? (

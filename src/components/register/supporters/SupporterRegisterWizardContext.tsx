@@ -6,7 +6,9 @@ import type {
   SupporterRegisterData,
   SupportersStep1Values,
 } from '@/forms/register/types';
+import { SELECT_OTHER } from '@/forms/register/options';
 import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
+import { createFaithCommunity } from '@/services/catalog.service';
 
 type SupporterRegisterWizardContextValue = {
   step: number;
@@ -47,6 +49,10 @@ export function SupporterRegisterWizardProvider({ children }: { children: ReactN
         password: values.password,
         passwordConfirmation: values.confirmPassword,
       });
+
+      if (merged.faithCommunity === SELECT_OTHER && merged.communityDetails?.name) {
+        await createFaithCommunity(merged.communityDetails);
+      }
 
       setFormData(merged);
       setStep(3);

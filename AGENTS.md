@@ -165,6 +165,7 @@ Before adding a new component or one-off MUI styling for a repeated pattern:
 | `Logo`                      | Brand mark                             | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`.                            |
 | `SectionHeader`             | Section title + optional subtitle      | Landing and content blocks.                                                                             |
 | `PhoneField`                | International phone inputs             | Also exports `isValidInternationalPhone`.                                                               |
+| `StyledTextArea`            | Multiline profile-edit fields          | Keep `RichTextEditor` for posts only.                                                                   |
 | `PasswordStrengthIndicator` | Password strength meter                | Pair with `validateStrongPassword` from `@/lib/passwordStrength`.                                       |
 
 ### `PillButton` tones (do not reinvent)

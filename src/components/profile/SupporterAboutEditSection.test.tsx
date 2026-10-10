@@ -13,7 +13,7 @@ const mockData: ProfileAboutData = {
 };
 
 describe('SupporterAboutEditSection', () => {
-  it('renders all fields including RichTextEditor for introduction and lifeVerse', () => {
+  it('renders all fields including styled textareas for introduction and lifeVerse', () => {
     render(<SupporterAboutEditSection data={mockData} onBack={vi.fn()} />);
 
     expect(

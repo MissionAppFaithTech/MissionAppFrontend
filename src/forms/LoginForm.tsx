@@ -19,6 +19,7 @@ import PillButton from '@/components/common/PillButton';
 import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
 import { login } from '@/services/auth.service';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 export default function LoginForm() {
   const router = useRouter();
@@ -192,8 +193,7 @@ export default function LoginForm() {
         tone="cta"
         disabled={isSubmitting}
         sx={{
-          minHeight: 40,
-          fontSize: '1rem',
+          ...FORM_ACTION_BUTTON_SX,
           fontWeight: 600,
           display: 'flex',
           alignItems: 'center',

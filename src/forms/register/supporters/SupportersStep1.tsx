@@ -4,26 +4,31 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TextField } from '@mui/material';
 import PhoneField from '@/components/common/PhoneField';
+import { useSupporterRegisterWizard } from '@/components/register/supporters/SupporterRegisterWizardContext';
+import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
 import GenderField from '@/forms/register/shared/GenderField';
 import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
+import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
+import { EMPTY_FAITH_COMMUNITY, SELECT_OTHER } from '@/forms/register/options';
 import { maskBirthDate } from '@/lib/masks';
 import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
-import { supporterStep1Schema, type SupporterStep1FormData } from '@/schemas/register.schema';
-import { useSupporterRegisterWizard } from '@/components/register/supporters/SupporterRegisterWizardContext';
-import { SELECT_OTHER } from '@/forms/register/options';
-import { listFaithCommunities } from '@/services/catalog.service';
 import { yieldToMain } from '@/lib/scheduler';
+import { createFaithCommunitySchema } from '@/schemas/catalog-create.schema';
+import { supporterStep1Schema, type SupporterStep1FormData } from '@/schemas/register.schema';
+import { listFaithCommunities } from '@/services/catalog.service';
 
 export default function SupportersStep1() {
   const { formData, completeStep1 } = useSupporterRegisterWizard();
   const communities = useCatalogItems(listFaithCommunities);
+  const communityEntry = useOtherCatalogEntry();
   const {
     register,
     handleSubmit,
     control,
     watch,
+    setValue,
     trigger,
     clearErrors,
     getFieldState,
@@ -38,14 +43,11 @@ export default function SupportersStep1() {
       gender: (formData.gender as 'feminino' | 'masculino') || undefined,
       phone: formData.phone || '',
       faithCommunity: formData.faithCommunity || '',
-      communityPhone: formData.communityPhone || '',
-      pastorName: formData.pastorName || '',
-      pastorPhone: formData.pastorPhone || '',
+      communityDetails: formData.communityDetails || EMPTY_FAITH_COMMUNITY,
     },
   });
 
-  const faithCommunity = watch('faithCommunity');
-  const showCommunityDetails = faithCommunity === SELECT_OTHER;
+  const communityDetails = watch('communityDetails');
 
   const handleStepSubmit = async (data: SupporterStep1FormData) => {
     await yieldToMain();
@@ -140,60 +142,35 @@ export default function SupportersStep1() {
             id="faithCommunity"
             label="Comunidade de fé (opcional)"
             value={field.value}
-            onChange={field.onChange}
+            onChange={(value) => communityEntry.selectValue(value, field.value, field.onChange)}
             options={communities.items}
             isLoading={communities.isLoading}
             loadError={communities.error}
+            error={Boolean(errors.faithCommunity)}
+            helperText={errors.faithCommunity?.message}
             emptyValueLabel="Nenhuma"
             allowEmpty
+            otherSummary={field.value === SELECT_OTHER ? communityDetails.name : undefined}
+            onEditOther={communityEntry.openEditor}
           />
         )}
       />
 
-      {showCommunityDetails ? (
-        <>
-          <Controller
-            name="communityPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone da comunidade de fé"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.communityPhone)}
-                helperText={errors.communityPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
-
-          <TextField
-            {...register('pastorName')}
-            label="Nome do pastor"
-            fullWidth
-            placeholder="Pr. João Souza"
-            error={Boolean(errors.pastorName)}
-            helperText={errors.pastorName?.message}
-          />
-
-          <Controller
-            name="pastorPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone do pastor"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.pastorPhone)}
-                helperText={errors.pastorPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
-        </>
-      ) : null}
+      <CreateFaithCommunityModal
+        open={communityEntry.open}
+        initialValues={communityDetails}
+        onClose={() =>
+          communityEntry.cancel(
+            createFaithCommunitySchema.safeParse(communityDetails).success,
+            (value) => setValue('faithCommunity', value)
+          )
+        }
+        onSave={(details) => {
+          setValue('communityDetails', details);
+          setValue('faithCommunity', SELECT_OTHER, { shouldValidate: true });
+          communityEntry.close();
+        }}
+      />
 
     </RegisterStepForm>
   );

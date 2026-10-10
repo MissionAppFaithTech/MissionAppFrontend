@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import AuthLayout from '@/components/common/AuthLayout';
 import PillButton from '@/components/common/PillButton';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 const roles = [
   { label: 'Sou um apoiador', href: '/register/supporters' },
@@ -49,7 +50,7 @@ export default function RoleSelectionPage() {
             href={href}
             tone="cta"
             fullWidth
-            sx={{ minHeight: { xs: 44, sm: 40 } }}
+            sx={FORM_ACTION_BUTTON_SX}
           >
             {label}
           </PillButton>

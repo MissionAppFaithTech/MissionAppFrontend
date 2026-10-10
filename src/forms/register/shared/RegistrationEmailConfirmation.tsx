@@ -10,11 +10,10 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import LoginIcon from '@mui/icons-material/Login';
 import HomeIcon from '@mui/icons-material/Home';
 import PillButton from '@/components/common/PillButton';
-import { BUTTON_BORDER_RADIUS } from '@/theme/theme';
+import { BUTTON_BORDER_RADIUS, FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 const actionButtonSx = {
-  minHeight: { xs: 44, sm: 40 },
-  fontSize: '0.875rem',
+  ...FORM_ACTION_BUTTON_SX,
   fontWeight: 600,
   gap: 1,
 } as const;

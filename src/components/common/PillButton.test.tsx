@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { BUTTON_BORDER_RADIUS } from '@/theme/theme';
+import { BUTTON_BORDER_RADIUS, FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import PillButton from './PillButton';
 
 describe('PillButton component', () => {
@@ -65,5 +65,20 @@ describe('PillButton component', () => {
     expect(fill).not.toBe('');
     expect(getComputedStyle(loading).getPropertyValue('--pill-bg').trim()).toBe(fill);
     expect(getComputedStyle(loading).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+  });
+
+  it('keeps Voltar and Salvar on the shared compact action token', () => {
+    expect(FORM_ACTION_BUTTON_SX.minHeight).toEqual({ xs: 44, sm: 34 });
+    expect(FORM_ACTION_BUTTON_SX.minWidth).toEqual({ xs: 0, sm: 108 });
+
+    render(
+      <>
+        <PillButton tone="primarySoftOutline">Voltar</PillButton>
+        <PillButton tone="primaryFilled">Salvar</PillButton>
+      </>
+    );
+
+    expect(screen.getByRole('button', { name: /voltar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
   });
 });

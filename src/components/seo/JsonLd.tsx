@@ -108,11 +108,11 @@ export function generateProfilePageSchema(
     };
   }
 
-  if (profile.contact?.publicEmail) {
+  if (profile.contact?.showPublicEmail !== false && profile.contact?.publicEmail) {
     personSchema.email = profile.contact.publicEmail;
   }
 
-  if (profile.contact?.publicPhone) {
+  if (profile.contact?.showPublicPhone !== false && profile.contact?.publicPhone) {
     personSchema.telephone = profile.contact.publicPhone;
   }
 

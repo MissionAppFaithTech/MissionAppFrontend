@@ -58,13 +58,11 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
     await expect(page.getByText(/configurações financeiras salvas com sucesso!/i)).toBeVisible();
   });
 
-  test('navigates to financial settings from missionary profile summary card', async ({ page }) => {
+  test('navigates to financial settings from the account menu', async ({ page }) => {
     await page.goto('/profile/projetos-de-impacto');
 
-    // Click on "Configurar Doações" in the missionary profile header card
-    const configBtn = page.getByRole('link', { name: /configurar doações/i });
-    await expect(configBtn).toBeVisible();
-    await configBtn.click();
+    await page.getByRole('button', { name: /abrir menu do perfil/i }).click();
+    await page.getByRole('link', { name: /configurações financeiras/i }).click();
 
     await page.waitForURL('**/profile/financeiro');
     await expect(

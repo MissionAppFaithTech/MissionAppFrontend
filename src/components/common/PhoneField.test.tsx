@@ -27,6 +27,18 @@ describe('PhoneField', () => {
     expect(screen.getByRole('combobox', { name: /país do telefone/i })).toBeInTheDocument();
   });
 
+  it('associates an external Typography label when hideLabel is set', () => {
+    render(
+      <>
+        <label htmlFor="publicPhone">Telefone:</label>
+        <PhoneField id="publicPhone" hideLabel size="small" value="" onChange={vi.fn()} />
+      </>
+    );
+
+    expect(screen.getByLabelText(/^telefone:$/i)).toBeInTheDocument();
+    expect(screen.queryByText(/^telefone$/i)).not.toBeInTheDocument();
+  });
+
   it('notifies the parent when the number is typed', async () => {
     const user = userEvent.setup();
     const handleChange = vi.fn();

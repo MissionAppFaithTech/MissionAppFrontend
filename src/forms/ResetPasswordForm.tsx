@@ -17,6 +17,7 @@ import {
   RESET_PASSWORD_TOKEN_TTL_MINUTES,
   resetPassword,
 } from '@/services/auth.service';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 type ResetPasswordFormProps = {
   token: string | null;
@@ -55,7 +56,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           href="/forgot-password"
           tone="cta"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<EmailOutlinedIcon />}
         >
           Solicitar novo link
@@ -65,7 +66,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           href="/login"
           tone="outline"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<ArrowBackIcon />}
         >
           Voltar para o login
@@ -90,7 +91,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           href="/forgot-password"
           tone="cta"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<EmailOutlinedIcon />}
         >
           Solicitar novo link
@@ -100,7 +101,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           href="/login"
           tone="outline"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<ArrowBackIcon />}
         >
           Voltar para o login
@@ -124,7 +125,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           href="/login"
           tone="cta"
           fullWidth
-          sx={{ minHeight: 44 }}
+          sx={FORM_ACTION_BUTTON_SX}
           startIcon={<LoginIcon />}
         >
           Entrar com a nova senha
@@ -220,7 +221,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         tone="cta"
         fullWidth
         disabled={isSubmitting}
-        sx={{ minHeight: 48, fontWeight: 600 }}
+        sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
         startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
       >
         {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
@@ -230,7 +231,7 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         href="/login"
         tone="outline"
         fullWidth
-        sx={{ minHeight: 44 }}
+        sx={FORM_ACTION_BUTTON_SX}
         startIcon={<ArrowBackIcon />}
       >
         Voltar para o login

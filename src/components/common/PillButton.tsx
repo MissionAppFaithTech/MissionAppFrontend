@@ -3,7 +3,7 @@
 import Button, { type ButtonProps } from '@mui/material/Button';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Link from 'next/link';
-import { BUTTON_BORDER_RADIUS, v } from '@/theme/theme';
+import { BUTTON_BORDER_RADIUS, FORM_ACTION_BUTTON_SX, v } from '@/theme/theme';
 
 /**
  * Branded button — prefer this over raw MUI Button for product CTAs.
@@ -44,10 +44,9 @@ const baseSx = () => ({
   '--pill-bg': 'var(--mui-palette-primary-main)',
   '--pill-bd': 'var(--mui-palette-primary-dark)',
   borderRadius: BUTTON_BORDER_RADIUS,
+  ...FORM_ACTION_BUTTON_SX,
   py: 0.5,
-  px: 2,
   fontWeight: 500,
-  fontSize: '0.9375rem',
   textTransform: 'none',
   boxShadow: 'none',
   transition:
@@ -61,13 +60,11 @@ const baseSx = () => ({
   },
 });
 
-/** Figma profile actions — um pouco mais compactos que o default do MUI. */
+/** Figma profile actions — mesmo tamanho compacto das demais ações. */
 const figmaActionBase = {
   borderRadius: BUTTON_BORDER_RADIUS,
-  minHeight: { xs: 44, sm: 32 },
+  ...FORM_ACTION_BUTTON_SX,
   py: 0.5,
-  px: 1.75,
-  fontSize: '0.8125rem',
   fontWeight: 500,
   lineHeight: 1.25,
   boxShadow: 'none',

@@ -10,13 +10,17 @@ import { CountrySelector, usePhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 
 type PhoneFieldProps = {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   error?: boolean;
   helperText?: string;
   label?: string;
+  /** When true, the caller renders the visible label (e.g. Typography + htmlFor). */
+  hideLabel?: boolean;
   placeholder?: string;
   defaultCountry?: string;
+  size?: 'small' | 'medium';
 };
 
 /** Valor só com DDI (ex: +55) — conta como vazio para mostrar o placeholder. */
@@ -27,15 +31,19 @@ function isOnlyDialCode(phone: string): boolean {
 }
 
 export default function PhoneField({
+  id,
   value,
   onChange,
   error = false,
   helperText,
   label = 'Telefone',
+  hideLabel = false,
   placeholder = '(11) 98765-4321',
   defaultCountry = 'br',
+  size = 'medium',
 }: PhoneFieldProps) {
-  const inputId = useId();
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
   const helperId = useId();
   const displayValue = isOnlyDialCode(value) ? '' : value;
 
@@ -46,14 +54,17 @@ export default function PhoneField({
   });
 
   return (
-    <FormControl variant="outlined" fullWidth error={error}>
-      <InputLabel htmlFor={inputId} shrink>
-        {label}
-      </InputLabel>
+    <FormControl variant="outlined" fullWidth error={error} size={size}>
+      {hideLabel ? null : (
+        <InputLabel htmlFor={inputId} shrink>
+          {label}
+        </InputLabel>
+      )}
       <OutlinedInput
         id={inputId}
-        label={label}
-        notched
+        label={hideLabel ? undefined : label}
+        notched={hideLabel ? false : true}
+        size={size}
         value={inputValue}
         onChange={handlePhoneValueChange}
         placeholder={placeholder}

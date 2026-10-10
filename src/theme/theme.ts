@@ -28,6 +28,14 @@ export const roleColors = {
 /** Product button corner — rounded rectangle, never a stadium / pill. */
 export const BUTTON_BORDER_RADIUS = '10px';
 
+/** Compact branded action size — shorter height, a bit more width. */
+export const FORM_ACTION_BUTTON_SX = {
+  minHeight: { xs: 44, sm: 34 },
+  minWidth: { xs: 0, sm: 108 },
+  px: { xs: 2.5, sm: 3 },
+  fontSize: { xs: '0.875rem', sm: '0.8125rem' },
+} as const;
+
 /** Derived shades for MUI palette variants */
 const shades = {
   primaryLight: '#1A3D6E',

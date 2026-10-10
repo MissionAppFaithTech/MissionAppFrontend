@@ -33,13 +33,14 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
-import RichTextEditor from '@/components/common/RichTextEditor';
+import StyledTextArea from '@/components/common/StyledTextArea';
 import DonationModal from '@/components/profile/DonationModal';
 import {
   financialSettingsSchema,
   type FinancialSettingsFormData,
 } from '@/schemas/financial.schema';
 import type { BankAccountType, FinancialConfigData, PixKeyType } from '@/types/profile';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 type FinancialSettingsFormProps = {
   initialData?: FinancialConfigData;
@@ -279,8 +280,7 @@ export default function FinancialSettingsForm({
                     size="medium"
                     aria-label="Voltar para o perfil"
                     sx={{
-                      minHeight: { xs: 48, sm: 42 },
-                      px: 2,
+                      ...FORM_ACTION_BUTTON_SX,
                       flexShrink: 0,
                       width: { xs: '100%', sm: 'auto' },
                     }}
@@ -294,8 +294,7 @@ export default function FinancialSettingsForm({
                     size="medium"
                     onClick={() => setPreviewOpen(true)}
                     sx={{
-                      minHeight: { xs: 48, sm: 42 },
-                      px: 2,
+                      ...FORM_ACTION_BUTTON_SX,
                       flexShrink: 0,
                       width: { xs: '100%', sm: 'auto' },
                     }}
@@ -345,14 +344,13 @@ export default function FinancialSettingsForm({
                   name="supporterMessage"
                   control={control}
                   render={({ field }) => (
-                    <RichTextEditor
+                    <StyledTextArea
                       id="financial-supporter-message"
                       label="Mensagem de Gratidão e Direcionamento"
                       value={field.value}
                       onChange={field.onChange}
                       minRows={3}
                       maxLength={500}
-                      draftKey="financial_supporter_message"
                       placeholder="Ex: Sua contribuição sustenta nossa atuação no campo missionário..."
                       error={Boolean(errors.supporterMessage)}
                       helperText={errors.supporterMessage?.message}
@@ -789,8 +787,7 @@ export default function FinancialSettingsForm({
                   gap: 1.5,
                   pt: 1,
                   '& .MuiButton-root': {
-                    minHeight: { xs: 48, sm: 44 },
-                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
+                    ...FORM_ACTION_BUTTON_SX,
                     width: { xs: '100%', sm: 'auto' },
                   },
                 }}

@@ -5,7 +5,6 @@ import { Box, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } f
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
@@ -168,8 +167,6 @@ export default function SiteHeader() {
               gap: { xs: 1, sm: 1.5 },
             }}
           >
-            <ThemeToggle />
-
             <PillButton
               href="/login"
               size="small"

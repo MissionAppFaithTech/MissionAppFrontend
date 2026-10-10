@@ -1,4 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const cookiesGet = vi.fn();
+
+vi.mock('next/headers', () => ({
+  cookies: vi.fn(async () => ({ get: cookiesGet })),
+}));
 
 vi.mock('@/lib/api/backend', () => ({
   BackendApiError: class BackendApiError extends Error {
@@ -14,16 +20,21 @@ vi.mock('@/lib/api/backend', () => ({
 }));
 
 import { backendFetch } from '@/lib/api/backend';
-import { GET } from './route';
+import { AUTH_COOKIE } from '@/lib/auth/cookies';
+import { GET, POST } from './route';
 
-describe('GET /api/faith-communities', () => {
+describe('/api/faith-communities', () => {
   beforeEach(() => {
     vi.mocked(backendFetch).mockReset();
+    cookiesGet.mockReset();
+    cookiesGet.mockImplementation((name: string) =>
+      name === AUTH_COOKIE.accessToken ? { value: 'access-token' } : undefined
+    );
   });
 
-  it('forwards the catalog from the backend', async () => {
+  it('normalizes the backend list for the select', async () => {
     vi.mocked(backendFetch).mockResolvedValue({
-      data: [{ id: 'community-1', name: 'Igreja Batista' }],
+      data: { faithCommunities: [{ id: 'community-1', name: 'Igreja Batista' }] },
     });
 
     const response = await GET();
@@ -33,10 +44,24 @@ describe('GET /api/faith-communities', () => {
     });
   });
 
-  it('returns 502 when the backend is unreachable', async () => {
-    vi.mocked(backendFetch).mockRejectedValue(new Error('ECONNREFUSED'));
+  it('forwards a create payload to the backend', async () => {
+    vi.mocked(backendFetch).mockResolvedValue({
+      data: { faithCommunity: { id: 'community-2', name: 'Igreja Nova' } },
+    });
 
-    const response = await GET();
-    expect(response.status).toBe(502);
+    const response = await POST(
+      new Request('http://localhost:3000/api/faith-communities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'Igreja Nova', city: 'Niterói' }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+    expect(backendFetch).toHaveBeenCalledWith('/faith-communities', {
+      method: 'POST',
+      body: expect.objectContaining({ name: 'Igreja Nova' }),
+      accessToken: 'access-token',
+    });
   });
 });

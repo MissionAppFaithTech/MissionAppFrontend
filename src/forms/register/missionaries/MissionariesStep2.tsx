@@ -3,25 +3,38 @@
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TextField, Typography } from '@mui/material';
-import PhoneField from '@/components/common/PhoneField';
+import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
+import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
+import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
 import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
+import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
+import {
+  EMPTY_FAITH_COMMUNITY,
+  EMPTY_MISSIONARY_AGENCY,
+  SELECT_OTHER,
+} from '@/forms/register/options';
 import { validateOnSubmit } from '@/lib/formValidation';
-import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
-import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
-import { SELECT_OTHER } from '@/forms/register/options';
-import { listFaithCommunities, listMissionaryAgencies } from '@/services/catalog.service';
 import { yieldToMain } from '@/lib/scheduler';
+import {
+  createFaithCommunitySchema,
+  createMissionaryAgencySchema,
+} from '@/schemas/catalog-create.schema';
+import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
+import { listFaithCommunities, listMissionaryAgencies } from '@/services/catalog.service';
 
 export default function MissionariesStep2() {
   const { formData, completeStep2, goBack } = useMissionaryRegisterWizard();
   const agencies = useCatalogItems(listMissionaryAgencies);
   const communities = useCatalogItems(listFaithCommunities);
+  const agencyEntry = useOtherCatalogEntry();
+  const communityEntry = useOtherCatalogEntry();
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<MissionaryStep2FormData>({
@@ -29,20 +42,15 @@ export default function MissionariesStep2() {
     ...validateOnSubmit,
     defaultValues: {
       missionaryAgency: formData.missionaryAgency || '',
-      agencyCustomName: formData.agencyCustomName || '',
-      agencyPhone: formData.agencyPhone || '',
+      agencyDetails: formData.agencyDetails || EMPTY_MISSIONARY_AGENCY,
       missionDescription: formData.missionDescription || '',
       faithCommunity: formData.faithCommunity || '',
-      communityPhone: formData.communityPhone || '',
-      pastorName: formData.pastorName || '',
-      pastorPhone: formData.pastorPhone || '',
+      communityDetails: formData.communityDetails || EMPTY_FAITH_COMMUNITY,
     },
   });
 
-  const missionaryAgency = watch('missionaryAgency');
-  const faithCommunity = watch('faithCommunity');
-  const showAgencyDetails = missionaryAgency === SELECT_OTHER;
-  const showCommunityDetails = faithCommunity === SELECT_OTHER;
+  const agencyDetails = watch('agencyDetails');
+  const communityDetails = watch('communityDetails');
 
   const handleStepSubmit = async (data: MissionaryStep2FormData) => {
     await yieldToMain();
@@ -56,7 +64,6 @@ export default function MissionariesStep2() {
       onBack={goBack}
       isSubmitting={isSubmitting}
     >
-
       <Controller
         name="missionaryAgency"
         control={control}
@@ -65,44 +72,17 @@ export default function MissionariesStep2() {
             id="missionaryAgency"
             label="Agência missionária"
             value={field.value}
-            onChange={field.onChange}
+            onChange={(value) => agencyEntry.selectValue(value, field.value, field.onChange)}
             options={agencies.items}
             isLoading={agencies.isLoading}
             loadError={agencies.error}
             error={Boolean(errors.missionaryAgency)}
             helperText={errors.missionaryAgency?.message}
+            otherSummary={field.value === SELECT_OTHER ? agencyDetails.name : undefined}
+            onEditOther={agencyEntry.openEditor}
           />
         )}
       />
-
-      {showAgencyDetails ? (
-        <>
-          <TextField
-            {...register('agencyCustomName')}
-            label="Nome da agência missionária"
-            fullWidth
-            placeholder="Nome da sua agência"
-            error={Boolean(errors.agencyCustomName)}
-            helperText={errors.agencyCustomName?.message}
-          />
-
-          <Controller
-            name="agencyPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone da agência missionária"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.agencyPhone)}
-                helperText={errors.agencyPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
-        </>
-      ) : null}
 
       <TextField
         {...register('missionDescription')}
@@ -125,61 +105,49 @@ export default function MissionariesStep2() {
             id="faithCommunity"
             label="Comunidade de fé"
             value={field.value}
-            onChange={field.onChange}
+            onChange={(value) => communityEntry.selectValue(value, field.value, field.onChange)}
             options={communities.items}
             isLoading={communities.isLoading}
             loadError={communities.error}
             error={Boolean(errors.faithCommunity)}
             helperText={errors.faithCommunity?.message}
+            otherSummary={field.value === SELECT_OTHER ? communityDetails.name : undefined}
+            onEditOther={communityEntry.openEditor}
           />
         )}
       />
 
-      {showCommunityDetails ? (
-        <>
-          <Controller
-            name="communityPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone da comunidade de fé"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.communityPhone)}
-                helperText={errors.communityPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
+      <CreateMissionaryAgencyModal
+        open={agencyEntry.open}
+        initialValues={agencyDetails}
+        onClose={() =>
+          agencyEntry.cancel(
+            createMissionaryAgencySchema.safeParse(agencyDetails).success,
+            (value) => setValue('missionaryAgency', value)
+          )
+        }
+        onSave={(details) => {
+          setValue('agencyDetails', details);
+          setValue('missionaryAgency', SELECT_OTHER, { shouldValidate: true });
+          agencyEntry.close();
+        }}
+      />
 
-          <TextField
-            {...register('pastorName')}
-            label="Nome do pastor"
-            fullWidth
-            placeholder="Pr. João Souza"
-            error={Boolean(errors.pastorName)}
-            helperText={errors.pastorName?.message}
-          />
-
-          <Controller
-            name="pastorPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone do pastor"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.pastorPhone)}
-                helperText={errors.pastorPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
-        </>
-      ) : null}
-
+      <CreateFaithCommunityModal
+        open={communityEntry.open}
+        initialValues={communityDetails}
+        onClose={() =>
+          communityEntry.cancel(
+            createFaithCommunitySchema.safeParse(communityDetails).success,
+            (value) => setValue('faithCommunity', value)
+          )
+        }
+        onSave={(details) => {
+          setValue('communityDetails', details);
+          setValue('faithCommunity', SELECT_OTHER, { shouldValidate: true });
+          communityEntry.close();
+        }}
+      />
     </RegisterStepForm>
   );
 }

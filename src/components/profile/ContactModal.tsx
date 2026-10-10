@@ -44,6 +44,9 @@ export default function ContactModal({
     }
   };
 
+  const showPublicEmail = contact.showPublicEmail !== false && Boolean(contact.publicEmail);
+  const showPublicPhone = contact.showPublicPhone !== false && Boolean(contact.publicPhone);
+  const allowWhatsapp = contact.allowWhatsappContact !== false && Boolean(contact.publicPhone || contact.whatsappNumber);
   const cleanPhone = contact.whatsappNumber || contact.publicPhone.replace(/\D/g, '');
   const waLink = `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.slice(1) : cleanPhone}`;
 
@@ -101,7 +104,7 @@ export default function ContactModal({
 
         <DialogContent sx={{ px: 2, pb: 2, pt: 0.5 }}>
           <Stack spacing={2.5}>
-            {/* Opção WhatsApp */}
+            {showPublicPhone || allowWhatsapp ? (
             <Box>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
                 <Box
@@ -135,45 +138,50 @@ export default function ContactModal({
               </Stack>
 
               <Stack direction="row" spacing={1} sx={{ pl: { xs: 0, sm: 5.5 } }}>
-                <PillButton
-                  tone="primarySoftOutline"
-                  size="small"
-                  onClick={() => handleCopy(contact.publicPhone, 'Telefone')}
-                  sx={{
-                    minHeight: 44,
-                    px: 2,
-                    fontSize: '0.8125rem',
-                    flex: { xs: 1, sm: 'initial' },
-                  }}
-                >
-                  <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
-                  Copiar
-                </PillButton>
-                <PillButton
-                  tone="missionFilled"
-                  size="small"
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    minHeight: 44,
-                    px: 2,
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    color: '#FFFFFF !important',
-                    bgcolor: '#9A3412',
-                    '&:hover': { bgcolor: '#7C2D12' },
-                    flex: { xs: 1, sm: 'initial' },
-                  }}
-                >
-                  Conversar
-                </PillButton>
+                {showPublicPhone ? (
+                  <PillButton
+                    tone="primarySoftOutline"
+                    size="small"
+                    onClick={() => handleCopy(contact.publicPhone, 'Telefone')}
+                    sx={{
+                      minHeight: 44,
+                      px: 2,
+                      fontSize: '0.8125rem',
+                      flex: { xs: 1, sm: 'initial' },
+                    }}
+                  >
+                    <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
+                    Copiar
+                  </PillButton>
+                ) : null}
+                {allowWhatsapp ? (
+                  <PillButton
+                    tone="missionFilled"
+                    size="small"
+                    href={waLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    sx={{
+                      minHeight: 44,
+                      px: 2,
+                      fontSize: '0.8125rem',
+                      fontWeight: 700,
+                      color: '#FFFFFF !important',
+                      bgcolor: '#9A3412',
+                      '&:hover': { bgcolor: '#7C2D12' },
+                      flex: { xs: 1, sm: 'initial' },
+                    }}
+                  >
+                    Conversar
+                  </PillButton>
+                ) : null}
               </Stack>
             </Box>
+            ) : null}
 
-            <Divider />
+            {showPublicEmail && (showPublicPhone || allowWhatsapp) ? <Divider /> : null}
 
-            {/* Opção E-mail */}
+            {showPublicEmail ? (
             <Box>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
                 <Box
@@ -223,6 +231,7 @@ export default function ContactModal({
                 </PillButton>
               </Stack>
             </Box>
+            ) : null}
 
             {/* Se for o próprio missionário dono da conta */}
             {isOwnProfile && (

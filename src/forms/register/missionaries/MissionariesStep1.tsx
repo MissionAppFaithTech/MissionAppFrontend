@@ -46,7 +46,6 @@ export default function MissionariesStep1() {
       sectionTitle="Dados pessoais"
       isSubmitting={isSubmitting}
     >
-
       <TextField
         {...register('fullName')}
         label="Nome completo"
@@ -135,7 +134,6 @@ export default function MissionariesStep1() {
           />
         )}
       />
-
     </RegisterStepForm>
   );
 }

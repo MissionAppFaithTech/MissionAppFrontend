@@ -4,10 +4,10 @@ import type { FormEventHandler, ReactNode } from 'react';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 const actionButtonSx = {
-  minHeight: { xs: 44, sm: 40 },
-  fontSize: '0.875rem',
+  ...FORM_ACTION_BUTTON_SX,
   fontWeight: 600,
   gap: 1,
 } as const;
@@ -35,13 +35,7 @@ export default function RegisterStepForm({
   isSubmitting = false,
 }: RegisterStepFormProps) {
   return (
-    <Stack
-      component="form"
-      spacing={2}
-      onSubmit={onSubmit}
-      sx={{ width: '100%' }}
-      noValidate
-    >
+    <Stack component="form" spacing={2} onSubmit={onSubmit} sx={{ width: '100%' }} noValidate>
       {sectionTitle ? (
         <Typography component="h2" variant="body1">
           {sectionTitle}
@@ -60,13 +54,7 @@ export default function RegisterStepForm({
             Voltar
           </PillButton>
         ) : null}
-        <PillButton
-          type="submit"
-          tone="cta"
-          loading={isSubmitting}
-          fullWidth
-          sx={actionButtonSx}
-        >
+        <PillButton type="submit" tone="cta" loading={isSubmitting} fullWidth sx={actionButtonSx}>
           {isSubmitting ? submittingLabel : submitLabel}
         </PillButton>
       </Stack>

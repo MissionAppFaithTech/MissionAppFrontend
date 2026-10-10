@@ -1,3 +1,5 @@
+import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
+
 export type Gender = 'feminino' | 'masculino';
 
 export type MissionariesStep1Values = {
@@ -17,21 +19,16 @@ export type SupportersStep1Values = {
   email: string;
   /** Opcional — use SELECT_OTHER se não encontrar na lista */
   faithCommunity: string;
-  communityPhone: string;
-  pastorName: string;
-  pastorPhone: string;
+  communityDetails: FaithCommunityData;
 };
 
 export type MissionariesStep2Values = {
   missionaryAgency: string;
   /** Preenchido quando missionaryAgency === SELECT_OTHER */
-  agencyCustomName: string;
-  agencyPhone: string;
+  agencyDetails: MissionaryAgencyData;
   missionDescription: string;
   faithCommunity: string;
-  communityPhone: string;
-  pastorName: string;
-  pastorPhone: string;
+  communityDetails: FaithCommunityData;
 };
 
 /** Dados de acesso — step 3 do missionário / step 2 do apoiador */

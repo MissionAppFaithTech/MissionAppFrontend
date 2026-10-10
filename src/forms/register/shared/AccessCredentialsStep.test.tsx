@@ -148,7 +148,7 @@ describe('AccessCredentialsStep component', () => {
 
     expect(await screen.findByText(/este nome de usuário já está em uso/i)).toBeInTheDocument();
     expect(document.querySelector('[data-testid="CloseIcon"]')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /allanna1/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /usar nome de usuário allanna1/i })).toBeInTheDocument();
   });
 
   it('warns while the confirmation password differs', async () => {

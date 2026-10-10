@@ -7,7 +7,9 @@ import type {
   MissionariesStep3Values,
   MissionaryRegisterData,
 } from '@/forms/register/types';
+import { SELECT_OTHER } from '@/forms/register/options';
 import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
+import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
 
 type MissionaryRegisterWizardContextValue = {
   step: number;
@@ -56,6 +58,13 @@ export function MissionaryRegisterWizardProvider({ children }: { children: React
         password: values.password,
         passwordConfirmation: values.confirmPassword,
       });
+
+      if (merged.missionaryAgency === SELECT_OTHER && merged.agencyDetails?.name) {
+        await createMissionaryAgency(merged.agencyDetails);
+      }
+      if (merged.faithCommunity === SELECT_OTHER && merged.communityDetails?.name) {
+        await createFaithCommunity(merged.communityDetails);
+      }
 
       setFormData(merged);
       setStep(4);

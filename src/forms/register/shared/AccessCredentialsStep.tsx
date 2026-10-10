@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -23,7 +23,10 @@ import { validateOnSubmit } from '@/lib/formValidation';
 import { yieldToMain } from '@/lib/scheduler';
 import type { AccessCredentialsValues } from '@/forms/register/types';
 import { accessCredentialsSchema, type AccessCredentialsFormData } from '@/schemas/register.schema';
-import { checkUsernameAvailability } from '@/services/username.service';
+import {
+  usernameAvailabilityHelper,
+  useUsernameAvailability,
+} from '@/hooks/useUsernameAvailability';
 import { colors } from '@/theme/theme';
 
 type AccessCredentialsStepProps = {
@@ -32,12 +35,6 @@ type AccessCredentialsStepProps = {
   onBack: () => void;
   submitLabel?: string;
 };
-
-type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
-
-function isUsernameFormatValid(value: string) {
-  return value.length >= 3 && value.length <= 32 && /^[a-z0-9_]+$/.test(value);
-}
 
 export default function AccessCredentialsStep({
   defaultValues,
@@ -69,65 +66,25 @@ export default function AccessCredentialsStep({
   const passwordsMismatch = Boolean(confirmPassword) && confirmPassword !== password;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const requestIdRef = useRef(0);
-
-  useEffect(() => {
-    const normalized = username.trim().toLowerCase();
-
-    if (!isUsernameFormatValid(normalized)) {
-      setUsernameStatus('idle');
-      setSuggestions([]);
-      return;
-    }
-
-    const requestId = ++requestIdRef.current;
-    setUsernameStatus('checking');
-
-    const timer = window.setTimeout(async () => {
-      try {
-        const result = await checkUsernameAvailability(normalized);
-        if (requestId !== requestIdRef.current) return;
-
-        if (result.available) {
-          setUsernameStatus('available');
-          setSuggestions([]);
-          clearErrors('username');
-          return;
-        }
-
-        setUsernameStatus('taken');
-        setSuggestions(result.suggestions ?? []);
-        setError('username', {
-          type: 'validate',
-          message: 'Este nome de usuário já está em uso',
-        });
-      } catch {
-        if (requestId !== requestIdRef.current) return;
-        setUsernameStatus('error');
-        setSuggestions([]);
-      }
-    }, 450);
-
-    return () => window.clearTimeout(timer);
-  }, [username, clearErrors, setError]);
+  const { status: usernameStatus, suggestions } = useUsernameAvailability({
+    username,
+    onTaken: () =>
+      setError('username', {
+        type: 'validate',
+        message: 'Este nome de usuário já está em uso',
+      }),
+    onAvailable: () => clearErrors('username'),
+  });
 
   const applySuggestion = (suggestion: string) => {
     setValue('username', suggestion, { shouldDirty: true, shouldValidate: true });
   };
 
-  const usernameHelperText = (() => {
-    if (errors.username?.message) return errors.username.message;
-    if (usernameStatus === 'checking') return 'Verificando disponibilidade…';
-    if (usernameStatus === 'available') return 'Nome de usuário disponível';
-    if (usernameStatus === 'taken') return 'Este nome de usuário já está em uso';
-    if (usernameStatus === 'error') {
-      return 'Não foi possível verificar o nome de usuário';
-    }
-    return undefined;
-  })();
+  const usernameHelperText = usernameAvailabilityHelper(
+    usernameStatus,
+    errors.username?.message
+  );
 
   const handleFormSubmit = async (values: AccessCredentialsFormData) => {
     if (usernameStatus === 'taken') {
@@ -142,7 +99,9 @@ export default function AccessCredentialsStep({
     try {
       await onSubmit(values);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Não foi possível concluir o cadastro');
+      setSubmitError(
+        error instanceof Error ? error.message : 'Não foi possível concluir o cadastro'
+      );
     }
   };
 
@@ -155,7 +114,6 @@ export default function AccessCredentialsStep({
       submittingLabel="Finalizando..."
       isSubmitting={isSubmitting}
     >
-
       {submitError ? (
         <Box
           role="alert"
@@ -229,6 +187,7 @@ export default function AccessCredentialsStep({
                 clickable
                 color="primary"
                 variant="outlined"
+                aria-label={`Usar nome de usuário ${suggestion}`}
                 onClick={() => applySuggestion(suggestion)}
               />
             ))}
@@ -238,11 +197,7 @@ export default function AccessCredentialsStep({
 
       <TextField
         {...register('password')}
-        label={
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-            Senha
-          </Box>
-        }
+        label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Senha</Box>}
         type={showPassword ? 'text' : 'password'}
         fullWidth
         placeholder="Ex: Senha@123"
@@ -311,7 +266,6 @@ export default function AccessCredentialsStep({
           },
         }}
       />
-
     </RegisterStepForm>
   );
 }
