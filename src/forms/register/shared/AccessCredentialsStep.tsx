@@ -81,10 +81,7 @@ export default function AccessCredentialsStep({
     setValue('username', suggestion, { shouldDirty: true, shouldValidate: true });
   };
 
-  const usernameHelperText = usernameAvailabilityHelper(
-    usernameStatus,
-    errors.username?.message
-  );
+  const usernameHelperText = usernameAvailabilityHelper(usernameStatus, errors.username?.message);
 
   const handleFormSubmit = async (values: AccessCredentialsFormData) => {
     if (usernameStatus === 'taken') {

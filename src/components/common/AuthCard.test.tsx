@@ -24,9 +24,9 @@ describe('AuthCard', () => {
     expect(normalizeColor(styles.getPropertyValue('--mui-palette-action2-disabledFill'))).toBe(
       normalizeColor(lightTokens.disabledFill)
     );
-    expect(
-      normalizeColor(styles.getPropertyValue('--mui-palette-action-disabledBackground'))
-    ).toBe(normalizeColor(lightTokens.disabledFill));
+    expect(normalizeColor(styles.getPropertyValue('--mui-palette-action-disabledBackground'))).toBe(
+      normalizeColor(lightTokens.disabledFill)
+    );
   });
 
   it('keeps example placeholders muted so they do not look like filled values', () => {

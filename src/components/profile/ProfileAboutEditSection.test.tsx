@@ -16,9 +16,9 @@ vi.mock('@/services/missionary.service', async () => {
 });
 
 vi.mock('@/services/catalog.service', () => ({
-  listFaithCommunities: vi.fn().mockResolvedValue([
-    { id: '018f1111-2222-7333-8444-555555555555', name: 'Igreja Batista' },
-  ]),
+  listFaithCommunities: vi
+    .fn()
+    .mockResolvedValue([{ id: '018f1111-2222-7333-8444-555555555555', name: 'Igreja Batista' }]),
 }));
 
 const mockedUpdate = vi.mocked(updateMissionaryAbout);
@@ -60,11 +60,7 @@ describe('ProfileAboutEditSection', () => {
     const handleBack = vi.fn();
 
     render(
-      <ProfileAboutEditSection
-        missionaryId={missionaryId}
-        data={mockData}
-        onBack={handleBack}
-      />
+      <ProfileAboutEditSection missionaryId={missionaryId} data={mockData} onBack={handleBack} />
     );
 
     await user.click(screen.getByRole('button', { name: /voltar/i }));

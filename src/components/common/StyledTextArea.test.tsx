@@ -28,13 +28,7 @@ describe('StyledTextArea', () => {
 
   it('links the error helper to the field and shows the character count', () => {
     render(
-      <StyledTextArea
-        label="Bio"
-        value="abc"
-        maxLength={10}
-        error
-        helperText="Informe uma bio"
-      />
+      <StyledTextArea label="Bio" value="abc" maxLength={10} error helperText="Informe uma bio" />
     );
 
     const field = screen.getByLabelText(/^bio:/i);

@@ -37,11 +37,7 @@ describe('ProfileSummaryCard component', () => {
 
   it('renders follow, offer, contact and icon-only share when a supporter views a missionary', () => {
     render(
-      <ProfileSummaryCard
-        profile={mockProfile}
-        isOwnProfile={false}
-        viewerRole="supporter"
-      />
+      <ProfileSummaryCard profile={mockProfile} isOwnProfile={false} viewerRole="supporter" />
     );
 
     expect(screen.getByRole('button', { name: /^seguir$/i })).toBeInTheDocument();
@@ -49,7 +45,9 @@ describe('ProfileSummaryCard component', () => {
     expect(screen.getByRole('button', { name: /entrar em contato/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /compartilhar perfil/i })).toBeInTheDocument();
     expect(screen.queryByText('apoiadores')).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /adicionar foto de perfil/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /adicionar foto de perfil/i })
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /editar perfil/i })).not.toBeInTheDocument();
   });
 

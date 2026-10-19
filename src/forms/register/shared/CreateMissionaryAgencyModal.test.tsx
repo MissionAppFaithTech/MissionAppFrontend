@@ -10,7 +10,9 @@ describe('CreateMissionaryAgencyModal', () => {
 
     render(<CreateMissionaryAgencyModal open onClose={vi.fn()} onSave={handleSave} />);
 
-    expect(screen.getByRole('heading', { name: /cadastrar agência missionária/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /cadastrar agência missionária/i })
+    ).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /^salvar$/i }));
 
     expect(await screen.findByText(/informe o nome da agência/i)).toBeInTheDocument();

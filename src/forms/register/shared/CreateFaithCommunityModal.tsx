@@ -71,7 +71,11 @@ export default function CreateFaithCommunityModal({
         helperText={errors.name?.message}
       />
 
-      <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography
+        component="h3"
+        variant="subtitle2"
+        sx={{ fontWeight: 700, color: 'text.primary' }}
+      >
         Localização
       </Typography>
 
@@ -109,7 +113,11 @@ export default function CreateFaithCommunityModal({
         helperText={errors.city?.message}
       />
 
-      <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography
+        component="h3"
+        variant="subtitle2"
+        sx={{ fontWeight: 700, color: 'text.primary' }}
+      >
         Pastor
       </Typography>
 
@@ -124,7 +132,11 @@ export default function CreateFaithCommunityModal({
         helperText={errors.pastorName?.message}
       />
 
-      <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography
+        component="h3"
+        variant="subtitle2"
+        sx={{ fontWeight: 700, color: 'text.primary' }}
+      >
         Contatos
       </Typography>
 
@@ -162,7 +174,11 @@ export default function CreateFaithCommunityModal({
         )}
       />
 
-      <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography
+        component="h3"
+        variant="subtitle2"
+        sx={{ fontWeight: 700, color: 'text.primary' }}
+      >
         Dados opcionais
       </Typography>
 

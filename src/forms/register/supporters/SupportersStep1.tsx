@@ -60,7 +60,6 @@ export default function SupportersStep1() {
       sectionTitle="Dados pessoais"
       isSubmitting={isSubmitting}
     >
-
       <TextField
         {...register('fullName')}
         label="Nome completo"
@@ -171,7 +170,6 @@ export default function SupportersStep1() {
           communityEntry.close();
         }}
       />
-
     </RegisterStepForm>
   );
 }

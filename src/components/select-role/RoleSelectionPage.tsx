@@ -45,13 +45,7 @@ export default function RoleSelectionPage() {
     >
       <Stack spacing={1.5} sx={{ width: '100%' }}>
         {roles.map(({ label, href }) => (
-          <PillButton
-            key={href}
-            href={href}
-            tone="cta"
-            fullWidth
-            sx={FORM_ACTION_BUTTON_SX}
-          >
+          <PillButton key={href} href={href} tone="cta" fullWidth sx={FORM_ACTION_BUTTON_SX}>
             {label}
           </PillButton>
         ))}

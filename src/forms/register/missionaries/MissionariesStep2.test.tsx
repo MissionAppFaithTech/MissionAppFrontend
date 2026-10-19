@@ -40,7 +40,9 @@ describe('MissionariesStep2', () => {
     await user.click(await screen.findByRole('button', { name: /cancelar/i }));
 
     await waitFor(() => {
-      expect(screen.queryByRole('heading', { name: /cadastrar agência missionária/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole('heading', { name: /cadastrar agência missionária/i })
+      ).not.toBeInTheDocument();
     });
     expect(screen.queryByRole('button', { name: /editar cadastro/i })).not.toBeInTheDocument();
   });

@@ -7,11 +7,7 @@ import IconButton, { type IconButtonProps } from '@mui/material/IconButton';
 /**
  * Plus overlay on the profile avatar — same look on the header and edit forms.
  */
-export default function ProfilePhotoAddButton({
-  children,
-  sx,
-  ...props
-}: IconButtonProps) {
+export default function ProfilePhotoAddButton({ children, sx, ...props }: IconButtonProps) {
   return (
     <IconButton
       aria-label="Adicionar foto de perfil"

@@ -37,10 +37,7 @@ describe('RegisterStepForm', () => {
 
   it('uses the same border radius for Voltar and the submit action', () => {
     render(
-      <RegisterStepForm
-        onSubmit={(event) => event.preventDefault()}
-        onBack={() => undefined}
-      >
+      <RegisterStepForm onSubmit={(event) => event.preventDefault()} onBack={() => undefined}>
         <input aria-label="Campo de teste" />
       </RegisterStepForm>
     );

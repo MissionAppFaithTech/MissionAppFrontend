@@ -159,14 +159,14 @@ Before adding a new component or one-off MUI styling for a repeated pattern:
 
 ### Shared atoms (`src/components/common/`)
 
-| Component                   | When to use                            | Notes                                                                                                   |
-| --------------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Component                   | When to use                            | Notes                                                                                   |
+| --------------------------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
 | `PillButton`                | Any branded button / CTA / link-button | Prefer over raw MUI `Button`. Same `10px` radius for every tone — never a stadium pill. |
-| `Logo`                      | Brand mark                             | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`.                            |
-| `SectionHeader`             | Section title + optional subtitle      | Landing and content blocks.                                                                             |
-| `PhoneField`                | International phone inputs             | Also exports `isValidInternationalPhone`.                                                               |
-| `StyledTextArea`            | Multiline profile-edit fields          | Keep `RichTextEditor` for posts only.                                                                   |
-| `PasswordStrengthIndicator` | Password strength meter                | Pair with `validateStrongPassword` from `@/lib/passwordStrength`.                                       |
+| `Logo`                      | Brand mark                             | Sizes: `sm` \| `md` \| `lg` \| `xl`. `variant`: `auto` \| `light` \| `dark`.            |
+| `SectionHeader`             | Section title + optional subtitle      | Landing and content blocks.                                                             |
+| `PhoneField`                | International phone inputs             | Also exports `isValidInternationalPhone`.                                               |
+| `StyledTextArea`            | Multiline profile-edit fields          | Keep `RichTextEditor` for posts only.                                                   |
+| `PasswordStrengthIndicator` | Password strength meter                | Pair with `validateStrongPassword` from `@/lib/passwordStrength`.                       |
 
 ### `PillButton` tones (do not reinvent)
 

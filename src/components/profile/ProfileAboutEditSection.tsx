@@ -330,12 +330,7 @@ export default function ProfileAboutEditSection({
               <PillButton type="button" tone="primarySoftOutline" size="medium" onClick={onBack}>
                 Voltar
               </PillButton>
-              <PillButton
-                type="submit"
-                tone="primaryFilled"
-                size="medium"
-                loading={isSubmitting}
-              >
+              <PillButton type="submit" tone="primaryFilled" size="medium" loading={isSubmitting}>
                 {isSubmitting ? 'Salvando...' : 'Salvar'}
               </PillButton>
             </Stack>

@@ -26,11 +26,14 @@ import { PATCH } from './route';
 const missionaryId = '018f1a2b-3c4d-7e8f-9a0b-1c2d3e4f5a6b';
 
 function request(body: unknown, id = missionaryId) {
-  return PATCH(new Request(`http://localhost:3000/api/missionaries/${id}/about`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  }), { params: Promise.resolve({ id }) });
+  return PATCH(
+    new Request(`http://localhost:3000/api/missionaries/${id}/about`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+    { params: Promise.resolve({ id }) }
+  );
 }
 
 describe('PATCH /api/missionaries/[id]/about', () => {

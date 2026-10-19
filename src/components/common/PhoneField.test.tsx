@@ -11,9 +11,7 @@ describe('PhoneField', () => {
   });
 
   it('links the validation message to the input without relying on color alone', () => {
-    render(
-      <PhoneField value="" onChange={vi.fn()} error helperText="Informe seu telefone" />
-    );
+    render(<PhoneField value="" onChange={vi.fn()} error helperText="Informe seu telefone" />);
 
     const input = screen.getByLabelText(/^telefone$/i);
     expect(input).toHaveAttribute('aria-invalid', 'true');

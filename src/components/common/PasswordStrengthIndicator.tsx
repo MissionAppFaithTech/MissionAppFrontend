@@ -24,11 +24,7 @@ export default function PasswordStrengthIndicator({ password }: PasswordStrength
   const showMeter = strength.level !== 'empty';
 
   return (
-    <Box
-      component="section"
-      aria-label="Requisitos da senha"
-      sx={{ mt: -0.5, minWidth: 0 }}
-    >
+    <Box component="section" aria-label="Requisitos da senha" sx={{ mt: -0.5, minWidth: 0 }}>
       {showMeter ? (
         <>
           <LinearProgress

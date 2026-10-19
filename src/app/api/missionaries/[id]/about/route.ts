@@ -24,10 +24,7 @@ type MissionaryAboutResponse = {
   };
 };
 
-export async function PATCH(
-  request: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params;
   if (!isMissionaryUuid(id)) {
     return NextResponse.json({ message: 'Identificador do missionário inválido' }, { status: 400 });

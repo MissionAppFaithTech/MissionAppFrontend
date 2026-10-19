@@ -5,7 +5,11 @@ export function useOtherCatalogEntry() {
   const [open, setOpen] = useState(false);
   const previousValueRef = useRef('');
 
-  const selectValue = (nextValue: string, currentValue: string, setValue: (value: string) => void) => {
+  const selectValue = (
+    nextValue: string,
+    currentValue: string,
+    setValue: (value: string) => void
+  ) => {
     if (nextValue === SELECT_OTHER) {
       if (currentValue !== SELECT_OTHER) {
         previousValueRef.current = currentValue;

@@ -43,9 +43,9 @@ export default function StyledTextArea({
   const fieldId = id ?? `styled-textarea-${generatedId}`;
   const helperId = `${fieldId}-helper`;
   const countId = `${fieldId}-count`;
-  const describedBy = [helperText ? helperId : null, maxLength ? countId : null]
-    .filter(Boolean)
-    .join(' ') || undefined;
+  const describedBy =
+    [helperText ? helperId : null, maxLength ? countId : null].filter(Boolean).join(' ') ||
+    undefined;
   const visibleLabel = label.endsWith(':') ? label : `${label}:`;
 
   return (
@@ -98,7 +98,10 @@ export default function StyledTextArea({
         <Stack
           direction="row"
           spacing={1}
-          sx={{ justifyContent: helperText ? 'space-between' : 'flex-end', alignItems: 'flex-start' }}
+          sx={{
+            justifyContent: helperText ? 'space-between' : 'flex-end',
+            alignItems: 'flex-start',
+          }}
         >
           {helperText ? (
             <FormHelperText id={helperId} error={error} sx={{ mx: 0, mt: 0 }}>

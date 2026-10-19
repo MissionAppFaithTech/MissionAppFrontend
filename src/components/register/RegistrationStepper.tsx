@@ -19,11 +19,7 @@ export default function RegistrationStepper({
   const progressPercent = Math.min(100, Math.max(0, ((currentStep - 1) / lastIndex) * 100));
 
   return (
-    <Box
-      component="nav"
-      aria-label="Progresso do cadastro"
-      sx={{ width: '100%', mb: 4, pt: 0.5 }}
-    >
+    <Box component="nav" aria-label="Progresso do cadastro" sx={{ width: '100%', mb: 4, pt: 0.5 }}>
       <Box
         role="progressbar"
         aria-valuenow={currentStep}

@@ -12,7 +12,9 @@ describe('localizeApiErrorMessage', () => {
   });
 
   it('leaves Portuguese messages unchanged', () => {
-    expect(localizeApiErrorMessage('Este e-mail já está em uso')).toBe('Este e-mail já está em uso');
+    expect(localizeApiErrorMessage('Este e-mail já está em uso')).toBe(
+      'Este e-mail já está em uso'
+    );
   });
 });
 

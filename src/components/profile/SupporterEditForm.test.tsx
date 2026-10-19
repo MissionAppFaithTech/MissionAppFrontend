@@ -35,12 +35,8 @@ describe('SupporterEditForm Component', () => {
     expect(screen.getByLabelText(/^e-mail:$/i)).toHaveValue('samuelhe@gmail.com');
     expect(screen.getByLabelText(/^telefone:$/i)).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: /país do telefone/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole('checkbox', { name: /exibir e-mail no meu perfil/i })
-    ).toBeChecked();
-    expect(
-      screen.getByRole('checkbox', { name: /exibir telefone no meu perfil/i })
-    ).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /exibir e-mail no meu perfil/i })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /exibir telefone no meu perfil/i })).toBeChecked();
     expect(
       screen.getByRole('checkbox', { name: /este número é um número de whatsapp/i })
     ).toBeChecked();
@@ -74,6 +70,8 @@ describe('SupporterEditForm Component', () => {
     expect(await screen.findByText(/este nome de usuário já está em uso/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /salvar/i }));
-    expect(screen.queryByText(/perfil de apoiador atualizado com sucesso!/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/perfil de apoiador atualizado com sucesso!/i)
+    ).not.toBeInTheDocument();
   });
 });

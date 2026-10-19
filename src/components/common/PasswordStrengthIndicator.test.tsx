@@ -26,9 +26,9 @@ describe('PasswordStrengthIndicator', () => {
     expect(getComputedStyle(screen.getByLabelText(/uma letra maiúscula: atendido/i)).color).toBe(
       hexToRgb(colors.success)
     );
-    expect(getComputedStyle(screen.getByLabelText(/pelo menos 8 caracteres: faltando/i)).color).toBe(
-      hexToRgb(colors.textSecondary)
-    );
+    expect(
+      getComputedStyle(screen.getByLabelText(/pelo menos 8 caracteres: faltando/i)).color
+    ).toBe(hexToRgb(colors.textSecondary));
   });
 
   it('announces overall strength when the password is not empty', () => {

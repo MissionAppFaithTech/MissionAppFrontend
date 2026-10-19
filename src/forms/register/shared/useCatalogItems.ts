@@ -19,9 +19,7 @@ export function useCatalogItems(load: CatalogLoader) {
       })
       .catch((cause: unknown) => {
         if (!cancelled) {
-          setError(
-            cause instanceof Error ? cause.message : 'Não foi possível carregar as opções'
-          );
+          setError(cause instanceof Error ? cause.message : 'Não foi possível carregar as opções');
         }
       })
       .finally(() => {

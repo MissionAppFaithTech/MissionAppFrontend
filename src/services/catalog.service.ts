@@ -89,8 +89,7 @@ async function fetchCatalog(path: string, fallbackMessage: string): Promise<Cata
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string' ? payload.message : fallbackMessage;
+    const message = typeof payload?.message === 'string' ? payload.message : fallbackMessage;
     throw new Error(localizeApiErrorMessage(message));
   }
 
@@ -116,8 +115,7 @@ async function postCatalog(
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string' ? payload.message : fallbackMessage;
+    const message = typeof payload?.message === 'string' ? payload.message : fallbackMessage;
     throw new Error(localizeApiErrorMessage(message));
   }
 
@@ -160,10 +158,7 @@ export function listMissionaryAgencies(): Promise<CatalogItem[]> {
 }
 
 export function listFaithCommunities(): Promise<CatalogItem[]> {
-  return fetchCatalog(
-    '/api/faith-communities',
-    'Não foi possível carregar as comunidades de fé'
-  );
+  return fetchCatalog('/api/faith-communities', 'Não foi possível carregar as comunidades de fé');
 }
 
 export function createMissionaryAgency(input: MissionaryAgencyData): Promise<CatalogItem> {

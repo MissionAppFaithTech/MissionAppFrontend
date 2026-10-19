@@ -23,10 +23,16 @@ function requiredPhone(emptyMessage: string) {
 }
 
 function optionalWebsite() {
-  return z.string().trim().refine((value) => {
-    if (!value) return true;
-    return /https?:\/\/.+\..+|.+\.[a-z]{2,}/i.test(value);
-  }, { message: 'Informe um site válido' });
+  return z
+    .string()
+    .trim()
+    .refine(
+      (value) => {
+        if (!value) return true;
+        return /https?:\/\/.+\..+|.+\.[a-z]{2,}/i.test(value);
+      },
+      { message: 'Informe um site válido' }
+    );
 }
 
 export const createMissionaryAgencySchema = z.object({

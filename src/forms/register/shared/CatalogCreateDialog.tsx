@@ -79,7 +79,11 @@ export default function CatalogCreateDialog({
             id={titleId}
             variant="h6"
             component="h2"
-            sx={{ fontWeight: 700, color: 'primary.main', fontSize: { xs: '1.125rem', sm: '1.25rem' } }}
+            sx={{
+              fontWeight: 700,
+              color: 'primary.main',
+              fontSize: { xs: '1.125rem', sm: '1.25rem' },
+            }}
           >
             {title}
           </Typography>
@@ -123,7 +127,12 @@ export default function CatalogCreateDialog({
         <PillButton type="button" tone="primarySoftOutline" onClick={onClose}>
           Cancelar
         </PillButton>
-        <PillButton type="submit" form={`${titleId}-form`} tone="primaryFilled" loading={isSubmitting}>
+        <PillButton
+          type="submit"
+          form={`${titleId}-form`}
+          tone="primaryFilled"
+          loading={isSubmitting}
+        >
           {isSubmitting ? 'Salvando...' : 'Salvar'}
         </PillButton>
       </DialogActions>

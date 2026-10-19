@@ -105,7 +105,9 @@ describe('catalog.service', () => {
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
-        json: async () => ({ data: { missionaryAgency: { id: 'agency-2', name: 'Nova Agência' } } }),
+        json: async () => ({
+          data: { missionaryAgency: { id: 'agency-2', name: 'Nova Agência' } },
+        }),
       })
     );
 
@@ -128,4 +130,3 @@ describe('catalog.service', () => {
     ).resolves.toEqual({ id: 'church-2', name: 'Igreja Nova' });
   });
 });
-

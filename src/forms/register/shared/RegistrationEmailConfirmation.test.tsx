@@ -19,7 +19,9 @@ describe('RegistrationEmailConfirmation', () => {
 
     expect(screen.getByText('Clique no link enviado para seu e-mail.')).toBeInTheDocument();
     expect(screen.getByText('Seu cadastro será analisado')).toBeInTheDocument();
-    expect(screen.getByText('Nossa equipe verificará as informações cadastradas.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Nossa equipe verificará as informações cadastradas.')
+    ).toBeInTheDocument();
     expect(screen.getByText('Acesso liberado')).toBeInTheDocument();
     expect(
       screen.getByText(/após confirmar seu e-mail, nossa equipe irá analisar seu cadastro/i)

@@ -66,12 +66,7 @@ export default function PublicContactFields<T extends PublicContactFormValues>({
 
       <Stack spacing={0.5}>
         <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-          <Typography
-            component="label"
-            htmlFor="publicEmail"
-            variant="body2"
-            sx={fieldLabelSx}
-          >
+          <Typography component="label" htmlFor="publicEmail" variant="body2" sx={fieldLabelSx}>
             E-mail:
           </Typography>
           <Controller
@@ -125,12 +120,7 @@ export default function PublicContactFields<T extends PublicContactFormValues>({
 
       <Stack spacing={0.5}>
         <Stack spacing={0.75} sx={{ minWidth: 0 }}>
-          <Typography
-            component="label"
-            htmlFor="publicPhone"
-            variant="body2"
-            sx={fieldLabelSx}
-          >
+          <Typography component="label" htmlFor="publicPhone" variant="body2" sx={fieldLabelSx}>
             Telefone:
           </Typography>
           <Controller

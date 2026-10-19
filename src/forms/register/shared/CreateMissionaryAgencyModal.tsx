@@ -71,7 +71,11 @@ export default function CreateMissionaryAgencyModal({
         helperText={errors.name?.message}
       />
 
-      <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography
+        component="h3"
+        variant="subtitle2"
+        sx={{ fontWeight: 700, color: 'text.primary' }}
+      >
         Localização
       </Typography>
 
@@ -126,7 +130,11 @@ export default function CreateMissionaryAgencyModal({
         )}
       />
 
-      <Typography component="h3" variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+      <Typography
+        component="h3"
+        variant="subtitle2"
+        sx={{ fontWeight: 700, color: 'text.primary' }}
+      >
         Dados opcionais
       </Typography>
 

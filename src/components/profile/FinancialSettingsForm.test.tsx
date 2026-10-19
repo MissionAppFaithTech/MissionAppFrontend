@@ -38,9 +38,9 @@ describe('FinancialSettingsForm Component', () => {
     expect(screen.getByRole('heading', { name: /configurações financeiras/i })).toBeInTheDocument();
     expect(screen.getByText(/status: ativo/i)).toBeInTheDocument();
     expect(screen.getByText(/ambiente seguro/i)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(/mensagem de gratidão e direcionamento/i)
-    ).toHaveValue(mockFinancialData.supporterMessage);
+    expect(screen.getByLabelText(/mensagem de gratidão e direcionamento/i)).toHaveValue(
+      mockFinancialData.supporterMessage
+    );
     expect(screen.queryByRole('button', { name: /desfazer alteração/i })).not.toBeInTheDocument();
     expect(screen.getByDisplayValue('missionario@email.com')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Banco do Brasil')).toBeInTheDocument();

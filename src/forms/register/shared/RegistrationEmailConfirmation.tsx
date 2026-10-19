@@ -183,8 +183,8 @@ export default function RegistrationEmailConfirmation({
 
       <Typography variant="body2" color="text.secondary">
         A verificação do e-mail deve ser feita em até <strong>7 dias</strong>. Caso contrário, o
-        cadastro será excluído automaticamente. Não encontrou o e-mail? Verifique a caixa de spam
-        ou lixo eletrônico.
+        cadastro será excluído automaticamente. Não encontrou o e-mail? Verifique a caixa de spam ou
+        lixo eletrônico.
       </Typography>
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>

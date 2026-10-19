@@ -177,11 +177,7 @@ function HeroHeadline() {
             justifyContent: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <PillButton
-            href="/select-role"
-            tone="missionFilled"
-            sx={heroCtaButtonSx}
-          >
+          <PillButton href="/select-role" tone="missionFilled" sx={heroCtaButtonSx}>
             Comece agora
           </PillButton>
           <PillButton
