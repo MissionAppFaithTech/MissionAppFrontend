@@ -1,6 +1,7 @@
 'use client';
 
-import { Box, Stack, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 export interface RegistrationStepperProps {
   currentStep: number;
@@ -13,115 +14,102 @@ export default function RegistrationStepper({
   currentStep,
   totalSteps,
   stepLabels,
-  tone = 'mission',
 }: RegistrationStepperProps) {
-  // Two roles, two tokens: `fill` is a filled surface and `ink` is a mark read
-  // against the page. A single value cannot satisfy both on a dark ground.
-  // `fillInk` comes from the fill's own contrastText, because the fill is a deep
-  // orange in light and a vivid one in dark, and each carries a different ink.
-  const fillColor = tone === 'mission' ? 'mission.main' : 'brandFill.main';
-  const fillInk = tone === 'mission' ? 'mission.contrastText' : 'brandFill.contrastText';
-  const inkColor = tone === 'mission' ? 'accent.main' : 'connection.main';
-  const progressPercent = Math.min(100, Math.max(0, (currentStep / totalSteps) * 100));
+  const lastIndex = Math.max(totalSteps - 1, 1);
+  const progressPercent = Math.min(100, Math.max(0, ((currentStep - 1) / lastIndex) * 100));
 
   return (
-    <Box component="nav" aria-label="Progresso do cadastro" sx={{ width: '100%', mb: 2.5 }}>
-      <Stack
-        direction="row"
-        sx={{
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 1,
-        }}
-      >
-        <Typography
-          variant="caption"
-          component="p"
-          sx={{
-            fontWeight: 600,
-            color: 'text.secondary',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            fontSize: '0.75rem',
-          }}
-        >
-          Etapa {currentStep} de {totalSteps}
-        </Typography>
-
-        <Typography
-          variant="caption"
-          sx={{
-            fontWeight: 700,
-            color: inkColor,
-            fontSize: '0.8125rem',
-          }}
-        >
-          {stepLabels[currentStep - 1]}
-        </Typography>
-      </Stack>
-
-      {/* Modern thin progress bar with smooth transition */}
+    <Box component="nav" aria-label="Progresso do cadastro" sx={{ width: '100%', mb: 4, pt: 0.5 }}>
       <Box
         role="progressbar"
         aria-valuenow={currentStep}
         aria-valuemin={1}
         aria-valuemax={totalSteps}
-        aria-label={`Progresso: Etapa ${currentStep} de ${totalSteps} - ${stepLabels[currentStep - 1]}`}
+        aria-label={`Etapa ${currentStep} de ${totalSteps}: ${stepLabels[currentStep - 1] ?? ''}`}
         sx={{
-          width: '100%',
-          height: 6,
-          bgcolor: 'action.hover',
-          borderRadius: 3,
-          overflow: 'hidden',
+          display: 'flex',
           position: 'relative',
+          width: '100%',
         }}
       >
         <Box
+          aria-hidden
           sx={{
-            height: '100%',
-            width: `${progressPercent}%`,
-            bgcolor: inkColor,
-            borderRadius: 3,
+            position: 'absolute',
+            left: `calc(100% / ${totalSteps} / 2)`,
+            right: `calc(100% / ${totalSteps} / 2)`,
+            bottom: 7,
+            height: 2,
+            bgcolor: 'action2.borderStrong',
+            zIndex: 0,
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            left: `calc(100% / ${totalSteps} / 2)`,
+            bottom: 7,
+            height: 2,
+            width: `calc((100% - 100% / ${totalSteps}) * ${progressPercent / 100})`,
+            bgcolor: 'primary.main',
+            zIndex: 1,
             transition: 'width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         />
-      </Box>
 
-      {/* Step pill badges for quick visual reference */}
-      <Stack direction="row" spacing={1} sx={{ mt: 1.5, justifyContent: 'space-between' }}>
-        {stepLabels.map((label, index) => {
+        {stepLabels.slice(0, totalSteps).map((label, index) => {
           const stepNum = index + 1;
           const isCompleted = stepNum < currentStep;
           const isCurrent = stepNum === currentStep;
+          const isActive = isCompleted || isCurrent;
 
           return (
             <Box
               key={label}
               aria-current={isCurrent ? 'step' : undefined}
+              title={`Etapa ${stepNum}: ${label}`}
               sx={{
                 flex: 1,
-                py: 0.75,
-                px: 1,
-                borderRadius: 2,
-                textAlign: 'center',
-                fontSize: '0.75rem',
-                fontWeight: isCurrent ? 700 : 600,
-                color: isCurrent ? fillInk : isCompleted ? 'text.primary' : 'text.secondary',
-                bgcolor: isCurrent ? fillColor : isCompleted ? 'action.hover' : 'transparent',
-                border: '1px solid',
-                borderColor: isCurrent ? inkColor : 'divider',
-                transition: 'all 0.2s ease',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
+                minWidth: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'relative',
+                zIndex: 2,
+                px: 0.5,
               }}
-              title={`Etapa ${stepNum}: ${label}`}
             >
-              {stepNum}. {label}
+              <Typography
+                component="span"
+                sx={{
+                  mb: 1,
+                  fontSize: { xs: '0.625rem', sm: '0.75rem' },
+                  fontWeight: isActive ? 600 : 400,
+                  lineHeight: 1.25,
+                  textAlign: 'center',
+                  color: isActive ? 'primary.main' : 'text.secondary',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {label}
+              </Typography>
+              <Box
+                aria-hidden
+                sx={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: '50%',
+                  border: '2px solid',
+                  borderColor: isActive ? 'primary.main' : 'action2.borderStrong',
+                  bgcolor: isCompleted ? 'primary.main' : 'common.white',
+                  boxSizing: 'border-box',
+                }}
+              />
             </Box>
           );
         })}
-      </Stack>
+      </Box>
     </Box>
   );
 }

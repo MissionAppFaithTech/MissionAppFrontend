@@ -66,7 +66,16 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
       }) => {
         await page.addInitScript(`localStorage.setItem('theme', '${scheme}')`);
         await page.goto(route.path, { waitUntil: 'domcontentloaded' });
-        await page.waitForTimeout(300);
+        // next-themes applies `.dark` from storage; wait so axe does not scan the wrong scheme.
+        await page.waitForFunction(
+          (expected) => {
+            const isDark = document.documentElement.classList.contains('dark');
+            return expected === 'dark' ? isDark : !isDark;
+          },
+          scheme,
+          { timeout: 10000 }
+        );
+        await settleForScan(page);
 
         const accessibilityScanResults = await new AxeBuilder({ page })
           .exclude('iframe')

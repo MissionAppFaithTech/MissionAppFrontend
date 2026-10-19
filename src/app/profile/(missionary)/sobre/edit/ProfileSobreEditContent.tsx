@@ -9,6 +9,7 @@ export default function ProfileSobreEditContent() {
 
   return (
     <ProfileAboutEditSection
+      missionaryId={mockProfile.missionaryId ?? ''}
       data={mockProfile.about}
       onBack={() => router.push('/profile/sobre')}
     />

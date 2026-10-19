@@ -78,7 +78,6 @@ export default function AppTopNavbar({
                 py: { xs: 0.4, sm: 0.6 },
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
                 fontWeight: 600,
-                borderRadius: '14px',
                 border: '1px solid rgba(255, 255, 255, 0.35)',
                 bgcolor: 'rgba(255, 255, 255, 0.12)',
                 color: 'common.white',

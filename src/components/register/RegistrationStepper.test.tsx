@@ -5,7 +5,7 @@ import RegistrationStepper from './RegistrationStepper';
 describe('RegistrationStepper component', () => {
   const stepLabels = ['Dados pessoais', 'Dados de acesso'];
 
-  it('renders step text, labels and progress bar with accessible attributes', () => {
+  it('renders step labels and progress bar with accessible attributes', () => {
     render(
       <RegistrationStepper
         currentStep={1}
@@ -15,8 +15,8 @@ describe('RegistrationStepper component', () => {
       />
     );
 
-    expect(screen.getByText('Etapa 1 de 2')).toBeInTheDocument();
     expect(screen.getByText('Dados pessoais')).toBeInTheDocument();
+    expect(screen.getByText('Dados de acesso')).toBeInTheDocument();
 
     const progressBar = screen.getByRole('progressbar');
     expect(progressBar).toHaveAttribute('aria-valuenow', '1');
@@ -29,8 +29,7 @@ describe('RegistrationStepper component', () => {
       <RegistrationStepper currentStep={2} totalSteps={2} stepLabels={stepLabels} tone="mission" />
     );
 
-    expect(screen.getByText('Etapa 2 de 2')).toBeInTheDocument();
-    const currentStepPill = screen.getByText('2. Dados de acesso');
-    expect(currentStepPill).toHaveAttribute('aria-current', 'step');
+    const currentStep = screen.getByTitle('Etapa 2: Dados de acesso');
+    expect(currentStep).toHaveAttribute('aria-current', 'step');
   });
 });

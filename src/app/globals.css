@@ -19,7 +19,8 @@
   /* From main: brand aliases, OKLCH tokens and scrollbar colors. */
   --color-missionary: #0d2b5c;
   --color-supporter: #6ba6ff;
-  --color-mission: #f97316;
+  /* Align with theme `roleColors.mission` (#C2410C) — #F97316 fails WCAG with white. */
+  --color-mission: #c2410c;
   --color-intermediate: #2563eb;
   --color-deep-dark: #081c3a;
   --color-surface: #eaf1fa;
@@ -45,7 +46,7 @@
   --app-navbar-scrim: rgba(247, 249, 252, 0.92);
   /* Resting label of a navigation tab. The selected one is the accent. */
   --app-nav-rest: #0d2b5c;
-  --app-nav-active: #2563eb;
+  --app-nav-active: #c2410c;
   /* Ink for content sitting on the hero. */
   --app-hero-ink: #0d2b5c;
   --app-hero-wash: rgba(13, 43, 92, 0.08);
@@ -53,6 +54,9 @@
   --app-footer-bg: #081c3a;
   --app-badge-bg: rgba(230, 81, 0, 0.08);
   --app-badge-border: rgba(230, 81, 0, 0.28);
+  --app-badge-fg: #c2410c;
+  /* Emphasis text on paper/cards (campaign dates, accents). */
+  --app-emphasis-fg: #9a3412;
   /* Post-type chips. */
   --app-chip-info-bg: rgba(234, 241, 250, 0.85);
   --app-chip-info-fg: #0d2b5c;
@@ -64,40 +68,35 @@
 }
 
 :root.dark {
-  --background: #000000;
+  --background: #081c3a;
   --foreground: #ffffff;
 
-  /* Depth on black comes from elevation, so the shadows stay black and soft. */
-  --app-shadow-xs: 0 2px 8px rgba(0, 0, 0, 0.6);
-  --app-shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.65);
-  --app-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.7);
-  --app-shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.75);
-  --app-shadow-overlay: 0 12px 36px rgba(0, 0, 0, 0.8);
-  --app-shadow-accent: 0 3px 12px rgba(249, 115, 22, 0.35);
-  /* A white inset reads as a hairline crack on a black surface. */
-  --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --app-navbar-scrim: rgba(0, 0, 0, 0.92);
-  /* White; the selected tab is told apart by the orange and the weight. */
-  --app-nav-rest: #ffffff;
-  --app-nav-active: #fb923c;
-  /* The hero photo is scrimmed to black in this theme, so its ink is light. */
+  --app-shadow-xs: 0 2px 8px rgba(8, 28, 58, 0.45);
+  --app-shadow-sm: 0 3px 10px rgba(8, 28, 58, 0.5);
+  --app-shadow-md: 0 4px 14px rgba(8, 28, 58, 0.55);
+  --app-shadow-lg: 0 6px 20px rgba(8, 28, 58, 0.5);
+  --app-shadow-overlay: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --app-shadow-accent: 0 3px 10px rgba(230, 81, 0, 0.35);
+  --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  --app-navbar-scrim: rgba(8, 28, 58, 0.92);
+  /* Pale blue / soft orange on navy paper (#1a3d6e) — WCAG AA ≥ 4.5:1 */
+  --app-nav-rest: #bfdbfe;
+  --app-nav-active: #fdba74;
   --app-hero-ink: #ffffff;
-  --app-hero-wash: rgba(107, 166, 255, 0.16);
-  /* One neutral step above the canvas so the band still reads as a footer. */
-  --app-footer-bg: #121212;
-  --app-badge-bg: rgba(249, 115, 22, 0.16);
-  --app-badge-border: rgba(249, 115, 22, 0.45);
-  /* Tinted fills over black; the labels clear AA against the composited surface. */
-  --app-chip-info-bg: rgba(107, 166, 255, 0.18);
-  --app-chip-info-fg: #93c5fd;
+  --app-hero-wash: rgba(147, 197, 253, 0.16);
+  --app-footer-bg: #081c3a;
+  --app-badge-bg: rgba(194, 65, 12, 0.22);
+  --app-badge-border: rgba(251, 146, 60, 0.55);
+  --app-badge-fg: #fdba74;
+  --app-emphasis-fg: #fdba74;
+  --app-chip-info-bg: rgba(147, 197, 253, 0.22);
+  --app-chip-info-fg: #dbeafe;
   --app-chip-warn-bg: rgba(251, 191, 36, 0.18);
-  --app-chip-warn-fg: #fbbf24;
-  --app-chip-info-border: rgba(107, 166, 255, 0.4);
-  --app-chip-warn-border: rgba(251, 146, 60, 0.45);
-  /* Dark scrollbar values, moved out of the prefers-color-scheme block so the
-     explicit toggle drives them like everything else. */
-  --scrollbar-thumb: #3a3a3a;
-  --scrollbar-track: #0d0d0d;
+  --app-chip-warn-fg: #fde68a;
+  --app-chip-info-border: rgba(147, 197, 253, 0.35);
+  --app-chip-warn-border: rgba(251, 146, 60, 0.4);
+  --scrollbar-thumb: #334155;
+  --scrollbar-track: #081c3a;
 }
 
 /* Modern standard scrollbar-color and scrollbar-width (Baseline) */
@@ -327,11 +326,24 @@ select:-webkit-autofill {
 :root.dark input:-webkit-autofill:active,
 :root.dark textarea:-webkit-autofill,
 :root.dark select:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 1000px #1c1c1c inset !important;
-  box-shadow: 0 0 0 1000px #1c1c1c inset !important;
+  -webkit-box-shadow: 0 0 0 1000px #1a3d6e inset !important;
+  box-shadow: 0 0 0 1000px #1a3d6e inset !important;
   -webkit-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Auth cards stay a light island — keep autocomplete on the pale field fill. */
+:root.dark [data-auth-card] input:-webkit-autofill,
+:root.dark [data-auth-card] input:-webkit-autofill:hover,
+:root.dark [data-auth-card] input:-webkit-autofill:focus,
+:root.dark [data-auth-card] input:-webkit-autofill:active,
+:root.dark [data-auth-card] textarea:-webkit-autofill,
+:root.dark [data-auth-card] select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #eaf1fa inset !important;
+  box-shadow: 0 0 0 1000px #eaf1fa inset !important;
+  -webkit-text-fill-color: #081c3a !important;
+  caret-color: #081c3a !important;
 }
 
 /* Custom text selection to avoid harsh system blue */

@@ -37,8 +37,9 @@ Avoid hardcoding raw hex values (`#0D2B5C`, `#F97316`, etc.) in components. Alwa
 
 Before creating new components, always check existing atoms:
 
-- `PillButton` (`src/components/common/PillButton.tsx`): Primary CTA, action buttons, link buttons. Use standard tones (`primaryFilled`, `missionFilled`, `primarySoftOutline`, `cta`, `ghost`).
+- `PillButton` (`src/components/common/PillButton.tsx`): Primary CTA, action buttons, link buttons. Use standard tones (`primaryFilled`, `missionFilled`, `primarySoftOutline`, `cta`, `ghost`). Shared corner is `BUTTON_BORDER_RADIUS` (`10px`) — never a stadium pill or a per-call `borderRadius` override.
 - `PhoneField` (`src/components/common/PhoneField.tsx`): International phone inputs with country code selector.
+- `StyledTextArea` (`src/components/common/StyledTextArea.tsx`): Multiline profile-edit fields. Keep `RichTextEditor` for posts only.
 - `Logo` (`src/components/common/Logo.tsx`): Responsive brand mark (`sm`, `md`, `lg`, `xl`).
 - `SectionHeader` (`src/components/common/SectionHeader.tsx`): Section title and subtitle.
 - `PageNavbar` / `VisitorNavbar`: Navigation headers.
@@ -48,3 +49,4 @@ Before creating new components, always check existing atoms:
 - All interactive icon-only buttons MUST include an explicit `aria-label` (e.g., `aria-label="Alterar foto de perfil"`).
 - Dynamic menus and popovers must have `aria-haspopup="true"` and `aria-expanded`.
 - Form inputs must be associated with `<Typography component="label" htmlFor="...">` or MUI `<InputLabel>`.
+- Color-blind users (daltonism): never use color as the only status/error cue — pair with text or an icon (WCAG 1.4.1).

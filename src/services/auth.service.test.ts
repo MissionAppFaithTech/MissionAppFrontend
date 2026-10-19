@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { login, requestPasswordReset, getResetTokenStatus, resetPassword } from './auth.service';
 import { MOCK_RESET_TOKEN, MOCK_EXPIRED_RESET_TOKEN } from '@/mocks/auth';
 
@@ -6,14 +6,36 @@ describe('auth.service', () => {
   const validUserEmail = 'admin@missionapp.test';
 
   describe('login', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
     it('successfully logs in with valid credentials', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({
+            data: {
+              user: { id: '1', fullName: 'Admin Seed', email: validUserEmail },
+            },
+          }),
+        })
+      );
+
       const res = await login({ login: validUserEmail, password: 'Password123!' });
-      expect(res).toBeDefined();
-      expect(res.data.data.user.email).toBe(validUserEmail);
-      expect(res.data.data.accessToken).toBeDefined();
+      expect(res.user.email).toBe(validUserEmail);
     });
 
     it('rejects invalid password or user', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          json: async () => ({ message: 'E-mail ou senha inválidos' }),
+        })
+      );
+
       await expect(login({ login: 'nonexistent@domain.com', password: 'wrong' })).rejects.toThrow();
     });
   });

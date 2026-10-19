@@ -44,6 +44,11 @@ export default function ContactModal({
     }
   };
 
+  const showPublicEmail = contact.showPublicEmail !== false && Boolean(contact.publicEmail);
+  const showPublicPhone = contact.showPublicPhone !== false && Boolean(contact.publicPhone);
+  const allowWhatsapp =
+    contact.allowWhatsappContact !== false &&
+    Boolean(contact.publicPhone || contact.whatsappNumber);
   const cleanPhone = contact.whatsappNumber || contact.publicPhone.replace(/\D/g, '');
   const waLink = `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.slice(1) : cleanPhone}`;
 
@@ -101,128 +106,134 @@ export default function ContactModal({
 
         <DialogContent sx={{ px: 2, pb: 2, pt: 0.5 }}>
           <Stack spacing={2.5}>
-            {/* Opção WhatsApp */}
-            <Box>
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
-                <Box
-                  sx={{
-                    bgcolor: 'rgba(37, 211, 102, 0.12)',
-                    color: '#25D366',
-                    borderRadius: '50%',
-                    p: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <WhatsAppIcon sx={{ fontSize: 24 }} />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    WhatsApp
-                  </Typography>
-                  <Typography
-                    variant="body1"
+            {showPublicPhone || allowWhatsapp ? (
+              <Box>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
+                  <Box
                     sx={{
-                      fontWeight: 600,
-                      color: 'text.primary',
-                      wordBreak: 'break-word',
+                      bgcolor: 'rgba(37, 211, 102, 0.12)',
+                      color: '#25D366',
+                      borderRadius: '50%',
+                      p: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    {contact.publicPhone}
-                  </Typography>
-                </Box>
-              </Stack>
+                    <WhatsAppIcon sx={{ fontSize: 24 }} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      WhatsApp
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: 'text.primary',
+                        wordBreak: 'break-word',
+                      }}
+                    >
+                      {contact.publicPhone}
+                    </Typography>
+                  </Box>
+                </Stack>
 
-              <Stack direction="row" spacing={1} sx={{ pl: { xs: 0, sm: 5.5 } }}>
-                <PillButton
-                  tone="primarySoftOutline"
-                  size="small"
-                  onClick={() => handleCopy(contact.publicPhone, 'Telefone')}
-                  sx={{
-                    minHeight: 44,
-                    px: 2,
-                    fontSize: '0.8125rem',
-                    flex: { xs: 1, sm: 'initial' },
-                  }}
-                >
-                  <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
-                  Copiar
-                </PillButton>
-                <PillButton
-                  tone="missionFilled"
-                  size="small"
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{
-                    minHeight: 44,
-                    px: 2,
-                    fontSize: '0.8125rem',
-                    fontWeight: 700,
-                    color: '#FFFFFF !important',
-                    bgcolor: '#9A3412',
-                    '&:hover': { bgcolor: '#7C2D12' },
-                    flex: { xs: 1, sm: 'initial' },
-                  }}
-                >
-                  Conversar
-                </PillButton>
-              </Stack>
-            </Box>
+                <Stack direction="row" spacing={1} sx={{ pl: { xs: 0, sm: 5.5 } }}>
+                  {showPublicPhone ? (
+                    <PillButton
+                      tone="primarySoftOutline"
+                      size="small"
+                      onClick={() => handleCopy(contact.publicPhone, 'Telefone')}
+                      sx={{
+                        minHeight: 44,
+                        px: 2,
+                        fontSize: '0.8125rem',
+                        flex: { xs: 1, sm: 'initial' },
+                      }}
+                    >
+                      <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
+                      Copiar
+                    </PillButton>
+                  ) : null}
+                  {allowWhatsapp ? (
+                    <PillButton
+                      tone="missionFilled"
+                      size="small"
+                      href={waLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        minHeight: 44,
+                        px: 2,
+                        fontSize: '0.8125rem',
+                        fontWeight: 700,
+                        color: '#FFFFFF !important',
+                        bgcolor: '#9A3412',
+                        '&:hover': { bgcolor: '#7C2D12' },
+                        flex: { xs: 1, sm: 'initial' },
+                      }}
+                    >
+                      Conversar
+                    </PillButton>
+                  ) : null}
+                </Stack>
+              </Box>
+            ) : null}
 
-            <Divider />
+            {showPublicEmail && (showPublicPhone || allowWhatsapp) ? <Divider /> : null}
 
-            {/* Opção E-mail */}
-            <Box>
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
-                <Box
-                  sx={{
-                    bgcolor: 'rgba(13, 43, 92, 0.08)',
-                    color: 'primary.main',
-                    borderRadius: '50%',
-                    p: 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <EmailOutlinedIcon sx={{ fontSize: 24 }} />
-                </Box>
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    E-mail público
-                  </Typography>
-                  <Typography
-                    variant="body1"
+            {showPublicEmail ? (
+              <Box>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
+                  <Box
                     sx={{
-                      fontWeight: 600,
-                      color: 'text.primary',
-                      wordBreak: 'break-all',
+                      bgcolor: 'rgba(13, 43, 92, 0.08)',
+                      color: 'primary.main',
+                      borderRadius: '50%',
+                      p: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}
                   >
-                    {contact.publicEmail}
-                  </Typography>
-                </Box>
-              </Stack>
+                    <EmailOutlinedIcon sx={{ fontSize: 24 }} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                      E-mail público
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: 'text.primary',
+                        wordBreak: 'break-all',
+                      }}
+                    >
+                      {contact.publicEmail}
+                    </Typography>
+                  </Box>
+                </Stack>
 
-              <Stack direction="row" spacing={1} sx={{ pl: { xs: 0, sm: 5.5 } }}>
-                <PillButton
-                  tone="primarySoftOutline"
-                  size="small"
-                  onClick={() => handleCopy(contact.publicEmail, 'E-mail')}
-                  sx={{
-                    minHeight: 44,
-                    px: 2,
-                    fontSize: '0.8125rem',
-                    flex: { xs: 1, sm: 'initial' },
-                  }}
-                >
-                  <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
-                  Copiar
-                </PillButton>
-              </Stack>
-            </Box>
+                <Stack direction="row" spacing={1} sx={{ pl: { xs: 0, sm: 5.5 } }}>
+                  <PillButton
+                    tone="primarySoftOutline"
+                    size="small"
+                    onClick={() => handleCopy(contact.publicEmail, 'E-mail')}
+                    sx={{
+                      minHeight: 44,
+                      px: 2,
+                      fontSize: '0.8125rem',
+                      flex: { xs: 1, sm: 'initial' },
+                    }}
+                  >
+                    <ContentCopyIcon sx={{ fontSize: 16, mr: 0.75 }} />
+                    Copiar
+                  </PillButton>
+                </Stack>
+              </Box>
+            ) : null}
 
             {/* Se for o próprio missionário dono da conta */}
             {isOwnProfile && (

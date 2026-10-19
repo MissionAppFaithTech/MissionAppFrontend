@@ -2,6 +2,7 @@
  * Contas mock para fluxos de auth enquanto o backend não está ligado.
  * Inclua aqui e-mails de teste usados no front.
  * Troque `USE_AUTH_MOCKS` para `false` quando o back estiver pronto.
+ * A checagem de username já fala com o BFF/Adonis local e não usa este mock.
  */
 export const USE_AUTH_MOCKS = true;
 

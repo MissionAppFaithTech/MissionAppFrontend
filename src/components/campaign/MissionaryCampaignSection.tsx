@@ -197,8 +197,7 @@ export default function MissionaryCampaignSection({
                   <CalendarMonthIcon
                     sx={{
                       fontSize: 24,
-                      color: (theme) =>
-                        theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
+                      color: 'var(--app-emphasis-fg)',
                     }}
                   />
                   <Typography
@@ -206,8 +205,7 @@ export default function MissionaryCampaignSection({
                     sx={{
                       fontWeight: 800,
                       fontSize: { xs: '0.875rem', sm: '1rem' },
-                      color: (theme) =>
-                        theme.palette.mode === 'dark' ? 'accent.light' : 'mission.dark',
+                      color: 'var(--app-emphasis-fg)',
                       textAlign: 'center',
                     }}
                   >

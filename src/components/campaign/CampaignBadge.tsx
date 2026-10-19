@@ -25,10 +25,7 @@ export default function CampaignBadge({
         <VerifiedIcon
           sx={{
             fontSize: isSmall ? 16 : 18,
-            color: (theme) =>
-              theme.palette.mode === 'dark' || isHero
-                ? '#FB923C !important'
-                : 'mission.main !important',
+            color: isHero ? '#FB923C !important' : 'var(--app-badge-fg) !important',
             filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.25))',
           }}
         />
@@ -55,16 +52,10 @@ export default function CampaignBadge({
               textShadow: '0 1px 3px rgba(0, 0, 0, 0.5)',
             }
           : {
-              bgcolor: (theme) =>
-                theme.palette.mode === 'dark' ? 'var(--app-badge-bg)' : 'rgba(230, 81, 0, 0.08)',
-              color: 'accent.dark',
+              bgcolor: 'var(--app-badge-bg)',
+              color: 'var(--app-badge-fg)',
               border: '1px solid',
-              borderColor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'var(--app-badge-border)'
-                  : 'rgba(230, 81, 0, 0.28)',
-              boxShadow: (theme) =>
-                theme.palette.mode === 'dark' ? 'var(--app-shadow-accent)' : 'none',
+              borderColor: 'var(--app-badge-border)',
             }),
         ...sx,
       }}

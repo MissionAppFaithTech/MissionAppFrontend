@@ -1,18 +1,26 @@
 'use client';
 
-import { Box, FormHelperText, InputLabel, useTheme } from '@mui/material';
-import { v } from '@/theme/theme';
-import { PhoneInput } from 'react-international-phone';
+import { useId } from 'react';
+import FormControl from '@mui/material/FormControl';
+import FormHelperText from '@mui/material/FormHelperText';
+import InputAdornment from '@mui/material/InputAdornment';
+import InputLabel from '@mui/material/InputLabel';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import { CountrySelector, usePhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 
 type PhoneFieldProps = {
+  id?: string;
   value: string;
   onChange: (value: string) => void;
   error?: boolean;
   helperText?: string;
   label?: string;
+  /** When true, the caller renders the visible label (e.g. Typography + htmlFor). */
+  hideLabel?: boolean;
   placeholder?: string;
   defaultCountry?: string;
+  size?: 'small' | 'medium';
 };
 
 /** Valor só com DDI (ex: +55) — conta como vazio para mostrar o placeholder. */
@@ -23,92 +31,83 @@ function isOnlyDialCode(phone: string): boolean {
 }
 
 export default function PhoneField({
+  id,
   value,
   onChange,
-  error,
+  error = false,
   helperText,
   label = 'Telefone',
+  hideLabel = false,
   placeholder = '(11) 98765-4321',
   defaultCountry = 'br',
+  size = 'medium',
 }: PhoneFieldProps) {
-  const theme = useTheme();
-  // `v` reads through `theme.vars` so values follow the active color scheme —
-  // reading `theme.palette.*` directly would freeze the default scheme — and it
-  // tolerates the custom palette keys being absent, which is the case in unit
-  // tests that render against MUI's default theme.
-  const borderColor = error ? v(theme, 'palette.error.main') : v(theme, 'palette.divider');
-
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const helperId = useId();
   const displayValue = isOnlyDialCode(value) ? '' : value;
 
+  const { inputValue, country, setCountry, handlePhoneValueChange } = usePhoneInput({
+    defaultCountry,
+    value: displayValue,
+    onChange: (data) => onChange(data.phone),
+  });
+
   return (
-    <Box sx={{ width: '100%' }}>
-      <InputLabel
-        shrink
-        error={error}
-        sx={{ typography: 'body2', color: 'text.primary', mb: 0.75, display: 'block' }}
-      >
-        {label}
-      </InputLabel>
-
-      <Box
+    <FormControl variant="outlined" fullWidth error={error} size={size}>
+      {hideLabel ? null : (
+        <InputLabel htmlFor={inputId} shrink>
+          {label}
+        </InputLabel>
+      )}
+      <OutlinedInput
+        id={inputId}
+        label={hideLabel ? undefined : label}
+        notched={hideLabel ? false : true}
+        size={size}
+        value={inputValue}
+        onChange={handlePhoneValueChange}
+        placeholder={placeholder}
+        autoComplete="tel"
+        inputMode="tel"
+        aria-invalid={error}
+        aria-describedby={helperText ? helperId : undefined}
+        startAdornment={
+          <InputAdornment position="start" sx={{ mr: 0.5 }}>
+            <CountrySelector
+              selectedCountry={country.iso2}
+              onSelect={(selected) => setCountry(selected.iso2)}
+              renderButtonWrapper={({ children, rootProps }) => (
+                <button
+                  type="button"
+                  {...rootProps}
+                  aria-label={`País do telefone: ${country.name}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minWidth: 44,
+                    minHeight: 44,
+                    margin: 0,
+                    padding: 0,
+                    border: 0,
+                    background: 'transparent',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {children}
+                </button>
+              )}
+            />
+          </InputAdornment>
+        }
         sx={{
-          width: '100%',
-          border: '1px solid',
-          borderColor,
-          borderRadius: 1,
-          // Matches the field fill used by every other input in the app.
+          overflow: 'visible',
           bgcolor: 'var(--mui-palette-action2-fieldBg)',
-          px: 1,
-          py: 0.25,
-          transition: 'border-color 0.2s ease',
-          '&:focus-within': {
-            borderColor: error
-              ? v(theme, 'palette.error.main')
-              : v(theme, 'palette.connection.main'),
-            borderWidth: 2,
-            px: '7px',
-            py: '1px',
-          },
-          '& .react-international-phone-input-container': {
-            width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-          },
-          '& .react-international-phone-country-selector-button': {
-            border: 'none',
-            background: 'transparent',
-            padding: '8px 4px',
-            minHeight: 44,
-          },
-          '& .react-international-phone-input': {
-            flex: 1,
-            border: 'none',
-            outline: 'none',
-            background: 'transparent',
-            font: 'inherit',
-            fontSize: '1rem',
-            py: 1.25,
-            px: 0.5,
-            minHeight: 44,
-            color: v(theme, 'palette.text.primary'),
-            '&::placeholder': {
-              color: v(theme, 'palette.text.secondary'),
-              opacity: 1,
-            },
-          },
         }}
-      >
-        <PhoneInput
-          defaultCountry={defaultCountry}
-          value={displayValue}
-          onChange={(phone) => onChange(phone)}
-          placeholder={placeholder}
-        />
-      </Box>
-
-      {helperText ? <FormHelperText error={error}>{helperText}</FormHelperText> : null}
-    </Box>
+      />
+      {helperText ? <FormHelperText id={helperId}>{helperText}</FormHelperText> : null}
+    </FormControl>
   );
 }
 

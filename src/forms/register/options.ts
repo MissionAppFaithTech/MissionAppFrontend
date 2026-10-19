@@ -1,14 +1,30 @@
+import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
+
 /** Valor do select quando o usuário não encontra a opção na lista. */
 export const SELECT_OTHER = 'other' as const;
 
-export const missionaryAgencies = [
-  { value: '1', label: 'Agência missionária 1' },
-  { value: '2', label: 'Agência missionária 2' },
-  { value: '3', label: 'Agência missionária 3' },
-] as const;
+export const EMPTY_MISSIONARY_AGENCY: MissionaryAgencyData = {
+  name: '',
+  address1: '',
+  address2: '',
+  country: '',
+  state: '',
+  city: '',
+  zipCode: '',
+  website: '',
+  phone: '',
+};
 
-export const faithCommunities = [
-  { value: '1', label: 'Comunidade de fé 1' },
-  { value: '2', label: 'Comunidade de fé 2' },
-  { value: '3', label: 'Comunidade de fé 3' },
-] as const;
+export const EMPTY_FAITH_COMMUNITY: FaithCommunityData = {
+  name: '',
+  address1: '',
+  address2: '',
+  country: '',
+  state: '',
+  city: '',
+  zipCode: '',
+  website: '',
+  churchPhone: '',
+  pastorName: '',
+  pastorPhone: '',
+};

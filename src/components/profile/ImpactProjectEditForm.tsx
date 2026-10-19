@@ -24,9 +24,10 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
-import RichTextEditor from '@/components/common/RichTextEditor';
+import StyledTextArea from '@/components/common/StyledTextArea';
 import { getYouTubeEmbedUrl } from '@/components/profile/ImpactProjectCard';
 import { impactProjectEditSchema, type ImpactProjectEditFormData } from '@/schemas/content.schema';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ImpactProjectData } from '@/types/profile';
 
 type ImpactProjectEditFormProps = {
@@ -232,7 +233,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
               {/* 2. Informações Principais */}
               <Stack spacing={2.5}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  Informações Básicas
+                  Informações básicas
                 </Typography>
 
                 <Stack spacing={0.75}>
@@ -259,13 +260,12 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   name="description"
                   control={control}
                   render={({ field }) => (
-                    <RichTextEditor
+                    <StyledTextArea
                       id="project-description"
                       label="Descrição Detalhada"
                       value={field.value}
                       onChange={field.onChange}
                       minRows={5}
-                      draftKey={`impact_project_${project.id}`}
                       placeholder="Conte sobre o objetivo, público alcançado, etapas e necessidades do projeto..."
                       error={Boolean(errors.description)}
                       helperText={errors.description?.message}
@@ -543,9 +543,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   justifyContent: 'flex-end',
                   pt: { xs: 2, sm: 2 },
                   '& .MuiButton-root': {
-                    minHeight: { xs: 48, sm: 40 },
+                    ...FORM_ACTION_BUTTON_SX,
                     width: { xs: '100%', sm: 'auto' },
-                    fontSize: { xs: '0.9375rem', sm: '0.875rem' },
                   },
                 }}
               >

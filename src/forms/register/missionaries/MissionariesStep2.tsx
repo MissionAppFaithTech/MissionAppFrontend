@@ -2,53 +2,55 @@
 
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  TextField,
-  Typography,
-  Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormHelperText,
-  CircularProgress,
-} from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import PillButton from '@/components/common/PillButton';
-import PhoneField from '@/components/common/PhoneField';
-import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
+import { TextField, Typography } from '@mui/material';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
-import { SELECT_OTHER, faithCommunities, missionaryAgencies } from '@/forms/register/options';
+import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
+import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
+import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
+import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
+import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
+import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
+import {
+  EMPTY_FAITH_COMMUNITY,
+  EMPTY_MISSIONARY_AGENCY,
+  SELECT_OTHER,
+} from '@/forms/register/options';
+import { validateOnSubmit } from '@/lib/formValidation';
 import { yieldToMain } from '@/lib/scheduler';
+import {
+  createFaithCommunitySchema,
+  createMissionaryAgencySchema,
+} from '@/schemas/catalog-create.schema';
+import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
+import { listFaithCommunities, listMissionaryAgencies } from '@/services/catalog.service';
 
 export default function MissionariesStep2() {
   const { formData, completeStep2, goBack } = useMissionaryRegisterWizard();
+  const agencies = useCatalogItems(listMissionaryAgencies);
+  const communities = useCatalogItems(listFaithCommunities);
+  const agencyEntry = useOtherCatalogEntry();
+  const communityEntry = useOtherCatalogEntry();
   const {
     register,
     handleSubmit,
     control,
+    setValue,
     watch,
     formState: { errors, isSubmitting },
   } = useForm<MissionaryStep2FormData>({
     resolver: zodResolver(missionaryStep2Schema),
-    mode: 'onTouched',
+    ...validateOnSubmit,
     defaultValues: {
       missionaryAgency: formData.missionaryAgency || '',
-      agencyCustomName: formData.agencyCustomName || '',
-      agencyPhone: formData.agencyPhone || '',
+      agencyDetails: formData.agencyDetails || EMPTY_MISSIONARY_AGENCY,
       missionDescription: formData.missionDescription || '',
       faithCommunity: formData.faithCommunity || '',
-      communityPhone: formData.communityPhone || '',
-      pastorName: formData.pastorName || '',
-      pastorPhone: formData.pastorPhone || '',
+      communityDetails: formData.communityDetails || EMPTY_FAITH_COMMUNITY,
     },
   });
 
-  const missionaryAgency = watch('missionaryAgency');
-  const faithCommunity = watch('faithCommunity');
-  const showAgencyDetails = missionaryAgency === SELECT_OTHER;
-  const showCommunityDetails = faithCommunity === SELECT_OTHER;
+  const agencyDetails = watch('agencyDetails');
+  const communityDetails = watch('communityDetails');
 
   const handleStepSubmit = async (data: MissionaryStep2FormData) => {
     await yieldToMain();
@@ -56,67 +58,31 @@ export default function MissionariesStep2() {
   };
 
   return (
-    <Stack
-      component="form"
-      spacing={2.5}
+    <RegisterStepForm
       onSubmit={handleSubmit(handleStepSubmit)}
-      sx={{ width: '100%' }}
-      noValidate
+      sectionTitle="Dados ministeriais"
+      onBack={goBack}
+      isSubmitting={isSubmitting}
     >
-      <Typography variant="body1">Dados de missão</Typography>
-
       <Controller
         name="missionaryAgency"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth error={Boolean(errors.missionaryAgency)}>
-            <InputLabel shrink>Agência missionária</InputLabel>
-            <Select {...field} label="Agência missionária" displayEmpty>
-              <MenuItem value="" disabled>
-                Selecione...
-              </MenuItem>
-              {missionaryAgencies.map((agency) => (
-                <MenuItem key={agency.value} value={agency.value}>
-                  {agency.label}
-                </MenuItem>
-              ))}
-              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
-            </Select>
-            {errors.missionaryAgency ? (
-              <FormHelperText>{errors.missionaryAgency.message}</FormHelperText>
-            ) : null}
-          </FormControl>
+          <RegisterCatalogSelect
+            id="missionaryAgency"
+            label="Agência missionária"
+            value={field.value}
+            onChange={(value) => agencyEntry.selectValue(value, field.value, field.onChange)}
+            options={agencies.items}
+            isLoading={agencies.isLoading}
+            loadError={agencies.error}
+            error={Boolean(errors.missionaryAgency)}
+            helperText={errors.missionaryAgency?.message}
+            otherSummary={field.value === SELECT_OTHER ? agencyDetails.name : undefined}
+            onEditOther={agencyEntry.openEditor}
+          />
         )}
       />
-
-      {showAgencyDetails ? (
-        <>
-          <TextField
-            {...register('agencyCustomName')}
-            label="Nome da agência missionária"
-            fullWidth
-            placeholder="Nome da sua agência"
-            error={Boolean(errors.agencyCustomName)}
-            helperText={errors.agencyCustomName?.message}
-          />
-
-          <Controller
-            name="agencyPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone da agência missionária"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.agencyPhone)}
-                helperText={errors.agencyPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
-        </>
-      ) : null}
 
       <TextField
         {...register('missionDescription')}
@@ -135,118 +101,53 @@ export default function MissionariesStep2() {
         name="faithCommunity"
         control={control}
         render={({ field }) => (
-          <FormControl fullWidth error={Boolean(errors.faithCommunity)}>
-            <InputLabel id="missionary-faith-community-label" shrink>
-              Comunidade de fé
-            </InputLabel>
-            <Select
-              {...field}
-              labelId="missionary-faith-community-label"
-              id="faithCommunity"
-              label="Comunidade de fé"
-              displayEmpty
-            >
-              <MenuItem value="" disabled>
-                Selecione...
-              </MenuItem>
-              {faithCommunities.map((community) => (
-                <MenuItem key={community.value} value={community.value}>
-                  {community.label}
-                </MenuItem>
-              ))}
-              <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
-            </Select>
-            {errors.faithCommunity ? (
-              <FormHelperText>{errors.faithCommunity.message}</FormHelperText>
-            ) : null}
-          </FormControl>
+          <RegisterCatalogSelect
+            id="faithCommunity"
+            label="Comunidade de fé"
+            value={field.value}
+            onChange={(value) => communityEntry.selectValue(value, field.value, field.onChange)}
+            options={communities.items}
+            isLoading={communities.isLoading}
+            loadError={communities.error}
+            error={Boolean(errors.faithCommunity)}
+            helperText={errors.faithCommunity?.message}
+            otherSummary={field.value === SELECT_OTHER ? communityDetails.name : undefined}
+            onEditOther={communityEntry.openEditor}
+          />
         )}
       />
 
-      {showCommunityDetails ? (
-        <>
-          <Controller
-            name="communityPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone da comunidade de fé"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.communityPhone)}
-                helperText={errors.communityPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
+      <CreateMissionaryAgencyModal
+        open={agencyEntry.open}
+        initialValues={agencyDetails}
+        onClose={() =>
+          agencyEntry.cancel(
+            createMissionaryAgencySchema.safeParse(agencyDetails).success,
+            (value) => setValue('missionaryAgency', value)
+          )
+        }
+        onSave={(details) => {
+          setValue('agencyDetails', details);
+          setValue('missionaryAgency', SELECT_OTHER, { shouldValidate: true });
+          agencyEntry.close();
+        }}
+      />
 
-          <TextField
-            {...register('pastorName')}
-            label="Nome do pastor"
-            fullWidth
-            placeholder="Pr. João Souza"
-            error={Boolean(errors.pastorName)}
-            helperText={errors.pastorName?.message}
-          />
-
-          <Controller
-            name="pastorPhone"
-            control={control}
-            render={({ field }) => (
-              <PhoneField
-                label="Telefone do pastor"
-                value={field.value}
-                onChange={field.onChange}
-                error={Boolean(errors.pastorPhone)}
-                helperText={errors.pastorPhone?.message}
-                placeholder="(11) 98765-4321"
-                defaultCountry="br"
-              />
-            )}
-          />
-        </>
-      ) : null}
-
-      <Stack direction="row" spacing={2}>
-        <PillButton
-          type="button"
-          tone="primarySoftOutline"
-          onClick={goBack}
-          fullWidth
-          sx={{ minHeight: 48, fontSize: '1rem', fontWeight: 500 }}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar
-        </PillButton>
-        <PillButton
-          type="submit"
-          tone="cta"
-          disabled={isSubmitting}
-          fullWidth
-          sx={{
-            minHeight: 48,
-            fontSize: '1rem',
-            fontWeight: 600,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 1.5,
-          }}
-        >
-          {isSubmitting ? (
-            <>
-              <CircularProgress size={20} color="inherit" aria-label="Enviando dados" />
-              <span>Continuando...</span>
-            </>
-          ) : (
-            <>
-              <ArrowForwardIcon />
-              <span>Continuar</span>
-            </>
-          )}
-        </PillButton>
-      </Stack>
-    </Stack>
+      <CreateFaithCommunityModal
+        open={communityEntry.open}
+        initialValues={communityDetails}
+        onClose={() =>
+          communityEntry.cancel(
+            createFaithCommunitySchema.safeParse(communityDetails).success,
+            (value) => setValue('faithCommunity', value)
+          )
+        }
+        onSave={(details) => {
+          setValue('communityDetails', details);
+          setValue('faithCommunity', SELECT_OTHER, { shouldValidate: true });
+          communityEntry.close();
+        }}
+      />
+    </RegisterStepForm>
   );
 }

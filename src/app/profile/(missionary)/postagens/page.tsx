@@ -28,6 +28,7 @@ import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import { mockProfile } from '@/mocks/profile';
 import { newPostSchema, type NewPostFormData } from '@/schemas/content.schema';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 type FeedView = 'mine' | 'general';
 
@@ -130,7 +131,7 @@ function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
                 tone="primarySoftOutline"
                 size="medium"
                 sx={{
-                  minHeight: { xs: 48, sm: 40 },
+                  ...FORM_ACTION_BUTTON_SX,
                   width: { xs: '100%', sm: 'auto' },
                 }}
               >
@@ -147,9 +148,8 @@ function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
                 justifyContent: 'flex-end',
                 pt: { xs: 2, sm: 4 },
                 '& .MuiButton-root': {
-                  minHeight: { xs: 48, sm: 40 },
+                  ...FORM_ACTION_BUTTON_SX,
                   width: { xs: '100%', sm: 'auto' },
-                  fontSize: { xs: '0.9375rem', sm: '0.875rem' },
                 },
               }}
             >

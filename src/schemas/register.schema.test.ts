@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   supporterStep1Schema,
   missionaryStep1Schema,
+  missionaryStep2Schema,
   accessCredentialsSchema,
 } from './register.schema';
+import { EMPTY_FAITH_COMMUNITY, EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
 
 describe('register.schema', () => {
   describe('supporterStep1Schema', () => {
@@ -15,9 +17,7 @@ describe('register.schema', () => {
         gender: 'masculino',
         phone: '+5511987654321',
         faithCommunity: '',
-        communityPhone: '',
-        pastorName: '',
-        pastorPhone: '',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
       });
 
       expect(result.success).toBe(true);
@@ -31,9 +31,7 @@ describe('register.schema', () => {
         gender: 'masculino',
         phone: '+5511987654321',
         faithCommunity: '',
-        communityPhone: '',
-        pastorName: '',
-        pastorPhone: '',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
       });
       expect(missingEmail.success).toBe(false);
 
@@ -44,9 +42,7 @@ describe('register.schema', () => {
         gender: 'masculino',
         phone: '+5511987654321',
         faithCommunity: '',
-        communityPhone: '',
-        pastorName: '',
-        pastorPhone: '',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
       });
       expect(invalidEmail.success).toBe(false);
     });
@@ -99,6 +95,39 @@ describe('register.schema', () => {
       });
 
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('missionaryStep2Schema', () => {
+    it('rejects an incomplete custom agency', () => {
+      const result = missionaryStep2Schema.safeParse({
+        missionaryAgency: 'other',
+        agencyDetails: EMPTY_MISSIONARY_AGENCY,
+        missionDescription: 'Atuação no campo',
+        faithCommunity: 'community-1',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('accepts a completed custom agency and catalog church', () => {
+      const result = missionaryStep2Schema.safeParse({
+        missionaryAgency: 'other',
+        agencyDetails: {
+          ...EMPTY_MISSIONARY_AGENCY,
+          name: 'Nova Agência',
+          country: 'Brasil',
+          state: 'SP',
+          city: 'Campinas',
+          phone: '+5511987654321',
+        },
+        missionDescription: 'Atuação no campo',
+        faithCommunity: 'community-1',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 });

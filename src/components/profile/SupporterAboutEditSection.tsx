@@ -10,9 +10,10 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
-import RichTextEditor from '@/components/common/RichTextEditor';
+import StyledTextArea from '@/components/common/StyledTextArea';
 import { profileLocations } from '@/lib/profileOptions';
 import { supporterAboutSchema, type SupporterAboutFormData } from '@/schemas/profile.schema';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileAboutData } from '@/types/profile';
 import type { ReactNode } from 'react';
 
@@ -106,13 +107,12 @@ export default function SupporterAboutEditSection({
               name="introduction"
               control={control}
               render={({ field }) => (
-                <RichTextEditor
+                <StyledTextArea
                   id="supporter-about-introduction"
                   label="Bio / Apresentação"
                   value={field.value}
                   onChange={field.onChange}
                   minRows={4}
-                  draftKey="supporter_about_intro"
                   placeholder="Escreva uma breve apresentação sobre sua caminhada cristã e ministério..."
                   error={Boolean(errors.introduction)}
                   helperText={errors.introduction?.message}
@@ -186,13 +186,12 @@ export default function SupporterAboutEditSection({
               name="lifeVerse"
               control={control}
               render={({ field }) => (
-                <RichTextEditor
+                <StyledTextArea
                   id="supporter-about-life-verse"
                   label="Versículo para a vida"
                   value={field.value}
                   onChange={field.onChange}
                   minRows={2}
-                  draftKey="supporter_about_life_verse"
                   placeholder="Insira seu versículo bíblico favorito ou lema de fé..."
                   error={Boolean(errors.lifeVerse)}
                   helperText={errors.lifeVerse?.message}
@@ -207,7 +206,7 @@ export default function SupporterAboutEditSection({
                 justifyContent: 'flex-end',
                 pt: { xs: 1.5, sm: 2 },
                 '& .MuiButton-root': {
-                  minHeight: { xs: 48, sm: 40 },
+                  ...FORM_ACTION_BUTTON_SX,
                   flex: { xs: 1, sm: 'initial' },
                 },
               }}

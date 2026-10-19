@@ -1,8 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import SupporterEditForm from '@/components/profile/SupporterEditForm';
 import { mockProfile } from '@/mocks/profile';
+
+vi.mock('@/services/username.service', () => ({
+  checkUsernameAvailability: vi.fn().mockResolvedValue({
+    available: false,
+    username: 'nome_usado',
+    suggestions: ['nome_usado1'],
+  }),
+}));
 
 describe('SupporterEditForm Component', () => {
   it('renders all basic supporter profile information and public contact fields', () => {
@@ -10,21 +18,28 @@ describe('SupporterEditForm Component', () => {
 
     expect(screen.getByRole('heading', { name: /editar perfil de apoiador/i })).toBeInTheDocument();
     expect(screen.getByText(/informações básicas/i)).toBeInTheDocument();
-    expect(screen.getByText(/contatos públicos/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /informações de contato/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /essas informações serão exibidas publicamente para visitantes e apoiadores\./i
+      )
+    ).toBeInTheDocument();
 
     // Basic Fields
     expect(screen.getByDisplayValue(mockProfile.username)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProfile.displayName)).toBeInTheDocument();
-    expect(screen.getByDisplayValue(mockProfile.roleDescription)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /desfazer alteração/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /refazer alteração/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/bio \/ papel/i)).toHaveValue(mockProfile.roleDescription);
+    expect(screen.queryByRole('button', { name: /desfazer alteração/i })).not.toBeInTheDocument();
 
     // Contact Fields
-    expect(screen.getByLabelText(/e-mail de contato público/i)).toHaveValue('samuelhe@gmail.com');
-    expect(screen.getByLabelText(/telefone de contato público/i)).toHaveValue(
-      '+55 (21) 98765-4321'
-    );
-    expect(screen.getByLabelText(/número do whatsapp/i)).toHaveValue('+5521987654321');
+    expect(screen.getByLabelText(/^e-mail:$/i)).toHaveValue('samuelhe@gmail.com');
+    expect(screen.getByLabelText(/^telefone:$/i)).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /país do telefone/i })).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: /exibir e-mail no meu perfil/i })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: /exibir telefone no meu perfil/i })).toBeChecked();
+    expect(
+      screen.getByRole('checkbox', { name: /este número é um número de whatsapp/i })
+    ).toBeChecked();
 
     // Action Buttons
     expect(screen.getByRole('link', { name: /voltar/i })).toHaveAttribute(
@@ -42,5 +57,21 @@ describe('SupporterEditForm Component', () => {
     await user.click(saveButton);
 
     expect(screen.getByText(/perfil de apoiador atualizado com sucesso!/i)).toBeInTheDocument();
+  });
+
+  it('blocks save when the typed username is already taken', async () => {
+    const user = userEvent.setup();
+    render(<SupporterEditForm profile={mockProfile} />);
+
+    const username = screen.getByLabelText(/nome de usuário/i);
+    await user.clear(username);
+    await user.type(username, 'nome_usado');
+
+    expect(await screen.findByText(/este nome de usuário já está em uso/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /salvar/i }));
+    expect(
+      screen.queryByText(/perfil de apoiador atualizado com sucesso!/i)
+    ).not.toBeInTheDocument();
   });
 });

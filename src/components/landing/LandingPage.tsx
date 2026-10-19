@@ -177,18 +177,7 @@ function HeroHeadline() {
             justifyContent: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <PillButton
-            href="/select-role"
-            tone="missionFilled"
-            sx={{
-              ...heroCtaButtonSx,
-              borderRadius: '12px',
-              boxShadow: '0 4px 14px rgba(230, 81, 0, 0.3)',
-              '&:hover': {
-                boxShadow: '0 6px 18px rgba(230, 81, 0, 0.4)',
-              },
-            }}
-          >
+          <PillButton href="/select-role" tone="missionFilled" sx={heroCtaButtonSx}>
             Comece agora
           </PillButton>
           <PillButton
@@ -204,7 +193,6 @@ function HeroHeadline() {
             tone="primaryOutline"
             sx={{
               ...heroCtaButtonSx,
-              borderRadius: '12px',
               borderWidth: '2px',
               borderColor: (theme) =>
                 theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
@@ -279,7 +267,7 @@ function LandingHero() {
             sx={{
               position: 'absolute',
               inset: 0,
-              background: 'rgba(0, 0, 0, 0.72)',
+              background: 'rgba(8, 28, 58, 0.7)',
               pointerEvents: 'none',
             }}
           />
@@ -312,7 +300,7 @@ function LandingHero() {
               position: 'absolute',
               inset: 0,
               background:
-                'linear-gradient(90deg, rgba(0, 0, 0, 0.94) 0%, rgba(0, 0, 0, 0.82) 42%, rgba(0, 0, 0, 0.4) 68%, rgba(0, 0, 0, 0.1) 100%)',
+                'linear-gradient(90deg, rgba(8, 28, 58, 0.94) 0%, rgba(8, 28, 58, 0.8) 42%, rgba(8, 28, 58, 0.35) 68%, rgba(8, 28, 58, 0.08) 100%)',
               pointerEvents: 'none',
             }}
           />

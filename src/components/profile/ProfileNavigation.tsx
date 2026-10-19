@@ -62,11 +62,13 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
       sx={{
         borderRadius: { xs: 2, sm: 3 },
         border: '1px solid',
-        borderColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'var(--app-chip-info-bg)' : 'divider',
-        boxShadow: (theme) =>
-          theme.palette.mode === 'dark' ? 'var(--app-shadow-md)' : 'var(--app-shadow-sm)',
+        borderColor: 'divider',
+        boxShadow: 'var(--app-shadow-sm)',
         overflow: 'hidden',
+        '.dark &': {
+          borderColor: 'var(--app-chip-info-bg)',
+          boxShadow: 'var(--app-shadow-md)',
+        },
       }}
     >
       <Tabs
@@ -79,27 +81,24 @@ export default function ProfileNavigation({ role }: ProfileNavigationProps) {
           '& .MuiTabs-indicator': {
             height: 3,
             borderRadius: '3px 3px 0 0',
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main'),
+            bgcolor: 'var(--app-nav-active)',
           },
           '& .MuiTab-root': {
             minHeight: { xs: 48, sm: 52 },
             minWidth: isSupporterRoute ? 0 : { xs: 'max-content', md: 0 },
             px: { xs: 2, sm: 3 },
-            color: (theme) => (theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main'),
+            color: 'var(--app-nav-rest)',
             fontSize: { xs: '0.8125rem', sm: '0.875rem' },
             fontWeight: 700,
             flex: isSupporterRoute ? 1 : { md: 1 },
             maxWidth: 'none',
             transition: 'color 0.2s ease',
             '&:hover': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'text.primary' : 'primary.dark'),
+              color: 'text.primary',
             },
           },
           '& .MuiTab-root.Mui-selected': {
-            color: (theme) =>
-              theme.palette.mode === 'dark'
-                ? 'var(--mui-palette-accent-light) !important'
-                : 'mission.main !important',
+            color: 'var(--app-nav-active) !important',
           },
         }}
       >

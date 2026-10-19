@@ -6,5 +6,5 @@ import { useMissionaryRegisterWizard } from '@/components/register/missionaries/
 export default function MissionariesStep4() {
   const { formData } = useMissionaryRegisterWizard();
 
-  return <RegistrationEmailConfirmation email={formData.email} />;
+  return <RegistrationEmailConfirmation email={formData.email} requiresReview />;
 }

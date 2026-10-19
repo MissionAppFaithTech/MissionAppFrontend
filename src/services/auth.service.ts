@@ -1,4 +1,3 @@
-import axios from '@/lib/axios';
 import {
   findMockUserByEmail,
   getMockResetTokenStatus,
@@ -7,36 +6,37 @@ import {
   RESET_PASSWORD_TOKEN_TTL_MINUTES,
   USE_AUTH_MOCKS,
 } from '@/mocks/auth';
+import type { AuthUser } from '@/lib/api/auth-response';
 
 export { USE_AUTH_MOCKS, RESET_PASSWORD_TOKEN_TTL_MINUTES };
 
-export async function login(data: unknown) {
-  if (USE_AUTH_MOCKS) {
-    await mockDelay();
-    const payload = data as { login?: string; email?: string; password?: string };
-    const email = (payload.login ?? payload.email ?? '').trim().toLowerCase();
-    const user = findMockUserByEmail(email);
+export type LoginPayload = {
+  login: string;
+  password: string;
+};
 
-    if (!user || !payload.password) {
-      throw new Error('E-mail ou senha inválidos');
-    }
+export async function login(data: LoginPayload): Promise<{ user: AuthUser }> {
+  const response = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      login: data.login.trim().toLowerCase(),
+      password: data.password,
+    }),
+  });
 
-    return {
-      data: {
-        data: {
-          user: {
-            id: 'mock-user-id',
-            fullName: user.fullName,
-            email: user.email,
-          },
-          accessToken: 'mock-access-token',
-          refreshToken: 'mock-refresh-token',
-        },
-      },
-    };
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      typeof payload?.message === 'string' ? payload.message : 'E-mail ou senha inválidos';
+    throw new Error(message);
   }
 
-  return axios.post('/login', data);
+  return { user: payload.data.user as AuthUser };
 }
 
 export type ForgotPasswordResult = {

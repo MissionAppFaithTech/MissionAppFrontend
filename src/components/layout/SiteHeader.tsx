@@ -5,7 +5,6 @@ import { Box, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } f
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
-import ThemeToggle from '@/components/ThemeToggle';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
@@ -168,8 +167,6 @@ export default function SiteHeader() {
               gap: { xs: 1, sm: 1.5 },
             }}
           >
-            <ThemeToggle />
-
             <PillButton
               href="/login"
               size="small"
@@ -215,15 +212,6 @@ export default function SiteHeader() {
                 px: { sm: 1.75, md: 2.25 },
                 fontSize: '0.875rem',
                 fontWeight: 700,
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                color: 'mission.contrastText',
-                boxShadow: '0 2px 8px rgba(230, 81, 0, 0.35)',
-                '&:hover': {
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
-                  boxShadow: '0 4px 12px rgba(230, 81, 0, 0.45)',
-                },
               }}
             >
               Cadastre-se
@@ -297,9 +285,6 @@ export default function SiteHeader() {
               minHeight: 44,
               fontSize: '0.95rem',
               fontWeight: 700,
-              bgcolor: 'accent.main',
-              color: 'mission.contrastText',
-              '&:hover': { bgcolor: 'accent.dark' },
             }}
           >
             Cadastre-se

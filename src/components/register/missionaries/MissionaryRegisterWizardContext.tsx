@@ -7,13 +7,16 @@ import type {
   MissionariesStep3Values,
   MissionaryRegisterData,
 } from '@/forms/register/types';
+import { SELECT_OTHER } from '@/forms/register/options';
+import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
+import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
 
 type MissionaryRegisterWizardContextValue = {
   step: number;
   formData: Partial<MissionaryRegisterData>;
   completeStep1: (values: MissionariesStep1Values) => void;
   completeStep2: (values: MissionariesStep2Values) => void;
-  completeStep3: (values: MissionariesStep3Values) => void;
+  completeStep3: (values: MissionariesStep3Values) => Promise<void>;
   goBack: () => void;
 };
 
@@ -35,11 +38,39 @@ export function MissionaryRegisterWizardProvider({ children }: { children: React
     setStep(3);
   }, []);
 
-  const completeStep3 = useCallback((values: MissionariesStep3Values) => {
-    setFormData((prev) => ({ ...prev, ...values }));
-    // TODO: enviar formData + values para a API
-    setStep(4);
-  }, []);
+  const completeStep3 = useCallback(
+    async (values: MissionariesStep3Values) => {
+      const merged: Partial<MissionaryRegisterData> = { ...formData, ...values };
+      const email = merged.email?.trim();
+
+      if (!merged.fullName || !merged.phone || !merged.gender || !email) {
+        throw new Error('Complete os dados pessoais antes de finalizar o cadastro');
+      }
+
+      // NOTE: POST /accounts cria SUPPORTER. Dados de missão ficam no front
+      // até o POST autenticado em /missionaries/profile.
+      await registerAccount({
+        fullName: merged.fullName,
+        username: values.username,
+        phoneNumber: toE164Phone(merged.phone),
+        gender: toApiGender(merged.gender),
+        email,
+        password: values.password,
+        passwordConfirmation: values.confirmPassword,
+      });
+
+      if (merged.missionaryAgency === SELECT_OTHER && merged.agencyDetails?.name) {
+        await createMissionaryAgency(merged.agencyDetails);
+      }
+      if (merged.faithCommunity === SELECT_OTHER && merged.communityDetails?.name) {
+        await createFaithCommunity(merged.communityDetails);
+      }
+
+      setFormData(merged);
+      setStep(4);
+    },
+    [formData]
+  );
 
   const goBack = useCallback(() => {
     setStep((current) => Math.max(1, current - 1));

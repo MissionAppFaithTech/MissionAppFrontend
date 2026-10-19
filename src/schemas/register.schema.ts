@@ -1,7 +1,13 @@
 import { z } from 'zod';
 import { isValidInternationalPhone } from '@/components/common/PhoneField';
-import { isValidBirthDate, isValidEmail } from '@/lib/masks';
+import { SELECT_OTHER } from '@/forms/register/options';
+import { isValidBirthDate } from '@/lib/masks';
 import { validateStrongPassword } from '@/lib/passwordStrength';
+import {
+  createFaithCommunitySchema,
+  createMissionaryAgencySchema,
+} from '@/schemas/catalog-create.schema';
+import { requiredEmailSchema } from '@/schemas/email';
 
 export const missionaryStep1Schema = z.object({
   fullName: z.string().trim().min(1, 'Informe seu nome completo'),
@@ -23,87 +29,57 @@ export const missionaryStep1Schema = z.object({
       },
       { message: 'Informe um telefone válido' }
     ),
-  email: z
-    .string()
-    .trim()
-    .min(1, 'Informe seu e-mail')
-    .refine((val) => isValidEmail(val), { message: 'Informe um e-mail válido' }),
+  email: requiredEmailSchema,
 });
 
 export type MissionaryStep1FormData = z.infer<typeof missionaryStep1Schema>;
 
+const catalogDetailsDraft = z.object({
+  name: z.string(),
+  address1: z.string(),
+  address2: z.string(),
+  country: z.string(),
+  state: z.string(),
+  city: z.string(),
+  zipCode: z.string(),
+  website: z.string(),
+});
+
 export const missionaryStep2Schema = z
   .object({
     missionaryAgency: z.string().trim().min(1, 'Selecione a agência missionária'),
-    agencyCustomName: z.string(),
-    agencyPhone: z.string(),
+    agencyDetails: catalogDetailsDraft.extend({
+      phone: z.string(),
+    }),
     missionDescription: z.string().trim().min(1, 'Descreva seu projeto ou atuação missionária'),
     faithCommunity: z.string().trim().min(1, 'Selecione a comunidade de fé'),
-    communityPhone: z.string(),
-    pastorName: z.string(),
-    pastorPhone: z.string(),
+    communityDetails: catalogDetailsDraft.extend({
+      churchPhone: z.string(),
+      pastorName: z.string(),
+      pastorPhone: z.string(),
+    }),
   })
   .superRefine((data, ctx) => {
-    if (data.missionaryAgency === 'other') {
-      if (!data.agencyCustomName?.trim()) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o nome da agência',
-          path: ['agencyCustomName'],
-        });
-      }
-      const rawAgencyPhone = (data.agencyPhone || '').replace(/\D/g, '');
-      if (!rawAgencyPhone) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o telefone da agência missionária',
-          path: ['agencyPhone'],
-        });
-      } else if (!isValidInternationalPhone(data.agencyPhone || '')) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe um telefone válido',
-          path: ['agencyPhone'],
-        });
-      }
+    if (
+      data.missionaryAgency === SELECT_OTHER &&
+      !createMissionaryAgencySchema.safeParse(data.agencyDetails).success
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Complete o cadastro da agência missionária',
+        path: ['missionaryAgency'],
+      });
     }
 
-    if (data.faithCommunity === 'other') {
-      const rawCommPhone = (data.communityPhone || '').replace(/\D/g, '');
-      if (!rawCommPhone) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o telefone da comunidade de fé',
-          path: ['communityPhone'],
-        });
-      } else if (!isValidInternationalPhone(data.communityPhone || '')) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe um telefone válido',
-          path: ['communityPhone'],
-        });
-      }
-      if (!data.pastorName?.trim()) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o nome do pastor',
-          path: ['pastorName'],
-        });
-      }
-      const rawPastorPhone = (data.pastorPhone || '').replace(/\D/g, '');
-      if (!rawPastorPhone) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o telefone do pastor',
-          path: ['pastorPhone'],
-        });
-      } else if (!isValidInternationalPhone(data.pastorPhone || '')) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe um telefone válido',
-          path: ['pastorPhone'],
-        });
-      }
+    if (
+      data.faithCommunity === SELECT_OTHER &&
+      !createFaithCommunitySchema.safeParse(data.communityDetails).success
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Complete o cadastro da igreja',
+        path: ['faithCommunity'],
+      });
     }
   });
 
@@ -129,53 +105,24 @@ export const supporterStep1Schema = z
         },
         { message: 'Informe um telefone válido' }
       ),
-    email: z
-      .string()
-      .trim()
-      .min(1, 'Informe seu e-mail')
-      .refine((val) => isValidEmail(val), { message: 'Informe um e-mail válido' }),
+    email: requiredEmailSchema,
     faithCommunity: z.string(),
-    communityPhone: z.string(),
-    pastorName: z.string(),
-    pastorPhone: z.string(),
+    communityDetails: catalogDetailsDraft.extend({
+      churchPhone: z.string(),
+      pastorName: z.string(),
+      pastorPhone: z.string(),
+    }),
   })
   .superRefine((data, ctx) => {
-    if (data.faithCommunity === 'other') {
-      const rawCommPhone = (data.communityPhone || '').replace(/\D/g, '');
-      if (!rawCommPhone) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o telefone da comunidade de fé',
-          path: ['communityPhone'],
-        });
-      } else if (!isValidInternationalPhone(data.communityPhone || '')) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe um telefone válido',
-          path: ['communityPhone'],
-        });
-      }
-      if (!data.pastorName?.trim()) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o nome do pastor',
-          path: ['pastorName'],
-        });
-      }
-      const rawPastorPhone = (data.pastorPhone || '').replace(/\D/g, '');
-      if (!rawPastorPhone) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe o telefone do pastor',
-          path: ['pastorPhone'],
-        });
-      } else if (!isValidInternationalPhone(data.pastorPhone || '')) {
-        ctx.addIssue({
-          code: 'custom',
-          message: 'Informe um telefone válido',
-          path: ['pastorPhone'],
-        });
-      }
+    if (
+      data.faithCommunity === SELECT_OTHER &&
+      !createFaithCommunitySchema.safeParse(data.communityDetails).success
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Complete o cadastro da igreja',
+        path: ['faithCommunity'],
+      });
     }
   });
 
@@ -200,7 +147,7 @@ export const accessCredentialsSchema = z
     confirmPassword: z.string().min(1, 'Confirme sua senha'),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'As senhas não coincidem',
+    message: 'As senhas precisam ser iguais',
     path: ['confirmPassword'],
   });
 

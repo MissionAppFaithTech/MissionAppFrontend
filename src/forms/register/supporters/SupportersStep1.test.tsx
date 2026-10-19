@@ -1,8 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import SupportersStep1 from './SupportersStep1';
 import { SupporterRegisterWizardProvider } from '@/components/register/supporters/SupporterRegisterWizardContext';
+
+vi.mock('@/services/catalog.service', () => ({
+  listFaithCommunities: vi.fn().mockResolvedValue([{ id: 'church-1', name: 'Igreja Batista' }]),
+}));
 
 describe('SupportersStep1 component', () => {
   it('renders all personal fields including email and submit button', () => {
@@ -34,5 +38,51 @@ describe('SupportersStep1 component', () => {
     expect(await screen.findByText(/informe seu nome completo/i)).toBeInTheDocument();
     expect(await screen.findByText(/informe seu e-mail/i)).toBeInTheDocument();
     expect(await screen.findByText(/informe sua data de nascimento/i)).toBeInTheDocument();
+  });
+
+  it('does not show required errors until submit', async () => {
+    const user = userEvent.setup();
+    render(
+      <SupporterRegisterWizardProvider>
+        <SupportersStep1 />
+      </SupporterRegisterWizardProvider>
+    );
+
+    await user.click(screen.getByLabelText(/nome completo/i));
+    await user.tab();
+    await user.click(screen.getByLabelText(/e-mail/i));
+    await user.tab();
+
+    expect(screen.queryByText(/informe seu nome completo/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/informe seu e-mail/i)).not.toBeInTheDocument();
+  });
+
+  it('shows the @ error while typing an email without it', async () => {
+    const user = userEvent.setup();
+    render(
+      <SupporterRegisterWizardProvider>
+        <SupportersStep1 />
+      </SupporterRegisterWizardProvider>
+    );
+
+    await user.type(screen.getByLabelText(/e-mail/i), 'email-sem-arroba');
+
+    expect(await screen.findByText(/inclua um @ no e-mail/i)).toBeInTheDocument();
+    expect(screen.queryByText(/informe seu nome completo/i)).not.toBeInTheDocument();
+  });
+
+  it('opens the church modal from Não encontrei na lista', async () => {
+    const user = userEvent.setup();
+    render(
+      <SupporterRegisterWizardProvider>
+        <SupportersStep1 />
+      </SupporterRegisterWizardProvider>
+    );
+
+    await user.click(screen.getByLabelText(/comunidade de fé/i));
+    await user.click(await screen.findByRole('option', { name: /não encontrei na lista/i }));
+
+    expect(await screen.findByRole('heading', { name: /cadastrar igreja/i })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /nome do pastor/i })).toBeInTheDocument();
   });
 });

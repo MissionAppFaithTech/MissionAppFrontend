@@ -46,6 +46,21 @@ describe('ContactModal Component', () => {
     expect(writeTextSpy).toHaveBeenCalledWith(mockContact.publicEmail);
   });
 
+  it('hides the public email when showPublicEmail is false', () => {
+    render(
+      <ContactModal
+        open={true}
+        onClose={vi.fn()}
+        contact={{ ...mockContact, showPublicEmail: false }}
+        isOwnProfile={false}
+      />
+    );
+
+    expect(screen.getByText('+55 (21) 98765-4321')).toBeInTheDocument();
+    expect(screen.queryByText('samuelhe@gmail.com')).not.toBeInTheDocument();
+    expect(screen.queryByText(/e-mail público/i)).not.toBeInTheDocument();
+  });
+
   it('renders "Editar contatos públicos" shortcut when isOwnProfile is true', () => {
     render(
       <ContactModal open={true} onClose={vi.fn()} contact={mockContact} isOwnProfile={true} />

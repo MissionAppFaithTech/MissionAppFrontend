@@ -1,6 +1,7 @@
 import type { ProfileData, FollowedMissionary, SavedPost } from '@/types/profile';
 
 export const mockProfile: ProfileData = {
+  missionaryId: '018f1a2b-3c4d-7e8f-9a0b-1c2d3e4f5a6b',
   username: '_SamiMendonca',
   displayName: 'Samuel Mendonça',
   roleDescription: 'Missionário (a)(s) na África do Sul',
@@ -27,6 +28,9 @@ export const mockProfile: ProfileData = {
   contact: {
     publicEmail: 'samuelhe@gmail.com',
     publicPhone: '+55 (21) 98765-4321',
+    showPublicEmail: true,
+    showPublicPhone: true,
+    allowWhatsappContact: true,
     whatsappNumber: '+5521987654321',
   },
   impactProject: {
@@ -85,6 +89,9 @@ export const mockSupporterProfile: ProfileData = {
   contact: {
     publicEmail: 'soraia.santos@email.com',
     publicPhone: '+55 (21) 99876-5432',
+    showPublicEmail: true,
+    showPublicPhone: true,
+    allowWhatsappContact: true,
     whatsappNumber: '+5521998765432',
   },
 };
