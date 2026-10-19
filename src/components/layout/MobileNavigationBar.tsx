@@ -192,11 +192,11 @@ export default function MobileNavigationBar({
         pt: 0.75,
         pb: 'calc(env(safe-area-inset-bottom, 0px) + 6px)',
         px: 0.5,
-        boxShadow: (theme) =>
-          theme.palette.mode === 'dark'
-            ? '0 -2px 12px rgba(0, 0, 0, 0.4)'
-            : '0 -2px 10px rgba(13, 43, 92, 0.06)',
+        boxShadow: '0 -2px 10px rgba(13, 43, 92, 0.06)',
         transition: 'background-color 0.2s ease, border-color 0.2s ease',
+        '.dark &': {
+          boxShadow: '0 -2px 12px rgba(0, 0, 0, 0.4)',
+        },
         ...sx,
       }}
     >
@@ -227,21 +227,19 @@ export default function MobileNavigationBar({
               minWidth: 48,
               gap: 0.35,
               textDecoration: 'none',
-              color: isActive
-                ? (theme) => (theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main')
-                : 'text.secondary',
+              /* CSS vars follow html.dark — avoid palette.mode ternaries (lag behind class). */
+              color: isActive ? 'var(--app-nav-active)' : 'var(--app-nav-rest)',
               transition: 'color 0.18s ease, transform 0.15s ease',
               py: 0.5,
               px: 0.5,
               borderRadius: 1.5,
               position: 'relative',
               '&:hover': {
-                color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+                color: isActive ? 'var(--app-nav-active)' : 'text.primary',
               },
               '&:focus-visible': {
                 outline: '2px solid',
-                outlineColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'accent.light' : 'primary.main',
+                outlineColor: 'var(--app-nav-active)',
                 outlineOffset: '-2px',
               },
             }}
@@ -275,12 +273,11 @@ export default function MobileNavigationBar({
                   width: 24,
                   height: 3,
                   borderRadius: 1.5,
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
-                  boxShadow: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? '0 0 8px rgba(251, 146, 60, 0.6)'
-                      : '0 1px 4px rgba(230, 81, 0, 0.4)',
+                  bgcolor: 'var(--app-nav-active)',
+                  boxShadow: '0 1px 4px rgba(230, 81, 0, 0.4)',
+                  '.dark &': {
+                    boxShadow: '0 0 8px rgba(251, 146, 60, 0.6)',
+                  },
                 }}
               />
             )}

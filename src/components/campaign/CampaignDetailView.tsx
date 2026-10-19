@@ -445,26 +445,20 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           width: 48,
                           height: 48,
                           borderRadius: '12px',
-                          bgcolor: (theme) =>
-                            theme.palette.mode === 'dark'
-                              ? 'var(--app-chip-warn-bg)'
-                              : 'rgba(194, 65, 12, 0.08)',
-                          color: (theme) =>
-                            theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
+                          bgcolor: 'var(--app-chip-warn-bg)',
+                          color: 'var(--app-emphasis-fg)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           flexShrink: 0,
                           border: '1.5px solid',
-                          borderColor: (theme) =>
-                            theme.palette.mode === 'dark' ? 'var(--app-badge-border)' : 'divider',
+                          borderColor: 'var(--app-badge-border)',
                         }}
                       >
                         <CampaignIcon
                           sx={{
                             fontSize: 26,
-                            color: (theme) =>
-                              theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
+                            color: 'var(--app-emphasis-fg)',
                           }}
                         />
                       </Box>
@@ -509,8 +503,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start' }}>
                           <CalendarMonthIcon
                             sx={{
-                              color: (theme) =>
-                                theme.palette.mode === 'dark' ? 'accent.light' : 'mission.main',
+                              color: 'var(--app-emphasis-fg)',
                               fontSize: 20,
                               mt: 0.2,
                             }}

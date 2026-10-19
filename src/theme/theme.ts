@@ -145,7 +145,8 @@ export const darkTokens: ModeTokens = {
   borderSubtle: 'rgba(147, 197, 253, 0.18)',
   borderStrong: 'rgba(147, 197, 253, 0.35)',
   textPrimary: colors.surface,
-  textSecondary: '#94A3B8',
+  /* Slate-300 — ≥4.5:1 on paper (#1A3D6E) and field wash (#284977) */
+  textSecondary: '#CBD5E1',
   textDisabled: 'rgba(255, 255, 255, 0.38)',
   actionFill: roleColors.mission,
   actionFillHover: shades.missionDark,
@@ -161,7 +162,8 @@ export const darkTokens: ModeTokens = {
   disabledFill: 'rgba(255, 255, 255, 0.08)',
   disabledText: 'rgba(255, 255, 255, 0.55)',
   disabledBorder: 'rgba(147, 197, 253, 0.22)',
-  danger: '#F87171',
+  /* Soft red — readable as text/icons on navy paper (WCAG AA) */
+  danger: '#FCA5A5',
   dangerFill: colors.error,
   fieldBg: 'rgba(255, 255, 255, 0.06)',
   fieldBgDisabled: 'rgba(255, 255, 255, 0.03)',
@@ -440,7 +442,8 @@ function buildPalette(mode: 'light' | 'dark') {
           main: '#22C55E',
           light: '#4ADE80',
           dark: colors.success,
-          contrastText: t.actionFillText,
+          /* Dark ink on bright fill — white on #22C55E fails AA */
+          contrastText: '#052e16',
         },
     warning: isLight
       ? { main: colors.warning, contrastText: colors.surface }
@@ -448,14 +451,14 @@ function buildPalette(mode: 'light' | 'dark') {
           main: '#FBBF24',
           light: '#FCD34D',
           dark: colors.warning,
-          contrastText: t.actionFillText,
+          contrastText: '#422006',
         },
     error: isLight
       ? { main: colors.error, contrastText: colors.surface }
-      : { main: t.danger, light: '#FCA5A5', dark: t.dangerFill, contrastText: t.actionFillText },
+      : { main: t.danger, light: '#FECACA', dark: t.dangerFill, contrastText: '#450a0a' },
     info: isLight
       ? { main: roleColors.intermediate, contrastText: colors.surface }
-      : { main: t.link, contrastText: t.actionFillText },
+      : { main: t.link, contrastText: '#0c1a32' },
     background: {
       default: t.canvas,
       paper: t.surface1,
