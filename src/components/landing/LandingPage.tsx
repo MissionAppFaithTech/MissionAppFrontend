@@ -11,6 +11,7 @@ import {
   Accordion,
   AccordionSummary,
   Avatar,
+  Card,
   useTheme,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -170,50 +171,67 @@ function HeroHeadline() {
         />
 
         <Stack
-          direction="row"
           spacing={2}
           sx={{
-            flexWrap: 'wrap',
-            justifyContent: { xs: 'center', md: 'flex-start' },
+            width: '100%',
+            alignItems: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <PillButton href="/select-role" tone="missionFilled" sx={heroCtaButtonSx}>
-            Comece agora
-          </PillButton>
-          <PillButton
-            href="#como-funciona"
-            onClick={(e) => {
-              e.preventDefault();
-              const target = document.getElementById('como-funciona');
-              if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
-                window.history.pushState(null, '', '#como-funciona');
-              }
-            }}
-            tone="primaryOutline"
+          <Stack
+            direction="row"
+            spacing={2}
             sx={{
-              ...heroCtaButtonSx,
-              borderWidth: '2px',
-              borderColor: (theme) =>
-                theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
-              bgcolor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                  : 'transparent',
-              color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
-              boxShadow: (theme) =>
-                theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
-              '&:hover': {
-                borderColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'var(--mui-palette-action2-borderSubtle)'
-                    : 'rgba(13, 43, 92, 0.08)',
-              },
+              flexWrap: 'wrap',
+              justifyContent: { xs: 'center', md: 'flex-start' },
             }}
           >
-            Saiba mais
+            <PillButton href="/select-role" tone="missionFilled" sx={heroCtaButtonSx}>
+              Comece agora
+            </PillButton>
+            <PillButton
+              href="#como-funciona"
+              onClick={(e) => {
+                e.preventDefault();
+                const target = document.getElementById('como-funciona');
+                if (target) {
+                  target.scrollIntoView({ behavior: 'smooth' });
+                  window.history.pushState(null, '', '#como-funciona');
+                }
+              }}
+              tone="primaryOutline"
+              sx={{
+                ...heroCtaButtonSx,
+                borderWidth: '2px',
+                borderColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'var(--mui-palette-action2-secondaryHoverWash)'
+                    : 'transparent',
+                color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+                boxShadow: (theme) =>
+                  theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
+                '&:hover': {
+                  borderColor: (theme) =>
+                    theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
+                },
+              }}
+            >
+              Saiba mais
+            </PillButton>
+          </Stack>
+
+          <PillButton
+            href="/conselho-missionario"
+            tone="cta"
+            sx={{
+              ...heroCtaButtonSx,
+              width: { xs: '100%', sm: 'auto' },
+            }}
+          >
+            Como trazer o Mission App para sua igreja
           </PillButton>
         </Stack>
       </Stack>
@@ -521,6 +539,89 @@ export default function LandingPage() {
                 ))}
               </Grid>
             </Stack>
+          </Container>
+        </Box>
+
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box
+          id="para-igrejas"
+          component="section"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Card
+              elevation={0}
+              sx={{
+                p: { xs: 3.5, sm: 5, md: 6 },
+                borderRadius: 4,
+                bgcolor: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.03)'
+                    : 'linear-gradient(135deg, rgba(13, 43, 92, 0.04) 0%, rgba(194, 65, 12, 0.06) 100%)',
+                border: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                    : '1px solid var(--mui-palette-divider)',
+                textAlign: { xs: 'center', md: 'left' },
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 4,
+              }}
+            >
+              <Box sx={{ maxWidth: 720 }}>
+                <Typography
+                  variant="overline"
+                  sx={{
+                    fontWeight: 800,
+                    letterSpacing: '0.08em',
+                    color: 'accent.main',
+                    display: 'block',
+                    mb: 1,
+                  }}
+                >
+                  Para Comunidades de Fé & Pastores
+                </Typography>
+                <Typography
+                  component="h2"
+                  sx={{
+                    fontSize: { xs: '1.5rem', sm: '1.85rem', md: '2.1rem' },
+                    fontWeight: 800,
+                    color: (t) => (t.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+                    lineHeight: 1.25,
+                    mb: 1.5,
+                  }}
+                >
+                  Como trazer o Mission App para sua igreja
+                </Typography>
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.05rem' } }}
+                >
+                  Acesse nosso guia prático completo para implantar o Conselho Missionário,
+                  estruturar o fundo e a cadência anual de mobilização, com materiais oficiais da
+                  JMM, JMN, APMT e Perspectivas Brasil.
+                </Typography>
+              </Box>
+
+              <PillButton
+                href="/conselho-missionario"
+                tone="missionFilled"
+                sx={{
+                  flexShrink: 0,
+                  minHeight: 48,
+                  px: 3.5,
+                  fontSize: '1rem',
+                  fontWeight: 700,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Como trazer o Mission App para sua igreja
+              </PillButton>
+            </Card>
           </Container>
         </Box>
 
