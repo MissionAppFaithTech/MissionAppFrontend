@@ -15,7 +15,7 @@ describe('ImpactProjectEditForm Component', () => {
       '/images/projects/projeto-impacto.jpg',
       '/landing-page/background.png',
     ],
-    videoUrl: 'https://www.youtube.com/watch?v=5dsGWM5XGdg',
+    videoUrl: 'https://youtu.be/Bll78RzRaaU',
     campaignTitle: 'Campanha de Educação & Esperança',
     campaignBadge: true,
   };

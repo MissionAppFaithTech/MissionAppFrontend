@@ -14,7 +14,7 @@ describe('ImpactProjectCard Component', () => {
       '/images/projects/projeto-impacto.jpg',
       '/landing-page/background.png',
     ],
-    videoUrl: 'https://www.youtube.com/watch?v=5dsGWM5XGdg',
+    videoUrl: 'https://youtu.be/Bll78RzRaaU',
     campaignTitle: 'Campanha de Educação & Esperança',
     campaignBadge: true,
   };
@@ -36,7 +36,7 @@ describe('ImpactProjectCard Component', () => {
     expect(screen.getByRole('button', { name: /ofertar/i })).toBeInTheDocument();
   });
 
-  it('renders youtube video frame display with cute animal video when videoUrl is provided', () => {
+  it('renders youtube video frame display with presentation video when videoUrl is provided', () => {
     render(
       <ImpactProjectCard
         project={mockProject}
@@ -48,7 +48,7 @@ describe('ImpactProjectCard Component', () => {
     expect(screen.getByText(/vídeo de apresentação/i)).toBeInTheDocument();
     const iframe = screen.getByTitle(/vídeo de apresentação/i);
     expect(iframe).toBeInTheDocument();
-    expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg');
+    expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/Bll78RzRaaU');
   });
 
   it('renders gallery photos in carousel mode and opens lightbox modal when clicked', async () => {
