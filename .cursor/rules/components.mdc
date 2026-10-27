@@ -30,3 +30,4 @@ Full catalog: [`AGENTS.md`](../../AGENTS.md) → **UI component reuse**.
 4. Domain UI goes under `src/components/<domain>/`; shared atoms under `src/components/common/`.
 5. Forms live in `src/forms/` — reuse shared register steps when possible.
 6. Every `PillButton` / MUI button uses `BUTTON_BORDER_RADIUS` (`10px`) — rounded rectangle like **Voltar**. Never `9999`, stadium, or a more rounded primary than the outline secondary. Do not override `borderRadius` at the call site.
+7. Every component must be built **mobile-first**. Default styles target `xs` (~360px); button groups stack vertically on mobile screens.

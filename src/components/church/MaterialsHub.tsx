@@ -49,10 +49,10 @@ export default function MaterialsHub() {
       <Stack
         direction="row"
         spacing={1}
+        useFlexGap
         sx={{
           mb: 4,
           flexWrap: 'wrap',
-          gap: 1,
           alignItems: 'center',
         }}
         role="group"
@@ -306,13 +306,14 @@ export default function MaterialsHub() {
 
                 {/* External Action Links */}
                 <Stack
-                  direction={{ xs: 'column', sm: 'row' }}
+                  direction="column"
                   spacing={1.5}
+                  useFlexGap
                   sx={{
                     pt: 2,
                     borderTop: '1px solid',
                     borderColor: 'divider',
-                    flexWrap: 'wrap',
+                    width: '100%',
                   }}
                 >
                   {inst.links.map((link) => (
@@ -326,6 +327,8 @@ export default function MaterialsHub() {
                       endIcon={<OpenInNewIcon fontSize="small" />}
                       aria-label={`${link.label} (abre em nova aba)`}
                       sx={{
+                        width: '100%',
+                        justifyContent: 'center',
                         fontSize: '0.8125rem',
                         fontWeight: 600,
                         minHeight: 44, // Touch target
