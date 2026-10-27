@@ -35,3 +35,11 @@ O site (https://missionappfaithtech.github.io/MissionAppRequirementsList/) cont√
 - ARIA Live Announcements: Dynamic asynchronous notifications, toasts, and validation error messages must use appropriate ARIA live regions (`role="status"`, `aria-live="polite"`, or `role="alert"` / `aria-live="assertive"`).
 - Touch Targets & Contrast: Minimum 44x44px touch targets on mobile viewports; text and UI contrast ratios must meet or exceed WCAG AA (4.5:1 for normal text, 3:1 for large text/UI components). Never rely solely on color to convey state.
 - Automated Accessibility Verification: Run automated accessibility audits (`@axe-core/playwright` or equivalent) across all pages and views as part of the test suite. Zero tolerance for accessibility violations.
+
+## 6. Mandatory Mobile-First Design & Coding Directive
+
+- Mobile-First Architecture: Every component, screen, layout, and dialog must be architected, styled, and coded for mobile devices (`xs: ~360px`) first. Desktop viewports (`md`, `lg`) are strictly progressive enhancements.
+- Buttons & Action Stacking: Interactive buttons, CTAs, and link groups on mobile must default to stacking vertically on top of each other (`direction="column"`, `width: '100%'`). Horizontal button wrapping or awkward collision on mobile is strictly forbidden.
+- Mandatory `useFlexGap` on MUI `Stack`: Always add `useFlexGap` whenever using `flexWrap: 'wrap'` on an MUI `Stack` to eliminate margin overlap defects.
+- Zero Horizontal Overflow: Absolute zero tolerance for horizontal scrolling on mobile viewports. Apply `minWidth: 0` on flex items with truncating text, and wrap long content safely.
+- Double-Viewport Sanity Verification: Always verify UI rendering at ~360px mobile viewport first, and at ~1280px desktop.

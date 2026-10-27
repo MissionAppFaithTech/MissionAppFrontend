@@ -10,18 +10,27 @@ description: >-
 
 This skill defines the visual architecture, component reuse conventions, and responsive design principles for high-quality frontend development.
 
-## 1. Mobile-First Responsiveness (Mandatory)
+## 1. Mobile-First Responsiveness (Strictly Mandatory for Everything)
 
-Every component must be built mobile-first (`xs: ~360px` first, then progressive breakpoint overrides for `sm: 600px`, `md: 900px`, `lg: 1200px`).
+Every single screen, component, and layout must be built mobile-first (`xs: ~360px` first, then progressive breakpoint overrides for `sm: 600px`, `md: 900px`, `lg: 1200px`). Desktop viewports are strictly progressive enhancements.
 
 ### Rules:
 
-1. **Object Syntax over Fixed Units**: Always use MUI sx breakpoint objects (e.g. `direction={{ xs: 'column', sm: 'row' }}`, `fontSize: { xs: '0.875rem', md: '1.125rem' }`). Never hardcode fixed desktop widths.
-2. **Horizontal Overflow Prevention**:
-   - Flex containers must wrap or reflow cleanly (`useFlexGap`, `flexWrap: 'wrap'`).
-   - Flex children that contain text truncation must use `minWidth: 0` along with `textOverflow: 'ellipsis'`.
-3. **Touch-Friendly Controls**: Interactive elements (buttons, icon buttons, tabs, chips) must have minimum `44x44px` touch targets.
-4. **Double-Viewport Verification**: Test every visual change at small mobile (`~360px-390px`) and standard desktop (`1280px`).
+1. **Button Stacking & Action Groups on Mobile**:
+   - On mobile screens, all action button groups, CTAs, and link groups must stack vertically on top of each other (`direction="column"`, `width: '100%'`).
+   - Squeezing, collision, or awkward horizontal wrapping on mobile viewports is strictly forbidden.
+   - Buttons must provide a comfortable, accessible full-width tap target (`minHeight: 44px`, `justifyContent: 'center'`).
+2. **Mandatory `useFlexGap` on MUI `Stack`**:
+   - Always declare `useFlexGap` whenever using `flexWrap: 'wrap'` or `spacing` on an MUI `<Stack>`.
+   - This prevents MUI's directional margins (`margin-left`) from causing wrapped items to overlap preceding rows.
+3. **Object Syntax over Fixed Units**:
+   - Always use MUI `sx` breakpoint objects (e.g. `direction={{ xs: 'column', md: 'row' }}`, `fontSize: { xs: '0.875rem', md: '1.125rem' }`, `p: { xs: 2, sm: 3, md: 4 }`).
+   - Never hardcode desktop fixed widths.
+4. **Horizontal Overflow Prevention (Zero Horizontal Scroll)**:
+   - Flex containers must reflow cleanly.
+   - Flex children containing text truncation or long text must use `minWidth: 0` along with `textOverflow: 'ellipsis'` or `wordBreak: 'break-word'`.
+5. **Touch-Friendly Controls**: Interactive elements (buttons, icon buttons, tabs, chips) must have minimum `44x44px` touch targets. No hover-only interactions.
+6. **Double-Viewport Verification**: Test every visual change at small mobile (`~360px-390px`) first, then verify at standard desktop (`1280px`).
 
 ## 2. Design Tokens & Theme Palette
 

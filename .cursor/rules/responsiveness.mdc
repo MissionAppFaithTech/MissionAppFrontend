@@ -1,33 +1,36 @@
 ---
-description: Always design and implement responsive UI (mobile-first)
+description: Always design and implement responsive UI (mobile-first for everything)
 alwaysApply: true
 ---
 
-# Responsiveness (required for AI agents)
+# Mobile-First Responsiveness (strictly required for AI agents)
 
-Every UI change must work on **phone, tablet, and desktop**. Do not ship desktop-only layouts.
+Every UI change must be designed and coded **mobile-first** (`xs: ~360px` first). Phone is the primary target, not an afterthought. Desktop viewports (`md`, `lg`) are progressive enhancements.
 
 Pair with unit tests and accessibility — see `.cursor/rules/quality-bar.mdc`.
-
-Full guidance: [`AGENTS.md`](../../AGENTS.md) → **Responsiveness**.
+Full guidance: [`AGENTS.md`](../../AGENTS.md) → **Mobile-First Responsiveness**.
 
 ## Checklist before finishing UI work
 
-1. Think **mobile-first**, then enhance with `sm` / `md` / `lg`.
-2. Use MUI breakpoints in `sx` / Stack `direction` (`xs`, `sm`, `md`, `lg`) — avoid fixed pixel widths that break small screens.
-3. Touch targets stay usable (~32px+); on phone, prefer compact controls (icon-only when Figma/UX allows).
-4. Long text: `wordBreak` / truncate / wrap — never overflow horizontally.
-5. Stacks and grids reflow: row on desktop may become column (or a denser row) on `xs`.
-6. Test mentally at ~360px width and ~1280px; call out if you could not verify in the browser.
+1. **Think and code mobile-first:** Default styles target small screens (`xs`), then add overrides for `sm`, `md`, `lg`.
+2. **Button stacking on mobile:** Action buttons, CTAs, and card links must stack vertically on top of each other on mobile (`direction="column"`, `width: '100%'`). Never let buttons collide, squeeze, or wrap with awkward indentation.
+3. **MUI `useFlexGap` is mandatory:** Always add `useFlexGap` when using `<Stack flexWrap="wrap">` or `spacing` to avoid overlapping rows caused by residual `margin-left`.
+4. **MUI breakpoint objects:** Use `direction={{ xs: 'column', md: 'row' }}` and responsive `sx` properties instead of fixed widths.
+5. **Zero horizontal overflow:** Containers must have `maxWidth: '100%'`. Use `minWidth: 0` for flexing children with text truncation (`textOverflow: 'ellipsis'`).
+6. **Touch targets:** Ensure minimum 44x44px tap targets for mobile interactions.
+7. **No hover-only reliance:** Mobile has no hover. Critical info and actions must be accessible directly or via tap.
+8. **Double-viewport verification:** Verify changes at ~360px width first, then at ~1280px.
 
-## Patterns already used in this repo
+## Patterns in this codebase
 
-- Profile header: identity left, primary actions right, secondary actions below on `xs`
-- `PillButton` “Editar”: label hidden on `xs`, icon + `aria-label` kept
-- Navbar / forms: fluid width, `maxWidth`, padding via breakpoints
+- Profile header: identity left, primary actions right, secondary actions below on `xs`.
+- `MaterialsHub`: action buttons stack vertically (`direction="column"`, `width: '100%'`) with `useFlexGap`.
+- `PillButton` “Editar”: label hidden on `xs`, icon + `aria-label` kept.
+- Hero action stacks: full width (`width: { xs: '100%', md: 'auto' }`) on mobile, flowing horizontally on desktop.
 
-## Anti-patterns
+## Anti-patterns (strictly forbidden)
 
-- Hardcoded `width: 400` without responsive alternative
-- Centering everything on mobile when the product layout is left/right denser
-- Hiding critical actions on small screens without an equivalent (icon, menu, etc.)
+- Designing desktop-first and attempting to shrink to mobile later.
+- Allowing buttons to wrap horizontally and overlap due to missing `useFlexGap`.
+- Hardcoding `width: 400` or fixed pixel widths without a responsive `xs` alternative.
+- Horizontal scrollbars appearing on mobile viewports.

@@ -131,7 +131,17 @@ export default function ChurchGuideView() {
             e <strong>Perspectivas Brasil</strong>.
           </Typography>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ flexWrap: 'wrap' }}>
+          <Stack
+            direction={{ xs: 'column', md: 'row' }}
+            spacing={2}
+            useFlexGap
+            sx={{
+              flexWrap: 'wrap',
+              '& > *': {
+                width: { xs: '100%', md: 'auto' },
+              },
+            }}
+          >
             <PillButton
               href="#checklist"
               onClick={(e) => {
@@ -307,7 +317,15 @@ export default function ChurchGuideView() {
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
               spacing={2}
-              sx={{ justifyContent: 'center', alignItems: 'center' }}
+              useFlexGap
+              sx={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                '& > *': {
+                  width: { xs: '100%', sm: 'auto' },
+                },
+              }}
             >
               <PillButton
                 href="/select-role"

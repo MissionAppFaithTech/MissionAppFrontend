@@ -16,7 +16,7 @@ Do **not** finish a task without all three. This is the default reminder for eve
 
 1. **Unit tests** — new or changed logic/UI needs Vitest + Testing Library coverage (roles, labels, submit, errors). Run the affected specs before declaring done. See `.agents/skills/frontend-testing/SKILL.md`.
 2. **Accessibility** — WCAG 2.2 AA: landmarks, localized `aria-label`, keyboard + `:focus-visible`, form errors via `aria-invalid` / `aria-describedby`. See **Accessibility** below.
-3. **Responsiveness** — mobile-first (`xs` first), MUI breakpoints, no horizontal overflow, 44px touch targets. See **Responsiveness** below.
+3. **Mobile-First Responsiveness** — strictly mobile-first (`xs` first), button stacking on mobile, `useFlexGap` on flex containers, zero horizontal overflow, 44px touch targets. See **Mobile-First Responsiveness** below.
 
 **Buttons:** use `PillButton` + `tone`. Shared corner is `BUTTON_BORDER_RADIUS` (`10px`) — a rounded rectangle like **Voltar**. Never `9999`, stadium, or a more rounded primary than the outline secondary.
 
@@ -97,22 +97,38 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 
 ---
 
-## Responsiveness (mandatory)
+## Mobile-First Responsiveness (mandatory for all UI & code)
 
-**Always implement responsive layouts.** Phone is a first-class target, not an afterthought. Every single component must be designed and built **mobile-first**.
+**Mobile-First is strictly mandatory across the entire frontend.** Phone (`xs: ~360px`) is the first-class design and coding baseline, NOT an afterthought. Desktop (`md`, `lg`) is strictly a progressive enhancement layer. Every single component, layout, card, dialog, and form must be designed and coded mobile-first.
 
-### Rules
+### Core Rules
 
-1. **Mobile-first approach:** Write default base styles targeting small mobile screens (`xs: ~360px`) first, then layer breakpoint overrides progressively for larger viewports (`sm: 600px`, `md: 900px`, `lg: 1200px`).
-2. **MUI Breakpoint Props over Fixed Units:** Always use object syntax for MUI breakpoint props (`direction={{ xs: 'column', md: 'row' }}`, `sx={{ fontSize: { xs: '0.875rem', md: '1.25rem' } }}`) instead of hardcoded desktop pixel widths or fixed flex sizes.
-3. **Prevent Horizontal Overflow:** Ensure all container boxes wrap, truncate text, or reflow cleanly. Apply `minWidth: 0` on flex children that need to truncate (`textOverflow: 'ellipsis'`) or shrink without overflowing.
-4. **Fluid Stats & Action Grids:** On mobile screens, multi-column statistics or button groups must automatically wrap or scale (e.g., flex-wrap or auto-fit grids) rather than squeeze or overflow horizontally.
-5. **Touch-Friendly Controls:** Interactive elements (buttons, icons, chips) must have adequate tap targets (minimum 44x44px touch area) and accessible labels (`aria-label`). Never rely on hover-only affordances for critical interactions.
-6. **Double-Viewport Sanity Check:** Verify all UI changes at both small mobile width (~360px) and standard desktop width (~1280px).
+1. **Mobile-first approach:** Always write default base styles targeting small mobile screens (`xs: ~360px`) first, then layer breakpoint overrides progressively for larger viewports (`sm: 600px`, `md: 900px`, `lg: 1200px`). Never design desktop-first and retrofit mobile later.
+2. **Buttons & Action Groups Stacking Rule:**
+   - On mobile screens, all action button groups, CTAs, and card links must stack vertically on top of each other (`direction="column"` or `width: { xs: '100%', sm: 'auto' }`).
+   - Buttons must NEVER collide, squeeze, wrap with awkward horizontal indentation, or overflow. In mobile cards and dialog footers, set `width: '100%'` and `justifyContent: 'center'` on `PillButton` to ensure accessible, full-width touch targets.
+3. **Mandatory `useFlexGap` on MUI `Stack`:**
+   - Whenever using `flexWrap: 'wrap'` on an MUI `<Stack>`, **always** declare `useFlexGap`.
+   - Without `useFlexGap`, MUI uses directional margins (`margin-left`) that do not reset when items wrap to a new line, causing wrapped items to overlap preceding rows.
+4. **MUI Breakpoint Props over Fixed Units:**
+   - Always use object syntax for MUI breakpoint props (`direction={{ xs: 'column', md: 'row' }}`, `sx={{ fontSize: { xs: '0.875rem', md: '1.25rem' } }}`).
+   - Never hardcode desktop pixel widths (e.g., `width: 500px`). Always use responsive units (`width: { xs: '100%', md: 500 }`, `maxWidth: '100%'`).
+5. **Prevent Horizontal Overflow (Zero Horizontal Scroll):**
+   - The app must NEVER scroll horizontally on mobile.
+   - Apply `minWidth: 0` on flex children that need to truncate (`textOverflow: 'ellipsis'`) or shrink without overflowing.
+   - Wrap long text using `wordBreak: 'break-word'` or appropriate overflow clipping.
+6. **Fluid Stats & Action Grids:**
+   - Multi-column statistics, audience badges, or grid items must automatically reflow or stack on mobile viewports (e.g., `Grid size={{ xs: 12, sm: 6, md: 3 }}`).
+7. **Touch-Friendly Controls (Minimum 44x44px):**
+   - Interactive elements (buttons, icons, chips, tabs) must have adequate tap targets (minimum 44x44px touch area) and accessible labels (`aria-label`).
+   - Never rely on hover-only affordances for critical interactions (touchscreens have no hover). Touch states must use `:active` and high-contrast `:focus-visible`.
+8. **Double-Viewport Sanity Check:**
+   - Verify every UI change at small mobile width (~360px) **first**, then verify at standard desktop width (~1280px).
 
 ### Examples in this codebase
 
 - `ProfileSummaryCard`: on `xs`, avatar/info stack vertically or wrap cleanly; stats reflow onto mobile-friendly grids; primary action buttons wrap smoothly without clipping.
+- `MaterialsHub`: on mobile, external action buttons stack vertically (`direction="column"`, `width: '100%'`) with `useFlexGap` preventing overlapping.
 - `ProfileAboutSection` edit control: icon-only on `xs`, icon + “Editar” text label from `sm` up.
 
 ---
