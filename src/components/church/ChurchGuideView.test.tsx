@@ -157,10 +157,14 @@ describe('ChurchGuideView Component', () => {
       // Check institutions headings and logos are rendered
       REFERENCE_INSTITUTIONS.forEach((inst) => {
         expect(screen.getByRole('heading', { level: 4, name: inst.shortName })).toBeInTheDocument();
-        expect(
-          screen.getByAltText(new RegExp(`Logotipo da ${inst.name}`, 'i'))
-        ).toBeInTheDocument();
+        const logo = screen.getByAltText(new RegExp(`Logotipo da ${inst.name}`, 'i'));
+        expect(logo).toBeInTheDocument();
+        expect(logo).toHaveAttribute('src', inst.logoUrl);
       });
+
+      // Specifically verify JMN logo image
+      const jmnLogo = screen.getByAltText(/logotipo da junta de missões nacionais/i);
+      expect(jmnLogo).toHaveAttribute('src', '/images/institutions/jmn.png');
 
       // Check external links contain target="_blank" and rel="noopener noreferrer"
       const jmmLink = screen.getByRole('link', { name: /portal de mobilização jmm/i });

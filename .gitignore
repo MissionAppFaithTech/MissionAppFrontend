@@ -53,3 +53,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI agent skills
+.agents/skills/*
+!.agents/skills/e2e-chrome-testing/
+!.agents/skills/frontend-design/
+!.agents/skills/frontend-testing/

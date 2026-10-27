@@ -154,11 +154,11 @@ export default function MaterialsHub() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        bgcolor: 'background.paper',
+                        bgcolor: 'common.white',
                         border: '1px solid',
                         borderColor: (theme) =>
                           theme.palette.mode === 'dark'
-                            ? 'var(--mui-palette-action2-borderSubtle)'
+                            ? 'rgba(255, 255, 255, 0.2)'
                             : 'var(--mui-palette-divider)',
                         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                         flexShrink: 0,
