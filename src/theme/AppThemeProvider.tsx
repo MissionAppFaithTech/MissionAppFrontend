@@ -4,10 +4,11 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ThemeProvider, useColorScheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useTheme } from 'next-themes';
+import { useThemeStore } from '@/stores/themeStore';
 import { createAppTheme } from './theme';
 
 /**
- * Mirrors next-themes' resolved theme into MUI's color scheme.
+ * Mirrors next-themes and zustand theme store into MUI's color scheme.
  *
  * next-themes owns the `.dark` class on <html>, which is what drives the CSS
  * variables. But a lot of components read `theme.palette.mode` at render time,
@@ -18,12 +19,14 @@ import { createAppTheme } from './theme';
 function ColorSchemeBridge() {
   const { resolvedTheme } = useTheme();
   const { mode, setMode } = useColorScheme();
+  const zustandSetMode = useThemeStore((s) => s.setMode);
 
   useEffect(() => {
     if (!resolvedTheme) return;
     const next = resolvedTheme === 'dark' ? 'dark' : 'light';
     if (mode !== next) setMode(next);
-  }, [resolvedTheme, mode, setMode]);
+    zustandSetMode(next);
+  }, [resolvedTheme, mode, setMode, zustandSetMode]);
 
   return null;
 }
@@ -51,14 +54,9 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       theme={theme}
-      // next-themes owns <html class> and its own storage. Without these, MUI's
-      // CssVars provider would also write the class and a `mui-mode` key, and the
-      // two would fight over the same attribute with independent state.
       defaultMode={initialMode}
       colorSchemeNode={null}
       storageManager={null}
-      // Recalculates `theme.palette.*` when the mode changes, so components that
-      // branch on `palette.mode` follow the active scheme.
       forceThemeRerender
     >
       <ColorSchemeBridge />
