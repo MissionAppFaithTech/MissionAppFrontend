@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Typography from '@mui/material/Typography';
@@ -13,59 +13,32 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import PillButton from '@/components/common/PillButton';
 import useHasMounted from '@/lib/useHasMounted';
+import {
+  useChurchChecklistStore,
+  getChecklistProgressPercentage,
+  getChecklistProgressStatus,
+} from '@/stores/churchChecklistStore';
 import { CHECKLIST_PHASES, type ChecklistPhase } from './churchGuideData';
-
-const LOCAL_STORAGE_KEY = 'missionapp_church_council_checklist_v1';
 
 export default function InteractiveChecklist() {
   const hasMounted = useHasMounted();
-  const [completedPhases, setCompletedPhases] = useState<string[]>(() => {
-    if (typeof window === 'undefined') return [];
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      }
-    } catch {
-      // Fallback
-    }
-    return [];
-  });
+  const completedPhases = useChurchChecklistStore((s) => s.completedPhases);
+  const togglePhase = useChurchChecklistStore((s) => s.togglePhase);
+  const reset = useChurchChecklistStore((s) => s.reset);
 
   const isClient = hasMounted;
+  const activeCompletedPhases = isClient ? completedPhases : [];
 
   const handleTogglePhase = (phaseId: string) => {
-    setCompletedPhases((prev) => {
-      const next = prev.includes(phaseId)
-        ? prev.filter((id) => id !== phaseId)
-        : [...prev, phaseId];
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        // Fallback
-      }
-      return next;
-    });
+    togglePhase(phaseId);
   };
 
   const handleReset = () => {
-    setCompletedPhases([]);
-    try {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-    } catch {
-      // Fallback
-    }
+    reset();
   };
 
-  const progressPercentage = Math.round((completedPhases.length / CHECKLIST_PHASES.length) * 100);
-
-  const getProgressStatus = () => {
-    if (progressPercentage === 100) return 'Conselho Missionário plenamente estabelecido! 🎉';
-    if (progressPercentage >= 60) return 'Fase avançada de mobilização e preparo';
-    if (progressPercentage >= 20) return 'Implantação em andamento';
-    return 'Primeiros passos da estruturação';
-  };
+  const progressPercentage = getChecklistProgressPercentage(activeCompletedPhases.length);
+  const progressStatus = getChecklistProgressStatus(progressPercentage);
 
   return (
     <Box component="section" aria-labelledby="checklist-heading" sx={{ width: '100%' }}>
@@ -107,7 +80,7 @@ export default function InteractiveChecklist() {
               Progresso de Implantação do Conselho
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-              {isClient ? getProgressStatus() : 'Acompanhe as 5 etapas de criação'}
+              {isClient ? progressStatus : 'Acompanhe as 5 etapas de criação'}
             </Typography>
           </Box>
 

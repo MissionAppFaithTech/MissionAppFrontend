@@ -8,10 +8,12 @@ import {
   CADENCE_ITEMS,
   REFERENCE_INSTITUTIONS,
 } from './churchGuideData';
+import { useChurchChecklistStore } from '@/stores/churchChecklistStore';
 
 describe('ChurchGuideView Component', () => {
   beforeEach(() => {
     localStorage.clear();
+    useChurchChecklistStore.getState().reset();
     vi.restoreAllMocks();
   });
 
@@ -62,9 +64,9 @@ describe('ChurchGuideView Component', () => {
       });
 
       // Verify localStorage persistence
-      const saved = JSON.parse(
-        localStorage.getItem('missionapp_church_council_checklist_v1') || '[]'
-      );
+      const rawSaved = localStorage.getItem('missionapp_church_council_checklist_v1');
+      const parsed = rawSaved ? JSON.parse(rawSaved) : null;
+      const saved = parsed?.state?.completedPhases ?? parsed ?? [];
       expect(saved).toContain('fase-1');
 
       // Click Reset button
