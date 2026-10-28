@@ -11,6 +11,19 @@ export interface ThemeState {
   setHasHydrated: (status: boolean) => void;
 }
 
+function getInitialThemeMode(): ThemeMode {
+  if (typeof document !== 'undefined') {
+    if (document.documentElement.classList.contains('dark')) return 'dark';
+    try {
+      const stored = window.localStorage.getItem('theme');
+      if (stored === 'dark') return 'dark';
+    } catch {
+      // ignore
+    }
+  }
+  return 'light';
+}
+
 function syncDocumentTheme(mode: ThemeMode) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
@@ -29,7 +42,7 @@ function syncDocumentTheme(mode: ThemeMode) {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      mode: 'light',
+      mode: getInitialThemeMode(),
       hasHydrated: false,
 
       setMode: (mode: ThemeMode) => {
@@ -61,8 +74,13 @@ export const useThemeStore = create<ThemeState>()(
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
-        if (state?.mode) {
-          syncDocumentTheme(state.mode);
+        if (typeof document !== 'undefined') {
+          const isDomDark = document.documentElement.classList.contains('dark');
+          if (isDomDark && state && state.mode !== 'dark') {
+            state.setMode('dark');
+          } else if (state?.mode) {
+            syncDocumentTheme(state.mode);
+          }
         }
       },
     }

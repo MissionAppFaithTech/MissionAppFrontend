@@ -34,4 +34,11 @@ describe('themeStore', () => {
     expect(useThemeStore.getState().mode).toBe('light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
+
+  it('preserves existing dark mode when DOM has dark class', () => {
+    document.documentElement.classList.add('dark');
+    useThemeStore.getState().setMode('dark');
+    expect(useThemeStore.getState().mode).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+  });
 });
