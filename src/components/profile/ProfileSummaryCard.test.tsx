@@ -109,4 +109,36 @@ describe('ProfileSummaryCard component', () => {
     await user.click(screen.getByRole('button', { name: /compartilhar perfil/i }));
     expect(writeTextMock).toHaveBeenCalled();
   });
+
+  it('renders "Adicione sua biografia" prompt when bio is empty for owner', () => {
+    const profileWithoutBio = {
+      ...mockProfile,
+      roleDescription: '',
+      location: '',
+    };
+
+    render(<ProfileSummaryCard profile={profileWithoutBio} isOwnProfile />);
+
+    const addBioLink = screen.getByRole('link', { name: /adicione sua biografia/i });
+    expect(addBioLink).toBeInTheDocument();
+    expect(addBioLink).toHaveAttribute('href', '/profile/edit-profile');
+    expect(screen.queryByText(/cidade do cabo/i)).not.toBeInTheDocument();
+  });
+
+  it('renders real location when present and omits location pin when empty', () => {
+    const profileWithLocation = {
+      ...mockProfile,
+      location: 'Curitiba/PR',
+    };
+
+    const { rerender } = render(<ProfileSummaryCard profile={profileWithLocation} isOwnProfile />);
+    expect(screen.getByText('Curitiba/PR')).toBeInTheDocument();
+
+    const profileNoLocation = {
+      ...mockProfile,
+      location: '',
+    };
+    rerender(<ProfileSummaryCard profile={profileNoLocation} isOwnProfile />);
+    expect(screen.queryByText('Curitiba/PR')).not.toBeInTheDocument();
+  });
 });

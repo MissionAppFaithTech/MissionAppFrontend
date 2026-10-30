@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { POST } from './route';
+import { POST } from './route.auth-login';
 
 describe('POST /api/auth/login', () => {
   it('returns 400 for invalid json', async () => {

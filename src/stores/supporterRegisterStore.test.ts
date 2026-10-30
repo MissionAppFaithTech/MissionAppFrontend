@@ -107,6 +107,14 @@ describe('supporterRegisterStore', () => {
     expect(catalogService.createFaithCommunity).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Igreja Local' })
     );
+
+    // Verify password is stripped from store formData for security
+    const currentFormData = useSupporterRegisterStore.getState().formData as Record<
+      string,
+      unknown
+    >;
+    expect(currentFormData.password).toBeUndefined();
+    expect(currentFormData.confirmPassword).toBeUndefined();
   });
 
   it('throws error if personal data is missing on completeStep2', async () => {
@@ -119,5 +127,12 @@ describe('supporterRegisterStore', () => {
         confirmPassword: 'Pass',
       })
     ).rejects.toThrow('Complete os dados pessoais antes de finalizar o cadastro');
+  });
+
+  it('does not persist step 3 in storage so returning to register starts fresh', () => {
+    useSupporterRegisterStore.setState({ step: 3, formData: { fullName: 'Maria' } });
+    useSupporterRegisterStore.getState().reset();
+    expect(useSupporterRegisterStore.getState().step).toBe(1);
+    expect(useSupporterRegisterStore.getState().formData).toEqual({});
   });
 });

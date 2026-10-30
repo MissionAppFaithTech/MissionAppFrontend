@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
@@ -59,7 +60,7 @@ export default function ProfileSummaryCard({
     username,
     displayName,
     roleDescription,
-    location = 'Cidade do Cabo, África do Sul',
+    location = '',
     projectsCount = 25,
     postsCount = 3,
     campaignsCount = 4,
@@ -167,19 +168,42 @@ export default function ProfileSummaryCard({
                 >
                   {displayName}
                 </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: '0.875rem', sm: '1rem' },
-                    pt: 0.25,
-                    color: (theme) =>
-                      theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
-                  }}
-                >
-                  {roleDescription}
-                </Typography>
-                {showLocation ? (
+                {roleDescription?.trim() ? (
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: '0.875rem', sm: '1rem' },
+                      pt: 0.25,
+                      color: (theme) =>
+                        theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {roleDescription}
+                  </Typography>
+                ) : isOwnProfile ? (
+                  <Typography
+                    component={Link}
+                    href={editHref}
+                    variant="body2"
+                    sx={{
+                      display: 'inline-block',
+                      fontStyle: 'italic',
+                      fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                      pt: 0.25,
+                      color: 'text.secondary',
+                      textDecoration: 'none',
+                      '&:hover': {
+                        textDecoration: 'underline',
+                        color: 'primary.main',
+                      },
+                    }}
+                  >
+                    Adicione sua biografia
+                  </Typography>
+                ) : null}
+                {showLocation && location?.trim() ? (
                   <Stack
                     direction="row"
                     spacing={0.5}

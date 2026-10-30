@@ -29,6 +29,7 @@ describe('ProfileEditForm Component', () => {
     expect(screen.getByDisplayValue(mockProfile.username)).toBeInTheDocument();
     expect(screen.getByDisplayValue(mockProfile.displayName)).toBeInTheDocument();
     expect(screen.getByLabelText(/^bio:/i)).toHaveValue(mockProfile.roleDescription);
+    expect(screen.queryByLabelText(/local de atuação atual/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /desfazer alteração/i })).not.toBeInTheDocument();
 
     // Contact Fields
@@ -53,7 +54,7 @@ describe('ProfileEditForm Component', () => {
     const saveButton = screen.getByRole('button', { name: /salvar/i });
     await user.click(saveButton);
 
-    expect(screen.getByText(/perfil atualizado com sucesso!/i)).toBeInTheDocument();
+    expect(await screen.findByText(/perfil atualizado com sucesso!/i)).toBeInTheDocument();
   });
 
   it('requires a valid email when the public email checkbox is checked', async () => {

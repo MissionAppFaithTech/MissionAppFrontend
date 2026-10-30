@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -124,7 +124,7 @@ export default function AccountSettingsView({
   };
 
   // Email update handler (RF 15.2.1, RF 15.4)
-  const handleUpdateEmail = (e: FormEvent) => {
+  const handleUpdateEmail = (e: SyntheticEvent) => {
     e.preventDefault();
     const errors: { newEmail?: string; password?: string } = {};
 
@@ -165,7 +165,7 @@ export default function AccountSettingsView({
   };
 
   // Ecclesiastical data save handler (RF 15.3)
-  const handleSaveEcclesiastical = (e: FormEvent) => {
+  const handleSaveEcclesiastical = (e: SyntheticEvent) => {
     e.preventDefault();
 
     if (role === 'missionary' && !faithCommunity.name.trim()) {
@@ -208,7 +208,7 @@ export default function AccountSettingsView({
   };
 
   // Missionary agency save handler (RF 3.1.2)
-  const handleSaveAgency = (e: FormEvent) => {
+  const handleSaveAgency = (e: SyntheticEvent) => {
     e.preventDefault();
 
     if (!agency.name.trim()) {

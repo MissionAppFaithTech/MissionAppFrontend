@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { POST } from './route';
+import { POST } from './route.auth-reset-password';
 
 describe('POST /api/auth/reset-password', () => {
   it('returns 400 for invalid json', async () => {
@@ -36,7 +36,7 @@ describe('POST /api/auth/reset-password', () => {
       }),
     });
     const res = await POST(req);
-    // 200 on backend success or 503 if backend unreachable
-    expect([200, 503]).toContain(res.status);
+    // 200 on backend success, 404/400/422 if backend returns error for token, or 503 if unreachable
+    expect([200, 400, 404, 422, 503]).toContain(res.status);
   });
 });

@@ -3,7 +3,7 @@
 import Button, { type ButtonProps } from '@mui/material/Button';
 import type { SxProps, Theme } from '@mui/material/styles';
 import Link from 'next/link';
-import { BUTTON_BORDER_RADIUS, FORM_ACTION_BUTTON_SX, v } from '@/theme/theme';
+import { BUTTON_BORDER_RADIUS, FORM_ACTION_BUTTON_SX, colors, roleColors, v } from '@/theme/theme';
 
 /**
  * Branded button — prefer this over raw MUI Button for product CTAs.
@@ -100,8 +100,8 @@ const darkPrimaryFill: ToneEntry = (theme) =>
  * In the light theme this tone is the navy CTA. In dark it becomes the light
  * blue (`primary.main`) so the button still reads on the navy ground.
  */
-const darkBrandFill: ToneEntry = (theme) =>
-  theme.applyStyles('dark', {
+const darkBrandFill: ToneEntry = (theme) => ({
+  ...theme.applyStyles('dark', {
     backgroundColor: v(theme, 'palette.primary.main'),
     borderColor: v(theme, 'palette.primary.main'),
     color: v(theme, 'palette.primary.contrastText'),
@@ -112,12 +112,29 @@ const darkBrandFill: ToneEntry = (theme) =>
       backgroundColor: v(theme, 'palette.primary.light'),
       borderColor: v(theme, 'palette.primary.light'),
       color: v(theme, 'palette.primary.contrastText'),
-      boxShadow: `0 0 0 3px ${v(theme, 'palette.action2.secondaryHoverWash')}`,
+      boxShadow: '0 4px 14px rgba(147, 197, 253, 0.25)',
     },
     '&:active': {
       backgroundColor: v(theme, 'palette.primary.dark'),
     },
-  });
+  }),
+  '[data-auth-card] &': {
+    backgroundColor: `${colors.primary} !important`,
+    borderColor: `${colors.primary} !important`,
+    color: `${colors.surface} !important`,
+    boxShadow: 'none !important',
+    '&:hover': {
+      backgroundColor: `${roleColors.intermediate} !important`,
+      borderColor: `${roleColors.intermediate} !important`,
+      color: `${colors.surface} !important`,
+      boxShadow: '0 4px 12px rgba(13, 43, 92, 0.2) !important',
+    },
+    '&:active': {
+      backgroundColor: `${colors.textPrimary} !important`,
+      borderColor: `${colors.textPrimary} !important`,
+    },
+  },
+});
 
 /** Secondary action in dark: quiet outline that never becomes a white block. */
 const darkSecondaryOutline: ToneEntry = (theme) =>
@@ -305,6 +322,14 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
           '--pill-bg': 'transparent',
           '--pill-bd': v(theme, 'palette.action2.borderStrong'),
         }),
+        '[data-auth-card] &': {
+          borderColor: `${colors.primary} !important`,
+          backgroundColor: `${colors.surface} !important`,
+          color: `${colors.primary} !important`,
+          '--pill-fg': `${colors.primary} !important`,
+          '--pill-bg': `${colors.surface} !important`,
+          '--pill-bd': `${colors.primary} !important`,
+        },
       },
       '&&:hover': {
         bgcolor: 'rgba(13, 43, 92, 0.04)',
@@ -314,6 +339,12 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
           backgroundColor: v(theme, 'palette.action2.secondaryHoverWash'),
           borderColor: v(theme, 'palette.connection.main'),
         }),
+        '[data-auth-card] &': {
+          backgroundColor: 'rgba(13, 43, 92, 0.06) !important',
+          borderColor: `${colors.textPrimary} !important`,
+          color: `${colors.textPrimary} !important`,
+          boxShadow: 'none !important',
+        },
       },
     }),
   ],

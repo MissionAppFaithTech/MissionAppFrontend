@@ -21,7 +21,7 @@ vi.mock('@/lib/api/backend', () => ({
 
 import { backendFetch } from '@/lib/api/backend';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
-import { PATCH } from './route';
+import { PATCH } from './route.missionary-id-about';
 
 const missionaryId = '018f1a2b-3c4d-7e8f-9a0b-1c2d3e4f5a6b';
 

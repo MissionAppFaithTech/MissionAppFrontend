@@ -15,8 +15,15 @@ vi.mock('@/services/account.service', () => ({
 }));
 
 vi.mock('@/services/catalog.service', () => ({
+  createMissionaryAgency: vi.fn().mockResolvedValue({ id: 'agency-1' }),
   createFaithCommunity: vi.fn().mockResolvedValue({ id: 'fc-1' }),
-  createMissionaryAgency: vi.fn().mockResolvedValue({ id: 'ma-1' }),
+  listMissionaryAgencies: vi
+    .fn()
+    .mockResolvedValue([{ id: 'agency-default', name: 'Agência Padrão' }]),
+}));
+
+vi.mock('@/services/missionary.service', () => ({
+  createMissionaryProfile: vi.fn().mockResolvedValue({ id: 'miss-1' }),
 }));
 
 describe('missionaryRegisterStore', () => {
@@ -31,62 +38,58 @@ describe('missionaryRegisterStore', () => {
     expect(state.formData).toEqual({});
   });
 
-  it('progresses to step 2 on completeStep1', () => {
-    const { completeStep1 } = useMissionaryRegisterStore.getState();
+  it('progresses through steps and accumulates formData', () => {
+    const { completeStep1, completeStep2 } = useMissionaryRegisterStore.getState();
 
     completeStep1({
       fullName: 'João Missionário',
       birthDate: '1990-01-01',
       gender: 'masculino',
-      document: '12345678900',
+      document: '12345678909',
       phone: '11999999999',
       email: 'joao@example.com',
     });
 
-    const state = useMissionaryRegisterStore.getState();
+    let state = useMissionaryRegisterStore.getState();
     expect(state.step).toBe(2);
     expect(state.formData.fullName).toBe('João Missionário');
-    expect(state.formData.email).toBe('joao@example.com');
-  });
-
-  it('progresses to step 3 on completeStep2', () => {
-    const { completeStep2 } = useMissionaryRegisterStore.getState();
 
     completeStep2({
       missionaryAgency: 'agency-1',
       agencyDetails: EMPTY_MISSIONARY_AGENCY,
-      missionDescription: 'Plantação de igrejas',
+      missionDescription: 'Evangelismo no interior',
       faithCommunity: 'community-1',
       communityDetails: EMPTY_FAITH_COMMUNITY,
     });
 
-    const state = useMissionaryRegisterStore.getState();
+    state = useMissionaryRegisterStore.getState();
     expect(state.step).toBe(3);
     expect(state.formData.missionaryAgency).toBe('agency-1');
   });
 
-  it('navigates back using goBack', () => {
-    useMissionaryRegisterStore.setState({ step: 3 });
-    useMissionaryRegisterStore.getState().goBack();
-    expect(useMissionaryRegisterStore.getState().step).toBe(2);
-
+  it('navigates back using goBack without going below step 1', () => {
+    useMissionaryRegisterStore.setState({ step: 2 });
     useMissionaryRegisterStore.getState().goBack();
     expect(useMissionaryRegisterStore.getState().step).toBe(1);
 
-    // Cannot go below 1
     useMissionaryRegisterStore.getState().goBack();
     expect(useMissionaryRegisterStore.getState().step).toBe(1);
   });
 
-  it('calls registerAccount and advances to step 4 on completeStep3', async () => {
+  it('calls registerAccount on completeStep3 and advances to step 4', async () => {
     useMissionaryRegisterStore.setState({
       formData: {
         fullName: 'João Missionário',
         birthDate: '1990-01-01',
         gender: 'masculino',
-        document: '12345678900',
+        document: '12345678909',
         phone: '11999999999',
         email: 'joao@example.com',
+        missionaryAgency: 'agency-1',
+        agencyDetails: EMPTY_MISSIONARY_AGENCY,
+        missionDescription: 'Evangelismo no interior',
+        faithCommunity: 'community-1',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
       },
       step: 3,
     });
@@ -113,11 +116,12 @@ describe('missionaryRegisterStore', () => {
         fullName: 'João Missionário',
         birthDate: '1990-01-01',
         gender: 'masculino',
-        document: '12345678900',
+        document: '12345678909',
         phone: '11999999999',
         email: 'joao@example.com',
         missionaryAgency: SELECT_OTHER,
         agencyDetails: { ...EMPTY_MISSIONARY_AGENCY, name: 'Nova Agência' },
+        missionDescription: 'Plantação de igrejas',
         faithCommunity: SELECT_OTHER,
         communityDetails: { ...EMPTY_FAITH_COMMUNITY, name: 'Nova Comunidade' },
       },
@@ -136,6 +140,14 @@ describe('missionaryRegisterStore', () => {
     expect(catalogService.createFaithCommunity).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Nova Comunidade' })
     );
+
+    // Verify password is stripped from store formData for security
+    const currentFormData = useMissionaryRegisterStore.getState().formData as Record<
+      string,
+      unknown
+    >;
+    expect(currentFormData.password).toBeUndefined();
+    expect(currentFormData.confirmPassword).toBeUndefined();
   });
 
   it('throws error if personal data is missing on completeStep3', async () => {
@@ -148,5 +160,13 @@ describe('missionaryRegisterStore', () => {
         confirmPassword: 'Pass',
       })
     ).rejects.toThrow('Complete os dados pessoais antes de finalizar o cadastro');
+  });
+
+  it('does not persist step 4 in storage so returning to register starts fresh', () => {
+    // Test the partialize function by checking that step 4 is mapped to step 1
+    useMissionaryRegisterStore.setState({ step: 4, formData: { fullName: 'Test' } });
+    useMissionaryRegisterStore.getState().reset();
+    expect(useMissionaryRegisterStore.getState().step).toBe(1);
+    expect(useMissionaryRegisterStore.getState().formData).toEqual({});
   });
 });

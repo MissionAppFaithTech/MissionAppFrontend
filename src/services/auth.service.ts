@@ -154,3 +154,27 @@ export async function resetPassword(data: {
       typeof payload?.message === 'string' ? payload.message : 'Senha redefinida com sucesso.',
   };
 }
+
+export async function terminateAllSessions(): Promise<{ message: string }> {
+  const response = await fetch('/api/auth/sessions', {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      typeof payload?.message === 'string'
+        ? payload.message
+        : 'Não foi possível encerrar as sessões';
+    throw new Error(message);
+  }
+
+  return {
+    message:
+      typeof payload?.message === 'string' ? payload.message : 'Sessões encerradas com sucesso.',
+  };
+}

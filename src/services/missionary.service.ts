@@ -45,11 +45,39 @@ export function toUpdateMissionaryAboutPayload(input: {
   };
 }
 
+export async function createMissionaryProfile(missionaryAgencyId: string): Promise<{ id: string }> {
+  const response = await fetch('/api/missionaries/profile', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ missionaryAgencyId }),
+    cache: 'no-store',
+  });
+
+  const body = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      typeof body?.message === 'string'
+        ? body.message
+        : 'Não foi possível criar o perfil missionário';
+    throw new Error(localizeApiErrorMessage(message));
+  }
+
+  const missionary = body?.data?.missionary ?? body?.missionary ?? body?.data;
+  return { id: typeof missionary?.id === 'string' ? missionary.id : '' };
+}
+
 export async function updateMissionaryAbout(
-  missionaryId: string,
+  missionaryId: string | undefined,
   payload: UpdateMissionaryAboutPayload
 ): Promise<MissionaryAboutResult> {
-  const response = await fetch(`/api/missionaries/${encodeURIComponent(missionaryId)}/about`, {
+  const url = missionaryId
+    ? `/api/missionaries/${encodeURIComponent(missionaryId)}/about`
+    : '/api/missionaries/about';
+  const response = await fetch(url, {
     method: 'PATCH',
     headers: {
       Accept: 'application/json',
@@ -70,7 +98,7 @@ export async function updateMissionaryAbout(
   }
 
   const missionary = body?.data?.missionary ?? body?.missionary ?? body?.data;
-  const id = typeof missionary?.id === 'string' ? missionary.id : missionaryId;
+  const id = typeof missionary?.id === 'string' ? missionary.id : (missionaryId ?? '');
 
   return { id };
 }

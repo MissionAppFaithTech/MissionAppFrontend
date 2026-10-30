@@ -70,19 +70,14 @@ export default function VisitorProfileAboutSection({ data }: VisitorProfileAbout
             </Stack>
           ) : null}
 
-          <Divider />
-
-          <Stack spacing={1.25}>
-            {data.originLocation ? (
-              <DetailRow label="Local de origem" value={data.originLocation} />
-            ) : null}
-            {data.currentLocation ? (
-              <DetailRow label="Local de atuação atual" value={data.currentLocation} />
-            ) : null}
-            {data.missionaryAgency ? (
-              <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
-            ) : null}
-          </Stack>
+          {data.missionaryAgency ? (
+            <>
+              <Divider />
+              <Stack spacing={1.25}>
+                <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
+              </Stack>
+            </>
+          ) : null}
 
           {/* Seção bloqueada para membros cadastrados */}
           <LockedContentNotice

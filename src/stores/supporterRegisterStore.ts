@@ -69,8 +69,13 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
           await createFaithCommunity(merged.communityDetails);
         }
 
+        // Never retain plain text passwords in store state or storage
+        const sanitizedAfterSuccess = { ...merged };
+        delete (sanitizedAfterSuccess as Record<string, unknown>).password;
+        delete (sanitizedAfterSuccess as Record<string, unknown>).confirmPassword;
+
         set({
-          formData: merged,
+          formData: sanitizedAfterSuccess,
           step: 3,
         });
       },
@@ -80,6 +85,9 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
       },
 
       reset: () => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('missionapp_supporter_register_v1');
+        }
         set({
           step: 1,
           formData: {},
@@ -102,6 +110,26 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
           removeItem: () => {},
         };
       }),
+      partialize: (state) => {
+        // If registration completed (step 3), do not persist completion screen in localStorage
+        // so returning to the registration page starts the normal wizard flow.
+        if (state.step >= 3) {
+          return {
+            step: 1,
+            formData: {},
+          };
+        }
+
+        // Strip sensitive credentials from localStorage to avoid credential leakage via XSS
+        const sanitizedFormData = { ...state.formData };
+        delete (sanitizedFormData as Record<string, unknown>).password;
+        delete (sanitizedFormData as Record<string, unknown>).confirmPassword;
+
+        return {
+          step: state.step,
+          formData: sanitizedFormData,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

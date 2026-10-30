@@ -17,8 +17,6 @@ type LogoProps = {
   size?: LogoSize;
   /** `auto` follows light/dark theme. Use `dark` on gradient navbar. */
   variant?: LogoVariant;
-  /** @deprecated Prefer `variant="dark"` */
-  onDark?: boolean;
 };
 
 /** Altura visual + largura máxima — logo empilhada precisa de largura na navbar. */
@@ -36,15 +34,9 @@ function resolveSize(size?: string): LogoSize {
   return 'md';
 }
 
-function resolveVariant(variant: LogoVariant, onDark: boolean): LogoVariant {
-  if (onDark) return 'dark';
-  return variant;
-}
-
-export default function Logo({ href = '/', size, variant = 'auto', onDark = false }: LogoProps) {
+export default function Logo({ href = '/', size, variant = 'auto' }: LogoProps) {
   const resolvedSize = resolveSize(size);
   const { height, maxWidth } = sizes[resolvedSize];
-  const logoVariant = resolveVariant(variant, onDark);
 
   const imageStyle = {
     height,
@@ -73,7 +65,7 @@ export default function Logo({ href = '/', size, variant = 'auto', onDark = fals
    * the last piece of the theme flash.
    */
   const image =
-    logoVariant === 'auto' ? (
+    variant === 'auto' ? (
       <>
         <Box sx={{ lineHeight: 0, display: 'block', '.dark &': { display: 'none' } }}>
           {renderImage(LOGO_PATHS.light)}
@@ -83,7 +75,7 @@ export default function Logo({ href = '/', size, variant = 'auto', onDark = fals
         </Box>
       </>
     ) : (
-      renderImage(logoVariant === 'dark' ? LOGO_PATHS.dark : LOGO_PATHS.light)
+      renderImage(variant === 'dark' ? LOGO_PATHS.dark : LOGO_PATHS.light)
     );
 
   if (href) {

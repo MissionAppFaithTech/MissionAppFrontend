@@ -13,12 +13,19 @@ import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 
 const footerLinkSx = {
   color: 'mission.main',
-  fontWeight: 600,
+  fontWeight: 700,
   textDecoration: 'none',
   minHeight: 44,
   display: 'inline-flex',
   alignItems: 'center',
-  '&:hover': { textDecoration: 'underline' },
+  px: 0.75,
+  borderRadius: 1,
+  transition: 'color 0.2s ease, background-color 0.2s ease',
+  '&:hover': {
+    color: 'mission.dark',
+    backgroundColor: 'rgba(194, 65, 12, 0.08)',
+    textDecoration: 'none',
+  },
 } as const;
 
 type AuthLayoutProps = {

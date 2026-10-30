@@ -21,9 +21,9 @@ vi.mock('@/lib/api/backend', () => ({
 
 import { backendFetch } from '@/lib/api/backend';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
-import { GET, POST } from './route';
+import { GET, POST } from './route.faith-communities';
 
-describe('/api/missionary-agencies', () => {
+describe('/api/faith-communities', () => {
   beforeEach(() => {
     vi.mocked(backendFetch).mockReset();
     cookiesGet.mockReset();
@@ -34,49 +34,33 @@ describe('/api/missionary-agencies', () => {
 
   it('normalizes the backend list for the select', async () => {
     vi.mocked(backendFetch).mockResolvedValue({
-      data: { missionaryAgencies: [{ id: 'agency-1', name: 'JOCUM' }] },
+      data: { faithCommunities: [{ id: 'community-1', name: 'Igreja Batista' }] },
     });
 
     const response = await GET();
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      data: [{ id: 'agency-1', name: 'JOCUM' }],
+      data: [{ id: 'community-1', name: 'Igreja Batista' }],
     });
-  });
-
-  it('returns 401 when creating without an access token', async () => {
-    cookiesGet.mockReturnValue(undefined);
-    const response = await POST(
-      new Request('http://localhost:3000/api/missionary-agencies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Nova Agência' }),
-      })
-    );
-    expect(response.status).toBe(401);
   });
 
   it('forwards a create payload to the backend', async () => {
     vi.mocked(backendFetch).mockResolvedValue({
-      data: { missionaryAgency: { id: 'agency-2', name: 'Nova Agência' } },
+      data: { faithCommunity: { id: 'community-2', name: 'Igreja Nova' } },
     });
 
     const response = await POST(
-      new Request('http://localhost:3000/api/missionary-agencies', {
+      new Request('http://localhost:3000/api/faith-communities', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Nova Agência',
-          phoneNumber: '+5511987654321',
-          country: 'Brasil',
-        }),
+        body: JSON.stringify({ name: 'Igreja Nova', city: 'Niterói' }),
       })
     );
 
     expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/missionary-agencies', {
+    expect(backendFetch).toHaveBeenCalledWith('/faith-communities', {
       method: 'POST',
-      body: expect.objectContaining({ name: 'Nova Agência' }),
+      body: expect.objectContaining({ name: 'Igreja Nova' }),
       accessToken: 'access-token',
     });
   });

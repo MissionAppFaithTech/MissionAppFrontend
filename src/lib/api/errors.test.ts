@@ -9,6 +9,12 @@ describe('localizeApiErrorMessage', () => {
     expect(localizeApiErrorMessage('The username has already been taken')).toBe(
       'Este nome de usuário já está em uso'
     );
+    expect(localizeApiErrorMessage('Invalid user credentials')).toBe(
+      'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.'
+    );
+    expect(localizeApiErrorMessage('E_INVALID_CREDENTIALS')).toBe(
+      'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.'
+    );
   });
 
   it('leaves Portuguese messages unchanged', () => {

@@ -8,7 +8,12 @@ import type {
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
 import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
-import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
+import {
+  createFaithCommunity,
+  createMissionaryAgency,
+  listMissionaryAgencies,
+} from '@/services/catalog.service';
+import { createMissionaryProfile } from '@/services/missionary.service';
 
 export interface MissionaryRegisterState {
   step: number;
@@ -74,15 +79,34 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
           passwordConfirmation: values.confirmPassword,
         });
 
+        let resolvedAgencyId = merged.missionaryAgency;
+
         if (merged.missionaryAgency === SELECT_OTHER && merged.agencyDetails?.name) {
-          await createMissionaryAgency(merged.agencyDetails);
+          const createdAgency = await createMissionaryAgency(merged.agencyDetails);
+          resolvedAgencyId = createdAgency.id;
         }
         if (merged.faithCommunity === SELECT_OTHER && merged.communityDetails?.name) {
           await createFaithCommunity(merged.communityDetails);
         }
 
+        if (!resolvedAgencyId || resolvedAgencyId === SELECT_OTHER) {
+          const agencies = await listMissionaryAgencies().catch(() => []);
+          if (agencies.length > 0) {
+            resolvedAgencyId = agencies[0].id;
+          }
+        }
+
+        if (resolvedAgencyId && resolvedAgencyId !== SELECT_OTHER) {
+          await createMissionaryProfile(resolvedAgencyId).catch(() => {});
+        }
+
+        // Never retain plain text passwords in store state or storage
+        const sanitizedAfterSuccess = { ...merged };
+        delete (sanitizedAfterSuccess as Record<string, unknown>).password;
+        delete (sanitizedAfterSuccess as Record<string, unknown>).confirmPassword;
+
         set({
-          formData: merged,
+          formData: sanitizedAfterSuccess,
           step: 4,
         });
       },
@@ -92,6 +116,9 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
       },
 
       reset: () => {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('missionapp_missionary_register_v1');
+        }
         set({
           step: 1,
           formData: {},
@@ -114,6 +141,26 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
           removeItem: () => {},
         };
       }),
+      partialize: (state) => {
+        // If registration completed (step 4), do not persist completion screen in localStorage
+        // so returning to the registration page starts the normal wizard flow.
+        if (state.step >= 4) {
+          return {
+            step: 1,
+            formData: {},
+          };
+        }
+
+        // Strip sensitive credentials from localStorage to avoid credential leakage via XSS
+        const sanitizedFormData = { ...state.formData };
+        delete (sanitizedFormData as Record<string, unknown>).password;
+        delete (sanitizedFormData as Record<string, unknown>).confirmPassword;
+
+        return {
+          step: state.step,
+          formData: sanitizedFormData,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

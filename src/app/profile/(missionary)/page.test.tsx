@@ -20,12 +20,17 @@ vi.mock('next/navigation', async () => {
 });
 
 describe('Missionary Profile routes', () => {
-  it('renders missionary sobre page with about section and edit action', () => {
+  it('renders missionary sobre page with inviting empty state on initial load', () => {
     render(<ProfileAboutPage />);
 
     expect(screen.getByRole('heading', { name: /^sobre$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
-    expect(screen.getByText(/resumo da minha história em missões/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: /compartilhe sua história em missões/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /preencher informações do sobre/i })
+    ).toBeInTheDocument();
   });
 
   it('renders missionary impact projects page with impact project card', () => {

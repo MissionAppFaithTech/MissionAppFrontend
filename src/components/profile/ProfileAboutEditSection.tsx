@@ -8,13 +8,13 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import MenuItem from '@mui/material/MenuItem';
+import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import StyledTextArea from '@/components/common/StyledTextArea';
 import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
-import { profileLocations } from '@/lib/profileOptions';
 import { profileAboutSchema, type ProfileAboutFormData } from '@/schemas/profile.schema';
 import { listFaithCommunities } from '@/services/catalog.service';
 import {
@@ -22,6 +22,7 @@ import {
   updateMissionaryAbout,
 } from '@/services/missionary.service';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
+import { useProfileStore } from '@/stores/profileStore';
 import type { ProfileAboutData } from '@/types/profile';
 
 type ProfileAboutEditSectionProps = {
@@ -69,6 +70,7 @@ export default function ProfileAboutEditSection({
 }: ProfileAboutEditSectionProps) {
   const communities = useCatalogItems(listFaithCommunities);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [toastOpen, setToastOpen] = useState(false);
   const {
     handleSubmit,
     control,
@@ -77,15 +79,16 @@ export default function ProfileAboutEditSection({
   } = useForm<ProfileAboutFormData>({
     resolver: zodResolver(profileAboutSchema),
     mode: 'onTouched',
-    defaultValues: {
+    values: {
       introduction: data.introduction || '',
       missionHistory: data.missionHistory || '',
-      originLocation: data.originLocation || '',
-      currentLocation: data.currentLocation || '',
       missionaryAgency: data.missionaryAgency || '',
       faithCommunity: data.faithCommunity || '',
       prayerRequests: data.prayerRequests || '',
       lifeVerse: data.lifeVerse || '',
+    },
+    resetOptions: {
+      keepDirtyValues: true,
     },
   });
 
@@ -102,6 +105,15 @@ export default function ProfileAboutEditSection({
     setSubmitError(null);
     try {
       await updateMissionaryAbout(missionaryId, toUpdateMissionaryAboutPayload(formData));
+      useProfileStore.setState((prev) => ({
+        profile: {
+          ...prev.profile,
+          about: {
+            ...prev.profile.about,
+            ...formData,
+          },
+        },
+      }));
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : 'Não foi possível salvar as informações do sobre'
@@ -119,8 +131,12 @@ export default function ProfileAboutEditSection({
         // Ignore
       }
     }
+
+    setToastOpen(true);
     onSave?.(formData);
-    onBack();
+    setTimeout(() => {
+      onBack();
+    }, 700);
   };
 
   return (
@@ -186,52 +202,6 @@ export default function ProfileAboutEditSection({
               )}
             />
 
-            <LabeledField htmlFor="profile-about-origin" label="Local de origem">
-              <Controller
-                name="originLocation"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    id="profile-about-origin"
-                    select
-                    fullWidth
-                    error={Boolean(errors.originLocation)}
-                    helperText={errors.originLocation?.message}
-                  >
-                    {profileLocations.map((location) => (
-                      <MenuItem key={location} value={location}>
-                        {location}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </LabeledField>
-
-            <LabeledField htmlFor="profile-about-current-location" label="Local de atuação atual">
-              <Controller
-                name="currentLocation"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    id="profile-about-current-location"
-                    select
-                    fullWidth
-                    error={Boolean(errors.currentLocation)}
-                    helperText={errors.currentLocation?.message}
-                  >
-                    {profileLocations.map((location) => (
-                      <MenuItem key={location} value={location}>
-                        {location}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </LabeledField>
-
             <LabeledField htmlFor="profile-about-agency" label="Agência missionária">
               <Controller
                 name="missionaryAgency"
@@ -268,14 +238,26 @@ export default function ProfileAboutEditSection({
                     error={Boolean(errors.faithCommunity)}
                     helperText={errors.faithCommunity?.message}
                   >
-                    {(communities.items.length > 0
-                      ? communities.items
-                      : faithCommunities.map((name) => ({ id: name, name }))
-                    ).map((community) => (
-                      <MenuItem key={community.id} value={community.id}>
-                        {community.name}
-                      </MenuItem>
-                    ))}
+                    {(() => {
+                      const options =
+                        communities.items.length > 0
+                          ? communities.items
+                          : faithCommunities.map((name) => ({ id: name, name }));
+                      const hasCurrentValue = options.some((opt) => opt.id === field.value);
+                      const menuItems = options.map((community) => (
+                        <MenuItem key={community.id} value={community.id}>
+                          {community.name}
+                        </MenuItem>
+                      ));
+                      if (!hasCurrentValue && field.value) {
+                        menuItems.unshift(
+                          <MenuItem key={field.value} value={field.value} sx={{ display: 'none' }}>
+                            {field.value}
+                          </MenuItem>
+                        );
+                      }
+                      return menuItems;
+                    })()}
                   </TextField>
                 )}
               />
@@ -337,6 +319,35 @@ export default function ProfileAboutEditSection({
           </Stack>
         </Box>
       </CardContent>
+
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={4000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setToastOpen(false)}
+          severity="success"
+          role="status"
+          sx={{
+            width: '100%',
+            fontWeight: 600,
+            borderRadius: 2,
+            border: (theme) =>
+              theme.palette.mode === 'dark'
+                ? '1px solid var(--mui-palette-action2-borderSubtle)'
+                : 'none',
+            boxShadow: (theme) =>
+              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
+            '& .MuiAlert-icon': {
+              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
+            },
+          }}
+        >
+          Informações da seção Sobre salvas com sucesso!
+        </Alert>
+      </Snackbar>
     </Card>
   );
 }

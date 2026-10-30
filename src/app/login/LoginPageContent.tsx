@@ -48,7 +48,14 @@ export default function LoginPageContent() {
                 minHeight: 44,
                 display: 'inline-flex',
                 alignItems: 'center',
-                '&:hover': { color: 'primary.main', textDecoration: 'underline' },
+                px: 1,
+                borderRadius: 1,
+                transition: 'color 0.2s ease, background-color 0.2s ease',
+                '&:hover': {
+                  color: 'primary.main',
+                  backgroundColor: 'rgba(13, 43, 92, 0.06)',
+                  textDecoration: 'none',
+                },
               }}
             >
               Trocar perfil

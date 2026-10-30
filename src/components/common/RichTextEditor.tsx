@@ -246,7 +246,6 @@ export default function RichTextEditor({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (currentValue && lastSavedDraft) {
         e.preventDefault();
-        e.returnValue = '';
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);

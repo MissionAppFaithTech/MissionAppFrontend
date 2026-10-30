@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { GET } from './route';
+import { GET } from './route.username-availability';
 
 describe('GET /api/accounts/username-availability', () => {
   it('returns 422 for invalid username with special characters or too short', async () => {

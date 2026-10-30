@@ -40,29 +40,30 @@ const pixKeyTypeLabels: Record<string, string> = {
 export default function DonationModal({
   open,
   onClose,
-  missionaryName = 'Samuel Mendonça',
+  missionaryName = '',
   isOwnProfile = false,
   financialConfig,
 }: DonationModalProps) {
   const hasPix = financialConfig
-    ? financialConfig.pix.enabled && Boolean(financialConfig.pix.key)
+    ? Boolean(financialConfig.pix?.enabled && financialConfig.pix?.key)
     : true;
   const hasBank = financialConfig
-    ? financialConfig.bankTransfer.enabled &&
-      Boolean(financialConfig.bankTransfer.bankName && financialConfig.bankTransfer.account)
+    ? Boolean(
+        financialConfig.bankTransfer?.enabled &&
+        financialConfig.bankTransfer?.bankName &&
+        financialConfig.bankTransfer?.account
+      )
     : true;
 
   const defaultTab = hasPix ? 'pix' : hasBank ? 'bank' : 'pix';
   const [activeTab, setActiveTab] = useState<'pix' | 'bank'>(defaultTab);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const supporterMessage =
-    financialConfig?.supporterMessage ||
-    'Sua contribuição sustenta o trabalho de evangelização, distribuição de bíblias e construção da escola cristã na África do Sul. Que Deus abençoe sua generosidade!';
+  const supporterMessage = financialConfig?.supporterMessage || '';
 
-  const pixKey = financialConfig?.pix.key || 'samuelhe@gmail.com';
-  const pixKeyType = financialConfig?.pix.keyType || 'email';
-  const pixQrCodeUrl = financialConfig?.pix.qrCodeUrl;
+  const pixKey = financialConfig?.pix?.key || '';
+  const pixKeyType = financialConfig?.pix?.keyType || 'email';
+  const pixQrCodeUrl = financialConfig?.pix?.qrCodeUrl;
 
   const bankData = financialConfig?.bankTransfer
     ? {

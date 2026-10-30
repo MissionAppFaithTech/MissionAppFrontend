@@ -51,7 +51,7 @@ export const profileEditSchema = z
     username: z.string().trim().min(3, 'Nome de usuário inválido'),
     displayName: z.string().trim().min(2, 'O nome deve ter pelo menos 2 caracteres'),
     bio: z.string().trim().min(2, 'Informe sua atuação ou papel na missão'),
-    currentLocation: z.string().trim().min(1, 'Selecione ou informe sua localização'),
+    currentLocation: z.string().optional().or(z.literal('')),
     ...publicContactFields,
   })
   .superRefine(refinePublicContact);
@@ -81,14 +81,22 @@ export const supporterAboutSchema = z.object({
 export type SupporterAboutFormData = z.infer<typeof supporterAboutSchema>;
 
 export const profileAboutSchema = z.object({
-  introduction: z.string().max(5000, 'Use no máximo 5000 caracteres'),
-  missionHistory: z.string().max(5000, 'Use no máximo 5000 caracteres'),
-  originLocation: z.string().max(255, 'Use no máximo 255 caracteres'),
-  currentLocation: z.string(),
-  missionaryAgency: z.string(),
-  faithCommunity: z.string(),
-  prayerRequests: z.string().max(5000, 'Use no máximo 5000 caracteres'),
-  lifeVerse: z.string().max(255, 'Use no máximo 255 caracteres'),
+  introduction: z.string().max(5000, 'Use no máximo 5000 caracteres').optional().or(z.literal('')),
+  missionHistory: z
+    .string()
+    .max(5000, 'Use no máximo 5000 caracteres')
+    .optional()
+    .or(z.literal('')),
+  originLocation: z.string().max(255, 'Use no máximo 255 caracteres').optional().or(z.literal('')),
+  currentLocation: z.string().optional().or(z.literal('')),
+  missionaryAgency: z.string().optional().or(z.literal('')),
+  faithCommunity: z.string().optional().or(z.literal('')),
+  prayerRequests: z
+    .string()
+    .max(5000, 'Use no máximo 5000 caracteres')
+    .optional()
+    .or(z.literal('')),
+  lifeVerse: z.string().max(255, 'Use no máximo 255 caracteres').optional().or(z.literal('')),
 });
 
 export type ProfileAboutFormData = z.infer<typeof profileAboutSchema>;

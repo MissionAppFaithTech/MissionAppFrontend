@@ -18,6 +18,17 @@ vi.mock('@/services/auth.service', () => ({
   }),
 }));
 
+vi.mock('@/services/profile.service', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/services/profile.service')>();
+  return {
+    ...actual,
+    fetchAccountProfile: vi.fn().mockResolvedValue({
+      user: { id: '1', fullName: 'Teste', username: 'teste' },
+      missionary: null,
+    }),
+  };
+});
+
 describe('LoginForm component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -89,5 +100,27 @@ describe('LoginForm component', () => {
 
     await user.click(toggleButton);
     expect(screen.getByRole('button', { name: /ocultar senha/i })).toBeInTheDocument();
+  });
+
+  it('renders modern, informative Portuguese error alert when login fails with invalid credentials', async () => {
+    const { login } = await import('@/services/auth.service');
+    vi.mocked(login).mockRejectedValueOnce(new Error('Invalid user credentials'));
+
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(screen.getByPlaceholderText('seu@email.com'), 'usuario@errado.com');
+    await user.type(screen.getByPlaceholderText('Sua senha'), 'SenhaErrada123!');
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    const alert = await screen.findByRole('alert');
+    expect(alert).toBeInTheDocument();
+    expect(screen.getByText('E-mail ou senha incorretos')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /verifique os dados digitados e tente novamente\. se você esqueceu sua senha/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Invalid user credentials')).not.toBeInTheDocument();
   });
 });

@@ -10,7 +10,6 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
-import MenuItem from '@mui/material/MenuItem';
 import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
@@ -21,8 +20,8 @@ import PublicContactFields from '@/components/profile/PublicContactFields';
 import UsernameAvailabilityField from '@/components/profile/UsernameAvailabilityField';
 import StyledTextArea from '@/components/common/StyledTextArea';
 import type { UsernameAvailabilityStatus } from '@/hooks/useUsernameAvailability';
-import { profileLocations } from '@/lib/profileOptions';
 import { profileEditSchema, type ProfileEditFormData } from '@/schemas/profile.schema';
+import { useProfileStore } from '@/stores/profileStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
 
@@ -44,11 +43,10 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
   } = useForm<ProfileEditFormData>({
     resolver: zodResolver(profileEditSchema),
     mode: 'onTouched',
-    defaultValues: {
+    values: {
       username: profile.username || '',
       displayName: profile.displayName || '',
       bio: profile.roleDescription || '',
-      currentLocation: profile.about.currentLocation || '',
       publicEmail: profile.contact?.publicEmail || '',
       publicPhone: profile.contact?.publicPhone || '',
       showPublicEmail: profile.contact?.showPublicEmail ?? Boolean(profile.contact?.publicEmail),
@@ -57,9 +55,12 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
         profile.contact?.allowWhatsappContact ??
         Boolean(profile.contact?.whatsappNumber || profile.contact?.publicPhone),
     },
+    resetOptions: {
+      keepDirtyValues: true,
+    },
   });
 
-  const onSubmit = () => {
+  const onSubmit = async (data: ProfileEditFormData) => {
     if (usernameStatus === 'taken' || usernameStatus === 'checking') {
       if (usernameStatus === 'taken') {
         setError('username', {
@@ -69,6 +70,7 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
       }
       return;
     }
+
     if (typeof window !== 'undefined') {
       try {
         localStorage.removeItem('draft_profile_header_bio');
@@ -77,6 +79,18 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
       }
     }
     setToastOpen(true);
+
+    try {
+      await useProfileStore.getState().updateHeaderProfile({
+        displayName: data.displayName,
+        username: data.username,
+        bio: data.bio,
+        publicEmail: data.publicEmail,
+        publicPhone: data.publicPhone,
+      });
+    } catch {
+      // optimistic state already handled
+    }
   };
 
   return (
@@ -193,38 +207,6 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
                     />
                   )}
                 />
-
-                <Stack spacing={0.75}>
-                  <Typography
-                    component="label"
-                    htmlFor="currentLocation"
-                    variant="body2"
-                    sx={{ color: 'primary.main', fontWeight: 600 }}
-                  >
-                    Local de atuação atual:
-                  </Typography>
-                  <Controller
-                    name="currentLocation"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        id="currentLocation"
-                        select
-                        size="small"
-                        fullWidth
-                        error={Boolean(errors.currentLocation)}
-                        helperText={errors.currentLocation?.message}
-                      >
-                        {profileLocations.map((location) => (
-                          <MenuItem key={location} value={location}>
-                            {location}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  />
-                </Stack>
               </Stack>
 
               <Divider />

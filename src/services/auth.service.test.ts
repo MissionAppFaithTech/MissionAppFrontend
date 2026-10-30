@@ -1,5 +1,11 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
-import { login, requestPasswordReset, getResetTokenStatus, resetPassword } from './auth.service';
+import {
+  login,
+  requestPasswordReset,
+  getResetTokenStatus,
+  resetPassword,
+  terminateAllSessions,
+} from './auth.service';
 import { MOCK_RESET_TOKEN, MOCK_EXPIRED_RESET_TOKEN } from '@/mocks/auth';
 
 describe('auth.service', () => {
@@ -96,6 +102,37 @@ describe('auth.service', () => {
           passwordConfirmation: 'Password1!',
         })
       ).rejects.toThrow('Este link expirou');
+    });
+  });
+
+  describe('terminateAllSessions', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('terminates all sessions successfully', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => ({ message: 'Todas as sessões foram encerradas' }),
+        })
+      );
+
+      const res = await terminateAllSessions();
+      expect(res.message).toBe('Todas as sessões foram encerradas');
+    });
+
+    it('throws error when termination fails', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockResolvedValue({
+          ok: false,
+          json: async () => ({ message: 'Erro ao revogar sessões' }),
+        })
+      );
+
+      await expect(terminateAllSessions()).rejects.toThrow('Erro ao revogar sessões');
     });
   });
 });

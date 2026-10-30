@@ -912,9 +912,113 @@ export function createAppTheme() {
       },
       MuiAlert: {
         styleOverrides: {
-          root: {
-            borderRadius: 8,
-          },
+          root: ({ theme }) => ({
+            borderRadius: 10,
+            fontSize: '0.875rem',
+            lineHeight: 1.5,
+            padding: '12px 16px',
+            alignItems: 'flex-start',
+            '& .MuiAlert-icon': {
+              fontSize: 22,
+              marginRight: 12,
+              padding: 0,
+              opacity: 1,
+            },
+            '& .MuiAlert-message': {
+              padding: 0,
+              width: '100%',
+              minWidth: 0,
+            },
+            '&.MuiAlert-standardError': {
+              backgroundColor: '#FEF2F2',
+              border: '1.5px solid #FECACA',
+              color: '#991B1B',
+              '& .MuiAlert-icon': {
+                color: '#DC2626',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(239, 68, 68, 0.18)',
+                border: '1.5px solid #F87171',
+                color: '#FFFFFF',
+                boxShadow: '0 0 14px rgba(239, 68, 68, 0.18)',
+                '& .MuiAlert-icon': {
+                  color: '#F87171',
+                },
+                '& .MuiAlert-message': {
+                  color: '#FFFFFF',
+                },
+                '& .MuiTypography-root': {
+                  color: '#FFFFFF !important',
+                },
+              }),
+            },
+            '&.MuiAlert-standardWarning': {
+              backgroundColor: '#FFFBEB',
+              border: '1.5px solid #FDE68A',
+              color: '#92400E',
+              '& .MuiAlert-icon': {
+                color: '#D97706',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(245, 158, 11, 0.18)',
+                border: '1.5px solid #FBBF24',
+                color: '#FFFFFF',
+                '& .MuiAlert-icon': {
+                  color: '#FBBF24',
+                },
+                '& .MuiAlert-message': {
+                  color: '#FFFFFF',
+                },
+                '& .MuiTypography-root': {
+                  color: '#FFFFFF !important',
+                },
+              }),
+            },
+            '&.MuiAlert-standardInfo': {
+              backgroundColor: '#EFF6FF',
+              border: '1.5px solid #BFDBFE',
+              color: '#1E40AF',
+              '& .MuiAlert-icon': {
+                color: '#2563EB',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(59, 130, 246, 0.18)',
+                border: '1.5px solid #60A5FA',
+                color: '#FFFFFF',
+                '& .MuiAlert-icon': {
+                  color: '#60A5FA',
+                },
+                '& .MuiAlert-message': {
+                  color: '#FFFFFF',
+                },
+                '& .MuiTypography-root': {
+                  color: '#FFFFFF !important',
+                },
+              }),
+            },
+            '&.MuiAlert-standardSuccess': {
+              backgroundColor: '#F0FDF4',
+              border: '1.5px solid #BBF7D0',
+              color: '#166534',
+              '& .MuiAlert-icon': {
+                color: '#16A34A',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(34, 197, 94, 0.18)',
+                border: '1.5px solid #4ADE80',
+                color: '#FFFFFF',
+                '& .MuiAlert-icon': {
+                  color: '#4ADE80',
+                },
+                '& .MuiAlert-message': {
+                  color: '#FFFFFF',
+                },
+                '& .MuiTypography-root': {
+                  color: '#FFFFFF !important',
+                },
+              }),
+            },
+          }),
         },
         variants: [
           {
