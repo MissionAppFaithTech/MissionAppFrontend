@@ -22,6 +22,21 @@ Do **not** finish a task without all three. This is the default reminder for eve
 
 ---
 
+## Agent skills (versioned)
+
+Skills live in `.agents/skills/` (canonical) and are symlinked into `.claude/skills/`. Sources are pinned in `skills-lock.json`; restore with `npx skills experimental_install`, update with `npx skills update -p`. Load the matching skill before working in its area:
+
+| Skill                                                                   | Use for                                                                |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `nextjs`                                                                | App Router, route handlers, `proxy.ts`, caching, Server Components     |
+| `vercel-react-best-practices` / `vercel-composition-patterns`           | React 19 rendering, data fetching, component APIs (no `forwardRef`)    |
+| `zustand`                                                               | Stores, `persist` / `partialize`, SSR hydration, store tests           |
+| `frontend-design` / `web-design-guidelines`                             | MUI 9 + Tailwind 4 UI, tokens, interface guidelines review             |
+| `accessibility` / `modern-web-guidance`                                 | WCAG 2.2 AA, keyboard, screen readers, reduced motion, modern web APIs |
+| `frontend-testing` / `e2e-chrome-testing` / `playwright-screen-testing` | Vitest + RTL, Playwright E2E, axe and responsive checks                |
+
+---
+
 ## Mandatory contribution standards
 
 **Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).**
