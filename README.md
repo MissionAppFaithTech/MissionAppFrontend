@@ -157,17 +157,18 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 
 ## ✔️ Pré-requisitos
 
-- **Node.js** — versão pinada em [`.node-version`](./.node-version) (`24.18.0`, alinhada ao backend). Mínimo suportado: 20+ (`engines` no `package.json`).
-- **pnpm** 11.5+ (lockfile oficial: `pnpm-lock.yaml`) — mesma família do [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend)
+- **Node.js** — versão pinada em [`.node-version`](./.node-version) (`24.21.0`, alinhada ao backend). Mínimo suportado: 20+ (`engines` no `package.json`).
+- **pnpm** — versão fixada em `packageManager` no `package.json` (`12.16.1`; lockfile oficial: `pnpm-lock.yaml`) — mesma família do [MissionApp Backend](https://github.com/MissionAppFaithTech/MissionAppBackend)
 
 > Use **somente pnpm** (via Corepack). Não rode `npm install` / `yarn` neste repositório.
 
 Recomendado: [mise](https://mise.jdx.dev/) (ou outro version manager) para ler `.node-version` automaticamente.
 
 ```bash
-corepack enable
-corepack prepare pnpm@11.9.0 --activate
+corepack enable   # passa a usar o pnpm fixado em packageManager
 ```
+
+> **Idade mínima de pacotes:** o `pnpm-workspace.yaml` define `minimumReleaseAge: 1440`, então só são instaladas versões publicadas há pelo menos 24 h — localmente e no CI. Uma versão mais nova só entra listada em `minimumReleaseAgeExclude`.
 
 ---
 

@@ -83,7 +83,7 @@ MissionApp Frontend is the **Next.js** web client for Mission App (missionaries 
 | Framework                        | Next.js 16 (App Router)                                                                                                                                  |
 | UI                               | React 19 + MUI 9 + Tailwind 4                                                                                                                            |
 | Node.js                          | Pin in `.node-version` (align with backend)                                                                                                              |
-| Package manager                  | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo                                                                           |
+| Package manager                  | pnpm (`packageManager`: `pnpm@12.16.1`, lockfile: `pnpm-lock.yaml`, 24 h `minimumReleaseAge`) — never npm/yarn in this repo                              |
 | Theme / tokens                   | `src/theme/theme.ts`                                                                                                                                     |
 | Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                                                                                          |
 | CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build                                                                                        |
