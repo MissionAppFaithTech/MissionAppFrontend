@@ -66,4 +66,40 @@ describe('RoleGate / useRoleGuard', () => {
     expect(await screen.findByText('Área protegida')).toBeInTheDocument();
     expect(replace).not.toHaveBeenCalled();
   });
+
+  it('does nothing once the page is gone before the session answers', async () => {
+    let answer: (status: SessionStatus) => void = () => {};
+    useSessionStore.setState({
+      loadSession: vi.fn(
+        () =>
+          new Promise<SessionStatus>((resolve) => {
+            answer = (status) => {
+              useSessionStore.setState({ status, role: 'MISSIONARY' });
+              resolve(status);
+            };
+          })
+      ),
+    });
+    const { unmount } = renderGate();
+    unmount();
+
+    answer('authenticated');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('checks again when the path changes to another area', async () => {
+    session('authenticated', 'SUPPORTER');
+    const { rerender } = renderGate();
+    expect(await screen.findByText('Área protegida')).toBeInTheDocument();
+
+    pathname = '/profile/financeiro';
+    rerender(
+      <RoleGate>
+        <p>Área protegida</p>
+      </RoleGate>
+    );
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/profile/supporter'));
+  });
 });

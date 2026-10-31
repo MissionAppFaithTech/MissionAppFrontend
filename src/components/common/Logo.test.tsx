@@ -47,4 +47,11 @@ describe('Logo', () => {
 
     expect(link()).toHaveAttribute('href', '/navegacao');
   });
+
+  it('falls back to the landing page while the session is unknown, even with a stale role', () => {
+    useSessionStore.setState({ status: 'unknown', role: 'MISSIONARY' });
+    render(<Logo />);
+
+    expect(link()).toHaveAttribute('href', '/');
+  });
 });

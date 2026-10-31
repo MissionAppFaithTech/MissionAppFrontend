@@ -60,6 +60,13 @@ describe('accessDecision', () => {
     expect(accessDecision(null, '/profile/missionario/samuel')).toEqual({ allow: true });
   });
 
+  it('sends visitors to login with just the path when there is no query', () => {
+    expect(accessDecision(null, '/admin')).toEqual({
+      allow: false,
+      redirectTo: '/login?next=%2Fadmin',
+    });
+  });
+
   it('sends visitors to login, keeping the path and query in next', () => {
     expect(accessDecision(null, '/profile/sobre', '?tab=1')).toEqual({
       allow: false,
