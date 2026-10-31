@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
+// Resets every zustand store after each test (__mocks__/zustand.ts).
+vi.mock('zustand');
+
 // Mock window.matchMedia for MUI Responsive & jsdom
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
