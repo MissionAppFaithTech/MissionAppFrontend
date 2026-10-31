@@ -13,6 +13,8 @@ export interface SessionState {
   role: SessionInfo['role'];
   /** Asks the BFF who is logged in. Never throws. */
   loadSession: () => Promise<SessionStatus>;
+  /** Records the user returned by a successful login, so guards and the logo know the role at once. */
+  setAuthenticated: (user: { id: string; role?: SessionInfo['role'] }) => void;
   /** Ends the session on the backend, clears cookies and every user-scoped store. */
   logout: () => Promise<void>;
   /** Local cleanup after the BFF reported 401 (cookies are already gone). */
@@ -47,7 +49,8 @@ export const useSessionStore = create<SessionState>()((set) => ({
           set({ status: 'anonymous', userId: null, role: null });
           return 'anonymous';
         }
-        set({ status: 'unknown' });
+        // Unknown means unknown: never keep a previous user's role next to it.
+        set({ status: 'unknown', userId: null, role: null });
         return 'unknown';
       } finally {
         pendingSession = null;
@@ -55,6 +58,9 @@ export const useSessionStore = create<SessionState>()((set) => ({
     })();
     return pendingSession;
   },
+
+  setAuthenticated: (user) =>
+    set({ status: 'authenticated', userId: user.id, role: user.role ?? null }),
 
   logout: async () => {
     // If the BFF is unreachable the cookies are still set: keep the local state in

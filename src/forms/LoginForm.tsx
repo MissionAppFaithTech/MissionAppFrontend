@@ -107,11 +107,7 @@ export default function LoginForm() {
       const { user } = await login({ login: data.email, password: data.password });
       // Drop anything cached for a previous user before entering the new session.
       clearUserStores();
-      useSessionStore.setState({
-        status: 'authenticated',
-        userId: user.id,
-        role: user.role ?? null,
-      });
+      useSessionStore.getState().setAuthenticated(user);
       router.push(postLoginPath(user.role, searchParams.get('next')));
       router.refresh();
     } catch (err) {

@@ -4,11 +4,14 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { ThemeProvider, useColorScheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useTheme } from 'next-themes';
-import { useThemeStore } from '@/stores/themeStore';
 import { createAppTheme } from './theme';
 
+/** Key of the removed zustand theme store; its value duplicated next-themes' own `theme`. */
+const LEGACY_THEME_STORE_KEY = 'missionapp_theme_mode_v1';
+
 /**
- * Mirrors next-themes and zustand theme store into MUI's color scheme.
+ * Mirrors next-themes, the single source of truth for the theme, into MUI's
+ * color scheme.
  *
  * next-themes owns the `.dark` class on <html>, which is what drives the CSS
  * variables. But a lot of components read `theme.palette.mode` at render time,
@@ -19,14 +22,20 @@ import { createAppTheme } from './theme';
 function ColorSchemeBridge() {
   const { resolvedTheme } = useTheme();
   const { mode, setMode } = useColorScheme();
-  const zustandSetMode = useThemeStore((s) => s.setMode);
+
+  useEffect(() => {
+    try {
+      window.localStorage.removeItem(LEGACY_THEME_STORE_KEY);
+    } catch {
+      // Storage can be blocked (private mode, sandboxed iframe).
+    }
+  }, []);
 
   useEffect(() => {
     if (!resolvedTheme) return;
     const next = resolvedTheme === 'dark' ? 'dark' : 'light';
     if (mode !== next) setMode(next);
-    zustandSetMode(next);
-  }, [resolvedTheme, mode, setMode, zustandSetMode]);
+  }, [resolvedTheme, mode, setMode]);
 
   return null;
 }

@@ -114,11 +114,34 @@ describe('sessionStore', () => {
       ['a server error', () => Promise.resolve(jsonResponse({}, 500))],
       ['a network failure', () => Promise.reject(new TypeError('Failed to fetch'))],
     ])('stays unknown (never throws) on %s', async (_label, respond) => {
-      useSessionStore.setState({ status: 'authenticated' });
+      useSessionStore.setState({ status: 'authenticated', userId: 'user-1', role: 'MISSIONARY' });
       fetchSpy.mockImplementation(respond);
 
       await expect(useSessionStore.getState().loadSession()).resolves.toBe('unknown');
-      expect(useSessionStore.getState().status).toBe('unknown');
+      // No previous user's role survives next to an unknown session.
+      expect(useSessionStore.getState()).toMatchObject({
+        status: 'unknown',
+        userId: null,
+        role: null,
+      });
+    });
+  });
+
+  describe('setAuthenticated', () => {
+    it('records the logged-in user and role', () => {
+      useSessionStore.getState().setAuthenticated({ id: 'user-9', role: 'SUPPORTER' });
+
+      expect(useSessionStore.getState()).toMatchObject({
+        status: 'authenticated',
+        userId: 'user-9',
+        role: 'SUPPORTER',
+      });
+    });
+
+    it('stores a missing role as null', () => {
+      useSessionStore.getState().setAuthenticated({ id: 'user-9' });
+
+      expect(useSessionStore.getState().role).toBeNull();
     });
   });
 
