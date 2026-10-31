@@ -17,11 +17,17 @@ export async function createMissionaryProfile(missionaryAgencyId: string): Promi
   return { id: data.missionary.id ?? '' };
 }
 
-/** Links the missionary to a faith community (requires a missionary session). */
-export async function linkFaithCommunity(faithCommunityId: string): Promise<void> {
+/**
+ * Saves the sign-up data that only a missionary session can write: the faith
+ * community link and the project description (shown as the "Sobre" biography).
+ */
+export async function completeMissionaryAbout(payload: {
+  faithCommunityId?: string;
+  aboutMe?: string;
+}): Promise<void> {
   await bffRequest('/api/missionaries/about', {
     method: 'PATCH',
-    body: { faithCommunityId },
-    fallbackMessage: 'Não foi possível vincular a comunidade de fé',
+    body: payload,
+    fallbackMessage: 'Não foi possível concluir os dados do seu perfil missionário',
   });
 }

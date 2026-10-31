@@ -131,6 +131,8 @@ export function localizeFieldError(error: VineFieldError): string {
  */
 export function toBffError(status: number, body: unknown, fallback: string): BffErrorBody {
   const statusMessage = STATUS_MESSAGES_PT[status];
+  // Rate-limit bodies are generic English text: the pt-BR status copy says it better.
+  if (status === 429) return { message: STATUS_MESSAGES_PT[429] };
 
   if (typeof body === 'object' && body !== null) {
     const errors = (body as { errors?: unknown }).errors;

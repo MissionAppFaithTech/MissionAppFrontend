@@ -82,4 +82,31 @@ describe('/api/missionary-agencies', () => {
       accessToken: 'access-token',
     });
   });
+
+  it('lists without a session (public catalog) and sends no token', async () => {
+    cookiesGet.mockReturnValue(undefined);
+    vi.mocked(backendFetch).mockResolvedValue({
+      data: { missionaryAgencies: [{ id: 'x-1', name: 'JOCUM' }] },
+    });
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(backendFetch).toHaveBeenCalledWith(expect.stringMatching(/^\//));
+    expect(vi.mocked(backendFetch).mock.calls[0]).toHaveLength(1);
+  });
+
+  it('maps the public listing rate limit (429) to a pt-BR message', async () => {
+    const { BackendApiError } = await import('@/lib/api/backend');
+    vi.mocked(backendFetch).mockRejectedValue(
+      new BackendApiError('Too many requests', 429, { message: 'Too many requests' })
+    );
+
+    const response = await GET();
+
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({
+      message: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
+    });
+  });
 });

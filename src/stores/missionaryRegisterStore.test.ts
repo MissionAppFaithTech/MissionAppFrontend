@@ -10,6 +10,7 @@ import * as accountService from '@/services/account.service';
 import * as authService from '@/services/auth.service';
 import * as catalogService from '@/services/catalog.service';
 import * as missionaryService from '@/services/missionary.service';
+import * as profileService from '@/services/profile.service';
 import { useMissionaryRegisterStore } from './missionaryRegisterStore';
 
 vi.mock('@/services/account.service', () => ({
@@ -29,7 +30,11 @@ vi.mock('@/services/catalog.service', () => ({
 
 vi.mock('@/services/missionary.service', () => ({
   createMissionaryProfile: vi.fn(),
-  linkFaithCommunity: vi.fn(),
+  completeMissionaryAbout: vi.fn(),
+}));
+
+vi.mock('@/services/profile.service', () => ({
+  updateMissionaryIdentity: vi.fn(),
 }));
 
 const registerAccount = vi.mocked(accountService.registerAccount);
@@ -37,7 +42,8 @@ const login = vi.mocked(authService.login);
 const createMissionaryAgency = vi.mocked(catalogService.createMissionaryAgency);
 const createFaithCommunity = vi.mocked(catalogService.createFaithCommunity);
 const createMissionaryProfile = vi.mocked(missionaryService.createMissionaryProfile);
-const linkFaithCommunity = vi.mocked(missionaryService.linkFaithCommunity);
+const completeMissionaryAbout = vi.mocked(missionaryService.completeMissionaryAbout);
+const updateMissionaryIdentity = vi.mocked(profileService.updateMissionaryIdentity);
 
 const STORAGE_KEY = 'missionapp_missionary_register_v1';
 const PASSWORD = 'StrongPassword123!';
@@ -76,7 +82,8 @@ describe('missionaryRegisterStore', () => {
     createMissionaryAgency.mockResolvedValue({ id: 'agency-new', name: 'Nova Agência' });
     createFaithCommunity.mockResolvedValue({ id: 'community-new', name: 'Nova Comunidade' });
     createMissionaryProfile.mockResolvedValue({ id: 'missionary-1' });
-    linkFaithCommunity.mockResolvedValue(undefined);
+    completeMissionaryAbout.mockResolvedValue(undefined);
+    updateMissionaryIdentity.mockResolvedValue(undefined);
     useMissionaryRegisterStore.getState().reset();
     window.sessionStorage.clear();
     window.localStorage.clear();
@@ -189,11 +196,22 @@ describe('missionaryRegisterStore', () => {
       });
       expect(createMissionaryProfile).toHaveBeenCalledWith('agency-1');
       expect(login).toHaveBeenCalledWith({ login: 'joao@example.com', password: PASSWORD });
-      expect(linkFaithCommunity).toHaveBeenCalledWith('community-1');
+      expect(updateMissionaryIdentity).toHaveBeenCalledWith({
+        identityType: 'CPF',
+        identityDocument: '12345678909',
+      });
+      expect(completeMissionaryAbout).toHaveBeenCalledWith({
+        faithCommunityId: 'community-1',
+        aboutMe: 'Evangelismo no interior',
+      });
 
-      const order = [registerAccount, createMissionaryProfile, login, linkFaithCommunity].map(
-        (fn) => fn.mock.invocationCallOrder[0]
-      );
+      const order = [
+        registerAccount,
+        createMissionaryProfile,
+        login,
+        updateMissionaryIdentity,
+        completeMissionaryAbout,
+      ].map((fn) => fn.mock.invocationCallOrder[0]);
       expect(order).toEqual([...order].sort((a, b) => a - b));
 
       expect(createMissionaryAgency).not.toHaveBeenCalled();
@@ -215,12 +233,12 @@ describe('missionaryRegisterStore', () => {
       expect(state.formData).not.toHaveProperty('confirmPassword');
     });
 
-    it('logs in but does not link a community when none was chosen', async () => {
+    it('saves only the description when no community was chosen', async () => {
       startStep3({ faithCommunity: '' });
       await submit();
 
       expect(login).toHaveBeenCalledTimes(1);
-      expect(linkFaithCommunity).not.toHaveBeenCalled();
+      expect(completeMissionaryAbout).toHaveBeenCalledWith({ aboutMe: 'Evangelismo no interior' });
       expect(useMissionaryRegisterStore.getState().step).toBe(4);
     });
 
@@ -241,7 +259,35 @@ describe('missionaryRegisterStore', () => {
         expect.objectContaining({ name: 'Nova Comunidade' })
       );
       expect(createMissionaryProfile).toHaveBeenCalledWith('agency-new');
-      expect(linkFaithCommunity).toHaveBeenCalledWith('community-new');
+      expect(completeMissionaryAbout).toHaveBeenCalledWith(
+        expect.objectContaining({ faithCommunityId: 'community-new' })
+      );
+    });
+
+    it('skips identity and Sobre calls when there is nothing to send', async () => {
+      startStep3({ document: '   ', faithCommunity: '', missionDescription: '  ' });
+      await submit();
+
+      expect(updateMissionaryIdentity).not.toHaveBeenCalled();
+      expect(completeMissionaryAbout).not.toHaveBeenCalled();
+      expect(useMissionaryRegisterStore.getState().step).toBe(4);
+    });
+
+    it('trims the description before saving it as the biography', async () => {
+      startStep3({ faithCommunity: '', missionDescription: '  Plantação de igrejas  ' });
+      await submit();
+
+      expect(completeMissionaryAbout).toHaveBeenCalledWith({ aboutMe: 'Plantação de igrejas' });
+    });
+
+    it('sends a passport when the document has letters', async () => {
+      startStep3({ document: 'fx-123456' });
+      await submit();
+
+      expect(updateMissionaryIdentity).toHaveBeenCalledWith({
+        identityType: 'PASSPORT',
+        identityDocument: 'FX123456',
+      });
     });
 
     it('skips the community when SELECT_OTHER has no name', async () => {
@@ -249,7 +295,7 @@ describe('missionaryRegisterStore', () => {
       await submit();
 
       expect(createFaithCommunity).not.toHaveBeenCalled();
-      expect(linkFaithCommunity).not.toHaveBeenCalled();
+      expect(completeMissionaryAbout).toHaveBeenCalledWith({ aboutMe: 'Evangelismo no interior' });
       expect(useMissionaryRegisterStore.getState().step).toBe(4);
     });
 
@@ -302,7 +348,9 @@ describe('missionaryRegisterStore', () => {
       expect(createMissionaryProfile).toHaveBeenCalledTimes(2);
       expect(createMissionaryProfile).toHaveBeenLastCalledWith('agency-new');
       expect(login).toHaveBeenCalledTimes(1);
-      expect(linkFaithCommunity).toHaveBeenCalledWith('community-new');
+      expect(completeMissionaryAbout).toHaveBeenCalledWith(
+        expect.objectContaining({ faithCommunityId: 'community-new' })
+      );
       expect(useMissionaryRegisterStore.getState().step).toBe(4);
     });
 
@@ -315,20 +363,35 @@ describe('missionaryRegisterStore', () => {
         accountCreated: true,
         missionaryCreated: true,
       });
-      expect(linkFaithCommunity).not.toHaveBeenCalled();
+      expect(completeMissionaryAbout).not.toHaveBeenCalled();
 
       await submit();
 
       expect(registerAccount).toHaveBeenCalledTimes(1);
       expect(createMissionaryProfile).toHaveBeenCalledTimes(1);
       expect(login).toHaveBeenCalledTimes(2);
-      expect(linkFaithCommunity).toHaveBeenCalledTimes(1);
+      expect(completeMissionaryAbout).toHaveBeenCalledTimes(1);
       expect(useMissionaryRegisterStore.getState().step).toBe(4);
     });
 
-    it('retries only login + link when linkFaithCommunity fails', async () => {
+    it('retries the identity without repeating earlier steps', async () => {
       startStep3();
-      linkFaithCommunity.mockRejectedValueOnce(new ApiError('Comunidade inválida', 422));
+      updateMissionaryIdentity.mockRejectedValueOnce(new ApiError('Documento inválido', 422));
+
+      await expect(submit()).rejects.toThrow('Documento inválido');
+      expect(completeMissionaryAbout).not.toHaveBeenCalled();
+
+      await submit();
+
+      expect(registerAccount).toHaveBeenCalledTimes(1);
+      expect(createMissionaryProfile).toHaveBeenCalledTimes(1);
+      expect(updateMissionaryIdentity).toHaveBeenCalledTimes(2);
+      expect(completeMissionaryAbout).toHaveBeenCalledTimes(1);
+    });
+
+    it('retries only the failed step when saving the Sobre data fails', async () => {
+      startStep3();
+      completeMissionaryAbout.mockRejectedValueOnce(new ApiError('Comunidade inválida', 422));
 
       await expect(submit()).rejects.toThrow('Comunidade inválida');
       expect(useMissionaryRegisterStore.getState().step).toBe(3);
@@ -337,7 +400,8 @@ describe('missionaryRegisterStore', () => {
 
       expect(registerAccount).toHaveBeenCalledTimes(1);
       expect(createMissionaryProfile).toHaveBeenCalledTimes(1);
-      expect(linkFaithCommunity).toHaveBeenCalledTimes(2);
+      expect(updateMissionaryIdentity).toHaveBeenCalledTimes(1);
+      expect(completeMissionaryAbout).toHaveBeenCalledTimes(2);
       expect(useMissionaryRegisterStore.getState().step).toBe(4);
     });
   });

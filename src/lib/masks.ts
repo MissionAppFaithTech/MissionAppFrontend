@@ -25,6 +25,25 @@ export function maskCpfOrPassport(value: string): string {
   return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
+/**
+ * Same split as {@link maskCpfOrPassport}: letters mean passport, exactly 11 digits
+ * mean CPF, anything else (e.g. numeric passports) is a passport.
+ */
+export function toIdentityPayload(document: string): {
+  identityType: 'CPF' | 'PASSPORT';
+  identityDocument: string;
+} {
+  const trimmed = document.trim();
+  const digits = trimmed.replace(/\D/g, '');
+  if (!/[a-zA-Z]/.test(trimmed) && digits.length === 11) {
+    return { identityType: 'CPF', identityDocument: digits };
+  }
+  return {
+    identityType: 'PASSPORT',
+    identityDocument: trimmed.replace(/[^a-zA-Z0-9]/g, '').toUpperCase(),
+  };
+}
+
 export function normalizeEmail(value: string): string {
   return value.replace(/\s/g, '').toLowerCase();
 }

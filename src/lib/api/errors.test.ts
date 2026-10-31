@@ -269,3 +269,11 @@ describe('toBffError status-specific session message', () => {
     });
   });
 });
+
+describe('toBffError rate limit', () => {
+  it('always uses the pt-BR rate limit message', () => {
+    expect(toBffError(429, { message: 'Too many requests' }, 'Falhou')).toEqual({
+      message: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
+    });
+  });
+});

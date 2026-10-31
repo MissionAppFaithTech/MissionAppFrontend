@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import { ApiError } from '@/lib/api/client';
-import { createMissionaryProfile, linkFaithCommunity } from './missionary.service';
+import { completeMissionaryAbout, createMissionaryProfile } from './missionary.service';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -69,28 +69,32 @@ describe('missionary.service', () => {
     });
   });
 
-  describe('linkFaithCommunity', () => {
-    it('PATCHes the community id to /api/missionaries/about', async () => {
+  describe('completeMissionaryAbout', () => {
+    it('PATCHes the community id and description to /api/missionaries/about', async () => {
       fetchSpy.mockResolvedValue(jsonResponse({ data: { missionary: { id: 'm-1' } } }));
 
-      await expect(linkFaithCommunity('fc-1')).resolves.toBeUndefined();
+      await expect(
+        completeMissionaryAbout({ faithCommunityId: 'fc-1', aboutMe: 'Bio' })
+      ).resolves.toBeUndefined();
       expect(lastCall()).toEqual({
         path: '/api/missionaries/about',
         method: 'PATCH',
-        body: { faithCommunityId: 'fc-1' },
+        body: { faithCommunityId: 'fc-1', aboutMe: 'Bio' },
       });
     });
 
     it('falls back to a localized message on failure', async () => {
       fetchSpy.mockResolvedValue(jsonResponse(null, 500));
-      await expect(linkFaithCommunity('fc-1')).rejects.toThrow(
-        'Não foi possível vincular a comunidade de fé'
-      );
+      await expect(
+        completeMissionaryAbout({ faithCommunityId: 'fc-1', aboutMe: 'Bio' })
+      ).rejects.toThrow('Não foi possível concluir os dados do seu perfil missionário');
     });
 
     it('rejects with status 401 when the missionary session is missing', async () => {
       fetchSpy.mockResolvedValue(jsonResponse({ message: 'Não autenticado' }, 401));
-      await expect(linkFaithCommunity('fc-1')).rejects.toMatchObject({ status: 401 });
+      await expect(
+        completeMissionaryAbout({ faithCommunityId: 'fc-1', aboutMe: 'Bio' })
+      ).rejects.toMatchObject({ status: 401 });
     });
   });
 });

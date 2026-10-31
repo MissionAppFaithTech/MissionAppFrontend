@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { backendFetch } from '@/lib/api/backend';
-import { readJsonBody, withSession } from '@/lib/api/bff';
+import { bffErrorResponse, readJsonBody, withSession } from '@/lib/api/bff';
 import { normalizeCatalogList } from '@/services/catalog.service';
 
 const createBodySchema = z.object({
@@ -16,15 +16,18 @@ const createBodySchema = z.object({
   website: z.string().trim().optional(),
 });
 
+/** Public listing (backend PR #137): no session needed, so sign-up can list it. */
 export async function GET() {
-  return withSession(
-    'api/faith-communities GET',
-    'Não foi possível carregar as comunidades de fé',
-    async (accessToken) => {
-      const result = await backendFetch('/faith-communities', { accessToken });
-      return NextResponse.json(normalizeCatalogList(result, 'faithCommunities'));
-    }
-  );
+  try {
+    const result = await backendFetch('/faith-communities');
+    return NextResponse.json(normalizeCatalogList(result, 'faithCommunities'));
+  } catch (error) {
+    return bffErrorResponse(
+      error,
+      'Não foi possível carregar as comunidades de fé',
+      'api/faith-communities GET'
+    );
+  }
 }
 
 export async function POST(request: Request) {

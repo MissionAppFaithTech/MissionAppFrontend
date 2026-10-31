@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { backendFetch } from '@/lib/api/backend';
-import { readJsonBody, withSession } from '@/lib/api/bff';
+import { bffErrorResponse, readJsonBody, withSession } from '@/lib/api/bff';
 import { normalizeCatalogList } from '@/services/catalog.service';
 
 const createBodySchema = z.object({
@@ -16,15 +16,18 @@ const createBodySchema = z.object({
   website: z.string().trim().optional(),
 });
 
+/** Public listing (backend PR #137): no session needed, so sign-up can list it. */
 export async function GET() {
-  return withSession(
-    'api/missionary-agencies GET',
-    'Não foi possível carregar as agências missionárias',
-    async (accessToken) => {
-      const result = await backendFetch('/missionary-agencies', { accessToken });
-      return NextResponse.json(normalizeCatalogList(result, 'missionaryAgencies'));
-    }
-  );
+  try {
+    const result = await backendFetch('/missionary-agencies');
+    return NextResponse.json(normalizeCatalogList(result, 'missionaryAgencies'));
+  } catch (error) {
+    return bffErrorResponse(
+      error,
+      'Não foi possível carregar as agências missionárias',
+      'api/missionary-agencies GET'
+    );
+  }
 }
 
 export async function POST(request: Request) {
