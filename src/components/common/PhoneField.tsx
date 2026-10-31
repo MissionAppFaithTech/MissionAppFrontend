@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, type Ref } from 'react';
+import { useId, type ChangeEvent, type Ref } from 'react';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -24,6 +24,21 @@ type PhoneFieldProps = {
   /** Lets react-hook-form focus the input on validation errors. */
   inputRef?: Ref<HTMLInputElement>;
 };
+
+/**
+ * The field hides the bare dial code to show the placeholder, so a number pasted or
+ * autofilled without "+" would be read as international ("21…" → +21). Treat it as a
+ * national number of the selected country instead; keep it if it already carries the code.
+ */
+export function withDialCode(raw: string, dialCode: string): string {
+  const trimmed = raw.trimStart();
+  if (!trimmed || trimmed.startsWith('+')) return raw;
+  const digits = trimmed.replace(/\D/g, '');
+  if (!digits) return raw;
+  // E.164 national numbers have at most 12 digits here; longer input already includes the code.
+  if (digits.startsWith(dialCode) && digits.length > 11) return `+${digits}`;
+  return `+${dialCode}${digits}`;
+}
 
 /** Valor só com DDI (ex: +55) — conta como vazio para mostrar o placeholder. */
 function isOnlyDialCode(phone: string): boolean {
@@ -70,7 +85,11 @@ export default function PhoneField({
         notched={hideLabel ? false : true}
         size={size}
         value={inputValue}
-        onChange={handlePhoneValueChange}
+        onChange={(event: ChangeEvent<HTMLInputElement>) => {
+          const normalized = withDialCode(event.target.value, country.dialCode);
+          if (normalized !== event.target.value) event.target.value = normalized;
+          handlePhoneValueChange(event);
+        }}
         placeholder={placeholder}
         autoComplete="tel"
         inputMode="tel"

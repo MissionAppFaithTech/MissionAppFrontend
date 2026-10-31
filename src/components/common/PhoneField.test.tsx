@@ -1,7 +1,7 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import PhoneField from './PhoneField';
+import PhoneField, { withDialCode } from './PhoneField';
 
 describe('PhoneField', () => {
   it('associates the visible label with the phone input', () => {
@@ -45,5 +45,33 @@ describe('PhoneField', () => {
     await user.type(screen.getByLabelText(/^telefone$/i), '11987654321');
 
     expect(handleChange).toHaveBeenCalled();
+  });
+
+  it('treats a pasted or autofilled number without "+" as national (not +21…)', () => {
+    const onChange = vi.fn();
+    render(<PhoneField value="" onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText(/^telefone$/i), { target: { value: '21987654321' } });
+
+    expect(onChange).toHaveBeenLastCalledWith('+5521987654321');
+  });
+});
+
+describe('withDialCode', () => {
+  it.each([
+    ['21987654321', '+5521987654321'],
+    ['(21) 98765-4321', '+5521987654321'],
+    ['5521987654321', '+5521987654321'],
+    ['+5521987654321', '+5521987654321'],
+    ['+1 415 555 0100', '+1 415 555 0100'],
+    ['2', '+552'],
+    // DDD 55 (RS): 11 national digits that happen to start with the country code
+    ['(55) 98765-4321', '+5555987654321'],
+    ['55123', '+5555123'],
+    [' +5521987654321', ' +5521987654321'],
+    ['abc', 'abc'],
+    ['', ''],
+  ])('%s → %s', (raw, expected) => {
+    expect(withDialCode(raw, '55')).toBe(expected);
   });
 });
