@@ -91,6 +91,10 @@ describe('a11yPreferencesStore', () => {
     expect(root.getAttribute('data-a11y-contrast')).toBe('normal');
   });
 
+  it('pre-paint script reads the same storage key as the store', () => {
+    expect(A11Y_PRE_PAINT_SCRIPT).toContain(`'${A11Y_STORAGE_KEY}'`);
+  });
+
   it('pre-paint script survives corrupted storage', () => {
     localStorage.setItem(A11Y_STORAGE_KEY, '{not json');
     expect(() => new Function(A11Y_PRE_PAINT_SCRIPT)()).not.toThrow();
