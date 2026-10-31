@@ -1,13 +1,19 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ContactModal from '@/components/profile/ContactModal';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('ContactModal Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   const mockContact = {
     publicEmail: 'samuelhe@gmail.com',
     publicPhone: '+55 (21) 98765-4321',
     whatsappNumber: '+5521987654321',
+    allowWhatsappContact: true,
   };
 
   it('renders title, WhatsApp and E-mail public information', () => {
@@ -41,9 +47,16 @@ describe('ContactModal Component', () => {
 
     await user.click(copyButtons[0]);
     expect(writeTextSpy).toHaveBeenCalledWith(mockContact.publicPhone);
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Telefone copiado para a área de transferência!',
+      severity: 'success',
+    });
 
     await user.click(copyButtons[1]);
     expect(writeTextSpy).toHaveBeenCalledWith(mockContact.publicEmail);
+    expect(useFeedbackStore.getState().current?.message).toBe(
+      'E-mail copiado para a área de transferência!'
+    );
   });
 
   it('hides the public email when showPublicEmail is false', () => {
@@ -69,5 +82,37 @@ describe('ContactModal Component', () => {
     const editShortcut = screen.getByRole('link', { name: /editar contatos públicos/i });
     expect(editShortcut).toBeInTheDocument();
     expect(editShortcut).toHaveAttribute('href', '/profile/edit-profile');
+  });
+
+  it('shows a plain phone without the WhatsApp action when the number is not WhatsApp', () => {
+    render(
+      <ContactModal
+        open={true}
+        onClose={vi.fn()}
+        contact={{ publicEmail: '', publicPhone: '+5521987654321', allowWhatsappContact: false }}
+      />
+    );
+
+    expect(screen.getByText('Telefone')).toBeInTheDocument();
+    expect(screen.queryByText('Telefone e WhatsApp')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /conversar/i })).not.toBeInTheDocument();
+  });
+
+  it('treats an unanswered WhatsApp question as not WhatsApp', () => {
+    render(
+      <ContactModal
+        open={true}
+        onClose={vi.fn()}
+        contact={{ publicEmail: '', publicPhone: '+5521987654321' }}
+      />
+    );
+
+    expect(screen.queryByRole('link', { name: /conversar/i })).not.toBeInTheDocument();
+  });
+
+  it('labels a confirmed WhatsApp number and links to it', () => {
+    render(<ContactModal open={true} onClose={vi.fn()} contact={mockContact} />);
+
+    expect(screen.getByText('Telefone e WhatsApp')).toBeInTheDocument();
   });
 });

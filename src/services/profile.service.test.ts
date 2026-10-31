@@ -124,6 +124,13 @@ describe('mapAccountProfile', () => {
     });
   });
 
+  it('enables WhatsApp only when the backend confirms the public phone takes it', () => {
+    const confirmed = buildPayload();
+    confirmed.missionary = { ...confirmed.missionary!, publicPhoneIsWhatsapp: true };
+    expect(mapAccountProfile(confirmed).contact?.allowWhatsappContact).toBe(true);
+    expect(mapAccountProfile(buildPayload()).contact?.allowWhatsappContact).toBe(false);
+  });
+
   it('strips backend-only ids from the work address', () => {
     const profile = mapAccountProfile(buildPayload());
     expect(profile.about.workAddress).not.toHaveProperty('id');
@@ -172,6 +179,7 @@ describe('mapAccountProfile', () => {
     expect(profile.contact).toEqual({
       publicEmail: '',
       publicPhone: '',
+      allowWhatsappContact: false,
       accountEmail: user.email,
       accountPhone: user.phoneNumber,
     });

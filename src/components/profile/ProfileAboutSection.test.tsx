@@ -41,7 +41,7 @@ describe('ProfileAboutSection', () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps showing agency and faith community next to the empty state', () => {
+  it('keeps showing the agency, but never the faith community, next to the empty state', () => {
     render(
       <ProfileAboutSection
         data={{ ...emptyAbout, missionaryAgency: 'JOCUM', faithCommunity: 'Igreja Central' }}
@@ -51,7 +51,8 @@ describe('ProfileAboutSection', () => {
 
     expect(screen.getByRole('button', { name: /preencher o sobre/i })).toBeInTheDocument();
     expect(screen.getByText('JOCUM')).toBeInTheDocument();
-    expect(screen.getByText('Igreja Central')).toBeInTheDocument();
+    expect(screen.queryByText('Igreja Central')).not.toBeInTheDocument();
+    expect(screen.queryByText(/comunidade de fé/i)).not.toBeInTheDocument();
   });
 
   it('opens the editor from the header edit button', async () => {
@@ -63,7 +64,7 @@ describe('ProfileAboutSection', () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('shows every RF 10.7.1 field, with the biography unlabeled and quotes as blockquotes', () => {
+  it('shows the RF 10.7.1 fields except the faith community, with quotes as blockquotes', () => {
     const { container } = render(
       <ProfileAboutSection data={populatedAbout} onEditAction={vi.fn()} />
     );
@@ -78,12 +79,8 @@ describe('ProfileAboutSection', () => {
     const terms = within(details)
       .getAllByRole('term')
       .map((term) => term.textContent);
-    expect(terms).toEqual([
-      'Local de origem',
-      'Local de atuação atual',
-      'Agência missionária',
-      'Comunidade de fé',
-    ]);
+    expect(terms).toEqual(['Local de origem', 'Local de atuação atual', 'Agência missionária']);
+    expect(screen.queryByText(populatedAbout.faithCommunity)).not.toBeInTheDocument();
     expect(within(details).getByText('Santarém - PA - Brasil')).toBeInTheDocument();
 
     const quotes = container.querySelectorAll('blockquote');

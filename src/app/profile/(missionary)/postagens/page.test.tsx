@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProfilePostsPage from './page';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('ProfilePostsPage - Postar button & collapsible Nova Postagem', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('initially renders the full-width Postar button and hides the Nova Postagem form', () => {
     render(<ProfilePostsPage />);
 
@@ -100,9 +105,10 @@ describe('ProfilePostsPage - Postar button & collapsible Nova Postagem', () => {
     await user.click(shareBtn);
 
     expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
-    expect(
-      await screen.findByText(/link copiado para a área de transferência!/i)
-    ).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Link copiado para a área de transferência!',
+      severity: 'success',
+    });
   });
 
   it('validates required content field on submit', async () => {

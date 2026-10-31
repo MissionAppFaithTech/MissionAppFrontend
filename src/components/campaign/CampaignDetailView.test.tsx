@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CampaignDetailView from './CampaignDetailView';
 import { mockCampaign } from '@/mocks/campaign';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('CampaignDetailView component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders campaign hero title, subtitle, dates, and full description', () => {
     render(<CampaignDetailView campaign={mockCampaign} />);
 
@@ -49,8 +54,9 @@ describe('CampaignDetailView component', () => {
     await user.click(shareBtn);
 
     expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
-    expect(
-      await screen.findByText(/link copiado para a área de transferência!/i)
-    ).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Link copiado para a área de transferência!',
+      severity: 'success',
+    });
   });
 });

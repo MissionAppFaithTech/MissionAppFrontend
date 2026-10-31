@@ -1,6 +1,6 @@
 'use client';
 
-import { Controller, type Control, type FieldErrors, type Path } from 'react-hook-form';
+import { Controller, useWatch, type Control, type FieldErrors, type Path } from 'react-hook-form';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -23,6 +23,11 @@ type PublicContactFieldsProps<T extends PublicContactFormValues> = {
   errors: FieldErrors<T>;
   /** Show the "exibir no perfil"/WhatsApp checkboxes (not persisted for missionaries yet). */
   visibilityToggles?: boolean;
+  /**
+   * Ask whether the phone takes WhatsApp, only once a phone is typed (missionaries
+   * persist it as `publicPhoneIsWhatsapp`). Defaults to `visibilityToggles`.
+   */
+  whatsappToggle?: boolean;
   /** Login e-mail/phone offered as an explicit "use my sign-up data" shortcut. */
   accountContact?: { email?: string; phone?: string };
 };
@@ -58,8 +63,12 @@ export default function PublicContactFields<T extends PublicContactFormValues>({
   control,
   errors,
   visibilityToggles = true,
+  whatsappToggle,
   accountContact,
 }: PublicContactFieldsProps<T>) {
+  const phoneValue = useWatch({ control, name: 'publicPhone' as Path<T> });
+  const hasPhone = typeof phoneValue === 'string' && phoneValue.replace(/\D/g, '').length > 3;
+  const askWhatsapp = visibilityToggles || (Boolean(whatsappToggle) && hasPhone);
   const emailError =
     typeof errors.publicEmail?.message === 'string' ? errors.publicEmail.message : undefined;
   const phoneError =
@@ -194,24 +203,26 @@ export default function PublicContactFields<T extends PublicContactFormValues>({
         </Stack>
 
         {visibilityToggles ? (
-          <>
-            <Controller
-              name={'showPublicPhone' as Path<T>}
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  sx={checkboxSx}
-                  control={
-                    <Checkbox
-                      checked={Boolean(field.value)}
-                      onChange={(event) => field.onChange(event.target.checked)}
-                      onBlur={field.onBlur}
-                    />
-                  }
-                  label="Exibir telefone no meu perfil"
-                />
-              )}
-            />
+          <Controller
+            name={'showPublicPhone' as Path<T>}
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                sx={checkboxSx}
+                control={
+                  <Checkbox
+                    checked={Boolean(field.value)}
+                    onChange={(event) => field.onChange(event.target.checked)}
+                    onBlur={field.onBlur}
+                  />
+                }
+                label="Exibir telefone no meu perfil"
+              />
+            )}
+          />
+        ) : null}
+        {askWhatsapp ? (
+          <Stack spacing={0.25}>
             <Controller
               name={'allowWhatsappContact' as Path<T>}
               control={control}
@@ -223,13 +234,21 @@ export default function PublicContactFields<T extends PublicContactFormValues>({
                       checked={Boolean(field.value)}
                       onChange={(event) => field.onChange(event.target.checked)}
                       onBlur={field.onBlur}
+                      slotProps={{ input: { 'aria-describedby': 'allowWhatsappContact-hint' } }}
                     />
                   }
                   label="Este número é um número de WhatsApp"
                 />
               )}
             />
-          </>
+            <Typography
+              id="allowWhatsappContact-hint"
+              variant="caption"
+              sx={{ color: 'text.secondary', pl: 5.5 }}
+            >
+              Se não marcar, o botão de WhatsApp não aparece no seu perfil.
+            </Typography>
+          </Stack>
         ) : null}
       </Stack>
     </Stack>

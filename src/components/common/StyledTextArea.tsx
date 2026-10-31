@@ -5,6 +5,12 @@ import FormHelperText from '@mui/material/FormHelperText';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import {
+  CharacterCounter,
+  CharacterLimitMessage,
+  characterLimitStatus,
+  limitReachedOutlineSx,
+} from '@/components/common/CharacterLimit';
 import { BUTTON_BORDER_RADIUS } from '@/theme/theme';
 
 export type StyledTextAreaProps = {
@@ -46,9 +52,13 @@ export default function StyledTextArea({
   const fieldId = id ?? `styled-textarea-${generatedId}`;
   const helperId = `${fieldId}-helper`;
   const countId = `${fieldId}-count`;
+  const limitId = `${fieldId}-limit`;
   const describedBy =
-    [helperText ? helperId : null, maxLength ? countId : null].filter(Boolean).join(' ') ||
-    undefined;
+    [helperText ? helperId : null, maxLength ? countId : null, maxLength ? limitId : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
+  const limitReached =
+    maxLength !== undefined && characterLimitStatus(value.length, maxLength) === 'reached';
   const visibleLabel = label.endsWith(':') ? label : `${label}:`;
 
   return (
@@ -86,17 +96,20 @@ export default function StyledTextArea({
           'aria-describedby': describedBy,
           'aria-required': required || undefined,
         }}
-        sx={{
-          borderRadius: BUTTON_BORDER_RADIUS,
-          bgcolor: 'action2.fieldBg',
-          alignItems: 'flex-start',
-          '& textarea': {
-            resize: 'vertical',
-            fontSize: { xs: '0.9375rem', sm: '1rem' },
-            lineHeight: 1.5,
-            py: 0.5,
+        sx={[
+          {
+            borderRadius: BUTTON_BORDER_RADIUS,
+            bgcolor: 'action2.fieldBg',
+            alignItems: 'flex-start',
+            '& textarea': {
+              resize: 'vertical',
+              fontSize: { xs: '0.9375rem', sm: '1rem' },
+              lineHeight: 1.5,
+              py: 0.5,
+            },
           },
-        }}
+          limitReached && !error ? limitReachedOutlineSx : null,
+        ]}
       />
       {helperText || maxLength ? (
         <Stack
@@ -113,17 +126,12 @@ export default function StyledTextArea({
             </FormHelperText>
           ) : null}
           {maxLength ? (
-            <Typography
-              id={countId}
-              variant="caption"
-              color={error ? 'error.main' : 'text.secondary'}
-              sx={{ flexShrink: 0 }}
-              aria-live="polite"
-            >
-              {value.length}/{maxLength} caracteres
-            </Typography>
+            <CharacterCounter id={countId} length={value.length} maxLength={maxLength} />
           ) : null}
         </Stack>
+      ) : null}
+      {maxLength ? (
+        <CharacterLimitMessage id={limitId} length={value.length} maxLength={maxLength} />
       ) : null}
     </Stack>
   );

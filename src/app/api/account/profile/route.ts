@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
 import { readJsonBody, withSession } from '@/lib/api/bff';
+import { BIO_MAX_LENGTH } from '@/schemas/profile.schema';
 import type {
   AccountProfilePayload,
   BackendMissionary,
@@ -20,7 +21,7 @@ const updateAccountProfileSchema = z.object({
     .regex(/^[a-z0-9_]+$/)
     .optional(),
   /** `null` clears the mini-bio. */
-  biography: z.string().trim().max(200).nullable().optional(),
+  biography: z.string().trim().max(BIO_MAX_LENGTH).nullable().optional(),
 });
 
 type BackendProfileResponse = {

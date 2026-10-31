@@ -216,7 +216,19 @@ export default function AccessibilityPreferencesButton(props: Omit<IconButtonPro
         {...props}
         onClick={() => setOpen(true)}
         sx={[
-          { color: 'inherit', minWidth: 44, minHeight: 44 },
+          {
+            // Tinted from the navbar's own text color, so it stays visible on the
+            // navy app bar and on the light landing header alike.
+            color: 'inherit',
+            minWidth: 44,
+            minHeight: 44,
+            border: '1px solid color-mix(in srgb, currentColor 35%, transparent)',
+            bgcolor: 'color-mix(in srgb, currentColor 10%, transparent)',
+            '&:hover, &:active': {
+              bgcolor: 'color-mix(in srgb, currentColor 20%, transparent)',
+            },
+            '&:focus-visible': { outline: '3px solid currentColor', outlineOffset: 2 },
+          },
           ...(Array.isArray(props.sx) ? props.sx : props.sx ? [props.sx] : []),
         ]}
       >

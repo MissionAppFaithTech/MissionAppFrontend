@@ -1,9 +1,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import DonationModal from '@/components/profile/DonationModal';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('DonationModal Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders modal title, message, and defaults to Pix tab', () => {
     render(
       <DonationModal
@@ -47,6 +52,10 @@ describe('DonationModal Component', () => {
     expect(writeTextSpy).toHaveBeenCalledWith(
       expect.stringContaining('Dados Bancários de Samuel Mendonça')
     );
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Dados bancários completos copiado com sucesso!',
+      severity: 'success',
+    });
   });
 
   it('shows owner preview indicator when isOwnProfile is true', () => {

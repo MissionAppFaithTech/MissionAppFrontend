@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
-import ProfileEditForm from '@/components/profile/ProfileEditForm';
+import ProfileEditForm, { buildPayloads } from '@/components/profile/ProfileEditForm';
 import { ApiError } from '@/lib/api/client';
 import { emptyProfile } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
@@ -55,7 +55,7 @@ describe('ProfileEditForm', () => {
     expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel Mendonça');
     expect(screen.getByLabelText(/nome de usuário/i)).toHaveValue('samuel_missionary');
     expect(screen.getByLabelText(/minibiografia/i)).toHaveValue('Missionário na África do Sul');
-    expect(screen.getByText('28/200 caracteres')).toBeInTheDocument();
+    expect(screen.getByText('28/70 caracteres')).toBeInTheDocument();
     // The private login e-mail is never prefilled as a public contact.
     expect(screen.getByLabelText(/^e-mail:$/i)).toHaveValue('');
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
@@ -64,6 +64,18 @@ describe('ProfileEditForm', () => {
       'href',
       '/profile/sobre'
     );
+  });
+
+  it('limits the mini-bio to 70 characters', async () => {
+    const user = userEvent.setup();
+    render(<ProfileEditForm profile={profile} />);
+
+    const bio = screen.getByLabelText(/minibiografia/i);
+    await user.clear(bio);
+    await user.type(bio, 'a'.repeat(80));
+
+    expect((bio as HTMLTextAreaElement).value).toHaveLength(70);
+    expect(screen.getByText('70/70 caracteres')).toBeInTheDocument();
   });
 
   it('fills the public e-mail from the sign-up e-mail only on explicit request', async () => {
@@ -189,5 +201,59 @@ describe('ProfileEditForm', () => {
 
     await user.click(screen.getByRole('button', { name: /salvar/i }));
     expect(saveHeader).not.toHaveBeenCalled();
+  });
+
+  it('asks whether the public phone is WhatsApp only after a phone is typed', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockResolvedValue(undefined);
+    render(<ProfileEditForm profile={profile} />);
+
+    const whatsappName = /este número é um número de whatsapp/i;
+    expect(screen.queryByRole('checkbox', { name: whatsappName })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /usar meu telefone de cadastro/i }));
+    const whatsapp = screen.getByRole('checkbox', { name: whatsappName });
+    expect(whatsapp).not.toBeChecked();
+    expect(whatsapp).toHaveAccessibleDescription(/o botão de whatsapp não aparece no seu perfil/i);
+
+    await user.click(whatsapp);
+    await user.click(screen.getByRole('button', { name: /salvar/i }));
+
+    await waitFor(() => expect(saveHeader).toHaveBeenCalledTimes(1));
+    expect(saveHeader).toHaveBeenCalledWith({
+      header: {},
+      contacts: { publicPhone: '+5521987654321', publicPhoneIsWhatsapp: true },
+    });
+  });
+});
+
+describe('buildPayloads – WhatsApp', () => {
+  const base = {
+    displayName: 'Samuel',
+    username: 'samuel',
+    bio: '',
+    publicEmail: '',
+    publicPhone: '+5521987654321',
+    allowWhatsappContact: true,
+  };
+
+  it('sends nothing when the WhatsApp answer did not change', () => {
+    expect(buildPayloads(base, base, {}).contacts).toEqual({});
+  });
+
+  it('turns WhatsApp off when the answer changes to no', () => {
+    const { contacts } = buildPayloads({ ...base, allowWhatsappContact: false }, base, {});
+    expect(contacts).toEqual({ publicPhoneIsWhatsapp: false });
+  });
+
+  it('turns WhatsApp off when the phone is removed, even if still checked', () => {
+    const { contacts } = buildPayloads({ ...base, publicPhone: '+55' }, base, {});
+    expect(contacts).toEqual({ publicPhone: null, publicPhoneIsWhatsapp: false });
+  });
+
+  it('ignores a checked answer without a phone', () => {
+    const empty = { ...base, publicPhone: '', allowWhatsappContact: false };
+    const { contacts } = buildPayloads({ ...empty, allowWhatsappContact: true }, empty, {});
+    expect(contacts).toEqual({});
   });
 });

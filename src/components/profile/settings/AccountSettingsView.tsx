@@ -15,8 +15,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
@@ -27,9 +25,12 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import ChurchOutlinedIcon from '@mui/icons-material/ChurchOutlined';
 import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import PillButton from '@/components/common/PillButton';
+import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
 import { mockFaithCommunities, mockMissionaryAgencies } from '@/mocks/ecclesiastical';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 import ActiveSessionsSection from '@/components/profile/settings/ActiveSessionsSection';
 
@@ -97,24 +98,8 @@ export default function AccountSettingsView({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
 
-  // Toast notification state
-  const [toast, setToast] = useState<{
-    open: boolean;
-    message: string;
-    severity: 'success' | 'error' | 'info';
-  }>({
-    open: false,
-    message: '',
-    severity: 'success',
-  });
-
-  const showToast = (message: string, severity: 'success' | 'error' | 'info' = 'success') => {
-    setToast({ open: true, message, severity });
-  };
-
-  const handleCloseToast = () => {
-    setToast((prev) => ({ ...prev, open: false }));
-  };
+  // Global toast feedback (RNF 3.1, rendered once in the root providers)
+  const notify = useFeedbackStore((s) => s.notify);
 
   // Scroll to section helper
   const handleScrollTo = (sectionId: string) => {
@@ -151,7 +136,7 @@ export default function AccountSettingsView({
     setCurrentEmail(updatedEmail);
     setNewEmail('');
     setCurrentPasswordForEmail('');
-    showToast(
+    notify(
       `E-mail alterado com sucesso para ${updatedEmail}. Uma notificação de segurança foi enviada.`,
       'success'
     );
@@ -159,7 +144,7 @@ export default function AccountSettingsView({
 
   // Password reset via secure email link handler (RF 15.2.2)
   const handleSendResetPasswordLink = () => {
-    showToast(
+    notify(
       `Link seguro de redefinição de senha enviado para ${currentEmail}. Verifique sua caixa de entrada e spam.`,
       'info'
     );
@@ -175,7 +160,7 @@ export default function AccountSettingsView({
     }
 
     setEcclesiasticalError(null);
-    showToast(
+    notify(
       'Dados eclesiásticos atualizados com sucesso! Alterações salvas na plataforma.',
       'success'
     );
@@ -197,7 +182,7 @@ export default function AccountSettingsView({
       pastorPhone: '',
     });
     setEcclesiasticalError(null);
-    showToast('Vínculo com comunidade de fé removido.', 'info');
+    notify('Vínculo com comunidade de fé removido.', 'info');
   };
 
   // Select existing faith community from autocomplete
@@ -218,7 +203,7 @@ export default function AccountSettingsView({
     }
 
     setAgencyError(null);
-    showToast('Dados da agência missionária atualizados com sucesso!', 'success');
+    notify('Dados da agência missionária atualizados com sucesso!', 'success');
   };
 
   // Select existing agency from autocomplete
@@ -232,7 +217,7 @@ export default function AccountSettingsView({
   // Soft delete confirmation (RF 15.5 - Missionary)
   const handleConfirmDeactivateAccount = () => {
     setIsDeactivateDialogOpen(false);
-    showToast(
+    notify(
       'Conta de missionário desativada com sucesso (soft delete aplicado). Perfil ocultado do público.',
       'info'
     );
@@ -243,7 +228,7 @@ export default function AccountSettingsView({
     if (deleteConfirmationText.trim() !== 'EXCLUIR') return;
     setIsDeleteDialogOpen(false);
     setDeleteConfirmationText('');
-    showToast('Conta excluída definitivamente com sucesso (hard delete aplicado).', 'info');
+    notify('Conta excluída definitivamente com sucesso (hard delete aplicado).', 'info');
   };
 
   return (
@@ -304,6 +289,13 @@ export default function AccountSettingsView({
           }}
         >
           <Chip
+            icon={<PaletteOutlinedIcon fontSize="small" />}
+            label="Aparência"
+            clickable
+            onClick={() => handleScrollTo('appearance-section')}
+            sx={{ minHeight: 44, fontWeight: 600 }}
+          />
+          <Chip
             icon={<LockOutlinedIcon fontSize="small" />}
             label="Credenciais"
             clickable
@@ -338,6 +330,32 @@ export default function AccountSettingsView({
       </Card>
 
       <Stack spacing={4}>
+        <Card
+          id="appearance-section"
+          variant="outlined"
+          sx={{ borderRadius: 3, scrollMarginTop: 80 }}
+        >
+          <CardHeader
+            avatar={<PaletteOutlinedIcon color="primary" />}
+            title="Aparência"
+            subheader="Escolha entre o modo claro e o modo escuro"
+            slotProps={{
+              title: {
+                id: 'appearance-title',
+                component: 'h2',
+                sx: { fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.25rem' } },
+              },
+              subheader: { sx: { fontSize: '0.875rem' } },
+            }}
+          />
+          <Divider />
+          <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
+            <Box sx={{ maxWidth: { xs: '100%', sm: 360 } }}>
+              <ThemeModeSwitch labelledBy="appearance-title" />
+            </Box>
+          </CardContent>
+        </Card>
+
         {/* ========================================================================= */}
         {/* 1. CREDENCIAIS DE ACESSO (RF 15.2, RF 15.4)                               */}
         {/* ========================================================================= */}
@@ -1060,25 +1078,6 @@ export default function AccountSettingsView({
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Toast Feedback Notification (RNF 3.1, WCAG live region) */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={6000}
-        onClose={handleCloseToast}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={handleCloseToast}
-          severity={toast.severity}
-          variant="filled"
-          sx={{ width: '100%', borderRadius: 2, boxShadow: 3, fontWeight: 600 }}
-          role="status"
-          aria-live="polite"
-        >
-          {toast.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 }

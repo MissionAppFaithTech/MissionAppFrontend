@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import VisitorProfilePostsSection from './VisitorProfilePostsSection';
 import { mockSavedPosts } from '@/mocks/profile';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('VisitorProfilePostsSection Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders visitor posts list and locked notice', () => {
     render(<VisitorProfilePostsSection posts={mockSavedPosts} />);
 
@@ -43,8 +48,9 @@ describe('VisitorProfilePostsSection Component', () => {
     await user.click(shareButtons[0]);
 
     expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
-    expect(
-      await screen.findByText(/link copiado para a área de transferência!/i)
-    ).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Link copiado para a área de transferência!',
+      severity: 'success',
+    });
   });
 });

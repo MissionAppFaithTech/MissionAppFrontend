@@ -8,7 +8,6 @@ import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlin
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -17,7 +16,6 @@ import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -29,6 +27,7 @@ import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import { getMockCampaignForMissionary } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { CampaignData } from '@/types/campaign';
 import type { ProfileAboutData, ProfileData, SavedPost } from '@/types/profile';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
@@ -115,9 +114,6 @@ function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
             {data.missionaryAgency && (
               <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
             )}
-            {data.faithCommunity && (
-              <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
-            )}
           </Stack>
 
           {data.prayerRequests && (
@@ -158,7 +154,7 @@ export default function SupporterMissionaryProfileView({
 }: SupporterMissionaryProfileViewProps) {
   const [activeTab, setActiveTab] = useState<SupporterTabKey>('sobre');
   const [donationModalOpen, setDonationModalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const notify = useFeedbackStore((s) => s.notify);
 
   const missionaryCampaign =
     campaign !== undefined ? campaign : getMockCampaignForMissionary(profile.username);
@@ -204,20 +200,15 @@ export default function SupporterMissionaryProfileView({
   };
 
   const toggleSave = (id: string) => {
-    setSavedPostsState((prev) => {
-      const isCurrentlySaved = prev[id] ?? false;
-      const next = !isCurrentlySaved;
-      setToastMessage(
-        next ? 'Postagem salva aos seus favoritos!' : 'Postagem removida dos salvos.'
-      );
-      return { ...prev, [id]: next };
-    });
+    const next = !(savedPostsState[id] ?? false);
+    setSavedPostsState((prev) => ({ ...prev, [id]: next }));
+    notify(next ? 'Postagem salva aos seus favoritos!' : 'Postagem removida dos salvos.');
   };
 
   const handleShare = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
-      setToastMessage('Link copiado para a área de transferência!');
+      notify('Link copiado para a área de transferência!');
     }
   };
 
@@ -550,39 +541,6 @@ export default function SupporterMissionaryProfileView({
         missionaryName={profile.displayName}
         isOwnProfile={false}
       />
-
-      {/* Feedback Toast */}
-      <Snackbar
-        open={Boolean(toastMessage)}
-        autoHideDuration={3000}
-        onClose={() => setToastMessage(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastMessage(null)}
-          severity="success"
-          variant="filled"
-          role="status"
-          aria-live="polite"
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
-            color: 'common.white',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          {toastMessage}
-        </Alert>
-      </Snackbar>
     </Stack>
   );
 }

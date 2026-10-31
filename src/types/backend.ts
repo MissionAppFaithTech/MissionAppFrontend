@@ -22,6 +22,7 @@ export type BackendMissionary = {
   identityDocument?: string | null;
   publicEmail?: string | null;
   publicPhone?: string | null;
+  publicPhoneIsWhatsapp?: boolean;
   donationMessage?: string | null;
   aboutMe?: string | null;
   missionStorySummary?: string | null;
