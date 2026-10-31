@@ -7,6 +7,7 @@ import {
   USE_AUTH_MOCKS,
 } from '@/mocks/auth';
 import type { AuthUser } from '@/lib/api/auth-response';
+import { bffRequest } from '@/lib/api/client';
 
 export { USE_AUTH_MOCKS, RESET_PASSWORD_TOKEN_TTL_MINUTES };
 
@@ -177,4 +178,21 @@ export async function terminateAllSessions(): Promise<{ message: string }> {
     message:
       typeof payload?.message === 'string' ? payload.message : 'Sessões encerradas com sucesso.',
   };
+}
+
+export type ActiveSession = {
+  id: string;
+  deviceType: 'web' | 'mobile';
+  deviceName: string | null;
+  ipAddress: string | null;
+  lastUsedAt: string | null;
+  createdAt: string;
+  current: boolean;
+};
+
+export async function listActiveSessions(): Promise<ActiveSession[]> {
+  const { data } = await bffRequest<{ data: ActiveSession[] }>('/api/auth/sessions', {
+    fallbackMessage: 'Não foi possível carregar as sessões',
+  });
+  return data;
 }

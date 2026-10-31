@@ -1,5 +1,6 @@
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import {
+  listActiveSessions,
   login,
   requestPasswordReset,
   getResetTokenStatus,
@@ -102,6 +103,42 @@ describe('auth.service', () => {
           passwordConfirmation: 'Password1!',
         })
       ).rejects.toThrow('Este link expirou');
+    });
+  });
+
+  describe('listActiveSessions', () => {
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('GETs /api/auth/sessions and unwraps the list', async () => {
+      const sessions = [
+        {
+          id: 's-1',
+          deviceType: 'web',
+          deviceName: 'Chrome',
+          ipAddress: '127.0.0.1',
+          lastUsedAt: null,
+          createdAt: '2026-01-01T00:00:00Z',
+          current: true,
+        },
+      ];
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValue(new Response(JSON.stringify({ data: sessions }), { status: 200 }));
+
+      await expect(listActiveSessions()).resolves.toEqual(sessions);
+      expect(fetchSpy.mock.calls[0][0]).toBe('/api/auth/sessions');
+      expect(fetchSpy.mock.calls[0][1]?.method).toBe('GET');
+    });
+
+    it('rejects with the fallback message on failure', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{}', { status: 500 }));
+
+      await expect(listActiveSessions()).rejects.toMatchObject({
+        status: 500,
+        message: 'Não foi possível carregar as sessões',
+      });
     });
   });
 

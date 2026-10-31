@@ -8,16 +8,22 @@ import type {
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
 import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
-import {
-  createFaithCommunity,
-  createMissionaryAgency,
-  listMissionaryAgencies,
-} from '@/services/catalog.service';
-import { createMissionaryProfile } from '@/services/missionary.service';
+import { login } from '@/services/auth.service';
+import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
+import { createMissionaryProfile, linkFaithCommunity } from '@/services/missionary.service';
+
+/** Remote steps already done for this sign-up (in memory only, never persisted). */
+type RegisterSubmission = {
+  accountCreated?: boolean;
+  agencyId?: string;
+  communityId?: string;
+  missionaryCreated?: boolean;
+};
 
 export interface MissionaryRegisterState {
   step: number;
   formData: Partial<MissionaryRegisterData>;
+  submission: RegisterSubmission;
   hasHydrated: boolean;
   setStep: (step: number) => void;
   updateFormData: (data: Partial<MissionaryRegisterData>) => void;
@@ -29,9 +35,12 @@ export interface MissionaryRegisterState {
   setHasHydrated: (status: boolean) => void;
 }
 
+const STORAGE_KEY = 'missionapp_missionary_register_v1';
+
 const initialState = {
   step: 1,
   formData: {} as Partial<MissionaryRegisterData>,
+  submission: {} as RegisterSubmission,
   hasHydrated: false,
 };
 
@@ -63,44 +72,60 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
       completeStep3: async (values: MissionariesStep3Values) => {
         const currentData = get().formData;
         const merged: Partial<MissionaryRegisterData> = { ...currentData, ...values };
-        const email = merged.email?.trim();
+        const email = merged.email?.trim().toLowerCase();
 
         if (!merged.fullName || !merged.phone || !merged.gender || !email) {
           throw new Error('Complete os dados pessoais antes de finalizar o cadastro');
         }
-
-        await registerAccount({
-          fullName: merged.fullName,
-          username: values.username,
-          phoneNumber: toE164Phone(merged.phone),
-          gender: toApiGender(merged.gender),
-          email,
-          password: values.password,
-          passwordConfirmation: values.confirmPassword,
-        });
-
-        let resolvedAgencyId = merged.missionaryAgency;
-
-        if (merged.missionaryAgency === SELECT_OTHER && merged.agencyDetails?.name) {
-          const createdAgency = await createMissionaryAgency(merged.agencyDetails);
-          resolvedAgencyId = createdAgency.id;
-        }
-        if (merged.faithCommunity === SELECT_OTHER && merged.communityDetails?.name) {
-          await createFaithCommunity(merged.communityDetails);
+        if (!merged.missionaryAgency) {
+          throw new Error('Selecione a agência missionária antes de finalizar o cadastro');
         }
 
-        if (!resolvedAgencyId || resolvedAgencyId === SELECT_OTHER) {
-          const agencies = await listMissionaryAgencies().catch(() => []);
-          if (agencies.length > 0) {
-            resolvedAgencyId = agencies[0].id;
+        // Each step runs once even if the user retries after a later failure.
+        const progress = get().submission;
+        const mark = (patch: Partial<RegisterSubmission>) =>
+          set((state) => ({ submission: { ...state.submission, ...patch } }));
+
+        if (!progress.accountCreated) {
+          await registerAccount({
+            fullName: merged.fullName,
+            username: values.username,
+            phoneNumber: toE164Phone(merged.phone),
+            gender: toApiGender(merged.gender),
+            email,
+            password: values.password,
+            passwordConfirmation: values.confirmPassword,
+          });
+          mark({ accountCreated: true });
+        }
+
+        let agencyId = get().submission.agencyId ?? merged.missionaryAgency;
+        if (agencyId === SELECT_OTHER) {
+          if (!merged.agencyDetails?.name) {
+            throw new Error('Informe os dados da nova agência missionária');
           }
+          agencyId = (await createMissionaryAgency(merged.agencyDetails)).id;
+          mark({ agencyId });
         }
 
-        if (resolvedAgencyId && resolvedAgencyId !== SELECT_OTHER) {
-          await createMissionaryProfile(resolvedAgencyId).catch(() => {});
+        let communityId = get().submission.communityId ?? merged.faithCommunity;
+        if (communityId === SELECT_OTHER) {
+          communityId = merged.communityDetails?.name
+            ? (await createFaithCommunity(merged.communityDetails)).id
+            : undefined;
+          mark({ communityId });
         }
 
-        // Never retain plain text passwords in store state or storage
+        if (!get().submission.missionaryCreated) {
+          await createMissionaryProfile(agencyId);
+          mark({ missionaryCreated: true });
+        }
+
+        // Creating the missionary profile revokes every session: log in again
+        // with the credentials still in memory, then link the faith community.
+        await login({ login: email, password: values.password });
+        if (communityId) await linkFaithCommunity(communityId);
+
         const sanitizedAfterSuccess = { ...merged };
         delete (sanitizedAfterSuccess as Record<string, unknown>).password;
         delete (sanitizedAfterSuccess as Record<string, unknown>).confirmPassword;
@@ -108,6 +133,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         set({
           formData: sanitizedAfterSuccess,
           step: 4,
+          submission: {},
         });
       },
 
@@ -116,13 +142,8 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
       },
 
       reset: () => {
-        if (typeof window !== 'undefined') {
-          window.localStorage.removeItem('missionapp_missionary_register_v1');
-        }
-        set({
-          step: 1,
-          formData: {},
-        });
+        set({ step: 1, formData: {}, submission: {} });
+        useMissionaryRegisterStore.persist.clearStorage();
       },
 
       setHasHydrated: (status: boolean) => {
@@ -130,10 +151,11 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
       },
     }),
     {
-      name: 'missionapp_missionary_register_v1',
+      name: STORAGE_KEY,
+      // Drafts hold personal data: keep them for this tab only.
       storage: createJSONStorage(() => {
         if (typeof window !== 'undefined') {
-          return window.localStorage;
+          return window.sessionStorage;
         }
         return {
           getItem: () => null,
@@ -142,7 +164,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         };
       }),
       partialize: (state) => {
-        // If registration completed (step 4), do not persist completion screen in localStorage
+        // If registration completed (step 4), do not persist completion screen in storage
         // so returning to the registration page starts the normal wizard flow.
         if (state.step >= 4) {
           return {
@@ -151,7 +173,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
           };
         }
 
-        // Strip sensitive credentials from localStorage to avoid credential leakage via XSS
+        // Strip sensitive credentials from storage to avoid credential leakage via XSS
         const sanitizedFormData = { ...state.formData };
         delete (sanitizedFormData as Record<string, unknown>).password;
         delete (sanitizedFormData as Record<string, unknown>).confirmPassword;

@@ -1,267 +1,194 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import { ApiError } from '@/lib/api/client';
 import {
   emptyProfile,
-  fetchAccountProfile,
-  mapBackendToProfileData,
-  updateAccountProfile,
-  updateMissionaryAboutData,
-  updateMissionaryProfileData,
-  updateMissionaryWorkAddress,
-  type UpdateMissionaryWorkAddressPayload,
+  formatWorkAddress,
+  getMyProfile,
+  mapAccountProfile,
+  updateAbout,
+  updateHeader,
+  updatePublicContacts,
+  upsertWorkAddress,
+  type UpdateAboutPayload,
+  type UpdateHeaderPayload,
+  type UpdatePublicContactsPayload,
 } from '@/services/profile.service';
-import type { ProfileAboutData, ProfileData } from '@/types/profile';
+import type { BackendMissionary, BackendUser } from '@/types/backend';
+import type { ProfileData, WorkAddressData } from '@/types/profile';
+
+export const PROFILE_STORAGE_KEY = 'missionapp_profile_v2';
+/** Pre-v2 key that kept e-mail, phone and financial data in localStorage. */
+const LEGACY_STORAGE_KEY = 'missionapp_missionary_profile_v1';
+
+export type ProfileStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 export interface ProfileState {
   profile: ProfileData;
-  isLoading: boolean;
+  status: ProfileStatus;
   error: string | null;
   hasHydrated: boolean;
 
-  fetchProfile: () => Promise<ProfileData>;
-  updateAbout: (data: Partial<ProfileAboutData>) => Promise<void>;
-  updateHeaderProfile: (data: {
-    displayName?: string;
-    username?: string;
-    bio?: string;
-    currentLocation?: string;
-    publicEmail?: string;
-    publicPhone?: string;
+  /** Loads the logged-in user's profile. Never throws; read `status`/`error`. */
+  fetchProfile: () => Promise<ProfileData | null>;
+  /** Saves header fields and public contacts in sequence. Throws {@link ApiError}. */
+  saveHeader: (input: {
+    header?: UpdateHeaderPayload;
+    contacts?: UpdatePublicContactsPayload;
   }) => Promise<void>;
-  updateWorkAddress: (data: UpdateMissionaryWorkAddressPayload) => Promise<void>;
-  setProfile: (profile: ProfileData) => void;
-  setHasHydrated: (status: boolean) => void;
+  /** Saves "Sobre" fields and the work address in sequence. Throws {@link ApiError}. */
+  saveAbout: (input: {
+    about?: UpdateAboutPayload;
+    workAddress?: WorkAddressData;
+  }) => Promise<void>;
+  setHasHydrated: (value: boolean) => void;
   reset: () => void;
 }
 
-const initialProfile: ProfileData = emptyProfile;
+const initialState = {
+  profile: emptyProfile,
+  status: 'idle' as ProfileStatus,
+  error: null as string | null,
+};
+
+function applyUser(profile: ProfileData, user: Partial<BackendUser>): ProfileData {
+  return {
+    ...profile,
+    displayName: user.fullName ?? profile.displayName,
+    username: user.username ?? profile.username,
+    roleDescription:
+      user.biography === undefined ? profile.roleDescription : (user.biography ?? ''),
+  };
+}
+
+function pick<T>(value: T | null | undefined, fallback: T): T {
+  if (value === undefined) return fallback;
+  return (value ?? '') as T;
+}
+
+function applyMissionary(
+  profile: ProfileData,
+  missionary: Partial<BackendMissionary>
+): ProfileData {
+  const about = profile.about;
+  const contact = profile.contact ?? { publicEmail: '', publicPhone: '' };
+  return {
+    ...profile,
+    about: {
+      ...about,
+      introduction: pick(missionary.aboutMe, about.introduction),
+      missionHistory: pick(missionary.missionStorySummary, about.missionHistory ?? ''),
+      originLocation: pick(missionary.originLocation, about.originLocation),
+      prayerRequests: pick(missionary.prayerRequest, about.prayerRequests ?? ''),
+      lifeVerse: pick(missionary.lifeVerse, about.lifeVerse),
+    },
+    contact: {
+      ...contact,
+      publicEmail: pick(missionary.publicEmail, contact.publicEmail),
+      publicPhone: pick(missionary.publicPhone, contact.publicPhone),
+    },
+  };
+}
+
+function applyWorkAddress(profile: ProfileData, address: WorkAddressData): ProfileData {
+  const currentLocation = formatWorkAddress(address);
+  return {
+    ...profile,
+    location: currentLocation,
+    about: { ...profile.about, workAddress: address, currentLocation },
+  };
+}
+
+/** Only public profile fields reach sessionStorage: no e-mail, phone, documents or finances. */
+function toPersistedProfile(profile: ProfileData): ProfileData {
+  const { contact: _contact, financial: _financial, ...publicFields } = profile;
+  return publicFields;
+}
+
+const sessionStorageSafe = createJSONStorage(() =>
+  typeof window === 'undefined'
+    ? { getItem: () => null, setItem: () => {}, removeItem: () => {} }
+    : window.sessionStorage
+);
 
 export const useProfileStore = create<ProfileState>()(
   persist(
     (set, get) => ({
-      profile: initialProfile,
-      isLoading: false,
-      error: null,
+      ...initialState,
       hasHydrated: false,
 
       fetchProfile: async () => {
-        set({ isLoading: true, error: null });
+        set({ status: 'loading', error: null });
         try {
-          const backendData = await fetchAccountProfile();
-          const mapped = mapBackendToProfileData(backendData, get().profile);
-          set({ profile: mapped, isLoading: false, error: null });
-          return mapped;
-        } catch (err) {
-          const message = err instanceof Error ? err.message : 'Falha ao buscar perfil';
-          if (
-            message.includes('401') ||
-            message.includes('Não autorizado') ||
-            message.includes('unauthorized') ||
-            message.includes('Sessão')
-          ) {
+          const profile = mapAccountProfile(await getMyProfile());
+          set({ profile, status: 'ready', error: null });
+          return profile;
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 401) {
             get().reset();
+            return null;
           }
-          set({ isLoading: false, error: message });
-          return get().profile;
+          const message =
+            error instanceof Error ? error.message : 'Não foi possível carregar o seu perfil';
+          set({ status: 'error', error: message });
+          return null;
         }
       },
 
-      updateAbout: async (aboutData: Partial<ProfileAboutData>) => {
-        set({ isLoading: true, error: null });
-        const current = get().profile;
-        const updatedAbout: ProfileAboutData = {
-          ...current.about,
-          ...aboutData,
-        };
-
-        try {
-          await updateMissionaryAboutData({
-            aboutMe: updatedAbout.introduction,
-            missionStorySummary: updatedAbout.missionHistory,
-            originLocation: updatedAbout.originLocation,
-            faithCommunityId:
-              updatedAbout.faithCommunity && updatedAbout.faithCommunity.includes('-')
-                ? updatedAbout.faithCommunity
-                : undefined,
-            prayerRequest: updatedAbout.prayerRequests,
-            lifeVerse: updatedAbout.lifeVerse,
-          });
-
-          set({
-            profile: {
-              ...current,
-              about: updatedAbout,
-            },
-            isLoading: false,
-            error: null,
-          });
-        } catch (err) {
-          // Optimistic local update for mock / offline fallback
-          set({
-            profile: {
-              ...current,
-              about: updatedAbout,
-            },
-            isLoading: false,
-            error: null,
-          });
-          const message = err instanceof Error ? err.message : 'Falha ao salvar sobre';
-          console.warn('[profileStore.updateAbout]', message);
+      saveHeader: async ({ header, contacts }) => {
+        if (header && Object.keys(header).length > 0) {
+          const user = await updateHeader(header);
+          set({ profile: applyUser(get().profile, { ...header, ...user }) });
+        }
+        if (contacts && Object.keys(contacts).length > 0) {
+          const missionary = await updatePublicContacts(contacts);
+          set({ profile: applyMissionary(get().profile, { ...contacts, ...missionary }) });
         }
       },
 
-      updateHeaderProfile: async (data) => {
-        set({ isLoading: true, error: null });
-        const current = get().profile;
-
-        const updatedProfile: ProfileData = {
-          ...current,
-          displayName: data.displayName ?? current.displayName,
-          username: data.username ?? current.username,
-          roleDescription: data.bio ?? current.roleDescription,
-          location: data.currentLocation ?? current.location,
-          about: {
-            ...current.about,
-            currentLocation: data.currentLocation ?? current.about.currentLocation,
-          },
-          contact: {
-            ...current.contact,
-            publicEmail: data.publicEmail ?? current.contact?.publicEmail ?? '',
-            publicPhone: data.publicPhone ?? current.contact?.publicPhone ?? '',
-          },
-        };
-
-        try {
-          if (
-            data.displayName !== undefined ||
-            data.username !== undefined ||
-            data.bio !== undefined
-          ) {
-            await updateAccountProfile({
-              fullName: data.displayName,
-              username: data.username,
-              biography: data.bio,
-            });
-          }
-
-          if (data.publicEmail || data.publicPhone) {
-            await updateMissionaryProfileData({
-              publicEmail: data.publicEmail,
-              publicPhone: data.publicPhone,
-            });
-          }
-
-          if (data.currentLocation) {
-            const parts = data.currentLocation.split(/[\/,]/).map((s) => s.trim());
-            const city = parts[0] || '';
-            const state = parts[1] || '';
-            if (city) {
-              await updateMissionaryWorkAddress({
-                city,
-                state: state || 'SP',
-                country: 'Brasil',
-                district: 'Centro',
-                zip: '01001-000',
-              }).catch(() => {});
-            }
-          }
-
-          set({
-            profile: updatedProfile,
-            isLoading: false,
-            error: null,
-          });
-        } catch (err) {
-          // Optimistic update for mock / offline fallback
-          set({
-            profile: updatedProfile,
-            isLoading: false,
-            error: null,
-          });
-          const message = err instanceof Error ? err.message : 'Falha ao salvar perfil';
-          console.warn('[profileStore.updateHeaderProfile]', message);
+      saveAbout: async ({ about, workAddress }) => {
+        if (about && Object.keys(about).length > 0) {
+          const missionary = await updateAbout(about);
+          set({ profile: applyMissionary(get().profile, { ...about, ...missionary }) });
+        }
+        if (workAddress) {
+          const saved = await upsertWorkAddress(workAddress);
+          set({ profile: applyWorkAddress(get().profile, saved) });
         }
       },
 
-      updateWorkAddress: async (data: UpdateMissionaryWorkAddressPayload) => {
-        set({ isLoading: true, error: null });
-        const current = get().profile;
-        const locationString = data.state ? `${data.city}/${data.state}` : data.city;
-
-        try {
-          await updateMissionaryWorkAddress(data);
-
-          set({
-            profile: {
-              ...current,
-              location: locationString,
-              about: {
-                ...current.about,
-                currentLocation: locationString,
-              },
-            },
-            isLoading: false,
-            error: null,
-          });
-        } catch (err) {
-          set({
-            profile: {
-              ...current,
-              location: locationString,
-              about: {
-                ...current.about,
-                currentLocation: locationString,
-              },
-            },
-            isLoading: false,
-            error: null,
-          });
-          const message = err instanceof Error ? err.message : 'Falha ao salvar endereço';
-          console.warn('[profileStore.updateWorkAddress]', message);
-        }
-      },
-
-      setProfile: (profile: ProfileData) => {
-        set({ profile });
-      },
-
-      setHasHydrated: (status: boolean) => {
-        set({ hasHydrated: status });
-      },
+      setHasHydrated: (value) => set({ hasHydrated: value }),
 
       reset: () => {
-        if (typeof window !== 'undefined') {
-          try {
-            window.localStorage.removeItem('missionapp_missionary_profile_v1');
-          } catch {
-            // Ignore storage access errors in restricted iframe/private mode
-          }
-        }
-        set({
-          profile: initialProfile,
-          isLoading: false,
-          error: null,
-        });
+        set({ ...initialState });
+        useProfileStore.persist.clearStorage();
       },
     }),
     {
-      name: 'missionapp_missionary_profile_v1',
-      storage: createJSONStorage(() => {
-        if (typeof window !== 'undefined') {
-          return window.localStorage;
-        }
-        return {
-          getItem: () => null,
-          setItem: () => {},
-          removeItem: () => {},
-        };
-      }),
-      partialize: (state) => ({
-        profile: state.profile,
-      }),
+      name: PROFILE_STORAGE_KEY,
+      version: 2,
+      storage: sessionStorageSafe,
+      // Rehydrated from an effect (see `rehydrateProfileStore`) to avoid SSR mismatches.
+      skipHydration: true,
+      partialize: (state) => ({ profile: toPersistedProfile(state.profile) }),
+      migrate: () => ({ profile: emptyProfile }),
+      merge: (persisted, current) => {
+        const stored = (persisted as { profile?: ProfileData } | undefined)?.profile;
+        return stored ? { ...current, profile: { ...emptyProfile, ...stored } } : current;
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },
     }
   )
 );
+
+/** Client-only: restores the cached public profile and drops the legacy PII cache. */
+export async function rehydrateProfileStore() {
+  try {
+    window.localStorage.removeItem(LEGACY_STORAGE_KEY);
+  } catch {
+    // Storage can be blocked (private mode, sandboxed iframe).
+  }
+  await useProfileStore.persist.rehydrate();
+}
