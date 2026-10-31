@@ -1,3 +1,4 @@
+import { forwardedClientHeaders } from '@/lib/api/clientIp';
 import { getBackendApiBase } from '@/lib/api/config';
 
 export class BackendApiError extends Error {
@@ -31,6 +32,7 @@ export async function backendFetch<T>(path: string, options: BackendFetchOptions
       Accept: 'application/json',
       'Content-Type': 'application/json',
       'x-client-type': 'web',
+      ...(await forwardedClientHeaders()),
       ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       ...headers,
     },
