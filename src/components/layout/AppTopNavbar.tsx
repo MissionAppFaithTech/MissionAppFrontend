@@ -40,11 +40,7 @@ export default function AppTopNavbar({
 
   return (
     <PageNavbar maxWidth={maxWidth}>
-      <Logo
-        size="sm"
-        href={isLoggedIn ? (role === 'supporter' ? '/profile/supporter' : '/profile') : '/'}
-        variant="dark"
-      />
+      <Logo size="sm" variant="dark" />
 
       {/* When logged in: Central quick search field (RF 7.1) - hidden on mobile (xs/sm), visible on desktop (md+) */}
       {isLoggedIn && (

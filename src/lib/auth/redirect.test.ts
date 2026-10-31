@@ -45,4 +45,20 @@ describe('postLoginPath', () => {
     expect(postLoginPath('SUPPORTER', '/profile/edit-profile')).toBe('/profile/supporter');
     expect(postLoginPath('MISSIONARY', '/profile/supporter')).toBe('/profile');
   });
+
+  it('applies the RBAC areas to admins and to visitors', () => {
+    expect(postLoginPath('ADMIN', null)).toBe('/admin');
+    expect(postLoginPath('ADMIN', '/profile/sobre')).toBe('/admin');
+    expect(postLoginPath('MISSIONARY', '/admin')).toBe('/profile');
+    expect(postLoginPath('ADMIN', '/campanha/1')).toBe('/campanha/1');
+  });
+
+  it('checks the path without its query string', () => {
+    expect(postLoginPath('SUPPORTER', '/profile/supporter?tab=salvos')).toBe(
+      '/profile/supporter?tab=salvos'
+    );
+    expect(postLoginPath('SUPPORTER', '/profile?next=/profile/supporter')).toBe(
+      '/profile/supporter'
+    );
+  });
 });

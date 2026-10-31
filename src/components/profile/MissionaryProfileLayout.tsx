@@ -1,15 +1,14 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef, type ReactNode } from 'react';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import PillButton from '@/components/common/PillButton';
 import ProfileLayoutShell from '@/components/layout/ProfileLayoutShell';
+import { useRoleGuard } from '@/lib/auth/useRoleGuard';
 import { rehydrateProfileStore, useProfileStore } from '@/stores/profileStore';
-import { useSessionStore } from '@/stores/sessionStore';
 
 export interface MissionaryProfileLayoutProps {
   children: ReactNode;
@@ -38,34 +37,24 @@ const visuallyHidden = {
 } as const;
 
 export default function MissionaryProfileLayout({ children }: MissionaryProfileLayoutProps) {
-  const router = useRouter();
   const profile = useProfileStore((state) => state.profile);
   const status = useProfileStore((state) => state.status);
   const error = useProfileStore((state) => state.error);
   const hasHydrated = useProfileStore((state) => state.hasHydrated);
   const fetchProfile = useProfileStore((state) => state.fetchProfile);
-  const loadSession = useSessionStore((state) => state.loadSession);
+  // RBAC: visitors go to login and other roles to their own home (lib/auth/rbac.ts).
+  const access = useRoleGuard();
+
+  // The cached profile renders at once; the fresh fetch waits for it so it is never overwritten.
+  const rehydrated = useRef<Promise<void> | null>(null);
+  useEffect(() => {
+    rehydrated.current = rehydrateProfileStore();
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      await rehydrateProfileStore();
-      if ((await loadSession()) === 'anonymous') {
-        if (!cancelled) router.replace('/login?next=/profile');
-        return;
-      }
-      if (useSessionStore.getState().role === 'SUPPORTER') {
-        if (!cancelled) router.replace('/profile/supporter');
-        return;
-      }
-      await fetchProfile();
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [fetchProfile, loadSession, router]);
+    if (access !== 'allowed') return;
+    void (rehydrated.current ?? Promise.resolve()).then(() => fetchProfile());
+  }, [access, fetchProfile]);
 
   // A cached profile (sessionStorage) renders immediately while fresh data loads.
   const hasProfile = Boolean(profile.username);

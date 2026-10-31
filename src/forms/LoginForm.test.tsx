@@ -16,13 +16,15 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/services/auth.service', () => ({
   login: vi.fn().mockResolvedValue({
-    user: { id: '1', fullName: 'Teste', email: 'teste@missionapp.com' },
+    user: { id: '1', fullName: 'Teste', email: 'teste@missionapp.com', role: 'MISSIONARY' },
   }),
 }));
 
 const mockClearUserStores = vi.fn();
+const mockSetSession = vi.fn();
 vi.mock('@/stores/sessionStore', () => ({
   clearUserStores: () => mockClearUserStores(),
+  useSessionStore: { setState: (state: unknown) => mockSetSession(state) },
 }));
 
 describe('LoginForm component', () => {
@@ -87,6 +89,12 @@ describe('LoginForm component', () => {
       expect(mockPush).toHaveBeenCalledWith('/profile');
     });
     expect(mockClearUserStores).toHaveBeenCalled();
+    // The logo and the guards read the role right away, without another session request.
+    expect(mockSetSession).toHaveBeenCalledWith({
+      status: 'authenticated',
+      userId: '1',
+      role: 'MISSIONARY',
+    });
   });
 
   it('sends a supporter to the supporter area', async () => {
