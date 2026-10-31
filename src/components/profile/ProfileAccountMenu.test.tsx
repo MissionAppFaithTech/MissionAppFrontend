@@ -39,6 +39,14 @@ describe('ProfileAccountMenu', () => {
     expect(screen.getByRole('button', { name: /sair da conta/i })).toBeInTheDocument();
   });
 
+  it('offers a quick light/dark appearance switch', async () => {
+    await openMenu();
+
+    const appearance = screen.getByRole('group', { name: 'Aparência' });
+    expect(appearance).toContainElement(screen.getByRole('button', { name: 'Claro' }));
+    expect(appearance).toContainElement(screen.getByRole('button', { name: 'Escuro' }));
+  });
+
   it('logs out and goes to the login page', async () => {
     logout.mockResolvedValue(undefined);
     const user = await openMenu();

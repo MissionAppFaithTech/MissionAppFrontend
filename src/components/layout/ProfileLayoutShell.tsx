@@ -64,7 +64,7 @@ export default function ProfileLayoutShell({
         </Box>
 
         <PageNavbarActions>
-          <AccessibilityPreferencesButton size="medium" sx={{ color: 'text.primary' }} />
+          <AccessibilityPreferencesButton size="medium" />
           <ProfileAccountMenu profile={profile} />
         </PageNavbarActions>
       </PageNavbar>

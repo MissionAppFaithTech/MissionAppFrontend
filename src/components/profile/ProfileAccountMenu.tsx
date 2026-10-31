@@ -15,6 +15,7 @@ import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { Theme } from '@mui/material/styles';
+import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { focusVisibleSx } from '@/theme/theme';
@@ -157,6 +158,18 @@ export default function ProfileAccountMenu({
             {profile.displayName}
           </Typography>
         </Stack>
+
+        <Divider />
+
+        <Box sx={{ px: 2.5, py: 1.5 }}>
+          <Typography
+            id="account-menu-appearance"
+            sx={{ fontWeight: 700, fontSize: '0.875rem', mb: 1 }}
+          >
+            Aparência
+          </Typography>
+          <ThemeModeSwitch labelledBy="account-menu-appearance" />
+        </Box>
 
         <Divider />
 
