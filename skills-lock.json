@@ -35,10 +35,7 @@
       "source": "registry:marcioaltoe/zustand",
       "commit_sha": "81fc73feca4bd816531d95b30f57c711ee0d4286",
       "digest": "sha256:d8a03a0658e6d94252442322cdff9c3c513de2f5134c42c8ab6826d723218d68",
-      "agents": [
-        "github-copilot",
-        "antigravity-cli"
-      ],
+      "agents": ["github-copilot", "antigravity-cli"],
       "mode": {
         "github-copilot": "symlink",
         "antigravity-cli": "canonical"
