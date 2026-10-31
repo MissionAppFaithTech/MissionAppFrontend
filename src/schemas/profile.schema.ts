@@ -51,7 +51,7 @@ export function phoneDigits(value: string): string {
   return value.replace(/\D/g, '');
 }
 
-export const BIO_MAX_LENGTH = 200;
+export const BIO_MAX_LENGTH = 70;
 export const ABOUT_LONG_MAX_LENGTH = 5000;
 export const ABOUT_SHORT_MAX_LENGTH = 255;
 
@@ -80,6 +80,7 @@ export const profileEditSchema = z.object({
     .refine((val) => phoneDigits(val).length <= 3 || /^\+[1-9]\d{7,14}$/.test(val), {
       message: 'Informe um telefone válido com DDD',
     }),
+  allowWhatsappContact: z.boolean(),
 });
 
 export type ProfileEditFormData = z.infer<typeof profileEditSchema>;

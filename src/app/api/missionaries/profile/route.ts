@@ -11,6 +11,7 @@ const updateProfileBodySchema = z.object({
   /** `null` removes the public contact. */
   publicEmail: z.email().max(254).nullable().optional(),
   publicPhone: z.string().regex(E164).nullable().optional(),
+  publicPhoneIsWhatsapp: z.boolean().optional(),
   donationMessage: z.string().trim().max(5000).nullable().optional(),
 });
 

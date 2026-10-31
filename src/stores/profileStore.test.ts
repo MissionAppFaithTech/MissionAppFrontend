@@ -122,6 +122,14 @@ describe('profileStore', () => {
       });
     });
 
+    it('keeps the faith community in the store even though the Sobre does not show it', async () => {
+      getMyProfile.mockResolvedValue(payload);
+
+      await useProfileStore.getState().fetchProfile();
+
+      expect(useProfileStore.getState().profile.about.faithCommunity).toBe('Igreja Local');
+    });
+
     it('keeps the private login e-mail out of the public contact', async () => {
       getMyProfile.mockResolvedValue({
         ...payload,
@@ -267,6 +275,17 @@ describe('profileStore', () => {
         publicPhone: '',
         accountEmail: 'ana.login@example.com',
       });
+    });
+
+    it('keeps the WhatsApp answer returned by the backend', async () => {
+      updatePublicContacts.mockResolvedValue({ publicPhoneIsWhatsapp: true });
+
+      await useProfileStore.getState().saveHeader({ contacts: { publicPhoneIsWhatsapp: true } });
+      expect(useProfileStore.getState().profile.contact?.allowWhatsappContact).toBe(true);
+
+      updatePublicContacts.mockResolvedValue({ publicPhoneIsWhatsapp: false });
+      await useProfileStore.getState().saveHeader({ contacts: { publicPhoneIsWhatsapp: false } });
+      expect(useProfileStore.getState().profile.contact?.allowWhatsappContact).toBe(false);
     });
 
     it('saves the header before contacts, keeping the header when contacts fail', async () => {

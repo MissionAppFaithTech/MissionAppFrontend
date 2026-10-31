@@ -54,6 +54,7 @@ function toFormValues(profile: ProfileData): ProfileEditFormData {
     bio: profile.roleDescription,
     publicEmail: profile.contact?.publicEmail ?? '',
     publicPhone: profile.contact?.publicPhone ?? '',
+    allowWhatsappContact: profile.contact?.allowWhatsappContact === true,
   };
 }
 
@@ -81,6 +82,11 @@ export function buildPayloads(
   }
   const phone = normalizePhone(data.publicPhone);
   if (phone !== normalizePhone(initial.publicPhone)) contacts.publicPhone = phone || null;
+  // Without a phone there is nothing to open in WhatsApp.
+  const whatsapp = Boolean(phone) && data.allowWhatsappContact;
+  const initialWhatsapp =
+    Boolean(normalizePhone(initial.publicPhone)) && initial.allowWhatsappContact;
+  if (whatsapp !== initialWhatsapp) contacts.publicPhoneIsWhatsapp = whatsapp;
 
   return { header, contacts };
 }
@@ -299,6 +305,7 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
               control={control}
               errors={errors}
               visibilityToggles={false}
+              whatsappToggle
               accountContact={{
                 email: profile.contact?.accountEmail,
                 phone: profile.contact?.accountPhone,

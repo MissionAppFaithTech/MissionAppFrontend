@@ -86,6 +86,7 @@ function applyMissionary(
       ...contact,
       publicEmail: pick(missionary.publicEmail, contact.publicEmail),
       publicPhone: pick(missionary.publicPhone, contact.publicPhone),
+      allowWhatsappContact: missionary.publicPhoneIsWhatsapp ?? contact.allowWhatsappContact,
     },
   };
 }

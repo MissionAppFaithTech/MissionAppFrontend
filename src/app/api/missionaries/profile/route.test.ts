@@ -167,6 +167,17 @@ describe('PATCH /api/missionaries/profile', () => {
     expect(backendFetch).not.toHaveBeenCalled();
   });
 
+  it('forwards the WhatsApp answer and rejects a non-boolean one', async () => {
+    mockBackend({ 'PATCH /missionaries/profile': () => saved });
+
+    await send('PATCH', { publicPhoneIsWhatsapp: true });
+    expect(vi.mocked(backendFetch).mock.calls[0][1]?.body).toEqual({ publicPhoneIsWhatsapp: true });
+
+    const res = await send('PATCH', { publicPhoneIsWhatsapp: 'sim' });
+    expect(res.status).toBe(422);
+    expect((await res.json()).fieldErrors).toHaveProperty('publicPhoneIsWhatsapp');
+  });
+
   it('answers 422 for an empty string instead of null', async () => {
     const res = await send('PATCH', { publicEmail: '' });
 

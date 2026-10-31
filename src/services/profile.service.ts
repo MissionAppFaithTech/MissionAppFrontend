@@ -94,6 +94,7 @@ export function mapAccountProfile(payload: AccountProfilePayload): ProfileData {
     contact: {
       publicEmail: missionary?.publicEmail ?? '',
       publicPhone: missionary?.publicPhone ?? '',
+      allowWhatsappContact: missionary?.publicPhoneIsWhatsapp === true,
       accountEmail: user.email,
       accountPhone: user.phoneNumber,
     },
@@ -126,6 +127,8 @@ export async function updateHeader(payload: UpdateHeaderPayload): Promise<Partia
 export type UpdatePublicContactsPayload = {
   publicEmail?: string | null;
   publicPhone?: string | null;
+  /** Whether visitors may contact the public phone through WhatsApp. */
+  publicPhoneIsWhatsapp?: boolean;
 };
 
 export async function updatePublicContacts(

@@ -1,21 +1,20 @@
 'use client';
 
-import { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { ProfileContactData } from '@/types/profile';
 
 type ContactModalProps = {
@@ -32,23 +31,24 @@ export default function ContactModal({
     publicEmail: 'samuelhe@gmail.com',
     publicPhone: '+55 (21) 98765-4321',
     whatsappNumber: '+5521987654321',
+    allowWhatsappContact: true,
   },
   isOwnProfile = false,
 }: ContactModalProps) {
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const notify = useFeedbackStore((s) => s.notify);
 
   const handleCopy = (text: string, label: string) => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(text);
-      setToastMessage(`${label} copiado para a área de transferência!`);
+      notify(`${label} copiado para a área de transferência!`);
     }
   };
 
   const showPublicEmail = contact.showPublicEmail !== false && Boolean(contact.publicEmail);
   const showPublicPhone = contact.showPublicPhone !== false && Boolean(contact.publicPhone);
+  // WhatsApp only when the owner confirmed the number takes it; otherwise the link would fail.
   const allowWhatsapp =
-    contact.allowWhatsappContact !== false &&
-    Boolean(contact.publicPhone || contact.whatsappNumber);
+    contact.allowWhatsappContact === true && Boolean(contact.publicPhone || contact.whatsappNumber);
   const cleanPhone = contact.whatsappNumber || contact.publicPhone.replace(/\D/g, '');
   const waLink = `https://wa.me/${cleanPhone.startsWith('+') ? cleanPhone.slice(1) : cleanPhone}`;
 
@@ -110,9 +110,10 @@ export default function ContactModal({
               <Box>
                 <Stack direction="row" spacing={1.5} sx={{ alignItems: 'flex-start', mb: 1 }}>
                   <Box
+                    aria-hidden
                     sx={{
-                      bgcolor: 'rgba(37, 211, 102, 0.12)',
-                      color: '#25D366',
+                      bgcolor: allowWhatsapp ? 'rgba(37, 211, 102, 0.12)' : 'action.hover',
+                      color: allowWhatsapp ? '#25D366' : 'primary.main',
                       borderRadius: '50%',
                       p: 1,
                       display: 'flex',
@@ -120,11 +121,15 @@ export default function ContactModal({
                       justifyContent: 'center',
                     }}
                   >
-                    <WhatsAppIcon sx={{ fontSize: 24 }} />
+                    {allowWhatsapp ? (
+                      <WhatsAppIcon sx={{ fontSize: 24 }} />
+                    ) : (
+                      <PhoneOutlinedIcon sx={{ fontSize: 24 }} />
+                    )}
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                      WhatsApp
+                      {allowWhatsapp ? 'Telefone e WhatsApp' : 'Telefone'}
                     </Typography>
                     <Typography
                       variant="body1"
@@ -255,39 +260,6 @@ export default function ContactModal({
           </Stack>
         </DialogContent>
       </Dialog>
-
-      {/* Feedback Toast */}
-      <Snackbar
-        open={Boolean(toastMessage)}
-        autoHideDuration={3000}
-        onClose={() => setToastMessage(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastMessage(null)}
-          severity="success"
-          variant="filled"
-          role="status"
-          aria-live="polite"
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
-            color: 'common.white',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          {toastMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 }
