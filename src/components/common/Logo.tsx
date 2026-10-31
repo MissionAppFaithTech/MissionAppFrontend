@@ -1,8 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Image from 'next/image';
 import Link from 'next/link';
+import { homePathForRole } from '@/lib/auth/rbac';
+import { useSessionStore } from '@/stores/sessionStore';
 
 const LOGO_PATHS = {
   light: '/logos/logo_light.PNG',
@@ -13,6 +16,7 @@ type LogoSize = 'sm' | 'md' | 'lg' | 'xl';
 type LogoVariant = 'auto' | 'light' | 'dark';
 
 type LogoProps = {
+  /** Defaults to the user's home: role home when logged in, the landing page otherwise. */
   href?: string;
   size?: LogoSize;
   /** `auto` follows light/dark theme. Use `dark` on gradient navbar. */
@@ -34,7 +38,22 @@ function resolveSize(size?: string): LogoSize {
   return 'md';
 }
 
-export default function Logo({ href = '/', size, variant = 'auto' }: LogoProps) {
+/** Role home for a logged-in user (RBAC), the landing page for visitors. */
+function useHomeHref(): string {
+  const status = useSessionStore((state) => state.status);
+  const role = useSessionStore((state) => state.role);
+  const loadSession = useSessionStore((state) => state.loadSession);
+
+  useEffect(() => {
+    if (status === 'unknown') void loadSession();
+  }, [status, loadSession]);
+
+  return status === 'authenticated' ? homePathForRole(role) : '/';
+}
+
+export default function Logo({ href: hrefOverride, size, variant = 'auto' }: LogoProps) {
+  const homeHref = useHomeHref();
+  const href = hrefOverride ?? homeHref;
   const resolvedSize = resolveSize(size);
   const { height, maxWidth } = sizes[resolvedSize];
 

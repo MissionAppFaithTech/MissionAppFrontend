@@ -26,26 +26,34 @@ export function clearUserStores() {
   useSupporterRegisterStore.getState().reset();
 }
 
+/** Concurrent callers (layout guard, logo, menu) share one request. */
+let pendingSession: Promise<SessionStatus> | null = null;
+
 export const useSessionStore = create<SessionState>()((set) => ({
   status: 'unknown',
   userId: null,
   role: null,
 
-  loadSession: async () => {
-    try {
-      const { data } = await bffRequest<{ data: SessionInfo }>('/api/auth/session', {
-        fallbackMessage: 'Não foi possível verificar a sessão',
-      });
-      set({ status: 'authenticated', userId: data.userId, role: data.role });
-      return 'authenticated';
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 401) {
-        set({ status: 'anonymous', userId: null, role: null });
-        return 'anonymous';
+  loadSession: () => {
+    pendingSession ??= (async (): Promise<SessionStatus> => {
+      try {
+        const { data } = await bffRequest<{ data: SessionInfo }>('/api/auth/session', {
+          fallbackMessage: 'Não foi possível verificar a sessão',
+        });
+        set({ status: 'authenticated', userId: data.userId, role: data.role });
+        return 'authenticated';
+      } catch (error) {
+        if (error instanceof ApiError && error.status === 401) {
+          set({ status: 'anonymous', userId: null, role: null });
+          return 'anonymous';
+        }
+        set({ status: 'unknown' });
+        return 'unknown';
+      } finally {
+        pendingSession = null;
       }
-      set({ status: 'unknown' });
-      return 'unknown';
-    }
+    })();
+    return pendingSession;
   },
 
   logout: async () => {

@@ -51,6 +51,7 @@ export default function ProfileAccountMenu({
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const isOpen = Boolean(anchorElement);
+  const isSupporter = role === 'supporter';
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
     setAnchorElement(event.currentTarget);
@@ -173,36 +174,43 @@ export default function ProfileAccountMenu({
 
         <Divider />
 
-        <Box
-          component={Link}
-          href="/profile/projetos-de-impacto"
-          onClick={handleClose}
-          sx={menuItemSx}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Missionário</Typography>
-        </Box>
+        {/* RBAC: each role only gets links into its own area (lib/auth/rbac.ts). */}
+        {isSupporter ? (
+          <Box
+            component={Link}
+            href="/profile/supporter/missionarios"
+            onClick={handleClose}
+            sx={menuItemSx}
+          >
+            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
+          </Box>
+        ) : (
+          <>
+            <Box
+              component={Link}
+              href="/profile/projetos-de-impacto"
+              onClick={handleClose}
+              sx={menuItemSx}
+            >
+              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+                Perfil Missionário
+              </Typography>
+            </Box>
 
-        <Box
-          component={Link}
-          href="/profile/supporter/missionarios"
-          onClick={handleClose}
-          sx={menuItemSx}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
-        </Box>
+            <Divider />
+
+            <Box component={Link} href="/profile/financeiro" onClick={handleClose} sx={menuItemSx}>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+                Configurações Financeiras
+              </Typography>
+            </Box>
+          </>
+        )}
 
         <Divider />
-
-        <Box component={Link} href="/profile/financeiro" onClick={handleClose} sx={menuItemSx}>
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-            Configurações Financeiras
-          </Typography>
-        </Box>
-
-        <Divider />
         <Box
           component={Link}
-          href={role === 'supporter' ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
+          href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
           onClick={handleClose}
           sx={menuItemSx}
         >
@@ -213,9 +221,7 @@ export default function ProfileAccountMenu({
 
         <Box
           component={Link}
-          href={
-            role === 'supporter' ? '/profile/supporter/configuracoes' : '/profile/configuracoes'
-          }
+          href={isSupporter ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
           onClick={handleClose}
           sx={menuItemSx}
         >

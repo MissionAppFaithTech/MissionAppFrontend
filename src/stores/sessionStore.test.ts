@@ -82,6 +82,22 @@ describe('sessionStore', () => {
       });
     });
 
+    it('shares one request between concurrent callers and asks again afterwards', async () => {
+      fetchSpy.mockResolvedValue(
+        jsonResponse({ data: { authenticated: true, userId: 'user-1', role: 'SUPPORTER' } })
+      );
+
+      const { loadSession } = useSessionStore.getState();
+      const [first, second] = await Promise.all([loadSession(), loadSession()]);
+
+      expect(first).toBe('authenticated');
+      expect(second).toBe('authenticated');
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+      await loadSession();
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('marks the session anonymous on 401', async () => {
       useSessionStore.setState({ status: 'authenticated', userId: 'user-1', role: 'SUPPORTER' });
       fetchSpy.mockResolvedValue(jsonResponse({ message: 'Não autenticado' }, 401));

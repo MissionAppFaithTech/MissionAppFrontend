@@ -1,4 +1,7 @@
 import type { AuthUser } from '@/lib/api/auth-response';
+import { accessDecision, homePathForRole } from '@/lib/auth/rbac';
+
+export { homePathForRole };
 
 const URL_BASE = 'http://missionapp.local';
 
@@ -17,21 +20,10 @@ export function safeNextPath(next: string | null | undefined): string | null {
   return next;
 }
 
-/** Landing page after login, by role. */
-export function homePathForRole(role: AuthUser['role']): string {
-  return role === 'SUPPORTER' ? '/profile/supporter' : '/profile';
-}
-
-/** `next` wins only when it belongs to the same area as the user's role. */
+/** `next` wins only when the role may open it (see {@link accessDecision}). */
 export function postLoginPath(role: AuthUser['role'], next: string | null | undefined): string {
-  const home = homePathForRole(role);
   const target = safeNextPath(next);
-  if (!target) return home;
-  const supporterArea = target.startsWith('/profile/supporter');
-  const missionaryArea = target.startsWith('/profile') && !supporterArea;
-  if (role === 'SUPPORTER' && missionaryArea && !target.startsWith('/profile/missionario/')) {
-    return home;
-  }
-  if (role !== 'SUPPORTER' && supporterArea) return home;
-  return target;
+  if (!target) return homePathForRole(role);
+  const { pathname } = new URL(target, URL_BASE);
+  return accessDecision(role, pathname).allow ? target : homePathForRole(role);
 }

@@ -17,7 +17,7 @@ const loadedProfile = { ...emptyProfile, username: 'daniel', displayName: 'Missi
 
 type SetupOptions = {
   session?: SessionStatus;
-  role?: 'MISSIONARY' | 'SUPPORTER';
+  role?: 'MISSIONARY' | 'SUPPORTER' | 'ADMIN';
   fetchResult?: 'ready' | 'error';
 };
 
@@ -82,7 +82,9 @@ describe('MissionaryProfileLayout', () => {
     const { fetchProfile } = setup({ session: 'anonymous' });
     renderLayout();
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/login?next=/profile'));
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(`/login?next=${encodeURIComponent('/profile/sobre')}`)
+    );
     expect(fetchProfile).not.toHaveBeenCalled();
   });
 
@@ -92,5 +94,21 @@ describe('MissionaryProfileLayout', () => {
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/profile/supporter'));
     expect(fetchProfile).not.toHaveBeenCalled();
+  });
+
+  it('sends admins to the admin area', async () => {
+    const { fetchProfile } = setup({ role: 'ADMIN' });
+    renderLayout();
+
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/admin'));
+    expect(fetchProfile).not.toHaveBeenCalled();
+  });
+
+  it('still loads the profile when the session check fails (the backend authorizes)', async () => {
+    const { fetchProfile } = setup({ session: 'unknown' });
+    renderLayout();
+
+    await waitFor(() => expect(fetchProfile).toHaveBeenCalledTimes(1));
+    expect(replace).not.toHaveBeenCalled();
   });
 });

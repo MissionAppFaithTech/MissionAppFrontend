@@ -37,11 +37,7 @@ export default function ProfileLayoutShell({
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <PageNavbar maxWidth="lg">
-        <Logo
-          size="lg"
-          href={role === 'supporter' ? '/profile/supporter' : '/profile'}
-          variant="dark"
-        />
+        <Logo size="lg" variant="dark" />
 
         <Box
           sx={{
@@ -65,7 +61,7 @@ export default function ProfileLayoutShell({
 
         <PageNavbarActions>
           <AccessibilityPreferencesButton size="medium" />
-          <ProfileAccountMenu profile={profile} />
+          <ProfileAccountMenu profile={profile} role={role} />
         </PageNavbarActions>
       </PageNavbar>
 

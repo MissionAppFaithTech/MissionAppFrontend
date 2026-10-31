@@ -11,9 +11,9 @@ vi.mock('next/navigation', () => ({ useRouter: () => router }));
 
 const profile = { username: 'samuel', displayName: 'Samuel' };
 
-async function openMenu() {
+async function openMenu(role?: 'missionary' | 'supporter') {
   const user = userEvent.setup();
-  render(<ProfileAccountMenu profile={profile} />);
+  render(<ProfileAccountMenu profile={profile} role={role} />);
   await user.click(screen.getByRole('button', { name: /abrir menu do perfil/i }));
   return user;
 }
@@ -45,6 +45,40 @@ describe('ProfileAccountMenu', () => {
     const appearance = screen.getByRole('group', { name: 'Aparência' });
     expect(appearance).toContainElement(screen.getByRole('button', { name: 'Claro' }));
     expect(appearance).toContainElement(screen.getByRole('button', { name: 'Escuro' }));
+  });
+
+  it('gives a missionary only links into the missionary area', async () => {
+    await openMenu('missionary');
+
+    expect(screen.getByRole('link', { name: 'Perfil Missionário' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Configurações Financeiras' })).toHaveAttribute(
+      'href',
+      '/profile/financeiro'
+    );
+    expect(screen.queryByRole('link', { name: 'Perfil Apoiador' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /configurações de conta/i })).toHaveAttribute(
+      'href',
+      '/profile/configuracoes'
+    );
+  });
+
+  it('gives a supporter only links into the supporter area', async () => {
+    await openMenu('supporter');
+
+    expect(screen.getByRole('link', { name: 'Perfil Apoiador' })).toHaveAttribute(
+      'href',
+      '/profile/supporter/missionarios'
+    );
+    expect(screen.queryByRole('link', { name: 'Perfil Missionário' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /financeiras/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /editar perfil/i })).toHaveAttribute(
+      'href',
+      '/profile/supporter/edit-profile'
+    );
+    expect(screen.getByRole('link', { name: /configurações de conta/i })).toHaveAttribute(
+      'href',
+      '/profile/supporter/configuracoes'
+    );
   });
 
   it('logs out and goes to the login page', async () => {

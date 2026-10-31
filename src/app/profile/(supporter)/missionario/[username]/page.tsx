@@ -79,7 +79,7 @@ export default async function SupporterMissionaryPage({ params }: PageProps) {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       {/* TopBar Autenticado do Apoiador */}
       <PageNavbar maxWidth="lg">
-        <Logo size="lg" href="/profile/supporter" variant="dark" />
+        <Logo size="lg" variant="dark" />
 
         <Box sx={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'center' }}>
           <TextField
