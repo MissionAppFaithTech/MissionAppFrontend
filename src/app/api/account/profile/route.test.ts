@@ -267,7 +267,8 @@ describe('GET /api/account/profile', () => {
     expect((await res.json()).data.missionaryAgency).toBeNull();
   });
 
-  it('fails the request when a name lookup fails with something other than 404', async () => {
+  it('keeps the profile when a name lookup fails (cosmetic) and leaves that name empty', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockBackend({
       'GET /account/profile': () => profileResponse(),
       [AGENCY_PATH]: agencyResponse,
@@ -278,8 +279,114 @@ describe('GET /api/account/profile', () => {
 
     const res = await GET();
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.missionaryAgency).toEqual({ id: AGENCY_ID, name: 'JMN' });
+    expect(body.data.faithCommunity).toBeNull();
+    consoleError.mockRestore();
+  });
+
+  it('keeps the profile when the public catalog rate limit (429) is reached', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const tooMany = () => {
+      throw new BackendApiError('Too many requests', 429, { message: 'Too many requests' });
+    };
+    mockBackend({
+      'GET /account/profile': () => profileResponse(),
+      [AGENCY_PATH]: tooMany,
+      [COMMUNITY_PATH]: tooMany,
+    });
+
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.user.username).toBe(user.username);
+    expect(body.data.missionaryAgency).toBeNull();
+    expect(body.data.faithCommunity).toBeNull();
+    vi.mocked(console.error).mockRestore();
+  });
+
+  it('logs unexpected name lookup failures but not a missing (404) entry', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockBackend({
+      'GET /account/profile': () => profileResponse(),
+      [AGENCY_PATH]: () => {
+        throw new BackendApiError('Not found', 404, undefined);
+      },
+      [COMMUNITY_PATH]: communityResponse,
+    });
+
+    await GET();
+    expect(consoleError).not.toHaveBeenCalled();
+
+    const boom = new BackendApiError('Erro na API (500)', 500, 'boom');
+    mockBackend({
+      'GET /account/profile': () => profileResponse(),
+      [AGENCY_PATH]: () => {
+        throw boom;
+      },
+      [COMMUNITY_PATH]: communityResponse,
+    });
+
+    await GET();
+    expect(consoleError).toHaveBeenCalledWith(
+      '[api/account/profile GET] missionaryAgency name lookup failed',
+      boom
+    );
+    consoleError.mockRestore();
+  });
+
+  it('answers 502 with the pt-BR fallback when the backend is unreachable', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(backendFetch).mockRejectedValue(new TypeError('fetch failed'));
+
+    const res = await GET();
+
+    expect(res.status).toBe(502);
     await expect(res.json()).resolves.toEqual({ message: 'Não foi possível carregar o perfil' });
+    expect(consoleError).toHaveBeenCalledWith('[api/account/profile GET]', expect.any(TypeError));
+    consoleError.mockRestore();
+  });
+
+  it('uses the names sent by the backend (#142) without calling the public catalog', async () => {
+    mockBackend({
+      'GET /account/profile': () =>
+        profileResponse({
+          missionaryAgency: { id: AGENCY_ID, name: 'JMN' },
+          faithCommunity: null,
+        }),
+    });
+
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.missionaryAgency).toEqual({ id: AGENCY_ID, name: 'JMN' });
+    expect(body.data.faithCommunity).toBeNull();
+    expect(backendFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('still lets an expired session on a name lookup trigger the refresh flow', async () => {
+    let profileCalls = 0;
+    mockBackend({
+      'POST /auth/refresh': refreshOk,
+      'GET /account/profile': () => {
+        profileCalls += 1;
+        return profileResponse();
+      },
+      [AGENCY_PATH]: ({ accessToken }) => {
+        if (accessToken !== NEW_TOKENS.accessToken) throw unauthorized();
+        return agencyResponse();
+      },
+      [COMMUNITY_PATH]: communityResponse,
+    });
+
+    const res = await GET();
+
+    expect(res.status).toBe(200);
+    expect(profileCalls).toBe(2);
+    expectCookiesRewritten(res);
   });
 
   it('does not swallow a 404 on the profile itself', async () => {
@@ -347,6 +454,25 @@ describe('PATCH /api/account/profile', () => {
     );
 
   const updated = { data: { user: { ...user, fullName: 'Carlos Silva' } } };
+
+  it('rejects a username with a valid prefix followed by invalid characters', async () => {
+    const res = await patch({ username: 'carlos_ok!' });
+
+    expect(res.status).toBe(422);
+    expect(backendFetch).not.toHaveBeenCalled();
+  });
+
+  it('answers 502 with the pt-BR fallback when saving and the backend is unreachable', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(backendFetch).mockRejectedValue(new TypeError('fetch failed'));
+
+    const res = await patch({ fullName: 'Carlos Silva' });
+
+    expect(res.status).toBe(502);
+    await expect(res.json()).resolves.toEqual({ message: 'Não foi possível salvar o perfil' });
+    expect(consoleError).toHaveBeenCalledWith('[api/account/profile PATCH]', expect.any(TypeError));
+    consoleError.mockRestore();
+  });
 
   it('answers 400 for invalid JSON before touching the session', async () => {
     const res = await patch('{oops');
