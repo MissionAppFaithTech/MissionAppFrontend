@@ -31,6 +31,7 @@ import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import PillButton from '@/components/common/PillButton';
 import { mockFaithCommunities, mockMissionaryAgencies } from '@/mocks/ecclesiastical';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
+import ActiveSessionsSection from '@/components/profile/settings/ActiveSessionsSection';
 
 export type AccountSettingsViewProps = {
   role: 'missionary' | 'supporter';
@@ -307,14 +308,14 @@ export default function AccountSettingsView({
             label="Credenciais"
             clickable
             onClick={() => handleScrollTo('credentials-section')}
-            sx={{ minHeight: 36, fontWeight: 600 }}
+            sx={{ minHeight: 44, fontWeight: 600 }}
           />
           <Chip
             icon={<ChurchOutlinedIcon fontSize="small" />}
             label="Dados Eclesiásticos"
             clickable
             onClick={() => handleScrollTo('ecclesiastical-section')}
-            sx={{ minHeight: 36, fontWeight: 600 }}
+            sx={{ minHeight: 44, fontWeight: 600 }}
           />
           {role === 'missionary' && (
             <Chip
@@ -322,7 +323,7 @@ export default function AccountSettingsView({
               label="Agência Missionária"
               clickable
               onClick={() => handleScrollTo('agency-section')}
-              sx={{ minHeight: 36, fontWeight: 600 }}
+              sx={{ minHeight: 44, fontWeight: 600 }}
             />
           )}
           <Chip
@@ -330,7 +331,8 @@ export default function AccountSettingsView({
             label="Zona de Perigo"
             clickable
             onClick={() => handleScrollTo('danger-section')}
-            sx={{ minHeight: 36, fontWeight: 600, color: 'error.main' }}
+            // Red icon + text label; red text on the chip fill was 3.86:1.
+            sx={{ minHeight: 44, fontWeight: 600 }}
           />
         </Stack>
       </Card>
@@ -866,6 +868,8 @@ export default function AccountSettingsView({
             </CardContent>
           </Card>
         )}
+
+        <ActiveSessionsSection />
 
         {/* ========================================================================= */}
         {/* 4. ZONA DE PERIGO / ENCERRAMENTO DE CONTA (RF 15.5)                       */}

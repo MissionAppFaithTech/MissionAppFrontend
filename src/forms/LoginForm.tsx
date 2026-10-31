@@ -11,7 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -20,8 +20,9 @@ import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import PillButton from '@/components/common/PillButton';
 import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
+import { postLoginPath } from '@/lib/auth/redirect';
 import { login } from '@/services/auth.service';
-import { useProfileStore } from '@/stores/profileStore';
+import { clearUserStores } from '@/stores/sessionStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 type LoginErrorInfo = {
@@ -78,6 +79,8 @@ function parseLoginError(errorMessage: string): LoginErrorInfo {
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sessionExpired = searchParams.get('reason') === 'expired';
   const [showPassword, setShowPassword] = useState(false);
   const [submitError, setSubmitError] = useState<LoginErrorInfo | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
@@ -101,13 +104,10 @@ export default function LoginForm() {
   const onSubmit = async (data: LoginFormData) => {
     setSubmitError(null);
     try {
-      await login({ login: data.email, password: data.password });
-      useProfileStore.getState().reset();
-      await useProfileStore
-        .getState()
-        .fetchProfile()
-        .catch(() => {});
-      router.push('/profile');
+      const { user } = await login({ login: data.email, password: data.password });
+      // Drop anything cached for a previous user before entering the new session.
+      clearUserStores();
+      router.push(postLoginPath(user.role, searchParams.get('next')));
       router.refresh();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Falha ao autenticar';
@@ -142,64 +142,27 @@ export default function LoginForm() {
       noValidate
       sx={{ width: '100%' }}
     >
+      {sessionExpired && !submitError ? (
+        <Alert severity="info" role="status">
+          Sua sessão expirou. Entre novamente para continuar de onde parou.
+        </Alert>
+      ) : null}
       {submitError && (
         <Alert
           severity="error"
           role="alert"
           aria-live="assertive"
           icon={<ErrorOutlineRoundedIcon sx={{ fontSize: 22, mt: '2px' }} />}
-          sx={{
-            width: '100%',
-            borderRadius: '10px',
-            border: '1.5px solid',
-            borderColor: (theme) => (theme.palette.mode === 'dark' ? '#F87171' : '#FECACA'),
-            bgcolor: (theme) =>
-              theme.palette.mode === 'dark' ? 'rgba(239, 68, 68, 0.2)' : '#FEF2F2',
-            color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : '#991B1B'),
-            alignItems: 'flex-start',
-            p: 1.75,
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? '0 0 14px rgba(239, 68, 68, 0.2)' : 'none',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? '#F87171' : '#DC2626'),
-              mr: 1.5,
-              p: 0,
-            },
-            '& .MuiAlert-message': {
-              width: '100%',
-              p: 0,
-            },
-            '[data-auth-card] &': {
-              bgcolor: '#FEF2F2 !important',
-              borderColor: '#FECACA !important',
-              color: '#991B1B !important',
-              boxShadow: 'none !important',
-              '& .MuiAlert-icon': { color: '#DC2626 !important' },
-              '& .MuiTypography-root': { color: '#991B1B !important' },
-            },
-          }}
+          sx={{ width: '100%' }}
         >
           <Typography
             variant="subtitle2"
             component="div"
-            sx={{
-              fontWeight: 700,
-              color: (theme) => (theme.palette.mode === 'dark' ? '#FFFFFF' : '#991B1B'),
-              mb: 0.5,
-              lineHeight: 1.3,
-            }}
+            sx={{ fontWeight: 700, color: 'inherit', mb: 0.5, lineHeight: 1.3 }}
           >
             {submitError.title}
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: (theme) => (theme.palette.mode === 'dark' ? '#FEE2E2' : '#7F1D1D'),
-              fontSize: '0.8125rem',
-              lineHeight: 1.5,
-              opacity: 0.95,
-            }}
-          >
+          <Typography variant="body2" sx={{ color: 'inherit', lineHeight: 1.5 }}>
             {submitError.description}
           </Typography>
         </Alert>
@@ -251,7 +214,7 @@ export default function LoginForm() {
                     transition: 'color 0.2s ease, background-color 0.2s ease, transform 0.15s ease',
                     '&:hover': {
                       color: 'primary.main',
-                      backgroundColor: 'rgba(13, 43, 92, 0.08)',
+                      backgroundColor: 'action.hover',
                       transform: 'scale(1.05)',
                     },
                   }}
@@ -290,7 +253,7 @@ export default function LoginForm() {
             transition: 'color 0.2s ease, background-color 0.2s ease',
             '&:hover': {
               color: 'connection.main',
-              backgroundColor: 'rgba(13, 43, 92, 0.06)',
+              backgroundColor: 'action.hover',
               textDecoration: 'none',
             },
             '&:focus-visible': {

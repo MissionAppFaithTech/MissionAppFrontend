@@ -53,7 +53,7 @@ export default function LoginPageContent() {
                 transition: 'color 0.2s ease, background-color 0.2s ease',
                 '&:hover': {
                   color: 'primary.main',
-                  backgroundColor: 'rgba(13, 43, 92, 0.06)',
+                  backgroundColor: 'action.hover',
                   textDecoration: 'none',
                 },
               }}

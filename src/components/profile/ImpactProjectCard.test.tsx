@@ -48,7 +48,10 @@ describe('ImpactProjectCard Component', () => {
     expect(screen.getByText(/vídeo de apresentação/i)).toBeInTheDocument();
     const iframe = screen.getByTitle(/vídeo de apresentação/i);
     expect(iframe).toBeInTheDocument();
-    expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/Bll78RzRaaU');
+    expect(iframe).toHaveAttribute(
+      'src',
+      'https://www.youtube-nocookie.com/embed/Bll78RzRaaU?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
+    );
   });
 
   it('renders gallery photos in carousel mode and opens lightbox modal when clicked', async () => {
@@ -116,16 +119,20 @@ describe('ImpactProjectCard Component', () => {
   describe('getYouTubeEmbedUrl helper', () => {
     it('correctly extracts youtube video IDs and formats embed URLs', () => {
       expect(getYouTubeEmbedUrl('https://www.youtube.com/watch?v=5dsGWM5XGdg')).toBe(
-        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg'
+        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
       );
       expect(getYouTubeEmbedUrl('https://youtu.be/5dsGWM5XGdg')).toBe(
-        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg'
+        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
       );
-      expect(getYouTubeEmbedUrl('https://www.youtube-nocookie.com/embed/5dsGWM5XGdg')).toBe(
-        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg'
+      expect(
+        getYouTubeEmbedUrl(
+          'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
+        )
+      ).toBe(
+        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
       );
       expect(getYouTubeEmbedUrl('https://www.youtube.com/shorts/5dsGWM5XGdg')).toBe(
-        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg'
+        'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
       );
       expect(getYouTubeEmbedUrl(undefined)).toBeNull();
       expect(getYouTubeEmbedUrl('invalid-url')).toBeNull();

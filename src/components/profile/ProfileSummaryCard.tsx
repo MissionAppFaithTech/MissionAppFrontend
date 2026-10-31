@@ -5,18 +5,18 @@ import Link from 'next/link';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
-import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
+import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
 import DonationModal from '@/components/profile/DonationModal';
+import { EXAMPLE_PROFILE_STATS } from '@/services/profile.service';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { ProfileData } from '@/types/profile';
 
 type ProfileSummaryCardProps = {
@@ -51,7 +51,7 @@ export default function ProfileSummaryCard({
   onFollowToggle,
   onDonate,
 }: ProfileSummaryCardProps) {
-  const [toastOpen, setToastOpen] = useState(false);
+  const notify = useFeedbackStore((s) => s.notify);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(isFollowingInitial);
@@ -61,17 +61,17 @@ export default function ProfileSummaryCard({
     displayName,
     roleDescription,
     location = '',
-    projectsCount = 25,
-    postsCount = 3,
-    campaignsCount = 4,
-    supportersCount = '1.2k',
-    followingCount = 12,
+    projectsCount = EXAMPLE_PROFILE_STATS.projectsCount,
+    postsCount = EXAMPLE_PROFILE_STATS.postsCount,
+    campaignsCount = EXAMPLE_PROFILE_STATS.campaignsCount,
+    supportersCount = EXAMPLE_PROFILE_STATS.supportersCount,
+    followingCount = EXAMPLE_PROFILE_STATS.followingCount,
+    statsAreExample = true,
     role = 'missionary',
   } = profile;
 
   const isSupporterProfile = role === 'supporter';
   const isOwnSupporter = isOwnProfile && isSupporterProfile;
-  const showPhotoButton = isOwnProfile;
   const showLocation = !isSupporterProfile;
   const showShare = !isOwnSupporter;
 
@@ -91,10 +91,12 @@ export default function ProfileSummaryCard({
           { label: 'campanhas', value: campaignsCount },
         ];
 
-  const handleShare = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      setToastOpen(true);
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      notify('Link do perfil copiado.');
+    } catch {
+      notify('Não foi possível copiar o link. Copie o endereço da página manualmente.', 'error');
     }
   };
 
@@ -144,7 +146,6 @@ export default function ProfileSummaryCard({
                 >
                   <PersonIcon sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
                 </Avatar>
-                {showPhotoButton ? <ProfilePhotoAddButton /> : null}
               </Box>
 
               <Stack spacing={0.5} sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
@@ -188,16 +189,15 @@ export default function ProfileSummaryCard({
                     href={editHref}
                     variant="body2"
                     sx={{
-                      display: 'inline-block',
-                      fontStyle: 'italic',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      alignSelf: 'flex-start',
+                      minHeight: 44,
                       fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                      pt: 0.25,
-                      color: 'text.secondary',
-                      textDecoration: 'none',
-                      '&:hover': {
-                        textDecoration: 'underline',
-                        color: 'primary.main',
-                      },
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                      textUnderlineOffset: 3,
+                      '&:active': { color: 'primary.dark' },
                     }}
                   >
                     Adicione sua biografia
@@ -244,47 +244,53 @@ export default function ProfileSummaryCard({
 
             {statsList.length > 0 ? (
               <Stack
-                direction="row"
-                spacing={{ xs: 2, sm: 2.5, md: 3 }}
-                useFlexGap
-                sx={{
-                  flexWrap: 'wrap',
-                  justifyContent: { xs: 'flex-start', sm: 'flex-end' },
-                  alignItems: 'flex-start',
-                  flexShrink: 0,
-                  minWidth: 0,
-                }}
+                spacing={1}
+                sx={{ alignItems: { xs: 'flex-start', sm: 'flex-end' }, minWidth: 0 }}
               >
-                {statsList.map((stat) => (
-                  <Stack
-                    key={stat.label}
-                    spacing={0.25}
-                    sx={{ alignItems: 'center', minWidth: { xs: 56, sm: 64 } }}
-                  >
-                    <Typography
-                      variant="h6"
-                      color="text.primary"
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: { xs: '1.125rem', sm: '1.25rem' },
-                        lineHeight: 1.2,
-                      }}
+                {statsAreExample ? <ExampleDataBadge subject="estatísticas do perfil" /> : null}
+                <Stack
+                  direction="row"
+                  spacing={{ xs: 2, sm: 2.5, md: 3 }}
+                  useFlexGap
+                  sx={{
+                    flexWrap: 'wrap',
+                    justifyContent: { xs: 'flex-start', sm: 'flex-end' },
+                    alignItems: 'flex-start',
+                    flexShrink: 0,
+                    minWidth: 0,
+                  }}
+                >
+                  {statsList.map((stat) => (
+                    <Stack
+                      key={stat.label}
+                      spacing={0.25}
+                      sx={{ alignItems: 'center', minWidth: { xs: 56, sm: 64 } }}
                     >
-                      {stat.value}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-                        fontWeight: 500,
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {stat.label}
-                    </Typography>
-                  </Stack>
-                ))}
+                      <Typography
+                        variant="h6"
+                        color="text.primary"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: { xs: '1.125rem', sm: '1.25rem' },
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {stat.value}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                          fontWeight: 500,
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {stat.label}
+                      </Typography>
+                    </Stack>
+                  ))}
+                </Stack>
               </Stack>
             ) : null}
           </Stack>
@@ -394,36 +400,6 @@ export default function ProfileSummaryCard({
         isOwnProfile={isOwnProfile}
         financialConfig={profile.financial}
       />
-
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastOpen(false)}
-          severity="success"
-          variant="filled"
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
-            color: 'common.white',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          Link do perfil copiado para compartilhamento
-        </Alert>
-      </Snackbar>
     </Card>
   );
 }

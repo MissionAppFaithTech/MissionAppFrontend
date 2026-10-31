@@ -18,6 +18,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import type { FinancialConfigData } from '@/types/profile';
+import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import PillButton from '@/components/common/PillButton';
 import Image from 'next/image';
 
@@ -28,6 +29,8 @@ type DonationModalProps = {
   isOwnProfile?: boolean;
   financialConfig?: FinancialConfigData;
 };
+
+const EXAMPLE_PIX_KEY = 'exemplo@missionapp.org';
 
 const pixKeyTypeLabels: Record<string, string> = {
   cpf: 'CPF',
@@ -44,6 +47,8 @@ export default function DonationModal({
   isOwnProfile = false,
   financialConfig,
 }: DonationModalProps) {
+  // No financial data from the backend yet: show labelled example data instead.
+  const isExampleData = !financialConfig;
   const hasPix = financialConfig
     ? Boolean(financialConfig.pix?.enabled && financialConfig.pix?.key)
     : true;
@@ -61,7 +66,7 @@ export default function DonationModal({
 
   const supporterMessage = financialConfig?.supporterMessage || '';
 
-  const pixKey = financialConfig?.pix?.key || '';
+  const pixKey = financialConfig ? financialConfig.pix?.key || '' : EXAMPLE_PIX_KEY;
   const pixKeyType = financialConfig?.pix?.keyType || 'email';
   const pixQrCodeUrl = financialConfig?.pix?.qrCodeUrl;
 
@@ -79,7 +84,7 @@ export default function DonationModal({
               ? 'Conta Poupança'
               : 'Conta de Pagamento',
         titular: financialConfig.bankTransfer.holderName || missionaryName,
-        documento: financialConfig.bankTransfer.holderDocument || '123.456.789-00',
+        documento: financialConfig.bankTransfer.holderDocument,
       }
     : {
         banco: '033 - Banco Santander',
@@ -156,6 +161,9 @@ CPF/CNPJ: ${bankData.documento}`;
             >
               Apoie o ministério de {missionaryName}
             </Typography>
+            {isExampleData ? (
+              <ExampleDataBadge subject="dados de doação" sx={{ mt: 0.75 }} />
+            ) : null}
           </Box>
           <IconButton
             aria-label="Fechar modal de doação"

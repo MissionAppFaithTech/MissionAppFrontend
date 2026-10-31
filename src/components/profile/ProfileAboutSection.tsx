@@ -16,37 +16,121 @@ type ProfileAboutSectionProps = {
   onEditAction: () => void;
 };
 
-type DetailRowProps = {
-  label: string;
-  value: string;
-};
+const textSx = { whiteSpace: 'pre-line', overflowWrap: 'anywhere' } as const;
 
-function DetailRow({ label, value }: DetailRowProps) {
-  if (!value || !value.trim()) return null;
+function hasText(value: string | undefined): value is string {
+  return Boolean(value?.trim());
+}
+
+function LabeledText({ label, value }: { label: string; value: string }) {
   return (
-    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.25, sm: 1 }}>
-      <Typography variant="body2" sx={{ fontWeight: 700, flexShrink: 0 }}>
-        {label}:
+    <Box>
+      <Typography component="h3" variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>
+        {label}
       </Typography>
-      <Typography variant="body2">{value}</Typography>
-    </Stack>
+      <Typography variant="body2" sx={textSx}>
+        {value}
+      </Typography>
+    </Box>
+  );
+}
+
+/** Prayer requests and life verse are shown as quotes (RF 10.7.1). */
+function QuoteBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <Box component="figure" sx={{ m: 0 }}>
+      <Typography component="figcaption" variant="body2" sx={{ fontWeight: 700, mb: 0.75 }}>
+        {label}
+      </Typography>
+      <Box
+        component="blockquote"
+        sx={{
+          m: 0,
+          pl: 2,
+          py: 0.5,
+          borderLeft: '4px solid',
+          borderColor: 'secondary.main',
+        }}
+      >
+        <Typography variant="body2" sx={{ ...textSx, fontStyle: 'italic' }}>
+          {value}
+        </Typography>
+      </Box>
+    </Box>
   );
 }
 
 export default function ProfileAboutSection({ data, onEditAction }: ProfileAboutSectionProps) {
-  const isAboutEmpty =
-    !data.introduction?.trim() &&
-    !data.missionHistory?.trim() &&
-    !data.missionaryAgency?.trim() &&
-    !data.faithCommunity?.trim() &&
-    !data.prayerRequests?.trim() &&
-    !data.lifeVerse?.trim();
+  const details = [
+    { label: 'Local de origem', value: data.originLocation },
+    { label: 'Local de atuação atual', value: data.currentLocation },
+    { label: 'Agência missionária', value: data.missionaryAgency },
+    { label: 'Comunidade de fé', value: data.faithCommunity },
+  ].filter((row): row is { label: string; value: string } => hasText(row.value));
 
-  const hasDetailRows = Boolean(data.missionaryAgency?.trim() || data.faithCommunity?.trim());
+  const quotes = [
+    { label: 'Pedidos de oração', value: data.prayerRequests },
+    { label: 'Versículo para a vida', value: data.lifeVerse },
+  ].filter((row): row is { label: string; value: string } => hasText(row.value));
+
+  const hasStory = hasText(data.introduction) || hasText(data.missionHistory);
+  const hasEditableContent =
+    hasStory || quotes.length > 0 || hasText(data.originLocation) || hasText(data.currentLocation);
+
+  const blocks = [
+    hasStory ? (
+      <Stack key="story" spacing={2}>
+        {hasText(data.introduction) ? (
+          <Typography variant="body1" sx={textSx}>
+            {data.introduction}
+          </Typography>
+        ) : null}
+        {hasText(data.missionHistory) ? (
+          <LabeledText label="Resumo da minha história em missões" value={data.missionHistory} />
+        ) : null}
+      </Stack>
+    ) : null,
+    details.length > 0 ? (
+      <Box
+        key="details"
+        component="dl"
+        sx={{
+          m: 0,
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'max-content 1fr' },
+          columnGap: 2,
+          rowGap: { xs: 0.25, sm: 1.25 },
+        }}
+      >
+        {details.map(({ label, value }) => (
+          <Box key={label} sx={{ display: 'contents' }}>
+            <Typography
+              component="dt"
+              variant="body2"
+              sx={{ fontWeight: 700, mt: { xs: 1, sm: 0 } }}
+            >
+              {label}
+            </Typography>
+            <Typography component="dd" variant="body2" sx={{ ...textSx, m: 0 }}>
+              {value}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    ) : null,
+    quotes.length > 0 ? (
+      <Stack key="quotes" spacing={2.5}>
+        {quotes.map((quote) => (
+          <QuoteBlock key={quote.label} {...quote} />
+        ))}
+      </Stack>
+    ) : null,
+  ].filter(Boolean);
 
   return (
     <Card
       component="section"
+      aria-labelledby="profile-about-title"
       elevation={0}
       sx={{
         borderRadius: { xs: 2, sm: 3 },
@@ -62,74 +146,38 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
         }}
       >
         <Stack spacing={{ xs: 2, sm: 2.5 }}>
-          <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            sx={{ alignItems: 'center', justifyContent: 'space-between' }}
+          >
+            <Typography
+              id="profile-about-title"
+              component="h2"
+              variant="h6"
+              sx={{ fontWeight: 700, color: 'text.primary' }}
+            >
               Sobre
             </Typography>
             <PillButton
               tone="primarySoftOutline"
               size="small"
-              aria-label="Editar informações do sobre"
+              aria-label="Editar informações do Sobre"
               onClick={onEditAction}
+              startIcon={<EditOutlinedIcon aria-hidden />}
               sx={{
-                minWidth: { xs: 44, sm: 'auto' },
-                minHeight: { xs: 44, sm: 'auto' },
-                width: { xs: 44, sm: 'auto' },
-                height: { xs: 44, sm: 'auto' },
-                px: { xs: 0, sm: 1.75 },
-                py: { xs: 0, sm: 0.5 },
-                gap: 0.5,
-                // Mobile: só o lápis, sem caixa/borda. sm+: outline + label.
-                '&&': {
-                  border: { xs: 'none', sm: '1.5px solid' },
-                  borderColor: {
-                    xs: 'transparent',
-                    sm: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-borderStrong)'
-                        : 'primary.main',
-                  },
-                  bgcolor: {
-                    xs: 'transparent',
-                    sm: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-fieldBg)'
-                        : 'common.white',
-                  },
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
-                  boxShadow: 'none',
-                },
-                '&:hover': {
-                  bgcolor: {
-                    xs: 'transparent',
-                    sm: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-borderSubtle)'
-                        : 'rgba(13, 43, 92, 0.04)',
-                  },
-                  borderColor: {
-                    xs: 'transparent',
-                    sm: (theme) =>
-                      theme.palette.mode === 'dark' ? 'connection.main' : 'primary.main',
-                  },
-                },
+                minWidth: 44,
+                px: { xs: 1, sm: 1.75 },
+                '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.5 }, ml: 0 },
               }}
             >
-              <EditOutlinedIcon
-                sx={{
-                  fontSize: { xs: 20, sm: 16 },
-                  color: (theme) =>
-                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.main',
-                }}
-              />
               <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
                 Editar
               </Box>
             </PillButton>
           </Stack>
 
-          {isAboutEmpty ? (
+          {!hasEditableContent ? (
             <Box
               sx={{
                 py: { xs: 3.5, sm: 5 },
@@ -138,128 +186,48 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
                 borderRadius: 2,
                 border: '1.5px dashed',
                 borderColor: 'divider',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.02)'
-                    : 'rgba(0, 0, 0, 0.015)',
+                bgcolor: 'action.hover',
               }}
             >
-              <Box
-                sx={{
-                  width: 56,
-                  height: 56,
-                  borderRadius: '50%',
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(249, 115, 22, 0.12)'
-                      : 'rgba(249, 115, 22, 0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mb: 2,
-                  color: 'primary.main',
-                }}
-              >
-                <AutoStoriesOutlinedIcon sx={{ fontSize: 30, color: 'primary.main' }} />
-              </Box>
+              <AutoStoriesOutlinedIcon
+                aria-hidden
+                sx={{ fontSize: 32, color: 'primary.main', mb: 1.5 }}
+              />
               <Typography
+                component="h3"
                 variant="h6"
-                component="h2"
-                sx={{
-                  fontWeight: 700,
-                  mb: 1,
-                  color: 'text.primary',
-                  fontSize: { xs: '1rem', sm: '1.125rem' },
-                }}
+                sx={{ fontWeight: 700, mb: 1, fontSize: { xs: '1rem', sm: '1.125rem' } }}
               >
                 Compartilhe sua história em missões
               </Typography>
               <Typography
                 variant="body2"
                 color="text.secondary"
-                sx={{ maxWidth: 460, mb: 3, mx: 'auto', lineHeight: 1.6 }}
+                sx={{ maxWidth: 460, mb: 3, lineHeight: 1.6 }}
               >
-                Seus dados de apresentação, histórico missionário, pedidos de oração e versículo
-                ainda não foram preenchidos. Conte mais sobre seu ministério para que parceiros e
-                apoiadores conheçam seu chamado!
+                Conte sua trajetória, onde você atua, pedidos de oração e seu versículo. Assim
+                apoiadores conhecem melhor o seu chamado.
               </Typography>
               <PillButton
                 tone="mission"
                 size="medium"
                 onClick={onEditAction}
-                sx={{
-                  minHeight: 44,
-                  px: 3,
-                  width: { xs: '100%', sm: 'auto' },
-                  justifyContent: 'center',
-                }}
+                sx={{ px: 3, width: { xs: '100%', sm: 'auto' }, justifyContent: 'center' }}
               >
-                Preencher informações do Sobre
+                Preencher o Sobre
               </PillButton>
             </Box>
-          ) : (
-            <>
-              {data.introduction?.trim() ? (
-                <Typography variant="body2">{data.introduction}</Typography>
-              ) : null}
+          ) : null}
 
-              {data.introduction?.trim() &&
-              (data.missionHistory?.trim() ||
-                hasDetailRows ||
-                data.prayerRequests?.trim() ||
-                data.lifeVerse?.trim()) ? (
-                <Divider />
-              ) : null}
-
-              {data.missionHistory?.trim() ? (
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
-                    Resumo da minha história em missões:
-                  </Typography>
-                  <Typography variant="body2">{data.missionHistory}</Typography>
-                </Box>
-              ) : null}
-
-              {data.missionHistory?.trim() &&
-              (hasDetailRows || data.prayerRequests?.trim() || data.lifeVerse?.trim()) ? (
-                <Divider />
-              ) : null}
-
-              {hasDetailRows ? (
-                <Stack spacing={1.25}>
-                  {data.missionaryAgency ? (
-                    <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
-                  ) : null}
-                  <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
-                </Stack>
-              ) : null}
-
-              {hasDetailRows && (data.prayerRequests?.trim() || data.lifeVerse?.trim()) ? (
-                <Divider />
-              ) : null}
-
-              {data.prayerRequests?.trim() ? (
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>
-                    Pedidos de oração:
-                  </Typography>
-                  <Typography variant="body2">{data.prayerRequests}</Typography>
-                </Box>
-              ) : null}
-
-              {data.prayerRequests?.trim() && data.lifeVerse?.trim() ? <Divider /> : null}
-
-              {data.lifeVerse?.trim() ? (
-                <Box sx={{ pt: 0.5 }}>
-                  <DetailRow label="Versículo para a vida" value={data.lifeVerse} />
-                </Box>
-              ) : null}
-            </>
-          )}
+          {blocks.map((block, index) => (
+            <Stack key={index} spacing={{ xs: 2, sm: 2.5 }}>
+              {index > 0 ? <Divider /> : null}
+              {block}
+            </Stack>
+          ))}
         </Stack>
       </CardContent>
     </Card>

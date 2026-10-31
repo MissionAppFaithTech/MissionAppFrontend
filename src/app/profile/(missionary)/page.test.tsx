@@ -26,11 +26,9 @@ describe('Missionary Profile routes', () => {
     expect(screen.getByRole('heading', { name: /^sobre$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 2, name: /compartilhe sua história em missões/i })
+      screen.getByRole('heading', { level: 3, name: /compartilhe sua história em missões/i })
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /preencher informações do sobre/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /preencher o sobre/i })).toBeInTheDocument();
   });
 
   it('renders missionary impact projects page with impact project card', () => {

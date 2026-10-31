@@ -5,11 +5,13 @@ import LoginForm from './LoginForm';
 
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
+let mockSearchParams = new URLSearchParams();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
     push: mockPush,
     refresh: mockRefresh,
   }),
+  useSearchParams: () => mockSearchParams,
 }));
 
 vi.mock('@/services/auth.service', () => ({
@@ -18,20 +20,15 @@ vi.mock('@/services/auth.service', () => ({
   }),
 }));
 
-vi.mock('@/services/profile.service', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('@/services/profile.service')>();
-  return {
-    ...actual,
-    fetchAccountProfile: vi.fn().mockResolvedValue({
-      user: { id: '1', fullName: 'Teste', username: 'teste' },
-      missionary: null,
-    }),
-  };
-});
+const mockClearUserStores = vi.fn();
+vi.mock('@/stores/sessionStore', () => ({
+  clearUserStores: () => mockClearUserStores(),
+}));
 
 describe('LoginForm component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSearchParams = new URLSearchParams();
   });
 
   it('renders email and password inputs with submit button', () => {
@@ -89,6 +86,49 @@ describe('LoginForm component', () => {
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/profile');
     });
+    expect(mockClearUserStores).toHaveBeenCalled();
+  });
+
+  it('sends a supporter to the supporter area', async () => {
+    const { login } = await import('@/services/auth.service');
+    vi.mocked(login).mockResolvedValueOnce({
+      user: { id: '2', fullName: 'Apoiador', email: 'a@missionapp.com', role: 'SUPPORTER' },
+    });
+    const user = userEvent.setup();
+    render(<LoginForm />);
+
+    await user.type(screen.getByPlaceholderText('seu@email.com'), 'a@missionapp.com');
+    await user.type(screen.getByPlaceholderText('Sua senha'), 'SenhaForte123!');
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/profile/supporter'));
+  });
+
+  it('returns to a safe ?next= path and ignores external redirects', async () => {
+    mockSearchParams = new URLSearchParams('next=/profile/sobre/edit');
+    const user = userEvent.setup();
+    const { unmount } = render(<LoginForm />);
+
+    await user.type(screen.getByPlaceholderText('seu@email.com'), 'teste@missionapp.com');
+    await user.type(screen.getByPlaceholderText('Sua senha'), 'SenhaForte123!');
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/profile/sobre/edit'));
+    unmount();
+
+    mockPush.mockClear();
+    mockSearchParams = new URLSearchParams('next=//evil.example.com');
+    render(<LoginForm />);
+    await user.type(screen.getByPlaceholderText('seu@email.com'), 'teste@missionapp.com');
+    await user.type(screen.getByPlaceholderText('Sua senha'), 'SenhaForte123!');
+    await user.click(screen.getByRole('button', { name: 'Entrar' }));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/profile'));
+  });
+
+  it('tells the user when the session expired', () => {
+    mockSearchParams = new URLSearchParams('reason=expired');
+    render(<LoginForm />);
+
+    expect(screen.getByRole('status')).toHaveTextContent(/sua sessão expirou/i);
   });
 
   it('toggles password visibility', async () => {

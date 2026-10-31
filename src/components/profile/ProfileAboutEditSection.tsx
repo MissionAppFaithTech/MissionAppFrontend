@@ -1,147 +1,239 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { useState, type ReactNode } from 'react';
+import { Controller, useForm, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import MenuItem from '@mui/material/MenuItem';
-import Snackbar from '@mui/material/Snackbar';
+import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import StyledTextArea from '@/components/common/StyledTextArea';
-import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
-import { profileAboutSchema, type ProfileAboutFormData } from '@/schemas/profile.schema';
-import { listFaithCommunities } from '@/services/catalog.service';
+import { ApiError } from '@/lib/api/client';
 import {
-  toUpdateMissionaryAboutPayload,
-  updateMissionaryAbout,
-} from '@/services/missionary.service';
+  ABOUT_LONG_MAX_LENGTH,
+  ABOUT_SHORT_MAX_LENGTH,
+  profileAboutSchema,
+  type ProfileAboutFormData,
+} from '@/schemas/profile.schema';
+import type { UpdateAboutPayload } from '@/services/profile.service';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
-import { useProfileStore } from '@/stores/profileStore';
-import type { ProfileAboutData } from '@/types/profile';
+import type { ProfileAboutData, WorkAddressData } from '@/types/profile';
+
+export type SaveAboutInput = {
+  about?: UpdateAboutPayload;
+  workAddress?: WorkAddressData;
+};
 
 type ProfileAboutEditSectionProps = {
-  missionaryId: string;
   data: ProfileAboutData;
-  onBack: () => void;
-  onSave?: (data: ProfileAboutFormData) => void;
+  /** Persists the changes; rejects with {@link ApiError} on failure. */
+  onSave: (input: SaveAboutInput) => Promise<void>;
+  /** Called after a successful save, or with `saved: false` when nothing changed. */
+  onDone: (saved: boolean) => void;
+  onCancel: () => void;
 };
 
-const missionaryAgencies = [
-  'JOCUM (Jovens com uma Missão)',
-  'Missão do Interior',
-  'Agência Missionária Independente',
-] as const;
+type TextFieldName = Exclude<keyof ProfileAboutFormData, 'workAddress'>;
 
-const faithCommunities = ['Igreja Batista', 'Igreja Presbiteriana', 'Comunidade Cristã'] as const;
+const TEXT_FIELDS: Record<TextFieldName, keyof UpdateAboutPayload> = {
+  introduction: 'aboutMe',
+  missionHistory: 'missionStorySummary',
+  originLocation: 'originLocation',
+  prayerRequests: 'prayerRequest',
+  lifeVerse: 'lifeVerse',
+};
 
-type LabeledFieldProps = {
-  children: ReactNode;
-  htmlFor: string;
+const API_FIELD_TO_FORM: Record<string, FieldPath<ProfileAboutFormData>> = {
+  aboutMe: 'introduction',
+  missionStorySummary: 'missionHistory',
+  originLocation: 'originLocation',
+  prayerRequest: 'prayerRequests',
+  lifeVerse: 'lifeVerse',
+  zip: 'workAddress.zip',
+  district: 'workAddress.district',
+  city: 'workAddress.city',
+  state: 'workAddress.state',
+  country: 'workAddress.country',
+};
+
+const WORK_ADDRESS_INPUTS: Array<{
+  key: keyof WorkAddressData;
   label: string;
-};
+  autoComplete: string;
+  maxLength: number;
+}> = [
+  { key: 'country', label: 'País', autoComplete: 'country-name', maxLength: 255 },
+  { key: 'state', label: 'Estado ou província', autoComplete: 'address-level1', maxLength: 255 },
+  { key: 'city', label: 'Cidade', autoComplete: 'address-level2', maxLength: 255 },
+  { key: 'district', label: 'Bairro', autoComplete: 'address-level3', maxLength: 255 },
+  { key: 'zip', label: 'CEP ou código postal', autoComplete: 'postal-code', maxLength: 20 },
+];
 
-function LabeledField({ children, htmlFor, label }: LabeledFieldProps) {
+function toFormValues(data: ProfileAboutData): ProfileAboutFormData {
+  const address = data.workAddress;
+  return {
+    introduction: data.introduction ?? '',
+    missionHistory: data.missionHistory ?? '',
+    originLocation: data.originLocation ?? '',
+    prayerRequests: data.prayerRequests ?? '',
+    lifeVerse: data.lifeVerse ?? '',
+    workAddress: {
+      country: address?.country ?? '',
+      state: address?.state ?? '',
+      city: address?.city ?? '',
+      district: address?.district ?? '',
+      zip: address?.zip ?? '',
+    },
+  };
+}
+
+/** Only changed fields are sent; an emptied field is sent as `null` to clear it. */
+export function buildSaveAboutInput(
+  values: ProfileAboutFormData,
+  dirty: Partial<Record<keyof ProfileAboutFormData, unknown>>
+): SaveAboutInput {
+  const about: UpdateAboutPayload = {};
+  for (const [formField, apiField] of Object.entries(TEXT_FIELDS) as Array<
+    [TextFieldName, keyof UpdateAboutPayload]
+  >) {
+    if (dirty[formField]) about[apiField] = values[formField] || null;
+  }
+
+  const address = values.workAddress;
+  const addressChanged = Boolean(dirty.workAddress);
+  const addressComplete = Object.values(address).every((part) => part.length > 0);
+
+  return {
+    about: Object.keys(about).length > 0 ? about : undefined,
+    workAddress: addressChanged && addressComplete ? address : undefined,
+  };
+}
+
+function FormSection({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
   return (
-    <Stack spacing={0.75}>
+    <Stack component="fieldset" spacing={{ xs: 2, sm: 2.5 }} sx={{ border: 0, p: 0, m: 0 }}>
       <Typography
-        component="label"
-        htmlFor={htmlFor}
-        variant="body2"
-        sx={{ color: 'primary.main', fontWeight: 600 }}
+        id={id}
+        component="legend"
+        variant="subtitle1"
+        color="primary.main"
+        sx={{ fontWeight: 700, p: 0, mb: 0.5 }}
       >
-        {label}:
+        {title}
       </Typography>
+      {description ? (
+        <Typography variant="body2" color="text.secondary">
+          {description}
+        </Typography>
+      ) : null}
       {children}
     </Stack>
   );
 }
 
 export default function ProfileAboutEditSection({
-  missionaryId,
   data,
-  onBack,
   onSave,
+  onDone,
+  onCancel,
 }: ProfileAboutEditSectionProps) {
-  const communities = useCatalogItems(listFaithCommunities);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [toastOpen, setToastOpen] = useState(false);
   const {
     handleSubmit,
     control,
-    setValue,
-    formState: { errors, isSubmitting },
+    setError,
+    formState: { errors, isSubmitting, dirtyFields },
   } = useForm<ProfileAboutFormData>({
     resolver: zodResolver(profileAboutSchema),
     mode: 'onTouched',
-    values: {
-      introduction: data.introduction || '',
-      missionHistory: data.missionHistory || '',
-      missionaryAgency: data.missionaryAgency || '',
-      faithCommunity: data.faithCommunity || '',
-      prayerRequests: data.prayerRequests || '',
-      lifeVerse: data.lifeVerse || '',
-    },
-    resetOptions: {
-      keepDirtyValues: true,
-    },
+    values: toFormValues(data),
+    resetOptions: { keepDirtyValues: true },
   });
 
-  useEffect(() => {
-    const match = communities.items.find(
-      (item) => item.id === data.faithCommunity || item.name === data.faithCommunity
-    );
-    if (match) {
-      setValue('faithCommunity', match.id);
-    }
-  }, [communities.items, data.faithCommunity, setValue]);
-
-  const onSubmit = async (formData: ProfileAboutFormData) => {
+  const onSubmit = async (values: ProfileAboutFormData) => {
     setSubmitError(null);
-    try {
-      await updateMissionaryAbout(missionaryId, toUpdateMissionaryAboutPayload(formData));
-      useProfileStore.setState((prev) => ({
-        profile: {
-          ...prev.profile,
-          about: {
-            ...prev.profile.about,
-            ...formData,
-          },
+    // The backend can replace the work address but not delete it: say so instead
+    // of silently keeping the old one.
+    const addressCleared = Object.values(values.workAddress).every((part) => part.length === 0);
+    if (data.workAddress && addressCleared) {
+      setError(
+        'workAddress.country',
+        {
+          type: 'validate',
+          message: 'O local de atuação não pode ser removido. Preencha todos os campos.',
         },
-      }));
-    } catch (error) {
-      setSubmitError(
-        error instanceof Error ? error.message : 'Não foi possível salvar as informações do sobre'
+        { shouldFocus: true }
       );
       return;
     }
-
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem('draft_profile_about_intro');
-        localStorage.removeItem('draft_profile_about_mission_history');
-        localStorage.removeItem('draft_profile_about_prayer_requests');
-        localStorage.removeItem('draft_profile_about_life_verse');
-      } catch {
-        // Ignore
-      }
+    const input = buildSaveAboutInput(values, dirtyFields);
+    if (!input.about && !input.workAddress) {
+      onDone(false);
+      return;
     }
 
-    setToastOpen(true);
-    onSave?.(formData);
-    setTimeout(() => {
-      onBack();
-    }, 700);
+    try {
+      await onSave(input);
+      onDone(true);
+    } catch (error) {
+      const fieldErrors = error instanceof ApiError ? error.fieldErrors : {};
+      let focused = false;
+      for (const [apiField, message] of Object.entries(fieldErrors)) {
+        const formField = API_FIELD_TO_FORM[apiField];
+        if (!formField) continue;
+        setError(formField, { type: 'server', message }, { shouldFocus: !focused });
+        focused = true;
+      }
+      if (!focused) {
+        setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar o Sobre.');
+      }
+    }
   };
+
+  const textArea = (
+    name: TextFieldName,
+    label: string,
+    options: { maxLength: number; minRows: number; placeholder: string }
+  ) => (
+    <Controller
+      name={name}
+      control={control}
+      render={({ field }) => (
+        <StyledTextArea
+          id={`profile-about-${name}`}
+          inputRef={field.ref}
+          label={label}
+          value={field.value}
+          onChange={field.onChange}
+          minRows={options.minRows}
+          maxLength={options.maxLength}
+          placeholder={options.placeholder}
+          error={Boolean(errors[name])}
+          helperText={errors[name]?.message}
+        />
+      )}
+    />
+  );
 
   return (
     <Card
       component="section"
+      aria-labelledby="profile-about-edit-title"
       elevation={0}
       sx={{
         borderRadius: { xs: 2, sm: 3 },
@@ -156,11 +248,26 @@ export default function ProfileAboutEditSection({
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <Stack spacing={{ xs: 2, sm: 2.5 }}>
-            <Typography variant="h6" color="primary.main">
-              Editar sobre
-            </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+          aria-busy={isSubmitting || undefined}
+        >
+          <Stack spacing={{ xs: 3, sm: 4 }}>
+            <Stack spacing={1}>
+              <Typography
+                id="profile-about-edit-title"
+                component="h1"
+                variant="h6"
+                color="primary.main"
+              >
+                Editar Sobre
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Todos os campos são opcionais. Para remover uma informação, apague o texto e salve.
+              </Typography>
+            </Stack>
 
             {submitError ? (
               <Alert severity="error" role="alert">
@@ -168,186 +275,127 @@ export default function ProfileAboutEditSection({
               </Alert>
             ) : null}
 
-            <Controller
-              name="introduction"
-              control={control}
-              render={({ field }) => (
-                <StyledTextArea
-                  id="profile-about-introduction"
-                  label="Sobre mim"
-                  value={field.value}
-                  onChange={field.onChange}
-                  minRows={4}
-                  placeholder="Compartilhe sua trajetória, testemunho e dedicação ministerial..."
-                  error={Boolean(errors.introduction)}
-                  helperText={errors.introduction?.message}
-                />
-              )}
-            />
+            <FormSection id="about-section-story" title="Minha história">
+              {textArea('introduction', 'Biografia', {
+                maxLength: ABOUT_LONG_MAX_LENGTH,
+                minRows: 4,
+                placeholder: 'Compartilhe sua trajetória, testemunho e chamado',
+              })}
+              {textArea('missionHistory', 'Resumo da minha história em missões', {
+                maxLength: ABOUT_LONG_MAX_LENGTH,
+                minRows: 4,
+                placeholder: 'Conte sobre os lugares e comunidades onde você serviu',
+              })}
+            </FormSection>
 
-            <Controller
-              name="missionHistory"
-              control={control}
-              render={({ field }) => (
-                <StyledTextArea
-                  id="profile-about-mission-history"
-                  label="Resumo da minha história em missões"
-                  value={field.value}
-                  onChange={field.onChange}
-                  minRows={4}
-                  placeholder="Conte sobre os países, comunidades e marcos por onde você serviu..."
-                  error={Boolean(errors.missionHistory)}
-                  helperText={errors.missionHistory?.message}
-                />
-              )}
-            />
-
-            <LabeledField htmlFor="profile-about-agency" label="Agência missionária">
+            <FormSection id="about-section-origin" title="Local de origem">
               <Controller
-                name="missionaryAgency"
+                name="originLocation"
                 control={control}
-                render={({ field }) => (
+                render={({ field: { ref, ...field } }) => (
                   <TextField
                     {...field}
-                    id="profile-about-agency"
-                    select
+                    inputRef={ref}
+                    id="profile-about-originLocation"
+                    label="Cidade e país de origem"
+                    placeholder="Ex.: Rio de Janeiro - Brasil"
+                    size="small"
                     fullWidth
-                    error={Boolean(errors.missionaryAgency)}
-                    helperText={errors.missionaryAgency?.message}
-                  >
-                    {missionaryAgencies.map((agency) => (
-                      <MenuItem key={agency} value={agency}>
-                        {agency}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    error={Boolean(errors.originLocation)}
+                    helperText={errors.originLocation?.message}
+                    slotProps={{
+                      htmlInput: {
+                        maxLength: ABOUT_SHORT_MAX_LENGTH,
+                        'aria-invalid': Boolean(errors.originLocation) || undefined,
+                      },
+                    }}
+                  />
                 )}
               />
-            </LabeledField>
+            </FormSection>
 
-            <LabeledField htmlFor="profile-about-faith-community" label="Comunidade de fé">
-              <Controller
-                name="faithCommunity"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    id="profile-about-faith-community"
-                    select
-                    fullWidth
-                    error={Boolean(errors.faithCommunity)}
-                    helperText={errors.faithCommunity?.message}
-                  >
-                    {(() => {
-                      const options =
-                        communities.items.length > 0
-                          ? communities.items
-                          : faithCommunities.map((name) => ({ id: name, name }));
-                      const hasCurrentValue = options.some((opt) => opt.id === field.value);
-                      const menuItems = options.map((community) => (
-                        <MenuItem key={community.id} value={community.id}>
-                          {community.name}
-                        </MenuItem>
-                      ));
-                      if (!hasCurrentValue && field.value) {
-                        menuItems.unshift(
-                          <MenuItem key={field.value} value={field.value} sx={{ display: 'none' }}>
-                            {field.value}
-                          </MenuItem>
-                        );
-                      }
-                      return menuItems;
-                    })()}
-                  </TextField>
-                )}
-              />
-            </LabeledField>
+            <FormSection
+              id="about-section-work"
+              title="Local de atuação atual"
+              description="Preencha todos os campos para atualizar onde você atua hoje."
+            >
+              <Grid container spacing={2}>
+                {WORK_ADDRESS_INPUTS.map(({ key, label, autoComplete, maxLength }) => {
+                  const error = errors.workAddress?.[key]?.message;
+                  return (
+                    <Grid key={key} size={{ xs: 12, sm: 6 }}>
+                      <Controller
+                        name={`workAddress.${key}`}
+                        control={control}
+                        render={({ field: { ref, ...field } }) => (
+                          <TextField
+                            {...field}
+                            inputRef={ref}
+                            id={`profile-about-work-${key}`}
+                            label={label}
+                            size="small"
+                            fullWidth
+                            autoComplete={autoComplete}
+                            error={Boolean(error)}
+                            helperText={error}
+                            slotProps={{
+                              htmlInput: { maxLength, 'aria-invalid': Boolean(error) || undefined },
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </FormSection>
 
-            <Controller
-              name="prayerRequests"
-              control={control}
-              render={({ field }) => (
-                <StyledTextArea
-                  id="profile-about-prayer-requests"
-                  label="Pedidos de oração"
-                  value={field.value}
-                  onChange={field.onChange}
-                  minRows={3}
-                  placeholder="Liste pedidos de oração pelo seu ministério, saúde e família..."
-                  error={Boolean(errors.prayerRequests)}
-                  helperText={errors.prayerRequests?.message}
-                />
-              )}
-            />
+            <FormSection id="about-section-faith" title="Oração e fé">
+              {textArea('prayerRequests', 'Pedidos de oração', {
+                maxLength: ABOUT_LONG_MAX_LENGTH,
+                minRows: 3,
+                placeholder: 'Pelo que as pessoas podem orar por você e pelo seu ministério',
+              })}
+              {textArea('lifeVerse', 'Versículo para a vida', {
+                maxLength: ABOUT_SHORT_MAX_LENGTH,
+                minRows: 2,
+                placeholder: 'Ex.: Tudo posso naquele que me fortalece. (Filipenses 4:13)',
+              })}
+            </FormSection>
 
-            <Controller
-              name="lifeVerse"
-              control={control}
-              render={({ field }) => (
-                <StyledTextArea
-                  id="profile-about-life-verse"
-                  label="Versículo para a vida"
-                  value={field.value}
-                  onChange={field.onChange}
-                  minRows={2}
-                  placeholder="Insira sua citação bíblica ou lema de fé (ex: 'Tudo posso naquele que me fortalece')..."
-                  error={Boolean(errors.lifeVerse)}
-                  helperText={errors.lifeVerse?.message}
-                />
-              )}
-            />
+            <Typography variant="body2" color="text.secondary">
+              Agência missionária e comunidade de fé são alteradas em Configurações da conta.
+            </Typography>
 
             <Stack
-              direction="row"
+              direction={{ xs: 'column-reverse', sm: 'row' }}
               spacing={1.5}
               sx={{
-                pt: 1.5,
+                pt: 1,
                 justifyContent: 'flex-end',
                 '& .MuiButton-root': {
                   ...FORM_ACTION_BUTTON_SX,
-                  flex: { xs: 1, sm: 'initial' },
+                  width: { xs: '100%', sm: 'auto' },
+                  justifyContent: 'center',
                 },
               }}
             >
-              <PillButton type="button" tone="primarySoftOutline" size="medium" onClick={onBack}>
-                Voltar
+              <PillButton
+                type="button"
+                tone="primarySoftOutline"
+                size="medium"
+                onClick={onCancel}
+                disabled={isSubmitting}
+              >
+                Cancelar
               </PillButton>
               <PillButton type="submit" tone="primaryFilled" size="medium" loading={isSubmitting}>
-                {isSubmitting ? 'Salvando...' : 'Salvar'}
+                Salvar
               </PillButton>
             </Stack>
           </Stack>
         </Box>
       </CardContent>
-
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={4000}
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastOpen(false)}
-          severity="success"
-          role="status"
-          sx={{
-            width: '100%',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          Informações da seção Sobre salvas com sucesso!
-        </Alert>
-      </Snackbar>
     </Card>
   );
 }
