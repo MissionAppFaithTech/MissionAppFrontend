@@ -6,6 +6,8 @@ allowBuilds:
 # must land sooner (e.g. a security fix), and remove it once it is older than that.
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
+  # Allowed before 24 h on request (PR #111); remove after 2026-10-31T20:13Z.
+  - yet-another-react-lightbox@3.33.0
   - '@types/node@24.13.4'
   - '@types/react-dom'
   - zod@4.5.4
