@@ -12,11 +12,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { FinancialConfigData } from '@/types/profile';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import PillButton from '@/components/common/PillButton';
@@ -62,7 +62,7 @@ export default function DonationModal({
 
   const defaultTab = hasPix ? 'pix' : hasBank ? 'bank' : 'pix';
   const [activeTab, setActiveTab] = useState<'pix' | 'bank'>(defaultTab);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const notify = useFeedbackStore((s) => s.notify);
 
   const supporterMessage = financialConfig?.supporterMessage || '';
 
@@ -98,7 +98,7 @@ export default function DonationModal({
   const handleCopy = (text: string, label: string) => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(text);
-      setToastMessage(`${label} copiado com sucesso!`);
+      notify(`${label} copiado com sucesso!`);
     }
   };
 
@@ -399,31 +399,6 @@ CPF/CNPJ: ${bankData.documento}`;
           </Stack>
         </DialogContent>
       </Dialog>
-
-      {/* Feedback Toast */}
-      <Snackbar
-        open={Boolean(toastMessage)}
-        autoHideDuration={3000}
-        onClose={() => setToastMessage(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastMessage(null)}
-          severity="success"
-          variant="filled"
-          role="status"
-          aria-live="polite"
-          sx={{
-            bgcolor: 'brandFill.main',
-            color: 'brandFill.contrastText',
-            fontWeight: 600,
-            borderRadius: 2,
-            boxShadow: 3,
-          }}
-        >
-          {toastMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

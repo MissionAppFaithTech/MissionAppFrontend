@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import ImpactProjectEditForm from '@/components/profile/ImpactProjectEditForm';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('ImpactProjectEditForm Component', () => {
   const mockProjectWithCampaign = {
@@ -33,6 +34,7 @@ describe('ImpactProjectEditForm Component', () => {
   };
 
   beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
     if (!global.URL.createObjectURL) {
       global.URL.createObjectURL = vi.fn(
         (file: Blob | MediaSource) => `blob:${(file as File).name || 'preview'}`
@@ -148,6 +150,9 @@ describe('ImpactProjectEditForm Component', () => {
         title: 'Novo Título do Projeto',
       })
     );
-    expect(screen.getByText(/projeto de impacto atualizado com sucesso!/i)).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Projeto de impacto atualizado com sucesso!',
+      severity: 'success',
+    });
   });
 });

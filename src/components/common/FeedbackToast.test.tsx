@@ -26,4 +26,17 @@ describe('FeedbackToast', () => {
 
     expect(useFeedbackStore.getState().current).toBeNull();
   });
+
+  it('names the severity in text, not only with color', () => {
+    render(<FeedbackToast />);
+
+    act(() => useFeedbackStore.getState().notify('Salvo.'));
+    expect(screen.getByRole('status')).toHaveTextContent('Tudo certo');
+
+    act(() => useFeedbackStore.getState().notify('Nenhuma alteração para salvar.', 'info'));
+    expect(screen.getByRole('status')).toHaveTextContent('Aviso');
+
+    act(() => useFeedbackStore.getState().notify('Falhou.', 'error'));
+    expect(screen.getByRole('alert')).toHaveTextContent('Algo deu errado');
+  });
 });
