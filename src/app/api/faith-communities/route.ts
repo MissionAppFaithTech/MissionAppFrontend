@@ -1,1 +1,46 @@
-export * from './route.faith-communities';
+import { NextResponse } from 'next/server';
+import { z } from 'zod';
+import { backendFetch } from '@/lib/api/backend';
+import { readJsonBody, withSession } from '@/lib/api/bff';
+import { normalizeCatalogList } from '@/services/catalog.service';
+
+const createBodySchema = z.object({
+  name: z.string().trim().min(1).max(255),
+  phoneNumber: z.string().trim().optional(),
+  addressLine1: z.string().trim().optional(),
+  addressLine2: z.string().trim().optional(),
+  city: z.string().trim().optional(),
+  state: z.string().trim().optional(),
+  country: z.string().trim().optional(),
+  postalCode: z.string().trim().optional(),
+  website: z.string().trim().optional(),
+});
+
+export async function GET() {
+  return withSession(
+    'api/faith-communities GET',
+    'Não foi possível carregar as comunidades de fé',
+    async (accessToken) => {
+      const result = await backendFetch('/faith-communities', { accessToken });
+      return NextResponse.json(normalizeCatalogList(result, 'faithCommunities'));
+    }
+  );
+}
+
+export async function POST(request: Request) {
+  const body = await readJsonBody(request, createBodySchema, 'Dados da igreja inválidos');
+  if (!body.ok) return body.response;
+
+  return withSession(
+    'api/faith-communities POST',
+    'Não foi possível cadastrar a igreja',
+    async (accessToken) => {
+      const result = await backendFetch('/faith-communities', {
+        method: 'POST',
+        body: body.data,
+        accessToken,
+      });
+      return NextResponse.json(result);
+    }
+  );
+}

@@ -105,6 +105,12 @@ function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
           <Divider />
 
           <Stack spacing={1.25}>
+            {data.originLocation && (
+              <DetailRow label="Local de origem" value={data.originLocation} />
+            )}
+            {data.currentLocation && (
+              <DetailRow label="Local de atuação atual" value={data.currentLocation} />
+            )}
             {data.missionaryAgency && (
               <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
             )}
