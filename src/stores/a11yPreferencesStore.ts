@@ -108,6 +108,24 @@ export const useA11yPreferencesStore = create<A11yPreferencesState>()(
  * Inline script for `<head>`: applies the saved preferences before first paint so
  * larger text or reduced motion never flashes in after hydration.
  */
-export const A11Y_PRE_PAINT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem(${JSON.stringify(
-  A11Y_STORAGE_KEY
+function escapeUnsafeCharsForInlineScript(str: string): string {
+  const charMap: Record<string, string> = {
+    '<': '\\u003C',
+    '>': '\\u003E',
+    '/': '\\u002F',
+    '\\': '\\\\',
+    '\b': '\\b',
+    '\f': '\\f',
+    '\n': '\\n',
+    '\r': '\\r',
+    '\t': '\\t',
+    '\0': '\\0',
+    '\u2028': '\\u2028',
+    '\u2029': '\\u2029',
+  };
+  return str.replace(/[<>\/\\\b\f\n\r\t\0\u2028\u2029]/g, (x) => charMap[x]);
+}
+
+export const A11Y_PRE_PAINT_SCRIPT = `(function(){try{var p=JSON.parse(localStorage.getItem(${escapeUnsafeCharsForInlineScript(
+  JSON.stringify(A11Y_STORAGE_KEY)
 )})||'{}').state||{};var r=document.documentElement;var s=[100,115,130].indexOf(p.fontScale)>-1?p.fontScale:100;r.setAttribute('data-a11y-font-scale',String(s));r.setAttribute('data-a11y-contrast',p.highContrast?'high':'normal');r.setAttribute('data-a11y-reduce-motion',String(!!p.reduceMotion));r.setAttribute('data-a11y-readable-font',String(!!p.readableFont));r.setAttribute('data-a11y-text-spacing',String(!!p.textSpacing));r.setAttribute('data-a11y-underline-links',String(!!p.underlineLinks));}catch(e){}})();`;
