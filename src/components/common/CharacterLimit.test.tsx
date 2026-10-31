@@ -1,5 +1,6 @@
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { characterLimitStatus, limitReachedMessage } from './CharacterLimit';
+import { CharacterCounter, characterLimitStatus, limitReachedMessage } from './CharacterLimit';
 
 describe('characterLimitStatus', () => {
   it('is ok below 90% of the limit', () => {
@@ -23,5 +24,20 @@ describe('limitReachedMessage', () => {
     expect(limitReachedMessage(255)).toBe(
       'Você atingiu o limite de 255 caracteres. Para escrever algo novo, apague parte do texto.'
     );
+  });
+});
+
+describe('CharacterCounter', () => {
+  it('uses the singular when one character is left', () => {
+    render(<CharacterCounter id="c" length={69} maxLength={70} />);
+    expect(screen.getByText('69/70 caracteres · resta 1')).toBeInTheDocument();
+  });
+
+  it('shows only the count below the warning zone and at the limit', () => {
+    const { rerender } = render(<CharacterCounter id="c" length={10} maxLength={70} />);
+    expect(screen.getByText('10/70 caracteres')).toBeInTheDocument();
+
+    rerender(<CharacterCounter id="c" length={70} maxLength={70} />);
+    expect(screen.getByText('70/70 caracteres')).toBeInTheDocument();
   });
 });

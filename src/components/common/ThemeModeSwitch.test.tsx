@@ -45,6 +45,14 @@ describe('ThemeModeSwitch', () => {
     expect(setTheme).toHaveBeenLastCalledWith('light');
   });
 
+  it('marks Escuro as pressed when the dark theme is active', () => {
+    resolvedTheme = 'dark';
+    renderSwitch();
+
+    expect(screen.getByRole('button', { name: 'Escuro' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: 'Claro' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   it('ignores a tap on the option that is already selected', async () => {
     const user = userEvent.setup();
     renderSwitch();

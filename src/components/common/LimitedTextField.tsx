@@ -30,7 +30,8 @@ export default function LimitedTextField({
   ...props
 }: LimitedTextFieldProps) {
   const limitId = `${id}-limit`;
-  const reached = characterLimitStatus(value.length, maxLength) === 'reached';
+  // A validation error keeps its own red styling; the limit outline only shows without one.
+  const highlightLimit = characterLimitStatus(value.length, maxLength) === 'reached' && !error;
   const describedBy = [
     htmlInputProps?.['aria-describedby'],
     props.helperText ? `${id}-helper-text` : null,
@@ -40,7 +41,7 @@ export default function LimitedTextField({
     .join(' ');
 
   return (
-    <Box sx={{ minWidth: 0 }}>
+    <Box sx={{ minWidth: 0 }} data-limit-reached={highlightLimit || undefined}>
       <TextField
         {...props}
         id={id}
@@ -48,7 +49,7 @@ export default function LimitedTextField({
         error={error}
         sx={[
           ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-          reached && !error ? limitReachedOutlineSx : null,
+          highlightLimit ? limitReachedOutlineSx : null,
         ]}
         slotProps={{
           ...props.slotProps,

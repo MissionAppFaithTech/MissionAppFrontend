@@ -37,3 +37,45 @@ describe('LimitedTextField', () => {
     expect(input).toHaveAccessibleDescription(expect.stringContaining('Informe o estado'));
   });
 });
+
+describe('LimitedTextField – highlight and descriptions', () => {
+  it('flags the limit only when it is reached and there is no validation error', () => {
+    const { container, rerender } = render(
+      <LimitedTextField id="zip" label="CEP" value="1234" maxLength={5} />
+    );
+    const wrapper = () => container.firstElementChild as HTMLElement;
+    expect(wrapper()).not.toHaveAttribute('data-limit-reached');
+
+    rerender(<LimitedTextField id="zip" label="CEP" value="12345" maxLength={5} />);
+    expect(wrapper()).toHaveAttribute('data-limit-reached', 'true');
+
+    rerender(
+      <LimitedTextField id="zip" label="CEP" value="12345" maxLength={5} error helperText="Erro" />
+    );
+    expect(wrapper()).not.toHaveAttribute('data-limit-reached');
+  });
+
+  it('describes the input with exactly the limit region when nothing else applies', () => {
+    render(<LimitedTextField id="city" label="Cidade" value="" maxLength={5} />);
+
+    expect(screen.getByLabelText('Cidade')).toHaveAttribute('aria-describedby', 'city-limit');
+  });
+
+  it('keeps an existing description first, then the helper and the limit', () => {
+    render(
+      <LimitedTextField
+        id="city"
+        label="Cidade"
+        value=""
+        maxLength={5}
+        helperText="Obrigatório"
+        htmlInputProps={{ 'aria-describedby': 'city-hint' }}
+      />
+    );
+
+    expect(screen.getByLabelText('Cidade')).toHaveAttribute(
+      'aria-describedby',
+      'city-hint city-helper-text city-limit'
+    );
+  });
+});
