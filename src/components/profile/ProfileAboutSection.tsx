@@ -65,7 +65,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
     { label: 'Local de origem', value: data.originLocation },
     { label: 'Local de atuação atual', value: data.currentLocation },
     { label: 'Agência missionária', value: data.missionaryAgency },
-    { label: 'Comunidade de fé', value: data.faithCommunity },
+    // The faith community stays loaded in the profile store but is not shown here.
   ].filter((row): row is { label: string; value: string } => hasText(row.value));
 
   const quotes = [

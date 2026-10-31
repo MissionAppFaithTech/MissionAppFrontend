@@ -101,13 +101,6 @@ export function generateProfilePageSchema(
     };
   }
 
-  if (profile.about.faithCommunity) {
-    personSchema.memberOf = {
-      '@type': 'Organization',
-      name: profile.about.faithCommunity,
-    };
-  }
-
   if (profile.contact?.showPublicEmail !== false && profile.contact?.publicEmail) {
     personSchema.email = profile.contact.publicEmail;
   }
