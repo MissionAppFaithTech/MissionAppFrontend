@@ -1,6 +1,10 @@
 allowBuilds:
   sharp: true
   unrs-resolver: true
+# Supply-chain policy (same locally and in CI): only install versions published at
+# least 24 h (1440 min) ago. Add a version to minimumReleaseAgeExclude only when it
+# must land sooner (e.g. a security fix), and remove it once it is older than that.
+minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - '@types/node@24.13.4'
   - '@types/react-dom'
