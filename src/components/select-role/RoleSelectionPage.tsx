@@ -32,10 +32,15 @@ export default function RoleSelectionPage() {
             justifyContent: 'center',
             alignSelf: 'center',
             minHeight: 44,
-            px: 1,
+            px: 1.5,
+            py: 0.5,
+            borderRadius: 1,
+            fontWeight: 500,
+            transition: 'color 0.2s ease, background-color 0.2s ease',
             '&:hover': {
               color: 'primary.main',
-              textDecoration: 'underline',
+              backgroundColor: 'action.hover',
+              textDecoration: 'none',
             },
           }}
         >

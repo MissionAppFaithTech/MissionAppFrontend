@@ -5,6 +5,7 @@ import {
   normalizeEmail,
   isValidEmail,
   isValidBirthDate,
+  toIdentityPayload,
 } from './masks';
 
 describe('masks and validations utility', () => {
@@ -86,6 +87,26 @@ describe('masks and validations utility', () => {
       expect(isValidBirthDate('x15/08/1990')).toBe(false);
       expect(isValidBirthDate('15/08/1990x')).toBe(false);
       expect(isValidBirthDate('invalid')).toBe(false);
+    });
+  });
+});
+
+describe('toIdentityPayload', () => {
+  it('treats 11 digits as CPF and strips punctuation', () => {
+    expect(toIdentityPayload('123.456.789-09')).toEqual({
+      identityType: 'CPF',
+      identityDocument: '12345678909',
+    });
+  });
+
+  it('treats letters or other digit counts as passport, uppercased and compacted', () => {
+    expect(toIdentityPayload(' fx-123456 ')).toEqual({
+      identityType: 'PASSPORT',
+      identityDocument: 'FX123456',
+    });
+    expect(toIdentityPayload('123456789')).toEqual({
+      identityType: 'PASSPORT',
+      identityDocument: '123456789',
     });
   });
 });

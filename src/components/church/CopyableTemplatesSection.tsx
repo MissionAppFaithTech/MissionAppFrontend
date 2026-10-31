@@ -25,17 +25,7 @@ export default function CopyableTemplatesSection() {
         setCopiedId((current) => (current === template.id ? null : current));
       }, 2500);
     } catch {
-      // Fallback if clipboard API is not available
-      const textArea = document.createElement('textarea');
-      textArea.value = template.content;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      setCopiedId(template.id);
-      setTimeout(() => {
-        setCopiedId((current) => (current === template.id ? null : current));
-      }, 2500);
+      // Clipboard permission denied or unavailable
     }
   };
 

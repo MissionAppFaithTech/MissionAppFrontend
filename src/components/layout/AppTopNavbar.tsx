@@ -9,6 +9,7 @@ import ProfileSearchField from '@/components/profile/ProfileSearchField';
 import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
 import { mockProfile, mockSupporterProfile } from '@/mocks/profile';
 import type { ProfileData } from '@/types/profile';
+import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 export interface AppTopNavbarProps {
   /** Boolean flag separating logged in user view and non-registered visitor view */
@@ -64,6 +65,7 @@ export default function AppTopNavbar({
       )}
 
       <PageNavbarActions>
+        <AccessibilityPreferencesButton />
         <ThemeToggle />
 
         {/* When not registered: Action buttons 'Entrar' and 'Cadastre-se' */}

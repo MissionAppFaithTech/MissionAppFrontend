@@ -54,8 +54,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# AI agent skills
-.agents/skills/*
-!.agents/skills/e2e-chrome-testing/
-!.agents/skills/frontend-design/
-!.agents/skills/frontend-testing/
+# AI agent skills are versioned (.agents/skills, .claude/skills, skills-lock.json)
+# Claude Code local-only settings
+.claude/settings.local.json

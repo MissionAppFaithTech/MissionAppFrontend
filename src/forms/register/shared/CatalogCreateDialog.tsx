@@ -1,6 +1,6 @@
 'use client';
 
-import type { FormEventHandler, ReactNode } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -21,7 +21,7 @@ type CatalogCreateDialogProps = {
   titleId: string;
   descriptionId: string;
   onClose: () => void;
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (e: SyntheticEvent<HTMLFormElement>) => void;
   isSubmitting?: boolean;
   children: ReactNode;
 };

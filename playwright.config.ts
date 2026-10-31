@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+/** Google Chrome by default; `PW_BUNDLED_CHROMIUM=1` uses Playwright's Chromium where Chrome is not installed. */
+const chromeChannel = process.env.PW_BUNDLED_CHROMIUM ? {} : { channel: 'chrome' };
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -18,14 +21,14 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
-        channel: 'chrome',
+        ...chromeChannel,
       },
     },
     {
       name: 'Mobile Chrome',
       use: {
         ...devices['Pixel 5'],
-        channel: 'chrome',
+        ...chromeChannel,
       },
     },
   ],

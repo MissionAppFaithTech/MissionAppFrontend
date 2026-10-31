@@ -22,9 +22,11 @@ vi.mock('@/lib/api/backend', () => ({
 import { backendFetch } from '@/lib/api/backend';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
 import { GET, POST } from './route';
+import { clearRefreshCache } from '@/lib/api/bff';
 
 describe('/api/faith-communities', () => {
   beforeEach(() => {
+    clearRefreshCache();
     vi.mocked(backendFetch).mockReset();
     cookiesGet.mockReset();
     cookiesGet.mockImplementation((name: string) =>
@@ -62,6 +64,33 @@ describe('/api/faith-communities', () => {
       method: 'POST',
       body: expect.objectContaining({ name: 'Igreja Nova' }),
       accessToken: 'access-token',
+    });
+  });
+
+  it('lists without a session (public catalog) and sends no token', async () => {
+    cookiesGet.mockReturnValue(undefined);
+    vi.mocked(backendFetch).mockResolvedValue({
+      data: { faithCommunities: [{ id: 'x-1', name: 'Igreja Batista' }] },
+    });
+
+    const response = await GET();
+
+    expect(response.status).toBe(200);
+    expect(backendFetch).toHaveBeenCalledWith(expect.stringMatching(/^\//));
+    expect(vi.mocked(backendFetch).mock.calls[0]).toHaveLength(1);
+  });
+
+  it('maps the public listing rate limit (429) to a pt-BR message', async () => {
+    const { BackendApiError } = await import('@/lib/api/backend');
+    vi.mocked(backendFetch).mockRejectedValue(
+      new BackendApiError('Too many requests', 429, { message: 'Too many requests' })
+    );
+
+    const response = await GET();
+
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({
+      message: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
     });
   });
 });

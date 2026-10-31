@@ -7,6 +7,7 @@ import {
   USE_AUTH_MOCKS,
 } from '@/mocks/auth';
 import type { AuthUser } from '@/lib/api/auth-response';
+import { bffRequest } from '@/lib/api/client';
 
 export { USE_AUTH_MOCKS, RESET_PASSWORD_TOKEN_TTL_MINUTES };
 
@@ -153,4 +154,45 @@ export async function resetPassword(data: {
     message:
       typeof payload?.message === 'string' ? payload.message : 'Senha redefinida com sucesso.',
   };
+}
+
+export async function terminateAllSessions(): Promise<{ message: string }> {
+  const response = await fetch('/api/auth/sessions', {
+    method: 'DELETE',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  const payload = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message =
+      typeof payload?.message === 'string'
+        ? payload.message
+        : 'Não foi possível encerrar as sessões';
+    throw new Error(message);
+  }
+
+  return {
+    message:
+      typeof payload?.message === 'string' ? payload.message : 'Sessões encerradas com sucesso.',
+  };
+}
+
+export type ActiveSession = {
+  id: string;
+  deviceType: 'web' | 'mobile';
+  deviceName: string | null;
+  ipAddress: string | null;
+  lastUsedAt: string | null;
+  createdAt: string;
+  current: boolean;
+};
+
+export async function listActiveSessions(): Promise<ActiveSession[]> {
+  const { data } = await bffRequest<{ data: ActiveSession[] }>('/api/auth/sessions', {
+    fallbackMessage: 'Não foi possível carregar as sessões',
+  });
+  return data;
 }

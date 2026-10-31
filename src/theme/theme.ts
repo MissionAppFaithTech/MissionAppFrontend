@@ -30,7 +30,7 @@ export const BUTTON_BORDER_RADIUS = '10px';
 
 /** Compact branded action size — shorter height, a bit more width. */
 export const FORM_ACTION_BUTTON_SX = {
-  minHeight: { xs: 44, sm: 34 },
+  minHeight: 44,
   minWidth: { xs: 0, sm: 108 },
   px: { xs: 2.5, sm: 3 },
   fontSize: { xs: '0.875rem', sm: '0.8125rem' },
@@ -96,6 +96,8 @@ export type ModeTokens = {
   dangerFill: string;
   fieldBg: string;
   fieldBgDisabled: string;
+  /** Resting input outline — >= 3:1 against the field and the surface (WCAG 1.4.11). */
+  fieldBorder: string;
   /** Filled brand surface (toasts, avatar badges) — carries `brandFillText`. */
   brandFill: string;
   brandFillText: string;
@@ -131,6 +133,8 @@ export const lightTokens: ModeTokens = {
   dangerFill: colors.error,
   fieldBg: shades.surfaceMuted,
   fieldBgDisabled: 'rgba(13, 43, 92, 0.04)',
+  /* 3.24:1 on the field wash, 3.69:1 on white */
+  fieldBorder: '#7A8699',
   brandFill: colors.primary,
   brandFillText: colors.surface,
   avatarFill: shades.supporterLight,
@@ -167,6 +171,8 @@ export const darkTokens: ModeTokens = {
   dangerFill: colors.error,
   fieldBg: 'rgba(255, 255, 255, 0.06)',
   fieldBgDisabled: 'rgba(255, 255, 255, 0.03)',
+  /* 3.23:1 on paper (#1A3D6E) */
+  fieldBorder: 'rgba(147, 197, 253, 0.6)',
   brandFill: '#1E293B',
   brandFillText: colors.surface,
   avatarFill: colors.surface,
@@ -199,6 +205,7 @@ declare module '@mui/material/styles' {
       borderSubtle: string;
       borderStrong: string;
       focusRing: string;
+      linkHover: string;
       disabledFill: string;
       disabledText: string;
       disabledBorder: string;
@@ -207,6 +214,7 @@ declare module '@mui/material/styles' {
       surface2: string;
       fieldBg: string;
       fieldBgDisabled: string;
+      fieldBorder: string;
     };
   }
   interface PaletteOptions {
@@ -229,7 +237,8 @@ declare module '@mui/material/Button' {
   }
 }
 
-const fontFamily = 'var(--font-dm-sans), "DM Sans", sans-serif';
+/** `--app-font-family` is swapped by the readable-font preference (globals.css). */
+const fontFamily = 'var(--app-font-family, var(--font-dm-sans)), "DM Sans", sans-serif';
 
 function createTypography(): ThemeOptions['typography'] {
   return {
@@ -364,7 +373,8 @@ function buildPalette(mode: 'light' | 'dark') {
           main: t.link,
           light: t.linkHover,
           dark: roleColors.supporter,
-          contrastText: colors.surface,
+          /* Navy ink: white on #93C5FD was 1.80:1, navy is 9.41:1 */
+          contrastText: colors.textPrimary,
         },
     supporter: isLight
       ? {
@@ -415,7 +425,8 @@ function buildPalette(mode: 'light' | 'dark') {
           main: t.accent,
           light: t.accentSoft,
           dark: shades.missionLight,
-          contrastText: colors.surface,
+          /* Navy ink: white on #FB923C was 2.26:1, navy is 7.5:1 */
+          contrastText: colors.textPrimary,
         },
     surface: isLight
       ? {
@@ -479,6 +490,7 @@ function buildPalette(mode: 'light' | 'dark') {
       borderSubtle: t.borderSubtle,
       borderStrong: t.borderStrong,
       focusRing: t.focusRing,
+      linkHover: t.linkHover,
       disabledFill: t.disabledFill,
       disabledText: t.disabledText,
       disabledBorder: t.disabledBorder,
@@ -487,6 +499,7 @@ function buildPalette(mode: 'light' | 'dark') {
       surface2: t.surface2,
       fieldBg: t.fieldBg,
       fieldBgDisabled: t.fieldBgDisabled,
+      fieldBorder: t.fieldBorder,
     },
   };
 }
@@ -559,8 +572,11 @@ export function createAppTheme() {
           // which silently painted links like the bottom nav blue.
           'a:where(:not(.MuiButtonBase-root))': {
             color: 'var(--mui-palette-connection-main)',
+            // Darker in light mode (#1D4ED8, 6.7:1) and lighter in dark mode, plus an
+            // underline so hover never depends on color alone.
             '&:hover': {
-              color: 'var(--mui-palette-connection-light)',
+              color: 'var(--mui-palette-action2-linkHover)',
+              textDecoration: 'underline',
             },
           },
         },
@@ -790,11 +806,16 @@ export function createAppTheme() {
                 minHeight: 44,
               },
             },
+            {
+              '& .MuiOutlinedInput-notchedOutline': {
+                borderColor: v(theme, 'palette.action2.fieldBorder'),
+              },
+            },
             theme.applyStyles('dark', {
               backgroundColor: v(theme, 'palette.action2.fieldBg'),
               color: v(theme, 'palette.text.primary'),
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: v(theme, 'palette.action2.borderSubtle'),
+                borderColor: v(theme, 'palette.action2.fieldBorder'),
               },
               '&:hover .MuiOutlinedInput-notchedOutline': {
                 borderColor: v(theme, 'palette.action2.borderStrong'),
@@ -912,9 +933,107 @@ export function createAppTheme() {
       },
       MuiAlert: {
         styleOverrides: {
-          root: {
-            borderRadius: 8,
-          },
+          root: ({ theme }) => ({
+            borderRadius: 10,
+            fontSize: '0.875rem',
+            lineHeight: 1.5,
+            padding: '12px 16px',
+            alignItems: 'flex-start',
+            '& .MuiAlert-icon': {
+              fontSize: 22,
+              marginRight: 12,
+              padding: 0,
+              opacity: 1,
+            },
+            '& .MuiAlert-message': {
+              padding: 0,
+              width: '100%',
+              minWidth: 0,
+            },
+            '&.MuiAlert-standardError': {
+              backgroundColor: '#FEF2F2',
+              border: '1.5px solid #FECACA',
+              color: '#991B1B',
+              '& .MuiAlert-icon': {
+                color: '#DC2626',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(239, 68, 68, 0.18)',
+                border: '1.5px solid #F87171',
+                color: '#FFFFFF',
+                boxShadow: '0 0 14px rgba(239, 68, 68, 0.18)',
+                '& .MuiAlert-icon': {
+                  color: '#F87171',
+                },
+                '& .MuiAlert-message, & .MuiTypography-root': {
+                  color: 'inherit',
+                },
+              }),
+            },
+            '&.MuiAlert-standardWarning': {
+              backgroundColor: '#FFFBEB',
+              border: '1.5px solid #FDE68A',
+              color: '#92400E',
+              '& .MuiAlert-icon': {
+                color: '#D97706',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(245, 158, 11, 0.18)',
+                border: '1.5px solid #FBBF24',
+                // Text token, not white: AuthCard keeps a light surface in dark mode and
+                // remaps --mui-palette-text-primary, so alerts stay readable on both.
+                color: 'var(--mui-palette-text-primary)',
+                '& .MuiAlert-icon': {
+                  color: '#FBBF24',
+                },
+                '& .MuiAlert-message, & .MuiTypography-root': {
+                  color: 'inherit',
+                },
+              }),
+            },
+            '&.MuiAlert-standardInfo': {
+              backgroundColor: '#EFF6FF',
+              border: '1.5px solid #BFDBFE',
+              color: '#1E40AF',
+              '& .MuiAlert-icon': {
+                color: '#2563EB',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(59, 130, 246, 0.18)',
+                border: '1.5px solid #60A5FA',
+                // Text token, not white: AuthCard keeps a light surface in dark mode and
+                // remaps --mui-palette-text-primary, so alerts stay readable on both.
+                color: 'var(--mui-palette-text-primary)',
+                '& .MuiAlert-icon': {
+                  color: '#60A5FA',
+                },
+                '& .MuiAlert-message, & .MuiTypography-root': {
+                  color: 'inherit',
+                },
+              }),
+            },
+            '&.MuiAlert-standardSuccess': {
+              backgroundColor: '#F0FDF4',
+              border: '1.5px solid #BBF7D0',
+              color: '#166534',
+              '& .MuiAlert-icon': {
+                color: '#16A34A',
+              },
+              ...theme.applyStyles('dark', {
+                backgroundColor: 'rgba(34, 197, 94, 0.18)',
+                border: '1.5px solid #4ADE80',
+                // Text token, not white: AuthCard keeps a light surface in dark mode and
+                // remaps --mui-palette-text-primary, so alerts stay readable on both.
+                color: 'var(--mui-palette-text-primary)',
+                '& .MuiAlert-icon': {
+                  color: '#4ADE80',
+                },
+                '& .MuiAlert-message, & .MuiTypography-root': {
+                  color: 'inherit',
+                },
+              }),
+            },
+          }),
         },
         variants: [
           {

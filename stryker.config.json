@@ -16,5 +16,14 @@
     "high": 80,
     "low": 60,
     "break": 50
-  }
+  },
+  "ignorePatterns": [
+    ".claude",
+    ".agents",
+    "e2e",
+    "reports",
+    "playwright-report",
+    "test-results",
+    ".next"
+  ]
 }

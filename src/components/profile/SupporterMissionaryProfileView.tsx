@@ -31,6 +31,7 @@ import { getMockCampaignForMissionary } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
 import type { CampaignData } from '@/types/campaign';
 import type { ProfileAboutData, ProfileData, SavedPost } from '@/types/profile';
+import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 
 type SupporterTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
@@ -222,6 +223,8 @@ export default function SupporterMissionaryProfileView({
 
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
+      {/* Public profiles have no backend endpoint yet: the whole view is example data. */}
+      <ExampleDataBadge subject="perfil público de demonstração" sx={{ alignSelf: 'flex-start' }} />
       {/* 1. Header do Perfil do Missionário (Modo Apoiador: sem editar perfil, com botão Ofertar) */}
       <ProfileSummaryCard profile={profile} isOwnProfile={false} viewerRole="supporter" />
 

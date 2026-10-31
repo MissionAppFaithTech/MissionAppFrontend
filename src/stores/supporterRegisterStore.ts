@@ -69,8 +69,13 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
           await createFaithCommunity(merged.communityDetails);
         }
 
+        // Never retain plain text passwords in store state or storage
+        const sanitizedAfterSuccess = { ...merged };
+        delete (sanitizedAfterSuccess as Record<string, unknown>).password;
+        delete (sanitizedAfterSuccess as Record<string, unknown>).confirmPassword;
+
         set({
-          formData: merged,
+          formData: sanitizedAfterSuccess,
           step: 3,
         });
       },
@@ -80,10 +85,8 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
       },
 
       reset: () => {
-        set({
-          step: 1,
-          formData: {},
-        });
+        set({ step: 1, formData: {} });
+        useSupporterRegisterStore.persist.clearStorage();
       },
 
       setHasHydrated: (status: boolean) => {
@@ -92,9 +95,10 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
     }),
     {
       name: 'missionapp_supporter_register_v1',
+      // Drafts hold personal data: keep them for this tab only.
       storage: createJSONStorage(() => {
         if (typeof window !== 'undefined') {
-          return window.localStorage;
+          return window.sessionStorage;
         }
         return {
           getItem: () => null,
@@ -102,6 +106,26 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
           removeItem: () => {},
         };
       }),
+      partialize: (state) => {
+        // If registration completed (step 3), do not persist completion screen in storage
+        // so returning to the registration page starts the normal wizard flow.
+        if (state.step >= 3) {
+          return {
+            step: 1,
+            formData: {},
+          };
+        }
+
+        // Strip sensitive credentials from storage to avoid credential leakage via XSS
+        const sanitizedFormData = { ...state.formData };
+        delete (sanitizedFormData as Record<string, unknown>).password;
+        delete (sanitizedFormData as Record<string, unknown>).confirmPassword;
+
+        return {
+          step: state.step,
+          formData: sanitizedFormData,
+        };
+      },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);
       },

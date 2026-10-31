@@ -357,3 +357,106 @@ textarea::selection {
   background-color: rgba(249, 115, 22, 0.25) !important;
   color: inherit !important;
 }
+
+/* ==========================================================================
+   Reduced motion (WCAG 2.3.3) — the OS setting or the in-app preference
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+html[data-a11y-reduce-motion='true'] {
+  scroll-behavior: auto;
+}
+
+html[data-a11y-reduce-motion='true'] *,
+html[data-a11y-reduce-motion='true'] *::before,
+html[data-a11y-reduce-motion='true'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+html[data-a11y-reduce-motion='true']::view-transition-group(*),
+html[data-a11y-reduce-motion='true']::view-transition-old(*),
+html[data-a11y-reduce-motion='true']::view-transition-new(*) {
+  animation: none !important;
+}
+
+/* ==========================================================================
+   Accessibility preferences (AccessibilityPreferences panel)
+   ========================================================================== */
+
+/* Text size (WCAG 1.4.4): every rem-based size follows the root. */
+html[data-a11y-font-scale='115'] {
+  font-size: 115%;
+}
+
+html[data-a11y-font-scale='130'] {
+  font-size: 130%;
+}
+
+/* Readable font: Atkinson Hyperlegible (low vision, dyslexia). */
+html[data-a11y-readable-font='true'] {
+  --app-font-family: var(--font-readable), 'Atkinson Hyperlegible';
+}
+
+html[data-a11y-readable-font='true'] body {
+  font-family: var(--app-font-family), sans-serif;
+}
+
+/* Text spacing (WCAG 1.4.12). */
+html[data-a11y-text-spacing='true'] body * {
+  line-height: 1.5 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+html[data-a11y-text-spacing='true'] p {
+  margin-bottom: 2em;
+}
+
+/* Links never rely on color alone (WCAG 1.4.1). */
+html[data-a11y-underline-links='true'] a:not(.MuiButtonBase-root) {
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+}
+
+/* High contrast: darker secondary text and borders that stay >= 3:1. */
+html[data-a11y-contrast='high'] {
+  --mui-palette-text-secondary: #1e293b;
+  --mui-palette-divider: #475569;
+  --mui-palette-action2-borderSubtle: #475569;
+  --mui-palette-action2-borderStrong: #1e293b;
+  --mui-palette-action2-fieldBorder: #334155;
+  --mui-palette-action2-focusRing: #000000;
+}
+
+html.dark[data-a11y-contrast='high'] {
+  --mui-palette-text-secondary: #ffffff;
+  --mui-palette-divider: rgba(255, 255, 255, 0.7);
+  --mui-palette-action2-borderSubtle: rgba(255, 255, 255, 0.6);
+  --mui-palette-action2-borderStrong: #ffffff;
+  --mui-palette-action2-fieldBorder: #ffffff;
+  --mui-palette-action2-focusRing: #fde047;
+}
+
+html[data-a11y-contrast='high'] :focus-visible {
+  outline-width: 3px !important;
+}

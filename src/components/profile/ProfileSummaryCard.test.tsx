@@ -5,12 +5,16 @@ import ProfileSummaryCard from './ProfileSummaryCard';
 import { mockProfile, mockSupporterProfile } from '@/mocks/profile';
 
 describe('ProfileSummaryCard component', () => {
-  it('renders the missionary owner header with photo control, extra stats and navy edit', () => {
+  it('renders the missionary owner header with example-data stats and navy edit', () => {
     render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
 
     expect(screen.getByText(mockProfile.displayName)).toBeInTheDocument();
     expect(screen.getByText(`@${mockProfile.username}`)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /adicionar foto de perfil/i })).toBeInTheDocument();
+    // Photo upload is not available yet: no dead control on the header.
+    expect(
+      screen.queryByRole('button', { name: /adicionar foto de perfil/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/dados de exemplo: estatísticas do perfil/i)).toBeInTheDocument();
     expect(screen.getByText('apoiadores')).toBeInTheDocument();
     expect(screen.getByText('seguindo')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /editar perfil/i })).toBeInTheDocument();
@@ -25,7 +29,9 @@ describe('ProfileSummaryCard component', () => {
 
     expect(screen.getByText(mockSupporterProfile.displayName)).toBeInTheDocument();
     expect(screen.getByText(/apoiador de missões/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /adicionar foto de perfil/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /adicionar foto de perfil/i })
+    ).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /editar perfil/i })).toHaveAttribute(
       'href',
       '/profile/supporter/edit-profile'
@@ -108,5 +114,37 @@ describe('ProfileSummaryCard component', () => {
     render(<ProfileSummaryCard profile={mockProfile} isOwnProfile={false} />);
     await user.click(screen.getByRole('button', { name: /compartilhar perfil/i }));
     expect(writeTextMock).toHaveBeenCalled();
+  });
+
+  it('renders "Adicione sua biografia" prompt when bio is empty for owner', () => {
+    const profileWithoutBio = {
+      ...mockProfile,
+      roleDescription: '',
+      location: '',
+    };
+
+    render(<ProfileSummaryCard profile={profileWithoutBio} isOwnProfile />);
+
+    const addBioLink = screen.getByRole('link', { name: /adicione sua biografia/i });
+    expect(addBioLink).toBeInTheDocument();
+    expect(addBioLink).toHaveAttribute('href', '/profile/edit-profile');
+    expect(screen.queryByText(/cidade do cabo/i)).not.toBeInTheDocument();
+  });
+
+  it('renders real location when present and omits location pin when empty', () => {
+    const profileWithLocation = {
+      ...mockProfile,
+      location: 'Curitiba/PR',
+    };
+
+    const { rerender } = render(<ProfileSummaryCard profile={profileWithLocation} isOwnProfile />);
+    expect(screen.getByText('Curitiba/PR')).toBeInTheDocument();
+
+    const profileNoLocation = {
+      ...mockProfile,
+      location: '',
+    };
+    rerender(<ProfileSummaryCard profile={profileNoLocation} isOwnProfile />);
+    expect(screen.queryByText('Curitiba/PR')).not.toBeInTheDocument();
   });
 });

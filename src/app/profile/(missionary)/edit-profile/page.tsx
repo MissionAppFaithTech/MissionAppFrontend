@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import ProfileEditForm from '@/components/profile/ProfileEditForm';
-import { mockProfile } from '@/mocks/profile';
+import EditProfilePageContent from './EditProfilePageContent';
 
 export const metadata: Metadata = {
   title: 'Editar perfil',
@@ -8,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function EditProfilePage() {
-  return <ProfileEditForm profile={mockProfile} />;
+  return <EditProfilePageContent />;
 }

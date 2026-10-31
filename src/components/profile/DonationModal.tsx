@@ -18,6 +18,7 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import type { FinancialConfigData } from '@/types/profile';
+import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import PillButton from '@/components/common/PillButton';
 import Image from 'next/image';
 
@@ -28,6 +29,8 @@ type DonationModalProps = {
   isOwnProfile?: boolean;
   financialConfig?: FinancialConfigData;
 };
+
+const EXAMPLE_PIX_KEY = 'exemplo@missionapp.org';
 
 const pixKeyTypeLabels: Record<string, string> = {
   cpf: 'CPF',
@@ -40,29 +43,32 @@ const pixKeyTypeLabels: Record<string, string> = {
 export default function DonationModal({
   open,
   onClose,
-  missionaryName = 'Samuel Mendonça',
+  missionaryName = '',
   isOwnProfile = false,
   financialConfig,
 }: DonationModalProps) {
+  // No financial data from the backend yet: show labelled example data instead.
+  const isExampleData = !financialConfig;
   const hasPix = financialConfig
-    ? financialConfig.pix.enabled && Boolean(financialConfig.pix.key)
+    ? Boolean(financialConfig.pix?.enabled && financialConfig.pix?.key)
     : true;
   const hasBank = financialConfig
-    ? financialConfig.bankTransfer.enabled &&
-      Boolean(financialConfig.bankTransfer.bankName && financialConfig.bankTransfer.account)
+    ? Boolean(
+        financialConfig.bankTransfer?.enabled &&
+        financialConfig.bankTransfer?.bankName &&
+        financialConfig.bankTransfer?.account
+      )
     : true;
 
   const defaultTab = hasPix ? 'pix' : hasBank ? 'bank' : 'pix';
   const [activeTab, setActiveTab] = useState<'pix' | 'bank'>(defaultTab);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const supporterMessage =
-    financialConfig?.supporterMessage ||
-    'Sua contribuição sustenta o trabalho de evangelização, distribuição de bíblias e construção da escola cristã na África do Sul. Que Deus abençoe sua generosidade!';
+  const supporterMessage = financialConfig?.supporterMessage || '';
 
-  const pixKey = financialConfig?.pix.key || 'samuelhe@gmail.com';
-  const pixKeyType = financialConfig?.pix.keyType || 'email';
-  const pixQrCodeUrl = financialConfig?.pix.qrCodeUrl;
+  const pixKey = financialConfig ? financialConfig.pix?.key || '' : EXAMPLE_PIX_KEY;
+  const pixKeyType = financialConfig?.pix?.keyType || 'email';
+  const pixQrCodeUrl = financialConfig?.pix?.qrCodeUrl;
 
   const bankData = financialConfig?.bankTransfer
     ? {
@@ -78,7 +84,7 @@ export default function DonationModal({
               ? 'Conta Poupança'
               : 'Conta de Pagamento',
         titular: financialConfig.bankTransfer.holderName || missionaryName,
-        documento: financialConfig.bankTransfer.holderDocument || '123.456.789-00',
+        documento: financialConfig.bankTransfer.holderDocument,
       }
     : {
         banco: '033 - Banco Santander',
@@ -155,6 +161,9 @@ CPF/CNPJ: ${bankData.documento}`;
             >
               Apoie o ministério de {missionaryName}
             </Typography>
+            {isExampleData ? (
+              <ExampleDataBadge subject="dados de doação" sx={{ mt: 0.75 }} />
+            ) : null}
           </Box>
           <IconButton
             aria-label="Fechar modal de doação"

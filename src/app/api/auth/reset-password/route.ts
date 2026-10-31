@@ -1,12 +1,23 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
+import { bffErrorResponse, readJsonBody } from '@/lib/api/bff';
+import { toBffError } from '@/lib/api/errors';
+
+/** Backend field names → this form's field names. */
+const FORM_FIELDS: Record<string, string> = {
+  newPassword: 'password',
+  newPasswordConfirmation: 'passwordConfirmation',
+};
 
 const resetPasswordSchema = z
   .object({
     token: z.string().min(1),
-    password: z.string().min(8),
-    passwordConfirmation: z.string().min(8),
+    password: z
+      .string()
+      .min(8, 'A senha deve ter pelo menos 8 caracteres')
+      .max(32, 'A senha deve ter no máximo 32 caracteres'),
+    passwordConfirmation: z.string(),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
     message: 'As senhas não coincidem',
@@ -14,42 +25,34 @@ const resetPasswordSchema = z
   });
 
 export async function POST(request: Request) {
-  let json: unknown;
-
-  try {
-    json = await request.json();
-  } catch {
-    return NextResponse.json({ message: 'JSON inválido' }, { status: 400 });
-  }
-
-  const parsed = resetPasswordSchema.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json(
-      {
-        message: 'Dados inválidos para redefinição de senha',
-        issues: parsed.error.flatten(),
-      },
-      { status: 422 }
-    );
-  }
+  const body = await readJsonBody(
+    request,
+    resetPasswordSchema,
+    'Dados inválidos para redefinição de senha'
+  );
+  if (!body.ok) return body.response;
 
   try {
     const result = await backendFetch<{ message?: string }>('/auth/reset-password', {
-      method: 'POST',
-      body: parsed.data,
+      method: 'PATCH',
+      body: {
+        token: body.data.token,
+        newPassword: body.data.password,
+        newPasswordConfirmation: body.data.passwordConfirmation,
+      },
     });
-
-    return NextResponse.json(result ?? { message: 'Senha redefinida com sucesso.' });
+    return NextResponse.json({ message: result?.message ?? 'Senha redefinida com sucesso.' });
   } catch (error) {
-    if (error instanceof BackendApiError) {
-      return NextResponse.json(
-        typeof error.body === 'object' && error.body !== null
-          ? error.body
-          : { message: error.message },
-        { status: error.status }
+    if (error instanceof BackendApiError && error.status === 422) {
+      const body = toBffError(error.status, error.body, 'Não foi possível redefinir a senha');
+      const fieldErrors = Object.fromEntries(
+        Object.entries(body.fieldErrors ?? {}).map(([field, message]) => [
+          FORM_FIELDS[field] ?? field,
+          message,
+        ])
       );
+      return NextResponse.json({ ...body, fieldErrors }, { status: 422 });
     }
-
-    return NextResponse.json({ message: 'Não foi possível redefinir a senha' }, { status: 503 });
+    return bffErrorResponse(error, 'Não foi possível redefinir a senha', 'api/auth/reset-password');
   }
 }

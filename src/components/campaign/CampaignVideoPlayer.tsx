@@ -4,21 +4,14 @@ import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import getYouTubeId from 'get-youtube-id';
+import { getYouTubeEmbedUrl } from '@/lib/youtube';
 
 type CampaignVideoPlayerProps = {
   videoUrl?: string;
   title?: string;
 };
 
-export function getYouTubeEmbedUrl(url?: string): string | null {
-  if (!url) return null;
-  const videoId = getYouTubeId(url.trim());
-  if (videoId) {
-    return `https://www.youtube-nocookie.com/embed/${videoId}`;
-  }
-  return null;
-}
+export { getYouTubeEmbedUrl };
 
 export default function CampaignVideoPlayer({
   videoUrl,

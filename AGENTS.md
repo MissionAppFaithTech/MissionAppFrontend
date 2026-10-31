@@ -22,6 +22,21 @@ Do **not** finish a task without all three. This is the default reminder for eve
 
 ---
 
+## Agent skills (versioned)
+
+Skills live in `.agents/skills/` (canonical) and are symlinked into `.claude/skills/`. Sources are pinned in `skills-lock.json`; restore with `npx skills experimental_install`, update with `npx skills update -p`. Load the matching skill before working in its area:
+
+| Skill                                                                   | Use for                                                                |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `nextjs`                                                                | App Router, route handlers, `proxy.ts`, caching, Server Components     |
+| `vercel-react-best-practices` / `vercel-composition-patterns`           | React 19 rendering, data fetching, component APIs (no `forwardRef`)    |
+| `zustand`                                                               | Stores, `persist` / `partialize`, SSR hydration, store tests           |
+| `frontend-design` / `web-design-guidelines`                             | MUI 9 + Tailwind 4 UI, tokens, interface guidelines review             |
+| `accessibility` / `modern-web-guidance`                                 | WCAG 2.2 AA, keyboard, screen readers, reduced motion, modern web APIs |
+| `frontend-testing` / `e2e-chrome-testing` / `playwright-screen-testing` | Vitest + RTL, Playwright E2E, axe and responsive checks                |
+
+---
+
 ## Mandatory contribution standards
 
 **Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).**
@@ -63,15 +78,17 @@ Only create a git commit when the user explicitly asks.
 
 MissionApp Frontend is the **Next.js** web client for Mission App (missionaries and supporters). Maintained by FaithTech.
 
-| Item                             | Value                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| Framework                        | Next.js 16 (App Router)                                                        |
-| UI                               | React 19 + MUI 9 + Tailwind 4                                                  |
-| Node.js                          | Pin in `.node-version` (align with backend)                                    |
-| Package manager                  | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo |
-| Theme / tokens                   | `src/theme/theme.ts`                                                           |
-| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                |
-| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build              |
+| Item                             | Value                                                                                                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Framework                        | Next.js 16 (App Router)                                                                                                                                  |
+| UI                               | React 19 + MUI 9 + Tailwind 4                                                                                                                            |
+| Node.js                          | Pin in `.node-version` (align with backend)                                                                                                              |
+| Package manager                  | pnpm (`pnpm@11.9.0`, lockfile: `pnpm-lock.yaml`) — never npm/yarn in this repo                                                                           |
+| Theme / tokens                   | `src/theme/theme.ts`                                                                                                                                     |
+| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                                                                                          |
+| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build                                                                                        |
+| E2E / a11y                       | `pnpm test:e2e` / `pnpm test:a11y`; owner pages use `e2e/support/session.ts` (fake session + mocked BFF). Without Google Chrome: `PW_BUNDLED_CHROMIUM=1` |
+| Auth (BFF)                       | httpOnly cookies + refresh in `src/lib/api/bff.ts` (`withSession`); `src/proxy.ts` guards `/profile/**`                                                  |
 
 See `README.md` for setup. Env template: `.env.example`. PR/issue templates live under `.github/`.
 

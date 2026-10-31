@@ -37,7 +37,6 @@ import CampaignBadge from '@/components/campaign/CampaignBadge';
 import MobileNavigationBar, {
   type BottomNavViewMode,
 } from '@/components/layout/MobileNavigationBar';
-import SkipToContent from '@/components/common/SkipToContent';
 
 export type SearchItemType = 'campanha' | 'projeto' | 'missionario';
 
@@ -320,8 +319,6 @@ export default function NavigationPageContent({
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 6 } }}>
-      <SkipToContent />
-
       {/* Top Navigation Bar: Dynamic Logged In vs Non-Registered View */}
       <AppTopNavbar isLoggedIn={isLoggedIn} role={role} maxWidth="lg" />
 

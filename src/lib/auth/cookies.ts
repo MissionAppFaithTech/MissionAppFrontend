@@ -32,3 +32,8 @@ export function applyAuthCookies(
     maxAge: refreshTokenCookieMaxAge,
   });
 }
+
+export function clearAuthCookies(response: NextResponse) {
+  response.cookies.set(AUTH_COOKIE.accessToken, '', { ...authCookieOptions, maxAge: 0 });
+  response.cookies.set(AUTH_COOKIE.refreshToken, '', { ...authCookieOptions, maxAge: 0 });
+}
