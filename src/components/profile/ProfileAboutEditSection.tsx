@@ -9,9 +9,9 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import LimitedTextField from '@/components/common/LimitedTextField';
 import StyledTextArea from '@/components/common/StyledTextArea';
 import { ApiError } from '@/lib/api/client';
 import {
@@ -293,7 +293,7 @@ export default function ProfileAboutEditSection({
                 name="originLocation"
                 control={control}
                 render={({ field: { ref, ...field } }) => (
-                  <TextField
+                  <LimitedTextField
                     {...field}
                     inputRef={ref}
                     id="profile-about-originLocation"
@@ -301,14 +301,10 @@ export default function ProfileAboutEditSection({
                     placeholder="Ex.: Rio de Janeiro - Brasil"
                     size="small"
                     fullWidth
+                    maxLength={ABOUT_SHORT_MAX_LENGTH}
                     error={Boolean(errors.originLocation)}
                     helperText={errors.originLocation?.message}
-                    slotProps={{
-                      htmlInput: {
-                        maxLength: ABOUT_SHORT_MAX_LENGTH,
-                        'aria-invalid': Boolean(errors.originLocation) || undefined,
-                      },
-                    }}
+                    htmlInputProps={{ 'aria-invalid': Boolean(errors.originLocation) || undefined }}
                   />
                 )}
               />
@@ -328,7 +324,7 @@ export default function ProfileAboutEditSection({
                         name={`workAddress.${key}`}
                         control={control}
                         render={({ field: { ref, ...field } }) => (
-                          <TextField
+                          <LimitedTextField
                             {...field}
                             inputRef={ref}
                             id={`profile-about-work-${key}`}
@@ -336,11 +332,10 @@ export default function ProfileAboutEditSection({
                             size="small"
                             fullWidth
                             autoComplete={autoComplete}
+                            maxLength={maxLength}
                             error={Boolean(error)}
                             helperText={error}
-                            slotProps={{
-                              htmlInput: { maxLength, 'aria-invalid': Boolean(error) || undefined },
-                            }}
+                            htmlInputProps={{ 'aria-invalid': Boolean(error) || undefined }}
                           />
                         )}
                       />
