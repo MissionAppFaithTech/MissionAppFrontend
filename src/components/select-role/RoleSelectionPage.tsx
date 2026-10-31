@@ -39,7 +39,7 @@ export default function RoleSelectionPage() {
             transition: 'color 0.2s ease, background-color 0.2s ease',
             '&:hover': {
               color: 'primary.main',
-              backgroundColor: 'rgba(13, 43, 92, 0.04)',
+              backgroundColor: 'action.hover',
               textDecoration: 'none',
             },
           }}

@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
+import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
@@ -215,6 +216,8 @@ export default function SiteHeader() {
             >
               Cadastre-se
             </PillButton>
+
+            <AccessibilityPreferencesButton size="medium" sx={{ color: 'text.primary' }} />
 
             <IconButton
               aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}

@@ -13,6 +13,7 @@ import ProfileSearchField from '@/components/profile/ProfileSearchField';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import MobileNavigationBar from '@/components/layout/MobileNavigationBar';
 import type { ProfileData } from '@/types/profile';
+import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 export interface ProfileLayoutShellProps {
   children: ReactNode;
@@ -63,6 +64,7 @@ export default function ProfileLayoutShell({
         </Box>
 
         <PageNavbarActions>
+          <AccessibilityPreferencesButton size="medium" sx={{ color: 'text.primary' }} />
           <ProfileAccountMenu profile={profile} />
         </PageNavbarActions>
       </PageNavbar>

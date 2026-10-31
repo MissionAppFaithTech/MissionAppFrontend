@@ -16,6 +16,9 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/counter.css';
+import PauseIcon from '@mui/icons-material/Pause';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 type CampaignMediaCarouselProps = {
   images: string[];
@@ -31,17 +34,21 @@ export default function CampaignMediaCarousel({
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  /** Explicit pause from the Pausar button (WCAG 2.2.2); hover/focus pauses are temporary. */
+  const [userPaused, setUserPaused] = useState(false);
+  const reduceMotion = usePrefersReducedMotion();
   const total = images.length;
+  const autoPlays = total > 1 && !reduceMotion && !userPaused;
 
   useEffect(() => {
-    if (total <= 1 || isPaused) return;
+    if (!autoPlays || isPaused) return;
 
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % total);
     }, autoPlayInterval);
 
     return () => clearInterval(timer);
-  }, [total, isPaused, autoPlayInterval]);
+  }, [autoPlays, total, isPaused, autoPlayInterval]);
 
   if (!images || total === 0) {
     return null;
@@ -210,6 +217,21 @@ export default function CampaignMediaCarousel({
           spacing={0.5}
           sx={{ justifyContent: 'center', alignItems: 'center', pt: 1.5 }}
         >
+          {!reduceMotion ? (
+            <IconButton
+              aria-label={
+                userPaused
+                  ? 'Retomar troca automática de imagens'
+                  : 'Pausar troca automática de imagens'
+              }
+              aria-pressed={userPaused}
+              onClick={() => setUserPaused((paused) => !paused)}
+              size="small"
+              sx={{ minWidth: 44, minHeight: 44, color: 'text.primary' }}
+            >
+              {userPaused ? <PlayArrowIcon aria-hidden /> : <PauseIcon aria-hidden />}
+            </IconButton>
+          ) : null}
           {images.map((_, idx) => (
             <Box
               key={idx}
@@ -230,10 +252,7 @@ export default function CampaignMediaCarousel({
                 justifyContent: 'center',
                 borderRadius: 1,
                 '&:focus-visible': {
-                  outline: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? '2px solid var(--mui-palette-action2-focusRing)'
-                      : '2px solid #0D2B5C',
+                  outline: '2px solid var(--mui-palette-action2-focusRing)',
                   outlineOffset: 2,
                 },
               }}

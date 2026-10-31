@@ -10,6 +10,7 @@ import AuthCard from '@/components/common/AuthCard';
 import Logo from '@/components/common/Logo';
 import ThemeToggle from '@/components/ThemeToggle';
 import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
+import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 const footerLinkSx = {
   color: 'mission.main',
@@ -23,7 +24,7 @@ const footerLinkSx = {
   transition: 'color 0.2s ease, background-color 0.2s ease',
   '&:hover': {
     color: 'mission.dark',
-    backgroundColor: 'rgba(194, 65, 12, 0.08)',
+    backgroundColor: 'action.hover',
     textDecoration: 'none',
   },
 } as const;
@@ -79,7 +80,8 @@ export default function AuthLayout({
         bgcolor: 'background.default',
       }}
     >
-      <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+      <Box sx={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 0.5 }}>
+        <AccessibilityPreferencesButton />
         <ThemeToggle />
       </Box>
 

@@ -1,16 +1,25 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
-import { DM_Sans } from 'next/font/google';
+import { Atkinson_Hyperlegible, DM_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import JsonLd, { generateOrganizationAndWebsiteSchema } from '@/components/seo/JsonLd';
 import SkipToContent from '@/components/common/SkipToContent';
 import { getSiteUrl, siteConfig } from '@/lib/site';
+import { A11Y_PRE_PAINT_SCRIPT } from '@/stores/a11yPreferencesStore';
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-dm-sans',
+});
+
+/** Opt-in readable font (accessibility preferences); only downloaded when used. */
+const atkinson = Atkinson_Hyperlegible({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-readable',
+  preload: false,
 });
 
 const siteUrl = getSiteUrl();
@@ -105,8 +114,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const orgWebsiteSchema = generateOrganizationAndWebsiteSchema();
 
   return (
-    <html lang="pt-BR" suppressHydrationWarning className={dmSans.variable}>
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning
+      className={`${dmSans.variable} ${atkinson.variable}`}
+    >
       <head>
+        {/* Applies saved accessibility preferences before first paint (no flash). */}
+        <script dangerouslySetInnerHTML={{ __html: A11Y_PRE_PAINT_SCRIPT }} />
         <JsonLd data={orgWebsiteSchema} />
       </head>
       <body className={dmSans.className}>

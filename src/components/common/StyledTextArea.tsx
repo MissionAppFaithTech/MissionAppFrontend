@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, type Ref } from 'react';
 import FormHelperText from '@mui/material/FormHelperText';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Stack from '@mui/material/Stack';
@@ -20,6 +20,8 @@ export type StyledTextAreaProps = {
   helperText?: string;
   disabled?: boolean;
   required?: boolean;
+  /** Lets react-hook-form focus the textarea on validation errors. */
+  inputRef?: Ref<HTMLTextAreaElement>;
 };
 
 /**
@@ -38,6 +40,7 @@ export default function StyledTextArea({
   helperText,
   disabled = false,
   required = false,
+  inputRef,
 }: StyledTextAreaProps) {
   const generatedId = useId();
   const fieldId = id ?? `styled-textarea-${generatedId}`;
@@ -66,6 +69,7 @@ export default function StyledTextArea({
       </Typography>
       <OutlinedInput
         id={fieldId}
+        inputRef={inputRef}
         multiline
         fullWidth
         minRows={minRows}

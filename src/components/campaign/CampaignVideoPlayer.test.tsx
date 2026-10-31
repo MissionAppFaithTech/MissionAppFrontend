@@ -14,7 +14,10 @@ describe('CampaignVideoPlayer component', () => {
     expect(screen.getByText(/vídeo oficial da campanha/i)).toBeInTheDocument();
     const iframe = screen.getByTitle('Test Campaign Video');
     expect(iframe).toBeInTheDocument();
-    expect(iframe).toHaveAttribute('src', 'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg');
+    expect(iframe).toHaveAttribute(
+      'src',
+      'https://www.youtube-nocookie.com/embed/5dsGWM5XGdg?cc_load_policy=1&cc_lang_pref=pt&hl=pt-BR'
+    );
   });
 
   it('renders nothing when no videoUrl or invalid URL is provided', () => {

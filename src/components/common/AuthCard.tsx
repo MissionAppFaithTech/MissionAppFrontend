@@ -51,6 +51,8 @@ export default function AuthCard({ muted = false, sx, children, ...props }: Auth
           '--mui-palette-action2-fillHover': lightTokens.actionFillHover,
           '--mui-palette-action2-fillText': lightTokens.actionFillText,
           '--mui-palette-action2-focusRing': lightTokens.focusRing,
+          '--mui-palette-action2-fieldBorder': lightTokens.fieldBorder,
+          '--mui-palette-action2-linkHover': lightTokens.linkHover,
           '--mui-palette-divider': lightTokens.borderSubtle,
           '--mui-palette-action-active': lightTokens.textSecondary,
           '--mui-palette-success-main': colors.success,

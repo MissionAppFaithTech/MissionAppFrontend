@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, type Ref } from 'react';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -21,6 +21,8 @@ type PhoneFieldProps = {
   placeholder?: string;
   defaultCountry?: string;
   size?: 'small' | 'medium';
+  /** Lets react-hook-form focus the input on validation errors. */
+  inputRef?: Ref<HTMLInputElement>;
 };
 
 /** Valor só com DDI (ex: +55) — conta como vazio para mostrar o placeholder. */
@@ -31,6 +33,7 @@ function isOnlyDialCode(phone: string): boolean {
 }
 
 export default function PhoneField({
+  inputRef,
   id,
   value,
   onChange,
@@ -62,6 +65,7 @@ export default function PhoneField({
       )}
       <OutlinedInput
         id={inputId}
+        inputRef={inputRef}
         label={hideLabel ? undefined : label}
         notched={hideLabel ? false : true}
         size={size}
