@@ -16,7 +16,7 @@ O [ADR-0001](./0001-separacao-entre-estado-de-servidor-cliente-url-e-formulario.
 - **Um 401 pode chegar a qualquer momento**, não só quando o token expira. Pelo ADR-0023 do backend, troca de senha, revogação remota e "sair de todos" invalidam a sessão. Hoje `bffRequest` dispara `SESSION_EXPIRED_EVENT` e o `SessionWatcher` limpa os stores.
 - **A API não manda ETag nem Cache-Control e não tem canal em tempo real.** O frescor depende do cliente: prazo de validade, refetch e invalidação após as próprias mutações.
 - **Os próximos requisitos são de lista e interação:**
-  - feeds por cursor com 20 itens (NF 2.3; contrato no ADR-0033 do backend);
+  - feeds por cursor (NF 2.2) com no máximo 20 itens por requisição (NF 2.3; contrato no ADR-0033 do backend);
   - "Carregar mais" (RF 10.6, 11.6);
   - curtir e seguir com resposta em até 100 ms (RF 8.4, 10.2, NF 3.1);
   - typeahead de igrejas e agências e busca global (RF 2.1, 7).
@@ -144,4 +144,4 @@ Funciona para páginas de leitura, mas não resolve interação (curtir, seguir,
 - [ADR-0023 do backend](https://github.com/MissionAppFaithTech/MissionAppBackend/blob/main/docs/architecture/decisions/0023-estrategia-de-autenticacao-jwt-hibrido-com-revogacao-via-dragonflydb.md): ciclo do token e causas de 401
 - [ADR-0033 do backend](https://github.com/MissionAppFaithTech/MissionAppBackend/blob/main/docs/architecture/decisions/0033-paginacao-por-cursor-para-feeds-e-listas-incrementais.md): envelope de paginação por cursor
 - [ADR-0035 do backend](https://github.com/MissionAppFaithTech/MissionAppBackend/blob/main/docs/architecture/decisions/0035-rotacao-idempotente-de-refresh-token-com-janela-de-tolerancia.md): refresh seguro com várias instâncias do BFF
-- [Site de requisitos](https://missionappfaithtech.github.io/MissionAppRequirementsList/): RF 2.1, 7, 8.4, 10.2, 10.6, 11.6; NF 2.3, 3.1
+- [Site de requisitos](https://missionappfaithtech.github.io/MissionAppRequirementsList/): RF 2.1, 7, 8.4, 10.2, 10.6, 11.6; NF 2.2, 2.3, 3.1

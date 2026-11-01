@@ -20,7 +20,7 @@ O `docs/seo-and-ai-discoverability.md` já define metadata, JSON-LD (`Person`, `
 
 Quando esses dados vierem da API, há três formas de buscá-los:
 
-1. **Só no cliente**, com TanStack Query ([ADR-0002](./0002-adocao-do-tanstack-query-para-estado-de-servidor.md)). O HTML inicial sai sem conteúdo, o que piora SEO, descoberta por IAs e o LCP (NF 2.2 pede páginas em menos de 2 s).
+1. **Só no cliente**, com TanStack Query ([ADR-0002](./0002-adocao-do-tanstack-query-para-estado-de-servidor.md)). O HTML inicial sai sem conteúdo, o que piora SEO, descoberta por IAs e o LCP (NF 2.2 pede feed e exploração carregados em menos de 2 s).
 2. **Só no servidor**, sem cache no cliente. Bom para SEO, mas as interações da página (seguir, curtir, "Carregar mais" nos posts) teriam que refazer a busca no cliente.
 3. **No servidor e entregue ao cache do cliente** (prefetch + hidratação).
 

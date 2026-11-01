@@ -23,7 +23,7 @@ Fora dos stores, cada componente que lê a API reimplementa carregamento, erro, 
 
 As próximas integrações aumentam muito essa demanda. Pelo [site de requisitos](https://missionappfaithtech.github.io/MissionAppRequirementsList/):
 
-- feeds cronológicos com paginação por cursor de 20 itens (RF 4.4.2, 5.3.1, 10.4, NF 2.3);
+- feeds cronológicos com paginação por cursor (NF 2.2) e no máximo 20 itens por requisição (RF 4.4.2, 5.3.1, 10.4, NF 2.3);
 - listas "Carregar mais" de seguidores (RF 10.6, 11.6);
 - curtir e seguir com contador atualizado e feedback em até 100 ms (RF 8.4, 10.2, NF 3.1);
 - busca global e typeahead (RF 7, 2.1).
@@ -85,6 +85,6 @@ Brilha com estado de cliente muito granular e interdependente. Aqui o estado de 
 
 ## Referências
 
-- [Site de requisitos do MissionApp](https://missionappfaithtech.github.io/MissionAppRequirementsList/): RF 4.4.2, 5.3.1, 7, 8.4, 10.2, 10.6, 11.6 e NF 2.3, 3.1
+- [Site de requisitos do MissionApp](https://missionappfaithtech.github.io/MissionAppRequirementsList/): RF 4.4.2, 5.3.1, 7, 8.4, 10.2, 10.6, 11.6 e NF 2.2, 2.3, 3.1
 - [TanStack Query — Does this replace client state?](https://tanstack.com/query/latest/docs/framework/react/guides/does-this-replace-client-state): separação entre estado de servidor e de cliente
 - [Zustand — Setup with Next.js](https://zustand.docs.pmnd.rs/guides/nextjs): limites do Zustand em SSR
