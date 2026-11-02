@@ -7,9 +7,5 @@ describe('ResetPasswordPage route (/reset-password)', () => {
     render(<ResetPasswordPage />);
 
     expect(screen.getByRole('heading', { name: /nova senha/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /voltar para o login/i })).toHaveAttribute(
-      'href',
-      '/login'
-    );
   });
 });

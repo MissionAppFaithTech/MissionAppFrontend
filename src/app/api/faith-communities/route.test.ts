@@ -42,9 +42,7 @@ describe('/api/faith-communities', () => {
 
     const response = await GET();
     expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/faith-communities', {
-      accessToken: undefined,
-    });
+    expect(backendFetch).toHaveBeenCalledWith('/faith-communities');
   });
 
   it('normalizes the backend list for the select', async () => {

@@ -1,5 +1,6 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+import TextField from '@mui/material/TextField';
 import { colors, lightTokens } from '@/theme/theme';
 import AuthCard from './AuthCard';
 
@@ -41,5 +42,18 @@ describe('AuthCard', () => {
     expect(getComputedStyle(input as HTMLInputElement).webkitTextFillColor).not.toBe(
       lightTokens.textPrimary
     );
+  });
+
+  it('keeps the outlined label transparent so the notch matches the register fields', () => {
+    render(
+      <AuthCard>
+        <TextField label="E-mail" placeholder="seu@email.com" />
+      </AuthCard>
+    );
+
+    const input = screen.getByRole('textbox', { name: 'E-mail' });
+    const label = document.getElementById(`${input.id}-label`);
+    expect(label).toBeTruthy();
+    expect(getComputedStyle(label as HTMLElement).backgroundColor).not.toBe('rgb(255, 255, 255)');
   });
 });

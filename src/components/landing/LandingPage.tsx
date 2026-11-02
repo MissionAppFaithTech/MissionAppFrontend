@@ -220,17 +220,6 @@ function HeroHeadline() {
               Saiba mais
             </PillButton>
           </Stack>
-
-          <PillButton
-            href="/conselho-missionario"
-            tone="cta"
-            sx={{
-              ...heroCtaButtonSx,
-              width: { xs: '100%', sm: 'auto' },
-            }}
-          >
-            Como trazer o Mission App para sua igreja
-          </PillButton>
         </Stack>
       </Stack>
     </Stack>

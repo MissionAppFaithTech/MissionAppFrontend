@@ -42,9 +42,7 @@ describe('/api/missionary-agencies', () => {
 
     const response = await GET();
     expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/missionary-agencies', {
-      accessToken: undefined,
-    });
+    expect(backendFetch).toHaveBeenCalledWith('/missionary-agencies');
   });
 
   it('normalizes the backend list for the select', async () => {

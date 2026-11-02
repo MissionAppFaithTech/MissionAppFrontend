@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Stack, TextField, Typography } from '@mui/material';
 import Link from 'next/link';
 import SendIcon from '@mui/icons-material/Send';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -90,16 +89,6 @@ export default function ForgotPasswordForm() {
             </Typography>
           </Box>
         ) : null}
-
-        <PillButton
-          href="/login"
-          tone="cta"
-          fullWidth
-          sx={FORM_ACTION_BUTTON_SX}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar para o login
-        </PillButton>
       </Stack>
     );
   }
@@ -138,16 +127,6 @@ export default function ForgotPasswordForm() {
           startIcon={<PersonAddIcon />}
         >
           Criar uma conta
-        </PillButton>
-
-        <PillButton
-          href="/login"
-          tone="outline"
-          fullWidth
-          sx={FORM_ACTION_BUTTON_SX}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar para o login
         </PillButton>
       </Stack>
     );
@@ -194,26 +173,26 @@ export default function ForgotPasswordForm() {
         )}
       />
 
-      <PillButton
-        type="submit"
-        tone="cta"
-        fullWidth
-        disabled={isSubmitting}
-        sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
-        startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-      >
-        {isSubmitting ? 'Verificando…' : 'Enviar link'}
-      </PillButton>
-
-      <PillButton
-        href="/login"
-        tone="outline"
-        fullWidth
-        sx={FORM_ACTION_BUTTON_SX}
-        startIcon={<ArrowBackIcon />}
-      >
-        Voltar para o login
-      </PillButton>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap>
+        <PillButton
+          href="/login"
+          tone="primarySoftOutline"
+          fullWidth
+          sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+        >
+          Voltar
+        </PillButton>
+        <PillButton
+          type="submit"
+          tone="cta"
+          fullWidth
+          disabled={isSubmitting}
+          sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+        >
+          {isSubmitting ? 'Verificando…' : 'Enviar link'}
+        </PillButton>
+      </Stack>
     </Stack>
   );
 }

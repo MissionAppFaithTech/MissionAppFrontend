@@ -8,7 +8,6 @@ import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
-import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
@@ -20,31 +19,22 @@ const navLinks = [
 ];
 
 const navLinkSx = (isActive: boolean) => ({
-  position: 'relative' as const,
   display: 'inline-block',
   py: 0.5,
-  textDecoration: 'none',
+  textDecoration: isActive ? 'underline' : 'none',
+  textDecorationThickness: '2px',
+  textUnderlineOffset: '6px',
+  textDecorationColor: 'var(--app-nav-active)',
   color: isActive ? 'var(--app-nav-active)' : 'text.primary',
-  fontWeight: isActive ? 700 : 500,
+  fontFamily: 'inherit',
+  fontWeight: 500,
   whiteSpace: 'nowrap' as const,
   fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '0.95rem' },
   transition: 'color 0.2s ease',
   cursor: 'pointer',
   '&:hover': {
     color: 'var(--app-nav-active)',
-  },
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    width: isActive ? '100%' : 0,
-    height: 2,
-    bgcolor: 'var(--app-nav-active)',
-    transition: 'width 0.2s ease',
-  },
-  '&:hover::after': {
-    width: '100%',
+    textDecoration: 'underline',
   },
 });
 
@@ -76,7 +66,8 @@ const mobileNavLinkSx = (isActive: boolean) => ({
   py: 1.5,
   textDecoration: 'none',
   color: isActive ? 'var(--app-nav-active)' : 'text.primary',
-  fontWeight: isActive ? 700 : 500,
+  fontFamily: 'inherit',
+  fontWeight: 500,
   fontSize: '1.05rem',
   borderBottom: '1px solid',
   borderColor: 'divider',
@@ -220,24 +211,6 @@ export default function SiteHeader() {
             >
               Entrar
             </PillButton>
-
-            <PillButton
-              href="/select-role"
-              size="small"
-              tone="missionFilled"
-              sx={{
-                flexShrink: 0,
-                display: { xs: 'none', sm: 'inline-flex' },
-                minHeight: 38,
-                px: { sm: 1.75, md: 2.25 },
-                fontSize: '0.875rem',
-                fontWeight: 700,
-              }}
-            >
-              Cadastre-se
-            </PillButton>
-
-            <AccessibilityPreferencesButton size="medium" sx={{ color: 'text.primary' }} />
 
             <IconButton
               aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
