@@ -154,7 +154,6 @@ export default function CreateFaithCommunityModal({
         helperText={errors.country?.message}
       />
 
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <Controller
           name="churchPhone"
           control={control}
@@ -180,7 +179,6 @@ export default function CreateFaithCommunityModal({
           error={Boolean(errors.website)}
           helperText={errors.website?.message}
         />
-      </Stack>
 
       <TextField
         {...register('pastorName')}
