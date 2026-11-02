@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import Link from 'next/link';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
@@ -14,8 +14,8 @@ import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
+import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
 import DonationModal from '@/components/profile/DonationModal';
-import { EXAMPLE_PROFILE_STATS } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { ProfileData } from '@/types/profile';
 
@@ -55,20 +55,39 @@ export default function ProfileSummaryCard({
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(isFollowingInitial);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const {
     username,
     displayName,
     roleDescription,
     location = '',
-    projectsCount = EXAMPLE_PROFILE_STATS.projectsCount,
-    postsCount = EXAMPLE_PROFILE_STATS.postsCount,
-    campaignsCount = EXAMPLE_PROFILE_STATS.campaignsCount,
-    supportersCount = EXAMPLE_PROFILE_STATS.supportersCount,
-    followingCount = EXAMPLE_PROFILE_STATS.followingCount,
-    statsAreExample = true,
+    projectsCount = 0,
+    postsCount = 0,
+    campaignsCount = 0,
+    supportersCount = 0,
+    followingCount = 0,
+    statsAreExample = false,
     role = 'missionary',
   } = profile;
+
+  const photoSrc = photoPreview || profile.avatarUrl || undefined;
+
+  useEffect(() => {
+    if (!photoPreview) return;
+    return () => URL.revokeObjectURL(photoPreview);
+  }, [photoPreview]);
+
+  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      notify('Escolha uma imagem para a foto de perfil.', 'error');
+      return;
+    }
+    setPhotoPreview(URL.createObjectURL(file));
+  };
 
   const isSupporterProfile = role === 'supporter';
   const isOwnSupporter = isOwnProfile && isSupporterProfile;
@@ -135,6 +154,8 @@ export default function ProfileSummaryCard({
             >
               <Box sx={{ position: 'relative', flexShrink: 0 }}>
                 <Avatar
+                  src={photoSrc}
+                  alt={photoSrc ? `Foto de perfil de ${displayName}` : ''}
                   sx={{
                     width: { xs: 72, sm: 88, md: 96 },
                     height: { xs: 72, sm: 88, md: 96 },
@@ -144,8 +165,19 @@ export default function ProfileSummaryCard({
                     borderColor: 'divider',
                   }}
                 >
-                  <PersonIcon sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
+                  <PersonIcon aria-hidden sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
                 </Avatar>
+                {isOwnProfile ? (
+                  <ProfilePhotoAddButton component="label">
+                    <Box
+                      component="input"
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={handlePhotoChange}
+                    />
+                  </ProfilePhotoAddButton>
+                ) : null}
               </Box>
 
               <Stack spacing={0.5} sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>

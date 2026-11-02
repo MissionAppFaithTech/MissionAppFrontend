@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } fr
 import { ApiError } from '@/lib/api/client';
 import type { AccountProfilePayload, BackendUser } from '@/types/backend';
 import {
-  EXAMPLE_PROFILE_STATS,
   changeAccountPassword,
   emptyProfile,
   formatWorkAddress,
@@ -216,11 +215,18 @@ describe('mapAccountProfile', () => {
     expect(profile.about.faithCommunity).toBe('');
   });
 
-  it('keeps the example stats flagged as example data', () => {
+  it('starts counters at zero without the example-data flag', () => {
     const profile = mapAccountProfile(buildPayload());
-    expect(profile).toMatchObject(EXAMPLE_PROFILE_STATS);
-    expect(profile.statsAreExample).toBe(true);
-    expect(emptyProfile.statsAreExample).toBe(true);
+    expect(profile).toMatchObject({
+      followersCount: 0,
+      projectsCount: 0,
+      postsCount: 0,
+      campaignsCount: 0,
+      supportersCount: 0,
+      followingCount: 0,
+    });
+    expect(profile.statsAreExample).toBe(false);
+    expect(emptyProfile.statsAreExample).toBe(false);
   });
 });
 

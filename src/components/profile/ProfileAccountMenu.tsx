@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type MouseEvent } from 'react';
-import AddIcon from '@mui/icons-material/Add';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import Avatar from '@mui/material/Avatar';
@@ -132,25 +131,6 @@ export default function ProfileAccountMenu({
             >
               <PersonIcon sx={{ fontSize: 42 }} />
             </Avatar>
-            <Box
-              aria-hidden
-              sx={{
-                position: 'absolute',
-                right: -2,
-                bottom: 2,
-                width: 24,
-                height: 24,
-                display: 'grid',
-                placeItems: 'center',
-                borderRadius: '50%',
-                bgcolor: 'primary.main',
-                color: 'common.white',
-                border: '2px solid',
-                borderColor: 'background.paper',
-              }}
-            >
-              <AddIcon sx={{ fontSize: 16 }} />
-            </Box>
           </Box>
           <Typography variant="caption" color="text.secondary">
             @{profile.username}
@@ -174,40 +154,6 @@ export default function ProfileAccountMenu({
 
         <Divider />
 
-        {/* RBAC: each role only gets links into its own area (lib/auth/rbac.ts). */}
-        {isSupporter ? (
-          <Box
-            component={Link}
-            href="/profile/supporter/missionarios"
-            onClick={handleClose}
-            sx={menuItemSx}
-          >
-            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
-          </Box>
-        ) : (
-          <>
-            <Box
-              component={Link}
-              href="/profile/projetos-de-impacto"
-              onClick={handleClose}
-              sx={menuItemSx}
-            >
-              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-                Perfil Missionário
-              </Typography>
-            </Box>
-
-            <Divider />
-
-            <Box component={Link} href="/profile/financeiro" onClick={handleClose} sx={menuItemSx}>
-              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-                Configurações Financeiras
-              </Typography>
-            </Box>
-          </>
-        )}
-
-        <Divider />
         <Box
           component={Link}
           href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
@@ -216,6 +162,18 @@ export default function ProfileAccountMenu({
         >
           <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Editar perfil</Typography>
         </Box>
+
+        <Divider />
+
+        {role === 'missionary' && (
+          <>
+            <Box component={Link} href="/profile/financeiro" onClick={handleClose} sx={menuItemSx}>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+                Configurações Financeiras
+              </Typography>
+            </Box>
+          </>
+        )}
 
         <Divider />
 

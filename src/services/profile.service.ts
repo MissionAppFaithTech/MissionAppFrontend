@@ -8,16 +8,16 @@ import type {
 import type { ProfileData, WorkAddressData } from '@/types/profile';
 
 /**
- * Followers/projects/posts counters have no backend yet. They stay visible as
- * example data, flagged with `statsAreExample` so the UI labels them.
+ * Project, post and follower counters have no API yet. A new account shows
+ * zero until those endpoints exist — never placeholder numbers.
  */
-export const EXAMPLE_PROFILE_STATS = {
-  followersCount: 5,
-  projectsCount: 25,
-  postsCount: 3,
-  campaignsCount: 4,
-  supportersCount: '1.2k',
-  followingCount: 12,
+export const EMPTY_PROFILE_STATS = {
+  followersCount: 0,
+  projectsCount: 0,
+  postsCount: 0,
+  campaignsCount: 0,
+  supportersCount: 0,
+  followingCount: 0,
 } as const;
 
 export const emptyProfile: ProfileData = {
@@ -28,8 +28,8 @@ export const emptyProfile: ProfileData = {
   roleDescription: '',
   role: 'missionary',
   location: '',
-  ...EXAMPLE_PROFILE_STATS,
-  statsAreExample: true,
+  ...EMPTY_PROFILE_STATS,
+  statsAreExample: false,
   about: {
     introduction: '',
     missionHistory: '',

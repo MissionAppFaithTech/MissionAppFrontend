@@ -82,6 +82,9 @@ export default function VisitorProfileAboutSection({ data }: VisitorProfileAbout
             {data.missionaryAgency ? (
               <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
             ) : null}
+            {data.faithCommunity ? (
+              <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
+            ) : null}
           </Stack>
 
           {/* Seção bloqueada para membros cadastrados */}

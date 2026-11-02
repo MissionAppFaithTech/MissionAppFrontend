@@ -114,6 +114,9 @@ function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
             {data.missionaryAgency && (
               <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
             )}
+            {data.faithCommunity ? (
+              <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
+            ) : null}
           </Stack>
 
           {data.prayerRequests && (

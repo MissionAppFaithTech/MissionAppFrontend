@@ -8,3 +8,4 @@ yarn.lock
 coverage
 *.min.js
 .agents/skills
+.claude/skills

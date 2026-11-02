@@ -90,13 +90,15 @@ describe('profileStore', () => {
     window.localStorage.clear();
   });
 
-  it('starts idle with the empty profile and example stats', () => {
+  it('starts idle with the empty profile and zero counters', () => {
     const state = useProfileStore.getState();
     expect(state.status).toBe('idle');
     expect(state.error).toBeNull();
     expect(state.hasHydrated).toBe(false);
     expect(state.profile).toEqual(emptyProfile);
-    expect(state.profile.statsAreExample).toBe(true);
+    expect(state.profile.statsAreExample).toBe(false);
+    expect(state.profile.projectsCount).toBe(0);
+    expect(state.profile.supportersCount).toBe(0);
   });
 
   it('skips automatic hydration (rehydrated explicitly on the client)', () => {
@@ -477,6 +479,40 @@ describe('profileStore', () => {
       // Missing keys come back from the empty profile, never from storage.
       expect(state.profile.contact).toEqual(emptyProfile.contact);
       expect(window.localStorage.getItem(LEGACY_STORAGE_KEY)).toBeNull();
+    });
+
+    it('drops cached example counters and keeps the rest of the profile', async () => {
+      const { contact: _contact, ...publicProfile } = loadedProfile;
+      window.sessionStorage.setItem(
+        PROFILE_STORAGE_KEY,
+        JSON.stringify({
+          state: {
+            profile: {
+              ...publicProfile,
+              projectsCount: 25,
+              postsCount: 3,
+              campaignsCount: 4,
+              supportersCount: '1.2k',
+              followingCount: 12,
+              followersCount: 5,
+              statsAreExample: true,
+            },
+          },
+          version: 2,
+        })
+      );
+
+      await rehydrateProfileStore();
+
+      const profile = useProfileStore.getState().profile;
+      expect(profile.displayName).toBe('Ana Missionária');
+      expect(profile.projectsCount).toBe(0);
+      expect(profile.postsCount).toBe(0);
+      expect(profile.campaignsCount).toBe(0);
+      expect(profile.supportersCount).toBe(0);
+      expect(profile.followingCount).toBe(0);
+      expect(profile.followersCount).toBe(0);
+      expect(profile.statsAreExample).toBe(false);
     });
 
     it('discards a cache written by another version', async () => {

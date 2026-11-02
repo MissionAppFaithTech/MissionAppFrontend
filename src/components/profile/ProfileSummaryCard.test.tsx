@@ -5,16 +5,12 @@ import ProfileSummaryCard from './ProfileSummaryCard';
 import { mockProfile, mockSupporterProfile } from '@/mocks/profile';
 
 describe('ProfileSummaryCard component', () => {
-  it('renders the missionary owner header with example-data stats and navy edit', () => {
+  it('renders the missionary owner header with navy edit', () => {
     render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
 
     expect(screen.getByText(mockProfile.displayName)).toBeInTheDocument();
     expect(screen.getByText(`@${mockProfile.username}`)).toBeInTheDocument();
-    // Photo upload is not available yet: no dead control on the header.
-    expect(
-      screen.queryByRole('button', { name: /adicionar foto de perfil/i })
-    ).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/dados de exemplo: estatísticas do perfil/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
     expect(screen.getByText('apoiadores')).toBeInTheDocument();
     expect(screen.getByText('seguindo')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /editar perfil/i })).toBeInTheDocument();
@@ -24,14 +20,37 @@ describe('ProfileSummaryCard component', () => {
     expect(screen.queryByRole('button', { name: /ofertar/i })).not.toBeInTheDocument();
   });
 
+  it('shows zero counters and hides the example badge on a new profile', () => {
+    render(
+      <ProfileSummaryCard
+        profile={{
+          ...mockProfile,
+          projectsCount: 0,
+          postsCount: 0,
+          campaignsCount: 0,
+          supportersCount: 0,
+          followingCount: 0,
+          statsAreExample: false,
+        }}
+        isOwnProfile
+      />
+    );
+
+    expect(screen.queryByText(/dados de exemplo/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('1.2k')).not.toBeInTheDocument();
+    expect(screen.queryByText('25')).not.toBeInTheDocument();
+    for (const label of ['projetos', 'postagens', 'campanhas', 'apoiadores', 'seguindo']) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    }
+    expect(screen.getAllByText('0')).toHaveLength(5);
+  });
+
   it('renders a compact own supporter header without stats or share', () => {
     render(<ProfileSummaryCard profile={mockSupporterProfile} isOwnProfile />);
 
     expect(screen.getByText(mockSupporterProfile.displayName)).toBeInTheDocument();
     expect(screen.getByText(/apoiador de missões/i)).toBeInTheDocument();
-    expect(
-      screen.queryByRole('button', { name: /adicionar foto de perfil/i })
-    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /editar perfil/i })).toHaveAttribute(
       'href',
       '/profile/supporter/edit-profile'
@@ -92,6 +111,22 @@ describe('ProfileSummaryCard component', () => {
 
     await user.click(screen.getByRole('button', { name: /ofertar/i }));
     expect(screen.getByRole('heading', { name: /ofertar na missão/i })).toBeInTheDocument();
+  });
+
+  it('shows the chosen image on the owner avatar', async () => {
+    const user = userEvent.setup();
+    const previewUrl = 'blob:profile-photo';
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue(previewUrl);
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+
+    render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
+    const file = new File(['photo'], 'foto.png', { type: 'image/png' });
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), file);
+
+    expect(screen.getByRole('img', { name: /foto de perfil de samuel mendonça/i })).toHaveAttribute(
+      'src',
+      previewUrl
+    );
   });
 
   it('opens ContactModal from the owner Contato action', async () => {

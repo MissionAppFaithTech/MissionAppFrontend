@@ -154,31 +154,32 @@ export default function CreateFaithCommunityModal({
         helperText={errors.country?.message}
       />
 
-        <Controller
-          name="churchPhone"
-          control={control}
-          render={({ field }) => (
-            <PhoneField
-              id="create-church-phone"
-              label="Telefone da igreja"
-              value={field.value}
-              onChange={field.onChange}
-              error={Boolean(errors.churchPhone)}
-              helperText={errors.churchPhone?.message}
-              placeholder="(21) 3456-7890"
-              defaultCountry="br"
-            />
-          )}
-        />
-        <TextField
-          {...register('website')}
-          id="create-church-website"
-          label="Website"
-          fullWidth
-          placeholder="https://suaigreja.org.br"
-          error={Boolean(errors.website)}
-          helperText={errors.website?.message}
-        />
+      <Controller
+        name="churchPhone"
+        control={control}
+        render={({ field }) => (
+          <PhoneField
+            id="create-church-phone"
+            label="Telefone da igreja"
+            required
+            value={field.value}
+            onChange={field.onChange}
+            error={Boolean(errors.churchPhone)}
+            helperText={errors.churchPhone?.message}
+            placeholder="(21) 3456-7890"
+            defaultCountry="br"
+          />
+        )}
+      />
+      <TextField
+        {...register('website')}
+        id="create-church-website"
+        label="Website"
+        fullWidth
+        placeholder="https://suaigreja.org.br"
+        error={Boolean(errors.website)}
+        helperText={errors.website?.message}
+      />
 
       <TextField
         {...register('pastorName')}
@@ -199,6 +200,7 @@ export default function CreateFaithCommunityModal({
           <PhoneField
             id="create-church-pastor-phone"
             label="Telefone do pastor"
+            required
             value={field.value}
             onChange={field.onChange}
             error={Boolean(errors.pastorPhone)}

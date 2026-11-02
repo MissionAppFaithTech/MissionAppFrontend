@@ -76,6 +76,8 @@ export type ProfileData = {
   displayName: string;
   roleDescription: string;
   role?: 'missionary' | 'supporter';
+  /** Public profile photo, when one has been stored. */
+  avatarUrl?: string;
   followersCount?: number;
   location?: string;
   projectsCount?: number;
@@ -84,7 +86,7 @@ export type ProfileData = {
   supportersCount?: number | string;
   followingCount?: number;
   supportedCampaignsCount?: number;
-  /** True while followers/projects/posts counters are placeholder data (no backend yet). */
+  /** True only when the counters on screen are placeholder data. */
   statsAreExample?: boolean;
   about: ProfileAboutData;
   contact?: ProfileContactData;

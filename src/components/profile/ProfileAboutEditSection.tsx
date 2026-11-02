@@ -413,10 +413,6 @@ export default function ProfileAboutEditSection({
               })}
             </FormSection>
 
-            <Typography variant="body2" color="text.secondary">
-              Agência missionária e comunidade de fé são alteradas em Configurações da conta.
-            </Typography>
-
             <Stack
               direction={{ xs: 'column-reverse', sm: 'row' }}
               spacing={1.5}
