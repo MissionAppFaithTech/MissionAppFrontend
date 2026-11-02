@@ -16,7 +16,6 @@ import Link from 'next/link';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import LoginIcon from '@mui/icons-material/Login';
-import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import PillButton from '@/components/common/PillButton';
 import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
@@ -25,12 +24,7 @@ import { login } from '@/services/auth.service';
 import { clearUserStores, useSessionStore } from '@/stores/sessionStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
-type LoginErrorInfo = {
-  title: string;
-  description: string;
-};
-
-function parseLoginError(errorMessage: string): LoginErrorInfo {
+function parseLoginError(errorMessage: string): string {
   const lower = errorMessage.toLowerCase();
   if (
     lower.includes('invalid') ||
@@ -39,25 +33,13 @@ function parseLoginError(errorMessage: string): LoginErrorInfo {
     lower.includes('e_invalid_credentials') ||
     lower.includes('incorret')
   ) {
-    return {
-      title: 'E-mail ou senha incorretos',
-      description:
-        'Verifique os dados digitados e tente novamente. Se você esqueceu sua senha, utilize a recuperação de acesso logo abaixo.',
-    };
+    return 'E-mail ou senha incorretos. Verifique os dados e tente novamente.';
   }
   if (lower.includes('locked') || lower.includes('bloqueada')) {
-    return {
-      title: 'Conta temporariamente bloqueada',
-      description:
-        'Por segurança, o acesso foi pausado após várias tentativas inválidas. Aguarde alguns instantes ou redefina sua senha.',
-    };
+    return 'Conta temporariamente bloqueada. Aguarde alguns instantes ou redefina sua senha.';
   }
   if (lower.includes('not found') || lower.includes('não encontrad')) {
-    return {
-      title: 'Conta não localizada',
-      description:
-        'Não encontramos nenhuma conta com o e-mail informado. Verifique o endereço digitado ou cadastre-se.',
-    };
+    return 'Não encontramos uma conta com esse e-mail.';
   }
   if (
     lower.includes('conexão') ||
@@ -65,16 +47,9 @@ function parseLoginError(errorMessage: string): LoginErrorInfo {
     lower.includes('network') ||
     lower.includes('fetch')
   ) {
-    return {
-      title: 'Erro de conexão',
-      description:
-        'Não foi possível comunicar com o servidor. Verifique sua conexão com a internet e tente novamente.',
-    };
+    return 'Não foi possível comunicar com o servidor. Tente novamente.';
   }
-  return {
-    title: 'Não foi possível entrar',
-    description: errorMessage || 'Verifique seus dados e tente novamente.',
-  };
+  return errorMessage || 'Não foi possível entrar. Verifique seus dados e tente novamente.';
 }
 
 export default function LoginForm() {
@@ -82,7 +57,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const sessionExpired = searchParams.get('reason') === 'expired';
   const [showPassword, setShowPassword] = useState(false);
-  const [submitError, setSubmitError] = useState<LoginErrorInfo | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
 
   const {
@@ -148,26 +123,16 @@ export default function LoginForm() {
           Sua sessão expirou. Entre novamente para continuar de onde parou.
         </Alert>
       ) : null}
-      {submitError && (
+      {submitError ? (
         <Alert
           severity="error"
           role="alert"
           aria-live="assertive"
-          icon={<ErrorOutlineRoundedIcon sx={{ fontSize: 22, mt: '2px' }} />}
-          sx={{ width: '100%' }}
+          sx={{ alignItems: 'center', py: 0.75 }}
         >
-          <Typography
-            variant="subtitle2"
-            component="div"
-            sx={{ fontWeight: 700, color: 'inherit', mb: 0.5, lineHeight: 1.3 }}
-          >
-            {submitError.title}
-          </Typography>
-          <Typography variant="body2" sx={{ color: 'inherit', lineHeight: 1.5 }}>
-            {submitError.description}
-          </Typography>
+          {submitError}
         </Alert>
-      )}
+      ) : null}
 
       <TextField
         {...withLiveEmailFormat(register('email'), { trigger, clearErrors, getFieldState })}

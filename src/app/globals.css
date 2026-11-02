@@ -43,7 +43,7 @@
   --app-shadow-overlay: 0 8px 30px rgba(13, 43, 92, 0.18);
   --app-shadow-accent: 0 3px 10px rgba(230, 81, 0, 0.28);
   --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.95);
-  --app-navbar-scrim: rgba(247, 249, 252, 0.92);
+  --app-navbar-scrim: #ffffff;
   /* Resting label of a navigation tab. The selected one is the accent. */
   --app-nav-rest: #0d2b5c;
   --app-nav-active: #c2410c;
@@ -78,7 +78,7 @@
   --app-shadow-overlay: 0 10px 30px rgba(0, 0, 0, 0.4);
   --app-shadow-accent: 0 3px 10px rgba(230, 81, 0, 0.35);
   --app-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  --app-navbar-scrim: rgba(8, 28, 58, 0.92);
+  --app-navbar-scrim: #1a3d6e;
   /* Pale blue / soft orange on navy paper (#1a3d6e) — WCAG AA ≥ 4.5:1 */
   --app-nav-rest: #bfdbfe;
   --app-nav-active: #fdba74;

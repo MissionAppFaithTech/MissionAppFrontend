@@ -12,9 +12,5 @@ describe('ChurchCouncilGuidePage (/conselho-missionario)', () => {
         name: /guia prático do conselho missionário & mobilização da igreja/i,
       })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /voltar para o início/i })).toHaveAttribute(
-      'href',
-      '/'
-    );
   });
 });

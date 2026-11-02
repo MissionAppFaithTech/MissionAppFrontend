@@ -18,6 +18,7 @@ type PhoneFieldProps = {
   label?: string;
   /** When true, the caller renders the visible label (e.g. Typography + htmlFor). */
   hideLabel?: boolean;
+  required?: boolean;
   placeholder?: string;
   defaultCountry?: string;
   size?: 'small' | 'medium';
@@ -56,6 +57,7 @@ export default function PhoneField({
   helperText,
   label = 'Telefone',
   hideLabel = false,
+  required = false,
   placeholder = '(11) 98765-4321',
   defaultCountry = 'br',
   size = 'medium',
@@ -72,9 +74,9 @@ export default function PhoneField({
   });
 
   return (
-    <FormControl variant="outlined" fullWidth error={error} size={size}>
+    <FormControl variant="outlined" fullWidth error={error} required={required} size={size}>
       {hideLabel ? null : (
-        <InputLabel htmlFor={inputId} shrink>
+        <InputLabel htmlFor={inputId} shrink required={required}>
           {label}
         </InputLabel>
       )}
@@ -83,6 +85,7 @@ export default function PhoneField({
         inputRef={inputRef}
         label={hideLabel ? undefined : label}
         notched={hideLabel ? false : true}
+        required={required}
         size={size}
         value={inputValue}
         onChange={(event: ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +98,9 @@ export default function PhoneField({
         inputMode="tel"
         aria-invalid={error}
         aria-describedby={helperText ? helperId : undefined}
+        slotProps={{
+          input: { 'aria-required': required || undefined },
+        }}
         startAdornment={
           <InputAdornment position="start" sx={{ mr: 0.5 }}>
             <CountrySelector

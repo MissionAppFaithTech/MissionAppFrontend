@@ -9,7 +9,6 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Divider from '@mui/material/Divider';
 import Card from '@mui/material/Card';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChecklistIcon from '@mui/icons-material/Checklist';
 import GroupsIcon from '@mui/icons-material/Groups';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -50,19 +49,6 @@ export default function ChurchGuideView() {
   return (
     <Box sx={{ width: '100%', py: { xs: 3, md: 6 } }}>
       <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 4 } }}>
-        {/* Breadcrumb / Back button */}
-        <Box sx={{ mb: 3 }}>
-          <PillButton
-            href="/"
-            tone="primaryOutline"
-            size="small"
-            startIcon={<ArrowBackIcon fontSize="small" />}
-            sx={{ minHeight: 40, px: 2, fontSize: '0.8125rem', fontWeight: 600 }}
-          >
-            Voltar para o início
-          </PillButton>
-        </Box>
-
         {/* Hero Header */}
         <Card
           elevation={0}

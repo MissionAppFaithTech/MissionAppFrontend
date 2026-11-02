@@ -74,9 +74,9 @@ export default function AuthCard({ muted = false, sx, children, ...props }: Auth
             color: `${lightTokens.textPrimary} !important`,
             caretColor: lightTokens.textPrimary,
             py: 1.25,
-            '&::placeholder': {
+            '&::placeholder, &::-webkit-input-placeholder': {
               color: `${lightTokens.textDisabled} !important`,
-              opacity: 1,
+              opacity: '1 !important',
               WebkitTextFillColor: `${lightTokens.textDisabled} !important`,
             },
           },

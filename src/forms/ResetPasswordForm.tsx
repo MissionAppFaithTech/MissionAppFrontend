@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Stack, TextField, Typography, Tooltip, Box, CircularProgress } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LoginIcon from '@mui/icons-material/Login';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
@@ -61,16 +60,6 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         >
           Solicitar novo link
         </PillButton>
-
-        <PillButton
-          href="/login"
-          tone="outline"
-          fullWidth
-          sx={FORM_ACTION_BUTTON_SX}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar para o login
-        </PillButton>
       </Stack>
     );
   }
@@ -95,16 +84,6 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           startIcon={<EmailOutlinedIcon />}
         >
           Solicitar novo link
-        </PillButton>
-
-        <PillButton
-          href="/login"
-          tone="outline"
-          fullWidth
-          sx={FORM_ACTION_BUTTON_SX}
-          startIcon={<ArrowBackIcon />}
-        >
-          Voltar para o login
         </PillButton>
       </Stack>
     );
@@ -225,16 +204,6 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SaveIcon />}
       >
         {isSubmitting ? 'Salvando…' : 'Salvar nova senha'}
-      </PillButton>
-
-      <PillButton
-        href="/login"
-        tone="outline"
-        fullWidth
-        sx={FORM_ACTION_BUTTON_SX}
-        startIcon={<ArrowBackIcon />}
-      >
-        Voltar para o login
       </PillButton>
     </Stack>
   );

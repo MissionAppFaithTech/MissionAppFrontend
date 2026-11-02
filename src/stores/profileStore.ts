@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { ApiError } from '@/lib/api/client';
 import {
+  EMPTY_PROFILE_STATS,
   emptyProfile,
   formatWorkAddress,
   getMyProfile,
@@ -175,7 +176,19 @@ export const useProfileStore = create<ProfileState>()(
       migrate: () => ({ profile: emptyProfile }),
       merge: (persisted, current) => {
         const stored = (persisted as { profile?: ProfileData } | undefined)?.profile;
-        return stored ? { ...current, profile: { ...emptyProfile, ...stored } } : current;
+        // NOTE: contadores antigos em cache eram números de exemplo (25, 1.2k).
+        // A API ainda não devolve esses totais, então a sessão nunca pode reexibi-los.
+        return stored
+          ? {
+              ...current,
+              profile: {
+                ...emptyProfile,
+                ...stored,
+                ...EMPTY_PROFILE_STATS,
+                statsAreExample: false,
+              },
+            }
+          : current;
       },
       onRehydrateStorage: () => (state) => {
         state?.setHasHydrated(true);

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Controller, useForm, type FieldPath } from 'react-hook-form';
+import { useLayoutEffect, useState, type ReactNode } from 'react';
+import { Controller, useForm, type FieldErrors, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -73,6 +73,38 @@ const WORK_ADDRESS_INPUTS: Array<{
   { key: 'district', label: 'Bairro', autoComplete: 'address-level3', maxLength: 255 },
   { key: 'zip', label: 'CEP ou código postal', autoComplete: 'postal-code', maxLength: 20 },
 ];
+
+// NOTE: ordem do documento — o primeiro campo inválido é quem recebe o foco.
+const FIELD_DOM_IDS: Array<{ name: FieldPath<ProfileAboutFormData>; id: string }> = [
+  { name: 'introduction', id: 'profile-about-introduction' },
+  { name: 'missionHistory', id: 'profile-about-missionHistory' },
+  { name: 'originLocation', id: 'profile-about-originLocation' },
+  ...WORK_ADDRESS_INPUTS.map(({ key }) => ({
+    name: `workAddress.${key}` as const,
+    id: `profile-about-work-${key}`,
+  })),
+  { name: 'prayerRequests', id: 'profile-about-prayerRequests' },
+  { name: 'lifeVerse', id: 'profile-about-lifeVerse' },
+];
+
+function errorMessage(
+  errors: FieldErrors<ProfileAboutFormData>,
+  name: FieldPath<ProfileAboutFormData>
+): string | undefined {
+  const value = name.split('.').reduce<unknown>((current, key) => {
+    if (!current || typeof current !== 'object') return undefined;
+    return (current as Record<string, unknown>)[key];
+  }, errors);
+  if (!value || typeof value !== 'object' || !('message' in value)) return undefined;
+  return typeof value.message === 'string' ? value.message : undefined;
+}
+
+function firstInvalidFieldId(errors: FieldErrors<ProfileAboutFormData>): string | null {
+  for (const field of FIELD_DOM_IDS) {
+    if (errorMessage(errors, field.name)) return field.id;
+  }
+  return null;
+}
 
 function toFormValues(data: ProfileAboutData): ProfileAboutFormData {
   const address = data.workAddress;
@@ -153,6 +185,12 @@ export default function ProfileAboutEditSection({
   onCancel,
 }: ProfileAboutEditSectionProps) {
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [focusRequest, setFocusRequest] = useState<{ id: string; tick: number } | null>(null);
+  const requestFocus = (id: string | null) => {
+    if (!id) return;
+    setFocusRequest((current) => ({ id, tick: (current?.tick ?? 0) + 1 }));
+  };
   const {
     handleSubmit,
     control,
@@ -161,9 +199,21 @@ export default function ProfileAboutEditSection({
   } = useForm<ProfileAboutFormData>({
     resolver: zodResolver(profileAboutSchema),
     mode: 'onTouched',
+    shouldFocusError: false,
     values: toFormValues(data),
     resetOptions: { keepDirtyValues: true },
   });
+
+  useLayoutEffect(() => {
+    if (isSubmitting || saving || !focusRequest) return;
+    const id = focusRequest.id;
+    // NOTE: o clique em Salvar termina depois deste efeito. focus() no mesmo
+    // turno perde para o botão; o macrotask corre depois do clique.
+    const timer = window.setTimeout(() => {
+      document.getElementById(id)?.focus();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [isSubmitting, saving, focusRequest]);
 
   const onSubmit = async (values: ProfileAboutFormData) => {
     setSubmitError(null);
@@ -171,6 +221,7 @@ export default function ProfileAboutEditSection({
     // of silently keeping the old one.
     const addressCleared = Object.values(values.workAddress).every((part) => part.length === 0);
     if (data.workAddress && addressCleared) {
+      requestFocus('profile-about-work-country');
       setError(
         'workAddress.country',
         {
@@ -187,6 +238,7 @@ export default function ProfileAboutEditSection({
       return;
     }
 
+    setSaving(true);
     try {
       await onSave(input);
       onDone(true);
@@ -196,12 +248,17 @@ export default function ProfileAboutEditSection({
       for (const [apiField, message] of Object.entries(fieldErrors)) {
         const formField = API_FIELD_TO_FORM[apiField];
         if (!formField) continue;
+        if (!focused) {
+          requestFocus(FIELD_DOM_IDS.find((field) => field.name === formField)?.id ?? null);
+        }
         setError(formField, { type: 'server', message }, { shouldFocus: !focused });
         focused = true;
       }
       if (!focused) {
         setSubmitError(error instanceof Error ? error.message : 'Não foi possível salvar o Sobre.');
       }
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -250,7 +307,9 @@ export default function ProfileAboutEditSection({
       >
         <Box
           component="form"
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit(onSubmit, (formErrors) => {
+            requestFocus(firstInvalidFieldId(formErrors));
+          })}
           noValidate
           aria-busy={isSubmitting || undefined}
         >
@@ -358,10 +417,6 @@ export default function ProfileAboutEditSection({
               })}
             </FormSection>
 
-            <Typography variant="body2" color="text.secondary">
-              Agência missionária e comunidade de fé são alteradas em Configurações da conta.
-            </Typography>
-
             <Stack
               direction={{ xs: 'column-reverse', sm: 'row' }}
               spacing={1.5}
@@ -380,11 +435,21 @@ export default function ProfileAboutEditSection({
                 tone="primarySoftOutline"
                 size="medium"
                 onClick={onCancel}
-                disabled={isSubmitting}
+                disabled={saving}
               >
                 Cancelar
               </PillButton>
-              <PillButton type="submit" tone="primaryFilled" size="medium" loading={isSubmitting}>
+              <PillButton
+                type="submit"
+                tone="primaryFilled"
+                size="medium"
+                loading={saving}
+                onMouseDown={(event) => {
+                  // NOTE: sem isto o mousedown foca Salvar e o Chrome devolve o
+                  // foco para o botão depois da validação.
+                  event.preventDefault();
+                }}
+              >
                 Salvar
               </PillButton>
             </Stack>

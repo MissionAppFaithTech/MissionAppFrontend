@@ -22,10 +22,10 @@ export default function UserHeader({
   bio,
   roleDescription = 'Missionário (a)(s)',
   location = 'Cidade do Cabo, África do Sul',
-  projectsCount = 25,
-  postsCount = 3,
-  campaignsCount = 4,
-  supportersCount = '1.2k',
+  projectsCount = 0,
+  postsCount = 0,
+  campaignsCount = 0,
+  supportersCount = 0,
   profile,
 }: UserHeaderProps) {
   const profileData: ProfileData = profile || {

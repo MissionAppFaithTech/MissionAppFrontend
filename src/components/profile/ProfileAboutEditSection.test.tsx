@@ -100,6 +100,21 @@ describe('ProfileAboutEditSection', () => {
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
     expect(await screen.findAllByText(/preencha para salvar o local de atuação/i)).toHaveLength(4);
+    await waitFor(() => expect(screen.getByLabelText(/^país$/i)).toHaveFocus());
+    expect(onSave).not.toHaveBeenCalled();
+  });
+
+  it('focuses cidade when it is the only empty work address field', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    const city = screen.getByLabelText(/^cidade$/i);
+    await user.clear(city);
+    await user.click(screen.getByRole('button', { name: /salvar/i }));
+
+    expect(await screen.findByText(/preencha para salvar o local de atuação/i)).toBeInTheDocument();
+    expect(city).toHaveAttribute('aria-invalid', 'true');
+    await waitFor(() => expect(city).toHaveFocus());
     expect(onSave).not.toHaveBeenCalled();
   });
 
@@ -121,7 +136,7 @@ describe('ProfileAboutEditSection', () => {
     expect(
       await screen.findByText(/o local de atuação não pode ser removido/i)
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/^país$/i)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^país$/i)).toHaveFocus());
     expect(onSave).not.toHaveBeenCalled();
     expect(onDone).not.toHaveBeenCalled();
   });

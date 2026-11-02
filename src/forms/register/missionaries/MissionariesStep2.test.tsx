@@ -54,7 +54,9 @@ describe('MissionariesStep2', () => {
     await user.click(screen.getByLabelText(/comunidade de fé/i));
     await user.click(await screen.findByRole('option', { name: /não encontrei na lista/i }));
 
-    expect(await screen.findByRole('heading', { name: /cadastrar igreja/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: /cadastrar comunidade de fé/i })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText(/nome do pastor/i)).toBeInTheDocument();
   });
 });

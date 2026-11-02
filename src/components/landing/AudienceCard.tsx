@@ -1,7 +1,6 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -12,56 +11,10 @@ type AudienceCardProps = {
   title: string;
   benefit: string;
   accentColor: 'primary.main' | 'supporter.main' | 'connection.main';
-  mockupVariant: 'missionary' | 'supporter';
   icon?: string;
   layout?: 'card' | 'row';
-  imagePosition?: 'left' | 'right';
   header?: ReactNode;
 };
-function PhoneMockup({ variant }: { variant: 'missionary' | 'supporter' }) {
-  const isMissionary = variant === 'missionary';
-
-  return (
-    <Box
-      sx={{
-        width: '100%',
-        maxWidth: 220,
-      }}
-    >
-      {' '}
-      <Box
-        sx={{
-          borderRadius: 4,
-          border: '3px solid',
-          borderColor: isMissionary ? 'primary.main' : 'supporter.main',
-          bgcolor: isMissionary ? 'primary.dark' : 'supporter.dark',
-          p: 1.5,
-          aspectRatio: '9/16',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 1,
-        }}
-      >
-        <Box
-          sx={{
-            height: 8,
-            width: '40%',
-            borderRadius: 999,
-            bgcolor: 'rgba(255,255,255,0.35)',
-            mx: 'auto',
-          }}
-        />
-        <Box sx={{ flex: 1, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.12)' }} />
-        <Box
-          sx={{ height: 10, width: '70%', borderRadius: 999, bgcolor: 'rgba(255,255,255,0.25)' }}
-        />
-        <Box
-          sx={{ height: 10, width: '55%', borderRadius: 999, bgcolor: 'rgba(255,255,255,0.18)' }}
-        />
-      </Box>
-    </Box>
-  );
-}
 
 function AudienceContent({
   label,
@@ -71,12 +24,11 @@ function AudienceContent({
   return (
     <Stack
       direction="row"
-      spacing={1.5}
+      spacing={{ xs: 1.5, md: 2 }}
       sx={{
         alignItems: 'flex-start',
-        flex: 1,
+        width: '100%',
         minWidth: 0,
-        pt: { xs: 0, md: 6, lg: 10 },
       }}
     >
       {icon ? (
@@ -90,10 +42,14 @@ function AudienceContent({
       ) : null}
 
       <Stack spacing={1} sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="h4" sx={{ lineHeight: 1.2 }}>
+        <Typography variant="h4" sx={{ lineHeight: 1.2, fontSize: { xs: '1.5rem', md: '2rem' } }}>
           {label}
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ fontSize: { xs: '0.9375rem', md: '1rem' } }}
+        >
           {benefit}
         </Typography>
       </Stack>
@@ -105,47 +61,19 @@ export default function AudienceCard({
   label,
   benefit,
   accentColor,
-  mockupVariant,
   icon,
   layout = 'card',
-  imagePosition = 'right',
   header,
 }: AudienceCardProps) {
+  const content = (
+    <Stack spacing={header ? { xs: 3, md: 4 } : 0} sx={{ width: '100%', minWidth: 0 }}>
+      {header}
+      <AudienceContent label={label} benefit={benefit} icon={icon} />
+    </Stack>
+  );
+
   if (layout === 'row') {
-    const imageOnLeft = imagePosition === 'left';
-
-    return (
-      <Stack
-        spacing={{ xs: 4, md: 6 }}
-        sx={{
-          alignItems: { xs: 'center', md: 'flex-start' },
-          flexDirection: {
-            xs: 'column',
-            md: imageOnLeft ? 'row-reverse' : 'row',
-          },
-        }}
-      >
-        <Stack
-          spacing={header ? 4 : 0}
-          sx={{ flex: { md: '0 0 46%' }, width: '100%', maxWidth: { md: 540 } }}
-        >
-          {header}
-          <AudienceContent label={label} benefit={benefit} icon={icon} />
-        </Stack>
-
-        <Box
-          sx={{
-            flex: 1,
-            width: '100%',
-            display: 'flex',
-            justifyContent: { xs: 'center', md: imageOnLeft ? 'flex-start' : 'flex-end' },
-            alignItems: 'flex-start',
-          }}
-        >
-          <PhoneMockup variant={mockupVariant} />
-        </Box>
-      </Stack>
-    );
+    return content;
   }
 
   return (
@@ -165,8 +93,7 @@ export default function AudienceCard({
         },
       }}
     >
-      <PhoneMockup variant={mockupVariant} />
-      <AudienceContent label={label} benefit={benefit} icon={icon} />
+      {content}
     </Paper>
   );
 }

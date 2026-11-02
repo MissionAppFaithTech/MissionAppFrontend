@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Box, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -8,7 +8,6 @@ import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
-import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
@@ -20,40 +19,55 @@ const navLinks = [
 ];
 
 const navLinkSx = (isActive: boolean) => ({
-  position: 'relative' as const,
   display: 'inline-block',
   py: 0.5,
-  textDecoration: 'none',
+  textDecoration: isActive ? 'underline' : 'none',
+  textDecorationThickness: '2px',
+  textUnderlineOffset: '6px',
+  textDecorationColor: 'var(--app-nav-active)',
   color: isActive ? 'var(--app-nav-active)' : 'text.primary',
-  fontWeight: isActive ? 700 : 500,
+  fontFamily: 'inherit',
+  fontWeight: 500,
   whiteSpace: 'nowrap' as const,
   fontSize: { xs: '0.8125rem', sm: '0.875rem', md: '0.95rem' },
   transition: 'color 0.2s ease',
   cursor: 'pointer',
   '&:hover': {
     color: 'var(--app-nav-active)',
-  },
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    width: isActive ? '100%' : 0,
-    height: 2,
-    bgcolor: 'var(--app-nav-active)',
-    transition: 'width 0.2s ease',
-  },
-  '&:hover::after': {
-    width: '100%',
+    textDecoration: 'underline',
   },
 });
+
+const SCROLL_THRESHOLD_PX = 8;
+
+function subscribeToPageScroll(onStoreChange: () => void) {
+  const options: AddEventListenerOptions = { passive: true, capture: true };
+  // NOTE: scroll não borbulha. No capture o evento chega mesmo quando quem
+  // rola é o documento, não a window.
+  document.addEventListener('scroll', onStoreChange, options);
+  window.addEventListener('scroll', onStoreChange, options);
+  return () => {
+    document.removeEventListener('scroll', onStoreChange, options);
+    window.removeEventListener('scroll', onStoreChange, options);
+  };
+}
+
+function isPageScrolled() {
+  const top = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+  return top > SCROLL_THRESHOLD_PX;
+}
+
+function isPageScrolledOnServer() {
+  return false;
+}
 
 const mobileNavLinkSx = (isActive: boolean) => ({
   display: 'block',
   py: 1.5,
   textDecoration: 'none',
   color: isActive ? 'var(--app-nav-active)' : 'text.primary',
-  fontWeight: isActive ? 700 : 500,
+  fontFamily: 'inherit',
+  fontWeight: 500,
   fontSize: '1.05rem',
   borderBottom: '1px solid',
   borderColor: 'divider',
@@ -68,15 +82,12 @@ export default function SiteHeader() {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const [activeSection, setActiveSection] = useState('inicio');
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useSyncExternalStore(
+    subscribeToPageScroll,
+    isPageScrolled,
+    isPageScrolledOnServer
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   useEffect(() => {
     const sectionIds = navLinks.map(({ sectionId }) => sectionId);
@@ -200,24 +211,6 @@ export default function SiteHeader() {
             >
               Entrar
             </PillButton>
-
-            <PillButton
-              href="/select-role"
-              size="small"
-              tone="missionFilled"
-              sx={{
-                flexShrink: 0,
-                display: { xs: 'none', sm: 'inline-flex' },
-                minHeight: 38,
-                px: { sm: 1.75, md: 2.25 },
-                fontSize: '0.875rem',
-                fontWeight: 700,
-              }}
-            >
-              Cadastre-se
-            </PillButton>
-
-            <AccessibilityPreferencesButton size="medium" sx={{ color: 'text.primary' }} />
 
             <IconButton
               aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}

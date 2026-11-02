@@ -4,6 +4,14 @@ import { describe, it, expect, vi } from 'vitest';
 import PhoneField, { withDialCode } from './PhoneField';
 
 describe('PhoneField', () => {
+  it('shows an asterisk when the phone is required', () => {
+    render(<PhoneField required value="" onChange={vi.fn()} />);
+
+    const input = screen.getByRole('textbox', { name: /^telefone/i });
+    expect(input).toHaveAttribute('aria-required', 'true');
+    expect((input as HTMLInputElement).labels?.[0]).toHaveTextContent('*');
+  });
+
   it('associates the visible label with the phone input', () => {
     render(<PhoneField value="" onChange={vi.fn()} />);
 

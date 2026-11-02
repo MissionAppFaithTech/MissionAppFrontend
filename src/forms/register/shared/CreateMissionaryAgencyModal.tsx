@@ -5,10 +5,12 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import PhoneField from '@/components/common/PhoneField';
 import CatalogCreateDialog from '@/forms/register/shared/CatalogCreateDialog';
+import CatalogZipField from '@/forms/register/shared/CatalogZipField';
 import { EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
+import { applyCepAddress, useCepAutofill } from '@/hooks/useCepAutofill';
+import { maskCep } from '@/lib/masks';
 import { validateOnSubmit } from '@/lib/formValidation';
 import {
   createMissionaryAgencySchema,
@@ -34,11 +36,20 @@ export default function CreateMissionaryAgencyModal({
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateMissionaryAgencyFormData>({
     resolver: zodResolver(createMissionaryAgencySchema),
     ...validateOnSubmit,
     defaultValues: { ...EMPTY_MISSIONARY_AGENCY, ...initialValues },
+  });
+
+  const zipCode = watch('zipCode');
+  const { status, message, search } = useCepAutofill({
+    zipCode,
+    enabled: open,
+    onAddress: (address) => applyCepAddress(setValue, address),
   });
 
   useEffect(() => {
@@ -64,6 +75,7 @@ export default function CreateMissionaryAgencyModal({
         {...register('name')}
         id="create-agency-name"
         label="Nome"
+        placeholder="Jovens com uma Missão"
         required
         fullWidth
         autoComplete="organization"
@@ -71,29 +83,57 @@ export default function CreateMissionaryAgencyModal({
         helperText={errors.name?.message}
       />
 
-      <Typography
-        component="h3"
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: 'text.primary' }}
-      >
-        Localização
-      </Typography>
+      <Controller
+        name="zipCode"
+        control={control}
+        render={({ field }) => (
+          <CatalogZipField
+            id="create-agency-zip"
+            value={field.value}
+            onChange={(value) => field.onChange(maskCep(value))}
+            onBlur={field.onBlur}
+            onSearch={search}
+            status={status}
+            error={Boolean(errors.zipCode)}
+            helperText={errors.zipCode?.message ?? message}
+          />
+        )}
+      />
+
+      <TextField
+        {...register('address1')}
+        id="create-agency-address1"
+        label="Endereço"
+        placeholder="Av. Sete de Setembro, 200"
+        fullWidth
+        autoComplete="address-line1"
+      />
+      <TextField
+        {...register('address2')}
+        id="create-agency-address2"
+        label="Complemento"
+        placeholder="Sala 12"
+        fullWidth
+        autoComplete="address-line2"
+      />
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <TextField
-          {...register('country')}
-          id="create-agency-country"
-          label="País"
+          {...register('city')}
+          id="create-agency-city"
+          label="Cidade"
+          placeholder="Curitiba"
           required
           fullWidth
-          autoComplete="country-name"
-          error={Boolean(errors.country)}
-          helperText={errors.country?.message}
+          autoComplete="address-level2"
+          error={Boolean(errors.city)}
+          helperText={errors.city?.message}
         />
         <TextField
           {...register('state')}
           id="create-agency-state"
           label="Estado"
+          placeholder="PR"
           required
           fullWidth
           autoComplete="address-level1"
@@ -103,14 +143,15 @@ export default function CreateMissionaryAgencyModal({
       </Stack>
 
       <TextField
-        {...register('city')}
-        id="create-agency-city"
-        label="Cidade"
+        {...register('country')}
+        id="create-agency-country"
+        label="País"
+        placeholder="Brasil"
         required
         fullWidth
-        autoComplete="address-level2"
-        error={Boolean(errors.city)}
-        helperText={errors.city?.message}
+        autoComplete="country-name"
+        error={Boolean(errors.country)}
+        helperText={errors.country?.message}
       />
 
       <Controller
@@ -124,52 +165,21 @@ export default function CreateMissionaryAgencyModal({
             onChange={field.onChange}
             error={Boolean(errors.phone)}
             helperText={errors.phone?.message}
-            placeholder="(11) 98765-4321"
+            placeholder="(41) 98765-4321"
             defaultCountry="br"
           />
         )}
       />
 
-      <Typography
-        component="h3"
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: 'text.primary' }}
-      >
-        Dados opcionais
-      </Typography>
-
       <TextField
-        {...register('address1')}
-        id="create-agency-address1"
-        label="Endereço"
+        {...register('website')}
+        id="create-agency-website"
+        label="Website"
         fullWidth
-        autoComplete="address-line1"
+        placeholder="https://agencia.org"
+        error={Boolean(errors.website)}
+        helperText={errors.website?.message}
       />
-      <TextField
-        {...register('address2')}
-        id="create-agency-address2"
-        label="Complemento"
-        fullWidth
-        autoComplete="address-line2"
-      />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-        <TextField
-          {...register('zipCode')}
-          id="create-agency-zip"
-          label="CEP ou código postal"
-          fullWidth
-          autoComplete="postal-code"
-        />
-        <TextField
-          {...register('website')}
-          id="create-agency-website"
-          label="Website"
-          fullWidth
-          placeholder="https://agencia.org"
-          error={Boolean(errors.website)}
-          helperText={errors.website?.message}
-        />
-      </Stack>
     </CatalogCreateDialog>
   );
 }

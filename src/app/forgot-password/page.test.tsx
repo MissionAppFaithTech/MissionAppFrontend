@@ -9,9 +9,6 @@ describe('ForgotPasswordPage route (/forgot-password)', () => {
     expect(screen.getByRole('heading', { name: /esqueci minha senha/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /enviar link/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /voltar para o login/i })).toHaveAttribute(
-      'href',
-      '/login'
-    );
+    expect(screen.getByRole('link', { name: /^voltar$/i })).toHaveAttribute('href', '/login');
   });
 });

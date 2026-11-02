@@ -160,13 +160,9 @@ describe('LoginForm component', () => {
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
 
     const alert = await screen.findByRole('alert');
-    expect(alert).toBeInTheDocument();
-    expect(screen.getByText('E-mail ou senha incorretos')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /verifique os dados digitados e tente novamente\. se você esqueceu sua senha/i
-      )
-    ).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      'E-mail ou senha incorretos. Verifique os dados e tente novamente.'
+    );
     expect(screen.queryByText('Invalid user credentials')).not.toBeInTheDocument();
   });
 });

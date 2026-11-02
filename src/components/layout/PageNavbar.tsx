@@ -44,6 +44,7 @@ export default function PageNavbar({
     <AppBar
       position="sticky"
       elevation={0}
+      color={isLanding ? 'transparent' : 'primary'}
       sx={{
         top: 0,
         zIndex: (theme) => theme.zIndex.appBar,
@@ -53,12 +54,17 @@ export default function PageNavbar({
         transition: 'border-color 0.2s ease, background-color 0.2s ease, backdrop-filter 0.2s ease',
         ...(isLanding &&
           scrolled && {
-            // The scrolled scrim was a fixed light wash, which painted a white bar
-            // across the top of the dark landing page.
-            backgroundColor: 'var(--app-navbar-scrim)',
             backdropFilter: 'blur(8px)',
           }),
       }}
+      style={
+        isLanding
+          ? {
+              backgroundColor: scrolled ? 'var(--app-navbar-scrim, #ffffff)' : 'transparent',
+              backgroundImage: 'none',
+            }
+          : undefined
+      }
     >
       <Container
         maxWidth={isLanding ? false : maxWidth}

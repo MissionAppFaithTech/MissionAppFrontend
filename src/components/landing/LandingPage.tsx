@@ -35,7 +35,6 @@ const audienceCards = [
     label: 'Para Missionários',
     title: 'Se você está na missão',
     accentColor: 'primary.main' as const,
-    mockupVariant: 'missionary' as const,
     icon: LANDING_ICONS.presentation,
     benefit:
       'Compartilhe atualizações facilmente, receba apoio em oração, fortaleça sua rede de mantenedores e mantenha todos conectados em um só lugar.',
@@ -44,7 +43,6 @@ const audienceCards = [
     label: 'Para Apoiadores',
     title: 'Se você apoia alguém no campo',
     accentColor: 'supporter.main' as const,
-    mockupVariant: 'supporter' as const,
     icon: LANDING_ICONS.supporter,
     benefit:
       'Conecte-se à missão de forma mais próxima: acompanhe a jornada missionária, receba pedidos de oração e veja como sua participação faz a diferença na vida de pessoas ao redor do mundo.',
@@ -222,17 +220,6 @@ function HeroHeadline() {
               Saiba mais
             </PillButton>
           </Stack>
-
-          <PillButton
-            href="/conselho-missionario"
-            tone="cta"
-            sx={{
-              ...heroCtaButtonSx,
-              width: { xs: '100%', sm: 'auto' },
-            }}
-          >
-            Como trazer o Mission App para sua igreja
-          </PillButton>
         </Stack>
       </Stack>
     </Stack>
@@ -388,7 +375,6 @@ export default function LandingPage() {
                   key={card.label}
                   {...card}
                   layout="row"
-                  imagePosition={index === 0 ? 'right' : 'left'}
                   header={
                     index === 0 ? (
                       <SectionHeader

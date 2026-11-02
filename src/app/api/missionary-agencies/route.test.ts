@@ -34,6 +34,17 @@ describe('/api/missionary-agencies', () => {
     );
   });
 
+  it('lists agencies without an access token', async () => {
+    cookiesGet.mockReturnValue(undefined);
+    vi.mocked(backendFetch).mockResolvedValue({
+      data: { missionaryAgencies: [{ id: 'agency-1', name: 'JOCUM' }] },
+    });
+
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expect(backendFetch).toHaveBeenCalledWith('/missionary-agencies');
+  });
+
   it('normalizes the backend list for the select', async () => {
     vi.mocked(backendFetch).mockResolvedValue({
       data: { missionaryAgencies: [{ id: 'agency-1', name: 'JOCUM' }] },
