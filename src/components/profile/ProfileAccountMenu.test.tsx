@@ -47,28 +47,29 @@ describe('ProfileAccountMenu', () => {
     expect(appearance).toContainElement(screen.getByRole('button', { name: 'Escuro' }));
   });
 
-  it('gives a missionary only links into the missionary area', async () => {
+  it('gives a missionary the edit link and financial settings', async () => {
     await openMenu('missionary');
 
-    expect(screen.getByRole('link', { name: 'Perfil Missionário' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /editar perfil/i })).toHaveAttribute(
+      'href',
+      '/profile/edit-profile'
+    );
     expect(screen.getByRole('link', { name: 'Configurações Financeiras' })).toHaveAttribute(
       'href',
       '/profile/financeiro'
     );
     expect(screen.queryByRole('link', { name: 'Perfil Apoiador' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Perfil Missionário' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /configurações de conta/i })).toHaveAttribute(
       'href',
       '/profile/configuracoes'
     );
   });
 
-  it('gives a supporter only links into the supporter area', async () => {
+  it('gives a supporter the edit link without financial settings', async () => {
     await openMenu('supporter');
 
-    expect(screen.getByRole('link', { name: 'Perfil Apoiador' })).toHaveAttribute(
-      'href',
-      '/profile/supporter/missionarios'
-    );
+    expect(screen.queryByRole('link', { name: 'Perfil Apoiador' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Perfil Missionário' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /financeiras/i })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /editar perfil/i })).toHaveAttribute(

@@ -35,12 +35,13 @@ Skills live in `.agents/skills/` (canonical) and are symlinked into `.claude/ski
 | `accessibility` / `modern-web-guidance`                                 | WCAG 2.2 AA, keyboard, screen readers, reduced motion, modern web APIs |
 | `frontend-testing` / `e2e-chrome-testing` / `playwright-screen-testing` | Vitest + RTL, Playwright E2E, axe and responsive checks                |
 | `format-check`                                                          | `pnpm format:check` before every commit (CI Prettier gate)             |
+| `test-check`                                                            | `pnpm test` before every commit (CI Vitest gate)                       |
 
 ---
 
 ## Mandatory contribution standards
 
-**Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).** Load the `format-check` skill and run `pnpm format:check` before every commit.
+**Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).** Load the `format-check` and `test-check` skills and run `pnpm format:check` and `pnpm test` before every commit.
 
 Also follow the community [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) in all interactions (issues, PRs, reviews, chat). Report concerns to **missionapp.faithtech@gmail.com**.
 
