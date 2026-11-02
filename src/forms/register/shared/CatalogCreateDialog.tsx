@@ -104,9 +104,38 @@ export default function CatalogCreateDialog({
         sx={{
           px: { xs: 2, sm: 3 },
           pb: 1,
+          // NOTE: o seletor DialogTitle + DialogContent zera padding-top e ganha do sx.pt
+          paddingTop: '8px !important',
         }}
       >
-        <Stack component="form" id={`${titleId}-form`} spacing={2} onSubmit={onSubmit} noValidate>
+        <Stack
+          component="form"
+          id={`${titleId}-form`}
+          spacing={2.5}
+          onSubmit={onSubmit}
+          noValidate
+          sx={{
+            '& .MuiInputLabel-root': {
+              position: 'static',
+              transform: 'none',
+              maxWidth: 'none',
+              overflow: 'visible',
+              mb: 0.75,
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              lineHeight: 1.3,
+              color: 'text.primary',
+              pointerEvents: 'auto',
+            },
+            '& .MuiInputLabel-asterisk': {
+              color: 'error.main',
+            },
+            '& .MuiOutlinedInput-notchedOutline legend': {
+              width: 0,
+              padding: 0,
+            },
+          }}
+        >
           {children}
         </Stack>
       </DialogContent>

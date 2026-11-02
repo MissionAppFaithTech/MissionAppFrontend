@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import {
   maskBirthDate,
+  maskCep,
+  cepDigits,
+  isCompleteBrazilianCep,
   maskCpfOrPassport,
   normalizeEmail,
   isValidEmail,
@@ -8,6 +11,17 @@ import {
 } from './masks';
 
 describe('masks and validations utility', () => {
+  describe('maskCep', () => {
+    it('keeps only eight digits and inserts a hyphen', () => {
+      expect(cepDigits('01310-100')).toBe('01310100');
+      expect(maskCep('0131')).toBe('0131');
+      expect(maskCep('01310100')).toBe('01310-100');
+      expect(maskCep('01310100999')).toBe('01310-100');
+      expect(isCompleteBrazilianCep('01310-100')).toBe(true);
+      expect(isCompleteBrazilianCep('01310')).toBe(false);
+    });
+  });
+
   describe('maskBirthDate', () => {
     it('formats short inputs correctly', () => {
       expect(maskBirthDate('')).toBe('');

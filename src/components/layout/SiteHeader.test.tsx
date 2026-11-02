@@ -1,6 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import SiteHeader from './SiteHeader';
+
+function setScrollTop(value: number) {
+  Object.defineProperty(window, 'scrollY', { configurable: true, value });
+}
 
 describe('SiteHeader', () => {
   it('renders landing navigation and auth actions without a theme toggle', () => {
@@ -17,5 +21,27 @@ describe('SiteHeader', () => {
     expect(
       screen.queryByRole('button', { name: /alternar tema|ativar modo escuro|ativar modo claro/i })
     ).not.toBeInTheDocument();
+  });
+
+  it('paints a solid bar after the page scrolls and clears it at the top', () => {
+    setScrollTop(0);
+    render(<SiteHeader />);
+
+    const header = screen.getByRole('banner');
+    expect(header.getAttribute('style')).toContain('background-color: transparent');
+
+    act(() => {
+      setScrollTop(48);
+      document.dispatchEvent(new Event('scroll'));
+    });
+
+    expect(header.getAttribute('style')).toContain('background-color: var(--app-navbar-scrim, #ffffff)');
+
+    act(() => {
+      setScrollTop(0);
+      document.dispatchEvent(new Event('scroll'));
+    });
+
+    expect(header.getAttribute('style')).toContain('background-color: transparent');
   });
 });

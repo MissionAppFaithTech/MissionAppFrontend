@@ -32,6 +32,19 @@ describe('/api/faith-communities', () => {
     );
   });
 
+  it('lists communities without an access token', async () => {
+    cookiesGet.mockReturnValue(undefined);
+    vi.mocked(backendFetch).mockResolvedValue({
+      data: { faithCommunities: [{ id: 'community-1', name: 'Igreja Batista' }] },
+    });
+
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expect(backendFetch).toHaveBeenCalledWith('/faith-communities', {
+      accessToken: undefined,
+    });
+  });
+
   it('normalizes the backend list for the select', async () => {
     vi.mocked(backendFetch).mockResolvedValue({
       data: { faithCommunities: [{ id: 'community-1', name: 'Igreja Batista' }] },

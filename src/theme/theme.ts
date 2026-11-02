@@ -892,6 +892,9 @@ export function createAppTheme() {
             inputLabel: {
               shrink: true,
             },
+            input: {
+              notched: true,
+            },
           },
         },
         styleOverrides: {

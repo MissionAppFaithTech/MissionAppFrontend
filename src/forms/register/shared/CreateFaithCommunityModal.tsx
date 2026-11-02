@@ -5,10 +5,12 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import PhoneField from '@/components/common/PhoneField';
 import CatalogCreateDialog from '@/forms/register/shared/CatalogCreateDialog';
+import CatalogZipField from '@/forms/register/shared/CatalogZipField';
 import { EMPTY_FAITH_COMMUNITY } from '@/forms/register/options';
+import { applyCepAddress, useCepAutofill } from '@/hooks/useCepAutofill';
+import { maskCep } from '@/lib/masks';
 import { validateOnSubmit } from '@/lib/formValidation';
 import {
   createFaithCommunitySchema,
@@ -34,11 +36,20 @@ export default function CreateFaithCommunityModal({
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateFaithCommunityFormData>({
     resolver: zodResolver(createFaithCommunitySchema),
     ...validateOnSubmit,
     defaultValues: { ...EMPTY_FAITH_COMMUNITY, ...initialValues },
+  });
+
+  const zipCode = watch('zipCode');
+  const { status, message, search } = useCepAutofill({
+    zipCode,
+    enabled: open,
+    onAddress: (address) => applyCepAddress(setValue, address),
   });
 
   useEffect(() => {
@@ -52,8 +63,8 @@ export default function CreateFaithCommunityModal({
   return (
     <CatalogCreateDialog
       open={open}
-      title="Cadastrar igreja"
-      description="Informe nome, localização, pastor e contatos. Os campos obrigatórios são validados antes de salvar."
+      title="Cadastrar comunidade de fé"
+      description="Cadastre uma nova comunidade de fé."
       titleId="create-church-title"
       descriptionId="create-church-description"
       onClose={onClose}
@@ -64,6 +75,7 @@ export default function CreateFaithCommunityModal({
         {...register('name')}
         id="create-church-name"
         label="Nome"
+        placeholder="Igreja Batista do Centro"
         required
         fullWidth
         autoComplete="organization"
@@ -71,29 +83,57 @@ export default function CreateFaithCommunityModal({
         helperText={errors.name?.message}
       />
 
-      <Typography
-        component="h3"
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: 'text.primary' }}
-      >
-        Localização
-      </Typography>
+      <Controller
+        name="zipCode"
+        control={control}
+        render={({ field }) => (
+          <CatalogZipField
+            id="create-church-zip"
+            value={field.value}
+            onChange={(value) => field.onChange(maskCep(value))}
+            onBlur={field.onBlur}
+            onSearch={search}
+            status={status}
+            error={Boolean(errors.zipCode)}
+            helperText={errors.zipCode?.message ?? message}
+          />
+        )}
+      />
+
+      <TextField
+        {...register('address1')}
+        id="create-church-address1"
+        label="Endereço"
+        placeholder="Rua das Palmeiras, 100"
+        fullWidth
+        autoComplete="address-line1"
+      />
+      <TextField
+        {...register('address2')}
+        id="create-church-address2"
+        label="Complemento"
+        placeholder="Sala 2, fundos"
+        fullWidth
+        autoComplete="address-line2"
+      />
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <TextField
-          {...register('country')}
-          id="create-church-country"
-          label="País"
+          {...register('city')}
+          id="create-church-city"
+          label="Cidade"
+          placeholder="Niterói"
           required
           fullWidth
-          autoComplete="country-name"
-          error={Boolean(errors.country)}
-          helperText={errors.country?.message}
+          autoComplete="address-level2"
+          error={Boolean(errors.city)}
+          helperText={errors.city?.message}
         />
         <TextField
           {...register('state')}
           id="create-church-state"
           label="Estado"
+          placeholder="RJ"
           required
           fullWidth
           autoComplete="address-level1"
@@ -103,58 +143,55 @@ export default function CreateFaithCommunityModal({
       </Stack>
 
       <TextField
-        {...register('city')}
-        id="create-church-city"
-        label="Cidade"
+        {...register('country')}
+        id="create-church-country"
+        label="País"
+        placeholder="Brasil"
         required
         fullWidth
-        autoComplete="address-level2"
-        error={Boolean(errors.city)}
-        helperText={errors.city?.message}
+        autoComplete="country-name"
+        error={Boolean(errors.country)}
+        helperText={errors.country?.message}
       />
 
-      <Typography
-        component="h3"
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: 'text.primary' }}
-      >
-        Pastor
-      </Typography>
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+        <Controller
+          name="churchPhone"
+          control={control}
+          render={({ field }) => (
+            <PhoneField
+              id="create-church-phone"
+              label="Telefone da igreja"
+              value={field.value}
+              onChange={field.onChange}
+              error={Boolean(errors.churchPhone)}
+              helperText={errors.churchPhone?.message}
+              placeholder="(21) 3456-7890"
+              defaultCountry="br"
+            />
+          )}
+        />
+        <TextField
+          {...register('website')}
+          id="create-church-website"
+          label="Website"
+          fullWidth
+          placeholder="https://suaigreja.org.br"
+          error={Boolean(errors.website)}
+          helperText={errors.website?.message}
+        />
+      </Stack>
 
       <TextField
         {...register('pastorName')}
         id="create-church-pastor-name"
         label="Nome do pastor"
+        placeholder="Pr. Ana Souza"
         required
         fullWidth
         autoComplete="name"
         error={Boolean(errors.pastorName)}
         helperText={errors.pastorName?.message}
-      />
-
-      <Typography
-        component="h3"
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: 'text.primary' }}
-      >
-        Contatos
-      </Typography>
-
-      <Controller
-        name="churchPhone"
-        control={control}
-        render={({ field }) => (
-          <PhoneField
-            id="create-church-phone"
-            label="Telefone da igreja"
-            value={field.value}
-            onChange={field.onChange}
-            error={Boolean(errors.churchPhone)}
-            helperText={errors.churchPhone?.message}
-            placeholder="(11) 98765-4321"
-            defaultCountry="br"
-          />
-        )}
       />
 
       <Controller
@@ -168,52 +205,11 @@ export default function CreateFaithCommunityModal({
             onChange={field.onChange}
             error={Boolean(errors.pastorPhone)}
             helperText={errors.pastorPhone?.message}
-            placeholder="(11) 98765-4321"
+            placeholder="(21) 98765-4321"
             defaultCountry="br"
           />
         )}
       />
-
-      <Typography
-        component="h3"
-        variant="subtitle2"
-        sx={{ fontWeight: 700, color: 'text.primary' }}
-      >
-        Dados opcionais
-      </Typography>
-
-      <TextField
-        {...register('address1')}
-        id="create-church-address1"
-        label="Endereço"
-        fullWidth
-        autoComplete="address-line1"
-      />
-      <TextField
-        {...register('address2')}
-        id="create-church-address2"
-        label="Complemento"
-        fullWidth
-        autoComplete="address-line2"
-      />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-        <TextField
-          {...register('zipCode')}
-          id="create-church-zip"
-          label="CEP ou código postal"
-          fullWidth
-          autoComplete="postal-code"
-        />
-        <TextField
-          {...register('website')}
-          id="create-church-website"
-          label="Website"
-          fullWidth
-          placeholder="https://suaigreja.org.br"
-          error={Boolean(errors.website)}
-          helperText={errors.website?.message}
-        />
-      </Stack>
     </CatalogCreateDialog>
   );
 }

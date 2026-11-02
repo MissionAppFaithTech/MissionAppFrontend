@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Box, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -46,6 +46,29 @@ const navLinkSx = (isActive: boolean) => ({
   },
 });
 
+const SCROLL_THRESHOLD_PX = 8;
+
+function subscribeToPageScroll(onStoreChange: () => void) {
+  const options: AddEventListenerOptions = { passive: true, capture: true };
+  // NOTE: scroll não borbulha. No capture o evento chega mesmo quando quem
+  // rola é o documento, não a window.
+  document.addEventListener('scroll', onStoreChange, options);
+  window.addEventListener('scroll', onStoreChange, options);
+  return () => {
+    document.removeEventListener('scroll', onStoreChange, options);
+    window.removeEventListener('scroll', onStoreChange, options);
+  };
+}
+
+function isPageScrolled() {
+  const top = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop;
+  return top > SCROLL_THRESHOLD_PX;
+}
+
+function isPageScrolledOnServer() {
+  return false;
+}
+
 const mobileNavLinkSx = (isActive: boolean) => ({
   display: 'block',
   py: 1.5,
@@ -66,15 +89,12 @@ export default function SiteHeader() {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
   const [activeSection, setActiveSection] = useState('inicio');
-  const [scrolled, setScrolled] = useState(false);
+  const scrolled = useSyncExternalStore(
+    subscribeToPageScroll,
+    isPageScrolled,
+    isPageScrolledOnServer
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   useEffect(() => {
     const sectionIds = navLinks.map(({ sectionId }) => sectionId);
