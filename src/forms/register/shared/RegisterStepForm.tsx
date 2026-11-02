@@ -1,6 +1,6 @@
 'use client';
 
-import type { FormEventHandler, ReactNode } from 'react';
+import type { ReactNode, SyntheticEvent } from 'react';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
@@ -14,7 +14,7 @@ const actionButtonSx = {
 
 type RegisterStepFormProps = {
   children: ReactNode;
-  onSubmit: FormEventHandler<HTMLFormElement>;
+  onSubmit: (e: SyntheticEvent<HTMLFormElement>) => void;
   sectionTitle?: ReactNode;
   onBack?: () => void;
   submitLabel?: string;

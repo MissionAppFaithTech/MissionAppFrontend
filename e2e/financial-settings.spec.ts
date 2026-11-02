@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { mockMissionarySession } from './support/session';
 
 test.describe('Missionary Financial Settings E2E Flow', () => {
+  // Owner pages need a session since src/proxy.ts; the BFF is mocked.
+  test.beforeEach(async ({ page }) => {
+    await mockMissionarySession(page);
+  });
+
   test('navigates to financial settings, checks cards, previews donor modal and saves', async ({
     page,
   }) => {

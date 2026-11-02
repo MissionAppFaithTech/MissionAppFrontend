@@ -1,11 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect } from 'vitest';
 import SupporterMissionaryProfileView from './SupporterMissionaryProfileView';
 import { mockCampaign } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('SupporterMissionaryProfileView Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders missionary header without "Editar perfil" and with "Ofertar" button', () => {
     render(<SupporterMissionaryProfileView profile={mockProfile} posts={mockSavedPosts} />);
 
@@ -58,6 +63,23 @@ describe('SupporterMissionaryProfileView Component', () => {
         /distribuímos cestas básicas e kits escolares para 50 famílias em moçambique/i
       )
     ).not.toBeInTheDocument();
+  });
+
+  it('confirms saving and unsaving a post through the global toast', async () => {
+    const user = userEvent.setup();
+    render(<SupporterMissionaryProfileView profile={mockProfile} posts={mockSavedPosts} />);
+
+    await user.click(screen.getByRole('tab', { name: /postagens/i }));
+    await user.click(screen.getAllByRole('button', { name: /^salvar postagem$/i })[0]);
+
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Postagem salva aos seus favoritos!',
+      severity: 'success',
+    });
+
+    await user.click(screen.getByRole('button', { name: /remover dos salvos/i }));
+
+    expect(useFeedbackStore.getState().current?.message).toBe('Postagem removida dos salvos.');
   });
 
   it('displays only Maria Silva posts when viewing Maria Silva profile', async () => {

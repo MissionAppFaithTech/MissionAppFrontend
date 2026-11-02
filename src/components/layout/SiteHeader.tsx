@@ -8,12 +8,14 @@ import Link from 'next/link';
 import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import PageNavbar from '@/components/layout/PageNavbar';
+import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
   { label: 'Propósito', href: '/#objetivo', sectionId: 'objetivo' },
   { label: 'Comunidade', href: '/#sobre', sectionId: 'sobre' },
   { label: 'Como funciona', href: '/#como-funciona', sectionId: 'como-funciona' },
+  { label: 'Para Igrejas', href: '/conselho-missionario', sectionId: 'conselho-missionario' },
   { label: 'Perguntas frequentes', href: '/#faq', sectionId: 'faq' },
 ];
 
@@ -210,11 +212,9 @@ export default function SiteHeader() {
                   theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
                 '&:hover': {
                   borderColor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'common.white' : 'primary.dark',
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'var(--mui-palette-action2-borderSubtle)'
-                      : 'rgba(13, 43, 92, 0.08)',
+                    theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
                 },
               }}
             >
@@ -236,6 +236,8 @@ export default function SiteHeader() {
             >
               Cadastre-se
             </PillButton>
+
+            <AccessibilityPreferencesButton size="medium" sx={{ color: 'text.primary' }} />
 
             <IconButton
               aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
@@ -319,6 +321,12 @@ export default function SiteHeader() {
               minHeight: 44,
               fontSize: '0.95rem',
               fontWeight: 600,
+              '&:hover': {
+                borderColor: (theme) =>
+                  theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+              },
             }}
           >
             Entrar

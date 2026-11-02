@@ -6,8 +6,12 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { useTheme } from 'next-themes';
 import { createAppTheme } from './theme';
 
+/** Key of the removed zustand theme store; its value duplicated next-themes' own `theme`. */
+const LEGACY_THEME_STORE_KEY = 'missionapp_theme_mode_v1';
+
 /**
- * Mirrors next-themes' resolved theme into MUI's color scheme.
+ * Mirrors next-themes, the single source of truth for the theme, into MUI's
+ * color scheme.
  *
  * next-themes owns the `.dark` class on <html>, which is what drives the CSS
  * variables. But a lot of components read `theme.palette.mode` at render time,
@@ -18,6 +22,14 @@ import { createAppTheme } from './theme';
 function ColorSchemeBridge() {
   const { resolvedTheme } = useTheme();
   const { mode, setMode } = useColorScheme();
+
+  useEffect(() => {
+    try {
+      window.localStorage.removeItem(LEGACY_THEME_STORE_KEY);
+    } catch {
+      // Storage can be blocked (private mode, sandboxed iframe).
+    }
+  }, []);
 
   useEffect(() => {
     if (!resolvedTheme) return;
@@ -51,14 +63,9 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       theme={theme}
-      // next-themes owns <html class> and its own storage. Without these, MUI's
-      // CssVars provider would also write the class and a `mui-mode` key, and the
-      // two would fight over the same attribute with independent state.
       defaultMode={initialMode}
       colorSchemeNode={null}
       storageManager={null}
-      // Recalculates `theme.palette.*` when the mode changes, so components that
-      // branch on `palette.mode` follow the active scheme.
       forceThemeRerender
     >
       <ColorSchemeBridge />

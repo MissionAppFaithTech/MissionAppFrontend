@@ -1,5 +1,5 @@
 ---
-description: Every change must include unit tests, accessibility, and responsiveness
+description: Every change must include unit tests, accessibility, and mobile-first responsiveness
 alwaysApply: true
 ---
 
@@ -9,7 +9,7 @@ Do not finish a change without all three:
 
 1. **Unit tests** — new/changed logic or UI gets Vitest + Testing Library coverage (roles, labels, submit, errors). Run the affected specs before saying done. See `.agents/skills/frontend-testing/SKILL.md`.
 2. **Accessibility** — semantic landmarks, localized `aria-label`, keyboard + `:focus-visible`, form errors via `aria-invalid` / `aria-describedby`. Include color-blind users: never use color as the only cue. See [`AGENTS.md`](../../AGENTS.md) → Accessibility.
-3. **Responsiveness** — mobile-first (`xs` first), MUI breakpoints, no horizontal overflow, 44px touch targets. See [`AGENTS.md`](../../AGENTS.md) → Responsiveness.
+3. **Mobile-First Responsiveness** — strictly mobile-first (`xs` first), buttons stack vertically on mobile, `useFlexGap` on flex stacks, no horizontal overflow, 44px touch targets. See [`AGENTS.md`](../../AGENTS.md) → Mobile-First Responsiveness.
 
 **Buttons:** `PillButton` + `tone`, shared `BUTTON_BORDER_RADIUS` (`10px`). Never a stadium / “super boleado” primary next to a rectangular secondary.
 

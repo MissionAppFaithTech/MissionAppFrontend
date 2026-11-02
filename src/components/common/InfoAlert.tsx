@@ -10,7 +10,8 @@ type InfoAlertProps = Omit<AlertProps, 'severity' | 'children'> & {
 const infoAlertSx = {
   fontSize: { xs: '0.8125rem', sm: '0.875rem' },
   alignItems: 'center',
-  color: 'info.dark',
+  // text.primary keeps >= 4.5:1 on the tinted wash in both schemes (info.dark failed in dark).
+  color: 'text.primary',
   bgcolor:
     'color-mix(in srgb, var(--mui-palette-info-main) 16%, var(--mui-palette-background-paper))',
   border: '1px solid',

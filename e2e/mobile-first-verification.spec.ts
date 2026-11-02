@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { mockMissionarySession } from './support/session';
 
 test.describe('Mobile-First Layout & Touch Targets Verification', () => {
+  // Owner pages need a session since src/proxy.ts; the BFF is mocked.
+  test.beforeEach(async ({ page }) => {
+    await mockMissionarySession(page);
+  });
+
   test('Landing page has no horizontal overflow and displays touch-friendly bottom nav on mobile', async ({
     page,
     isMobile,

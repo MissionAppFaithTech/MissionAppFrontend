@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MissionaryCampaignSection from './MissionaryCampaignSection';
 import { mockCampaign } from '@/mocks/campaign';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('MissionaryCampaignSection component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders campaign details, badge, churchDay, and action buttons', () => {
     render(<MissionaryCampaignSection campaign={mockCampaign} missionaryName="Samuel Mendonça" />);
 
@@ -49,9 +54,10 @@ describe('MissionaryCampaignSection component', () => {
     await user.click(shareBtn);
 
     expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
-    expect(
-      await screen.findByText(/link copiado para a área de transferência!/i)
-    ).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Link copiado para a área de transferência!',
+      severity: 'success',
+    });
   });
 
   it('renders informative empty state when campaign is null', () => {

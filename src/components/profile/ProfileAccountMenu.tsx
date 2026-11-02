@@ -1,17 +1,40 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, type MouseEvent } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import LogoutIcon from '@mui/icons-material/Logout';
 import PersonIcon from '@mui/icons-material/Person';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
+import ButtonBase from '@mui/material/ButtonBase';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Popover from '@mui/material/Popover';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import type { Theme } from '@mui/material/styles';
+import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
+import { useFeedbackStore } from '@/stores/feedbackStore';
+import { useSessionStore } from '@/stores/sessionStore';
+import { focusVisibleSx } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
+
+/** 44px rows with the shared focus ring (WCAG 2.4.7) and a press state for touch. */
+const menuItemSx = (theme: Theme) => ({
+  display: 'flex',
+  alignItems: 'center',
+  width: '100%',
+  minHeight: 48,
+  px: 2.5,
+  py: 1.5,
+  color: 'text.primary',
+  textDecoration: 'none',
+  textAlign: 'left',
+  '&:hover, &:active': { bgcolor: 'action.hover' },
+  ...focusVisibleSx(theme),
+});
 
 type ProfileAccountMenuProps = {
   profile: Pick<ProfileData, 'username' | 'displayName'>;
@@ -22,8 +45,13 @@ export default function ProfileAccountMenu({
   profile,
   role = 'missionary',
 }: ProfileAccountMenuProps) {
+  const router = useRouter();
+  const logout = useSessionStore((state) => state.logout);
+  const notify = useFeedbackStore((state) => state.notify);
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
   const isOpen = Boolean(anchorElement);
+  const isSupporter = role === 'supporter';
 
   const handleOpen = (event: MouseEvent<HTMLElement>) => {
     setAnchorElement(event.currentTarget);
@@ -31,6 +59,20 @@ export default function ProfileAccountMenu({
 
   const handleClose = () => {
     setAnchorElement(null);
+  };
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+      setAnchorElement(null);
+      router.replace('/login');
+    } catch {
+      // Cookies may still be set: stay here and let the user retry.
+      notify('Não foi possível sair agora. Verifique sua conexão e tente novamente.', 'error');
+    } finally {
+      setLoggingOut(false);
+    }
   };
 
   return (
@@ -120,71 +162,57 @@ export default function ProfileAccountMenu({
 
         <Divider />
 
-        <Box
-          component={Link}
-          href="/profile/projetos-de-impacto"
-          onClick={handleClose}
-          sx={{
-            display: 'block',
-            px: 2.5,
-            py: 1.5,
-            color: 'text.primary',
-            textDecoration: 'none',
-            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
-          }}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Missionário</Typography>
-        </Box>
-
-        <Box
-          component={Link}
-          href="/profile/supporter/missionarios"
-          onClick={handleClose}
-          sx={{
-            display: 'block',
-            px: 2.5,
-            py: 1.5,
-            color: 'text.primary',
-            textDecoration: 'none',
-            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
-          }}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
-        </Box>
-
-        <Divider />
-
-        <Box
-          component={Link}
-          href="/profile/financeiro"
-          onClick={handleClose}
-          sx={{
-            display: 'block',
-            px: 2.5,
-            py: 1.5,
-            color: 'text.primary',
-            textDecoration: 'none',
-            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
-          }}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-            Configurações Financeiras
+        <Box sx={{ px: 2.5, py: 1.5 }}>
+          <Typography
+            id="account-menu-appearance"
+            sx={{ fontWeight: 700, fontSize: '0.875rem', mb: 1 }}
+          >
+            Aparência
           </Typography>
+          <ThemeModeSwitch labelledBy="account-menu-appearance" />
         </Box>
+
+        <Divider />
+
+        {/* RBAC: each role only gets links into its own area (lib/auth/rbac.ts). */}
+        {isSupporter ? (
+          <Box
+            component={Link}
+            href="/profile/supporter/missionarios"
+            onClick={handleClose}
+            sx={menuItemSx}
+          >
+            <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Perfil Apoiador</Typography>
+          </Box>
+        ) : (
+          <>
+            <Box
+              component={Link}
+              href="/profile/projetos-de-impacto"
+              onClick={handleClose}
+              sx={menuItemSx}
+            >
+              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+                Perfil Missionário
+              </Typography>
+            </Box>
+
+            <Divider />
+
+            <Box component={Link} href="/profile/financeiro" onClick={handleClose} sx={menuItemSx}>
+              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+                Configurações Financeiras
+              </Typography>
+            </Box>
+          </>
+        )}
 
         <Divider />
         <Box
           component={Link}
-          href={role === 'supporter' ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
+          href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
           onClick={handleClose}
-          sx={{
-            display: 'block',
-            px: 2.5,
-            py: 1.5,
-            color: 'text.primary',
-            textDecoration: 'none',
-            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
-          }}
+          sx={menuItemSx}
         >
           <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Editar perfil</Typography>
         </Box>
@@ -193,23 +221,22 @@ export default function ProfileAccountMenu({
 
         <Box
           component={Link}
-          href={
-            role === 'supporter' ? '/profile/supporter/configuracoes' : '/profile/configuracoes'
-          }
+          href={isSupporter ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
           onClick={handleClose}
-          sx={{
-            display: 'block',
-            px: 2.5,
-            py: 2,
-            color: 'text.primary',
-            textDecoration: 'none',
-            '&:hover, &:focus-visible': { bgcolor: 'action.hover' },
-          }}
+          sx={menuItemSx}
         >
           <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
             Configurações de conta
           </Typography>
         </Box>
+
+        <Divider />
+        <ButtonBase onClick={handleLogout} disabled={loggingOut} sx={menuItemSx}>
+          <LogoutIcon aria-hidden sx={{ fontSize: 20, mr: 1.5, color: 'error.main' }} />
+          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+            {loggingOut ? 'Saindo…' : 'Sair da conta'}
+          </Typography>
+        </ButtonBase>
       </Popover>
     </>
   );

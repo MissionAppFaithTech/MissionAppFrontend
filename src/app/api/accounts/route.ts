@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { BackendApiError, backendFetch } from '@/lib/api/backend';
-import { extractErrorMessage } from '@/lib/api/errors';
+import { backendFetch } from '@/lib/api/backend';
+import { bffErrorResponse } from '@/lib/api/bff';
 import type { AuthTokensResponse } from '@/lib/api/auth-response';
 import { applyAuthCookies } from '@/lib/auth/cookies';
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   const parsed = signupBodySchema.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json(
-      { message: 'Dados de cadastro inválidos', issues: parsed.error.flatten() },
+      { message: 'Dados de cadastro inválidos', issues: parsed.error.issues },
       { status: 422 }
     );
   }
@@ -60,19 +60,10 @@ export async function POST(request: Request) {
 
     return response;
   } catch (error) {
-    if (error instanceof BackendApiError) {
-      return NextResponse.json(
-        typeof error.body === 'object' && error.body !== null
-          ? { ...error.body, message: extractErrorMessage(error.body, error.message) }
-          : { message: extractErrorMessage(error.body, error.message) },
-        { status: error.status }
-      );
-    }
-
-    console.error('[api/accounts]', error);
-    return NextResponse.json(
-      { message: 'Não foi possível conectar ao servidor de cadastro' },
-      { status: 502 }
+    return bffErrorResponse(
+      error,
+      'Não foi possível conectar ao servidor de cadastro',
+      'api/accounts'
     );
   }
 }

@@ -39,18 +39,6 @@ export interface RichTextEditorProps {
   maxLength?: number;
 }
 
-export function normalizeEditorOutput(input: string): string {
-  if (!input) return '';
-  return input
-    .replace(/<\/p><p>/gi, '\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>');
-}
-
 export default function RichTextEditor({
   id: explicitId,
   label,
@@ -246,7 +234,6 @@ export default function RichTextEditor({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (currentValue && lastSavedDraft) {
         e.preventDefault();
-        e.returnValue = '';
       }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);

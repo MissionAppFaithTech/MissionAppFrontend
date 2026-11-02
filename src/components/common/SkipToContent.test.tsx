@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import SkipToContent from './SkipToContent';
+import { DEFAULT_A11Y_PREFERENCES, useA11yPreferencesStore } from '@/stores/a11yPreferencesStore';
 
 describe('SkipToContent component', () => {
   it('renders skip link with default label and href', () => {
@@ -33,5 +34,22 @@ describe('SkipToContent component', () => {
     expect(target.focus).toHaveBeenCalledWith({ preventScroll: true });
 
     document.body.removeChild(target);
+  });
+
+  it('jumps without smooth scrolling when the in-app "Reduzir movimento" is on', () => {
+    useA11yPreferencesStore.setState({ reduceMotion: true });
+    const main = document.createElement('main');
+    main.id = 'main-content';
+    main.tabIndex = -1;
+    main.scrollIntoView = vi.fn();
+    document.body.appendChild(main);
+    render(<SkipToContent />);
+
+    screen.getByRole('link', { name: /pular para o conteúdo principal/i }).click();
+
+    expect(main.scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto' });
+    expect(main).toHaveFocus();
+    main.remove();
+    useA11yPreferencesStore.setState({ ...DEFAULT_A11Y_PREFERENCES });
   });
 });

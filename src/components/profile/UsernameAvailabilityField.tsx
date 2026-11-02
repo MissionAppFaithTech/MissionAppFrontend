@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, type Ref } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import Chip from '@mui/material/Chip';
@@ -25,6 +25,8 @@ type UsernameAvailabilityFieldProps = {
   onStatusChange?: (status: UsernameAvailabilityStatus) => void;
   onTaken?: () => void;
   onAvailable?: () => void;
+  /** Lets react-hook-form focus the input on validation errors. */
+  inputRef?: Ref<HTMLInputElement>;
 };
 
 export default function UsernameAvailabilityField({
@@ -36,6 +38,7 @@ export default function UsernameAvailabilityField({
   onStatusChange,
   onTaken,
   onAvailable,
+  inputRef,
 }: UsernameAvailabilityFieldProps) {
   const { status, suggestions } = useUsernameAvailability({
     username: value,
@@ -63,6 +66,7 @@ export default function UsernameAvailabilityField({
       </Typography>
       <TextField
         id={id}
+        inputRef={inputRef}
         value={value}
         onChange={(event) => onChange(event.target.value.toLowerCase().replace(/\s/g, ''))}
         size="small"

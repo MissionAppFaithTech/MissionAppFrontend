@@ -1,10 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SavedPostsSection from './SavedPostsSection';
 import { mockSavedPosts } from '@/mocks/profile';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('SavedPostsSection Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders saved posts list and handles prayer toggle', async () => {
     const user = userEvent.setup();
     render(<SavedPostsSection posts={mockSavedPosts} />);
@@ -33,8 +38,9 @@ describe('SavedPostsSection Component', () => {
     await user.click(shareButtons[0]);
 
     expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
-    expect(
-      await screen.findByText(/link copiado para a área de transferência!/i)
-    ).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Link copiado para a área de transferência!',
+      severity: 'success',
+    });
   });
 });

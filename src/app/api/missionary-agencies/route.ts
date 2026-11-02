@@ -1,9 +1,7 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { BackendApiError, backendFetch } from '@/lib/api/backend';
-import { extractErrorMessage } from '@/lib/api/errors';
-import { AUTH_COOKIE } from '@/lib/auth/cookies';
+import { backendFetch } from '@/lib/api/backend';
+import { bffErrorResponse, readJsonBody, withSession } from '@/lib/api/bff';
 import { normalizeCatalogList } from '@/services/catalog.service';
 
 const createBodySchema = z.object({
@@ -18,75 +16,34 @@ const createBodySchema = z.object({
   website: z.string().trim().optional(),
 });
 
-async function accessToken() {
-  const store = await cookies();
-  return store.get(AUTH_COOKIE.accessToken)?.value;
-}
-
+/** Public listing (backend PR #137): no session needed, so sign-up can list it. */
 export async function GET() {
   try {
-    const token = await accessToken();
-    const result = await backendFetch('/missionary-agencies', {
-      accessToken: token,
-    });
+    const result = await backendFetch('/missionary-agencies');
     return NextResponse.json(normalizeCatalogList(result, 'missionaryAgencies'));
   } catch (error) {
-    if (error instanceof BackendApiError) {
-      return NextResponse.json(
-        typeof error.body === 'object' && error.body !== null
-          ? { ...error.body, message: extractErrorMessage(error.body, error.message) }
-          : { message: extractErrorMessage(error.body, error.message) },
-        { status: error.status }
-      );
-    }
-
-    console.error('[api/missionary-agencies]', error);
-    return NextResponse.json(
-      { message: 'Não foi possível carregar as agências missionárias' },
-      { status: 502 }
+    return bffErrorResponse(
+      error,
+      'Não foi possível carregar as agências missionárias',
+      'api/missionary-agencies GET'
     );
   }
 }
 
 export async function POST(request: Request) {
-  const token = await accessToken();
-  if (!token) {
-    return NextResponse.json({ message: 'Faça login para cadastrar a agência' }, { status: 401 });
-  }
+  const body = await readJsonBody(request, createBodySchema, 'Dados da agência inválidos');
+  if (!body.ok) return body.response;
 
-  let json: unknown;
-  try {
-    json = await request.json();
-  } catch {
-    return NextResponse.json({ message: 'JSON inválido' }, { status: 400 });
-  }
-
-  const parsed = createBodySchema.safeParse(json);
-  if (!parsed.success) {
-    return NextResponse.json({ message: 'Dados da agência inválidos' }, { status: 422 });
-  }
-
-  try {
-    const result = await backendFetch('/missionary-agencies', {
-      method: 'POST',
-      body: parsed.data,
-      accessToken: token,
-    });
-    return NextResponse.json(result);
-  } catch (error) {
-    if (error instanceof BackendApiError) {
-      return NextResponse.json(
-        typeof error.body === 'object' && error.body !== null
-          ? { ...error.body, message: extractErrorMessage(error.body, error.message) }
-          : { message: extractErrorMessage(error.body, error.message) },
-        { status: error.status }
-      );
+  return withSession(
+    'api/missionary-agencies POST',
+    'Não foi possível cadastrar a agência',
+    async (accessToken) => {
+      const result = await backendFetch('/missionary-agencies', {
+        method: 'POST',
+        body: body.data,
+        accessToken,
+      });
+      return NextResponse.json(result);
     }
-
-    console.error('[api/missionary-agencies]', error);
-    return NextResponse.json(
-      { message: 'Não foi possível conectar ao servidor para cadastrar a agência' },
-      { status: 502 }
-    );
-  }
+  );
 }

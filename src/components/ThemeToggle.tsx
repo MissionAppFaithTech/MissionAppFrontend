@@ -6,6 +6,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import useHasMounted from '@/lib/useHasMounted';
 
+/** Light/dark icon toggle; next-themes owns the choice and AppThemeProvider mirrors it into MUI. */
 export default function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const mounted = useHasMounted();

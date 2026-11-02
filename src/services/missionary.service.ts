@@ -1,76 +1,33 @@
-import { localizeApiErrorMessage } from '@/lib/api/errors';
+import { bffRequest } from '@/lib/api/client';
+import type { BackendMissionary } from '@/types/backend';
 
-export type UpdateMissionaryAboutPayload = {
-  aboutMe?: string;
-  missionStorySummary?: string;
-  originLocation?: string;
+/**
+ * Converts the logged-in supporter into a missionary. The backend revokes all
+ * sessions afterwards (the BFF clears the cookies), so the caller must log in again.
+ */
+export async function createMissionaryProfile(missionaryAgencyId: string): Promise<{ id: string }> {
+  const { data } = await bffRequest<{ data: { missionary: Partial<BackendMissionary> } }>(
+    '/api/missionaries/profile',
+    {
+      method: 'POST',
+      body: { missionaryAgencyId },
+      fallbackMessage: 'Não foi possível criar o perfil missionário',
+    }
+  );
+  return { id: data.missionary.id ?? '' };
+}
+
+/**
+ * Saves the sign-up data that only a missionary session can write: the faith
+ * community link and the project description (shown as the "Sobre" biography).
+ */
+export async function completeMissionaryAbout(payload: {
   faithCommunityId?: string;
-  prayerRequest?: string;
-  lifeVerse?: string;
-};
-
-export type MissionaryAboutResult = {
-  id: string;
-};
-
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function optionalText(value?: string) {
-  const trimmed = value?.trim() ?? '';
-  return trimmed ? trimmed : undefined;
-}
-
-export function isMissionaryUuid(value: string) {
-  return UUID_PATTERN.test(value.trim());
-}
-
-export function toUpdateMissionaryAboutPayload(input: {
-  introduction?: string;
-  missionHistory?: string;
-  originLocation?: string;
-  faithCommunity?: string;
-  prayerRequests?: string;
-  lifeVerse?: string;
-}): UpdateMissionaryAboutPayload {
-  const faithCommunityId = optionalText(input.faithCommunity);
-
-  return {
-    aboutMe: optionalText(input.introduction),
-    missionStorySummary: optionalText(input.missionHistory),
-    originLocation: optionalText(input.originLocation),
-    faithCommunityId:
-      faithCommunityId && isMissionaryUuid(faithCommunityId) ? faithCommunityId : undefined,
-    prayerRequest: optionalText(input.prayerRequests),
-    lifeVerse: optionalText(input.lifeVerse),
-  };
-}
-
-export async function updateMissionaryAbout(
-  missionaryId: string,
-  payload: UpdateMissionaryAboutPayload
-): Promise<MissionaryAboutResult> {
-  const response = await fetch(`/api/missionaries/${encodeURIComponent(missionaryId)}/about`, {
+  aboutMe?: string;
+}): Promise<void> {
+  await bffRequest('/api/missionaries/about', {
     method: 'PATCH',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-    cache: 'no-store',
+    body: payload,
+    fallbackMessage: 'Não foi possível concluir os dados do seu perfil missionário',
   });
-
-  const body = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message =
-      typeof body?.message === 'string'
-        ? body.message
-        : 'Não foi possível salvar as informações do sobre';
-    throw new Error(localizeApiErrorMessage(message));
-  }
-
-  const missionary = body?.data?.missionary ?? body?.missionary ?? body?.data;
-  const id = typeof missionary?.id === 'string' ? missionary.id : missionaryId;
-
-  return { id };
 }

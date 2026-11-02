@@ -21,6 +21,14 @@ export type SavedPost = {
   hasPrayed?: boolean;
 };
 
+export type WorkAddressData = {
+  zip: string;
+  district: string;
+  city: string;
+  state: string;
+  country: string;
+};
+
 export type ProfileAboutData = {
   introduction: string;
   missionHistory?: string;
@@ -30,6 +38,8 @@ export type ProfileAboutData = {
   faithCommunity: string;
   prayerRequests?: string;
   lifeVerse: string;
+  /** Structured work address behind `currentLocation` (missionary only). */
+  workAddress?: WorkAddressData | null;
 };
 
 export type ImpactProjectData = {
@@ -49,6 +59,9 @@ export type ImpactProjectData = {
 export type ProfileContactData = {
   publicEmail: string;
   publicPhone: string;
+  /** Private login e-mail/phone: only offered as a shortcut, never published automatically. */
+  accountEmail?: string;
+  accountPhone?: string;
   showPublicEmail?: boolean;
   showPublicPhone?: boolean;
   allowWhatsappContact?: boolean;
@@ -56,6 +69,8 @@ export type ProfileContactData = {
 };
 
 export type ProfileData = {
+  /** Backend user id of the profile owner. */
+  userId?: string;
   missionaryId?: string;
   username: string;
   displayName: string;
@@ -69,6 +84,8 @@ export type ProfileData = {
   supportersCount?: number | string;
   followingCount?: number;
   supportedCampaignsCount?: number;
+  /** True while followers/projects/posts counters are placeholder data (no backend yet). */
+  statsAreExample?: boolean;
   about: ProfileAboutData;
   contact?: ProfileContactData;
   impactProject?: ImpactProjectData;

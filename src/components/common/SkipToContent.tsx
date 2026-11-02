@@ -1,6 +1,7 @@
 'use client';
 
 import Box from '@mui/material/Box';
+import { useA11yPreferencesStore } from '@/stores/a11yPreferencesStore';
 
 type SkipToContentProps = {
   contentId?: string;
@@ -19,7 +20,10 @@ export default function SkipToContent({
     const target = document.getElementById(contentId);
     if (target) {
       e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth' });
+      const reduceMotion =
+        useA11yPreferencesStore.getState().reduceMotion ||
+        window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
       target.focus({ preventScroll: true });
       e.currentTarget.blur();
     }
@@ -35,8 +39,9 @@ export default function SkipToContent({
         top: 16,
         left: 16,
         zIndex: (theme) => theme.zIndex.tooltip + 100,
+        // contrastText flips with the scheme: white on navy (light), navy on light blue (dark).
         bgcolor: 'primary.main',
-        color: 'common.white',
+        color: 'primary.contrastText',
         px: 3,
         py: 1.5,
         borderRadius: 2,
@@ -45,7 +50,7 @@ export default function SkipToContent({
         textDecoration: 'none',
         boxShadow: '0 4px 16px rgba(0, 0, 0, 0.35)',
         border: '2px solid',
-        borderColor: 'common.white',
+        borderColor: 'primary.contrastText',
         opacity: 0,
         pointerEvents: 'none',
         transform: 'translateY(-200%)',
@@ -54,9 +59,11 @@ export default function SkipToContent({
           transform: 'translateY(0)',
           opacity: 1,
           pointerEvents: 'auto',
-          outline: '3px solid #FB923C',
+          outline: '3px solid var(--mui-palette-action2-focusRing)',
           outlineOffset: '2px',
         },
+        '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
+        '[data-a11y-reduce-motion="true"] &': { transition: 'none' },
       }}
     >
       {label}

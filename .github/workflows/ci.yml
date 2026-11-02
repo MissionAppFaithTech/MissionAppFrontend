@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Least privilege for GITHUB_TOKEN: the job only reads the repository.
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
@@ -16,10 +20,9 @@ jobs:
         with:
           node-version-file: '.node-version'
 
+      # Corepack runs the pnpm version pinned in package.json (`packageManager`).
       - name: Enable Corepack (pnpm)
-        run: |
-          corepack enable
-          corepack prepare pnpm@11.9.0 --activate
+        run: corepack enable
 
       - uses: actions/cache@v6
         with:

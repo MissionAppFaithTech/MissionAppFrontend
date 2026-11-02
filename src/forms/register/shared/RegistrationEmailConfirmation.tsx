@@ -1,6 +1,6 @@
 'use client';
 
-import type { ElementType } from 'react';
+import { useEffect, type ElementType } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -10,6 +10,8 @@ import VerifiedIcon from '@mui/icons-material/Verified';
 import LoginIcon from '@mui/icons-material/Login';
 import HomeIcon from '@mui/icons-material/Home';
 import PillButton from '@/components/common/PillButton';
+import { useMissionaryRegisterStore } from '@/stores/missionaryRegisterStore';
+import { useSupporterRegisterStore } from '@/stores/supporterRegisterStore';
 import { BUTTON_BORDER_RADIUS, FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 const actionButtonSx = {
@@ -66,6 +68,18 @@ export default function RegistrationEmailConfirmation({
   requiresReview = false,
 }: RegistrationEmailConfirmationProps) {
   const steps = requiresReview ? reviewSteps : immediateAccessSteps;
+
+  const handleResetStores = () => {
+    useMissionaryRegisterStore.getState().reset();
+    useSupporterRegisterStore.getState().reset();
+  };
+
+  useEffect(() => {
+    return () => {
+      // Ensure registration wizard state resets after departure so completion screen is shown once
+      handleResetStores();
+    };
+  }, []);
 
   return (
     <Stack spacing={2.5} sx={{ width: '100%' }}>
@@ -189,16 +203,24 @@ export default function RegistrationEmailConfirmation({
 
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
         <PillButton
-          href="/login"
+          href="/"
           tone="primarySoftOutline"
           fullWidth
           sx={actionButtonSx}
+          startIcon={<HomeIcon />}
+          onClick={handleResetStores}
+        >
+          Ir para início
+        </PillButton>
+        <PillButton
+          href="/login"
+          tone="cta"
+          fullWidth
+          sx={actionButtonSx}
           startIcon={<LoginIcon />}
+          onClick={handleResetStores}
         >
           Ir para login
-        </PillButton>
-        <PillButton href="/" tone="cta" fullWidth sx={actionButtonSx} startIcon={<HomeIcon />}>
-          Ir para início
         </PillButton>
       </Stack>
     </Stack>

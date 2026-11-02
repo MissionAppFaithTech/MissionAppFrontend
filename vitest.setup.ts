@@ -1,6 +1,9 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
+// Resets every zustand store after each test (__mocks__/zustand.ts).
+vi.mock('zustand');
+
 // Mock window.matchMedia for MUI Responsive & jsdom
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -36,16 +39,18 @@ Object.defineProperty(globalThis, 'IntersectionObserver', {
 // Mock Next.js navigation hooks
 vi.mock('next/navigation', () => {
   const actual = vi.importActual('next/navigation');
+  // Stable across renders, like the real App Router instance (effects may depend on it).
+  const router = {
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    refresh: vi.fn(),
+  };
   return {
     ...actual,
-    useRouter: () => ({
-      push: vi.fn(),
-      replace: vi.fn(),
-      prefetch: vi.fn(),
-      back: vi.fn(),
-      forward: vi.fn(),
-      refresh: vi.fn(),
-    }),
+    useRouter: () => router,
     usePathname: () => '/',
     useSearchParams: () => new URLSearchParams(),
     useParams: () => ({ username: '_SamiMendonca' }),
@@ -57,6 +62,10 @@ vi.mock('next/font/google', () => ({
   DM_Sans: () => ({
     className: 'font-dm-sans',
     variable: '--font-dm-sans',
+  }),
+  Atkinson_Hyperlegible: () => ({
+    className: 'font-readable',
+    variable: '--font-readable',
   }),
 }));
 

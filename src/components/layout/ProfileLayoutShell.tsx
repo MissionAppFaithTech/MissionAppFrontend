@@ -13,6 +13,7 @@ import ProfileSearchField from '@/components/profile/ProfileSearchField';
 import ProfileSummaryCard from '@/components/profile/ProfileSummaryCard';
 import MobileNavigationBar from '@/components/layout/MobileNavigationBar';
 import type { ProfileData } from '@/types/profile';
+import AccessibilityPreferencesButton from '@/components/a11y/AccessibilityPreferences';
 
 export interface ProfileLayoutShellProps {
   children: ReactNode;
@@ -36,11 +37,7 @@ export default function ProfileLayoutShell({
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <PageNavbar maxWidth="lg">
-        <Logo
-          size="lg"
-          href={role === 'supporter' ? '/profile/supporter' : '/profile'}
-          variant="dark"
-        />
+        <Logo size="lg" variant="dark" />
 
         <Box
           sx={{
@@ -63,7 +60,8 @@ export default function ProfileLayoutShell({
         </Box>
 
         <PageNavbarActions>
-          <ProfileAccountMenu profile={profile} />
+          <AccessibilityPreferencesButton size="medium" />
+          <ProfileAccountMenu profile={profile} role={role} />
         </PageNavbarActions>
       </PageNavbar>
 

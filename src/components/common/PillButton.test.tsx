@@ -67,8 +67,8 @@ describe('PillButton component', () => {
     expect(getComputedStyle(loading).backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
   });
 
-  it('keeps Voltar and Salvar on the shared compact action token', () => {
-    expect(FORM_ACTION_BUTTON_SX.minHeight).toEqual({ xs: 44, sm: 34 });
+  it('keeps Voltar and Salvar on the shared action token with a 44px target everywhere', () => {
+    expect(FORM_ACTION_BUTTON_SX.minHeight).toBe(44);
     expect(FORM_ACTION_BUTTON_SX.minWidth).toEqual({ xs: 0, sm: 108 });
 
     render(

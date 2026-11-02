@@ -21,5 +21,14 @@ describe('Home page (Landing Page route /)', () => {
       'href',
       '#como-funciona'
     );
+
+    // Check Church Guide CTA buttons
+    const churchLinks = screen.getAllByRole('link', {
+      name: /como trazer o mission app para sua igreja/i,
+    });
+    expect(churchLinks.length).toBeGreaterThanOrEqual(1);
+    churchLinks.forEach((link) => {
+      expect(link).toHaveAttribute('href', '/conselho-missionario');
+    });
   });
 });

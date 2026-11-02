@@ -12,12 +12,25 @@ const defaults: PublicContactFormValues = {
   allowWhatsappContact: true,
 };
 
-function Harness({ initial = defaults }: { initial?: PublicContactFormValues }) {
+function Harness({
+  initial = defaults,
+  missionary = false,
+}: {
+  initial?: PublicContactFormValues;
+  missionary?: boolean;
+}) {
   const { control, formState } = useForm<PublicContactFormValues>({
     defaultValues: initial,
   });
 
-  return <PublicContactFields control={control} errors={formState.errors} />;
+  return (
+    <PublicContactFields
+      control={control}
+      errors={formState.errors}
+      visibilityToggles={!missionary}
+      whatsappToggle={missionary}
+    />
+  );
 }
 
 describe('PublicContactFields', () => {
@@ -59,5 +72,20 @@ describe('PublicContactFields', () => {
     expect(showEmail).not.toBeChecked();
     expect(showPhone).not.toBeChecked();
     expect(allowWhatsapp).not.toBeChecked();
+  });
+
+  it('asks the WhatsApp question without the visibility toggles when a phone exists', () => {
+    render(<Harness missionary />);
+
+    expect(screen.queryByRole('checkbox', { name: /exibir/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: /este número é um número de whatsapp/i })
+    ).toBeChecked();
+  });
+
+  it('hides the WhatsApp question while there is no phone', () => {
+    render(<Harness missionary initial={{ ...defaults, publicPhone: '+55' }} />);
+
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 });

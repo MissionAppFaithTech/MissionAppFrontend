@@ -53,3 +53,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AI agent skills are versioned (.agents/skills, .claude/skills, skills-lock.json)
+# Claude Code local-only settings
+.claude/settings.local.json

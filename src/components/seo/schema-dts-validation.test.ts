@@ -70,7 +70,8 @@ describe('Schema.org / schema-dts Validation Suite', () => {
     expect(personSchema.homeLocation).toBeDefined();
     expect(personSchema.workLocation).toBeDefined();
     expect(personSchema.affiliation).toBeDefined();
-    expect(personSchema.memberOf).toBeDefined();
+    // The faith community is not shown on the profile, so it is not published either.
+    expect(personSchema.memberOf).toBeUndefined();
     expect(personSchema.email).toBe(mockProfile.contact?.publicEmail);
     expect(personSchema.telephone).toBe(mockProfile.contact?.publicPhone);
   });

@@ -26,7 +26,6 @@ import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
@@ -39,6 +38,7 @@ import {
   financialSettingsSchema,
   type FinancialSettingsFormData,
 } from '@/schemas/financial.schema';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { BankAccountType, FinancialConfigData, PixKeyType } from '@/types/profile';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
@@ -77,7 +77,7 @@ export default function FinancialSettingsForm({
   const source = initialData ?? defaultFinancialData;
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [toastOpen, setToastOpen] = useState(false);
+  const notify = useFeedbackStore((s) => s.notify);
 
   const {
     register,
@@ -208,7 +208,7 @@ export default function FinancialSettingsForm({
       },
     };
     onSave?.(configToSave);
-    setToastOpen(true);
+    notify('Configurações financeiras salvas com sucesso!');
   };
 
   return (
@@ -831,41 +831,6 @@ export default function FinancialSettingsForm({
         isOwnProfile={true}
         financialConfig={currentFinancialConfig}
       />
-
-      {/* Toast Feedback */}
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={4000}
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastOpen(false)}
-          severity="success"
-          variant="filled"
-          role="status"
-          aria-live="polite"
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
-            color: 'common.white',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark'
-                ? 'var(--app-shadow-overlay)'
-                : '0 3px 8px rgba(13, 43, 92, 0.14)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          Configurações financeiras salvas com sucesso!
-        </Alert>
-      </Snackbar>
     </>
   );
 }

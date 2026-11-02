@@ -1,5 +1,7 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { useMissionaryRegisterStore } from '@/stores/missionaryRegisterStore';
+import { useSupporterRegisterStore } from '@/stores/supporterRegisterStore';
 import RegistrationEmailConfirmation from './RegistrationEmailConfirmation';
 
 describe('RegistrationEmailConfirmation', () => {
@@ -37,11 +39,32 @@ describe('RegistrationEmailConfirmation', () => {
     ).toBeInTheDocument();
   });
 
-  it('keeps the 7-day deadline and navigation actions', () => {
+  it('keeps the 7-day deadline and navigation actions with left Home and right Login', () => {
     render(<RegistrationEmailConfirmation requiresReview />);
 
     expect(screen.getByText(/7 dias/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /ir para login/i })).toHaveAttribute('href', '/login');
-    expect(screen.getByRole('link', { name: /ir para início/i })).toHaveAttribute('href', '/');
+    const links = screen.getAllByRole('link');
+    // First button (left) is Ir para início, second button (right) is Ir para login
+    expect(links[0]).toHaveTextContent(/ir para início/i);
+    expect(links[0]).toHaveAttribute('href', '/');
+    expect(links[1]).toHaveTextContent(/ir para login/i);
+    expect(links[1]).toHaveAttribute('href', '/login');
+  });
+
+  it('resets missionary and supporter registration stores on navigation or unmount', () => {
+    const missionaryResetSpy = vi.spyOn(useMissionaryRegisterStore.getState(), 'reset');
+    const supporterResetSpy = vi.spyOn(useSupporterRegisterStore.getState(), 'reset');
+
+    const { unmount } = render(<RegistrationEmailConfirmation />);
+
+    const homeLink = screen.getByRole('link', { name: /ir para início/i });
+    fireEvent.click(homeLink);
+
+    expect(missionaryResetSpy).toHaveBeenCalled();
+    expect(supporterResetSpy).toHaveBeenCalled();
+
+    const callsBeforeUnmount = missionaryResetSpy.mock.calls.length;
+    unmount();
+    expect(missionaryResetSpy.mock.calls.length).toBeGreaterThan(callsBeforeUnmount);
   });
 });

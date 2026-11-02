@@ -1,9 +1,14 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import AccountSettingsView from './AccountSettingsView';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 describe('AccountSettingsView Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders all sections for missionary, including Agência Missionária and Soft Delete', () => {
     render(<AccountSettingsView role="missionary" />);
 
@@ -70,6 +75,14 @@ describe('AccountSettingsView Component', () => {
     ).toBeInTheDocument();
   });
 
+  it('offers the light/dark appearance switch in its own section', () => {
+    render(<AccountSettingsView role="missionary" />);
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Aparência' })).toBeInTheDocument();
+    const appearance = screen.getByRole('group', { name: 'Aparência' });
+    expect(appearance).toContainElement(screen.getByRole('button', { name: 'Escuro' }));
+  });
+
   it('validates and updates email successfully', async () => {
     const user = userEvent.setup();
     render(<AccountSettingsView role="missionary" />);
@@ -88,11 +101,10 @@ describe('AccountSettingsView Component', () => {
     await user.type(passwordInput, 'senha123');
     await user.click(updateEmailButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/e-mail alterado com sucesso para novo.missionario@email.com/i)
-      ).toBeInTheDocument();
-    });
+    expect(useFeedbackStore.getState().current?.message).toMatch(
+      /e-mail alterado com sucesso para novo.missionario@email.com/i
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('success');
   });
 
   it('triggers secure password reset link email and displays feedback toast', async () => {
@@ -104,11 +116,10 @@ describe('AccountSettingsView Component', () => {
     });
     await user.click(resetLinkButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/link seguro de redefinição de senha enviado para teste@missao.org/i)
-      ).toBeInTheDocument();
-    });
+    expect(useFeedbackStore.getState().current?.message).toMatch(
+      /link seguro de redefinição de senha enviado para teste@missao.org/i
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('info');
   });
 
   it('allows saving ecclesiastical data and displays success notification', async () => {
@@ -120,9 +131,10 @@ describe('AccountSettingsView Component', () => {
     });
     await user.click(saveEcclesiasticalButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/dados eclesiásticos atualizados com sucesso/i)).toBeInTheDocument();
-    });
+    expect(useFeedbackStore.getState().current?.message).toMatch(
+      /dados eclesiásticos atualizados com sucesso/i
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('success');
   });
 
   it('allows saving missionary agency data for missionary and displays success notification', async () => {
@@ -132,11 +144,10 @@ describe('AccountSettingsView Component', () => {
     const saveAgencyButton = screen.getByRole('button', { name: /salvar agência missionária/i });
     await user.click(saveAgencyButton);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/dados da agência missionária atualizados com sucesso/i)
-      ).toBeInTheDocument();
-    });
+    expect(useFeedbackStore.getState().current?.message).toMatch(
+      /dados da agência missionária atualizados com sucesso/i
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('success');
   });
 
   it('handles soft delete confirmation modal for missionary', async () => {
@@ -157,11 +168,10 @@ describe('AccountSettingsView Component', () => {
     });
     await user.click(confirmBtn);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/conta de missionário desativada com sucesso \(soft delete aplicado\)/i)
-      ).toBeInTheDocument();
-    });
+    expect(useFeedbackStore.getState().current?.message).toMatch(
+      /conta de missionário desativada com sucesso \(soft delete aplicado\)/i
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('info');
   });
 
   it('handles hard delete confirmation modal for supporter requiring EXCLUIR confirmation', async () => {
@@ -191,10 +201,9 @@ describe('AccountSettingsView Component', () => {
     expect(modalConfirmBtn).toBeEnabled();
     await user.click(modalConfirmBtn);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(/conta excluída definitivamente com sucesso \(hard delete aplicado\)/i)
-      ).toBeInTheDocument();
-    });
+    expect(useFeedbackStore.getState().current?.message).toMatch(
+      /conta excluída definitivamente com sucesso \(hard delete aplicado\)/i
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('info');
   });
 });

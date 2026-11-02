@@ -7,12 +7,10 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
@@ -20,6 +18,7 @@ import CampaignBadge from '@/components/campaign/CampaignBadge';
 import CampaignMediaCarousel from '@/components/campaign/CampaignMediaCarousel';
 import CampaignVideoPlayer from '@/components/campaign/CampaignVideoPlayer';
 import DonationModal from '@/components/profile/DonationModal';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { CampaignData } from '@/types/campaign';
 
 type MissionaryCampaignSectionProps = {
@@ -34,7 +33,7 @@ export default function MissionaryCampaignSection({
   isOwnProfile = false,
 }: MissionaryCampaignSectionProps) {
   const [donationModalOpen, setDonationModalOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const notify = useFeedbackStore((s) => s.notify);
 
   // Informative Empty State when missionary has no active campaign (RF 10.4)
   if (!campaign) {
@@ -88,7 +87,7 @@ export default function MissionaryCampaignSection({
   const handleShare = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
-      setToastMessage('Link copiado para a área de transferência!');
+      notify('Link copiado para a área de transferência!');
     }
   };
 
@@ -317,39 +316,6 @@ export default function MissionaryCampaignSection({
         missionaryName={missionaryName}
         isOwnProfile={isOwnProfile}
       />
-
-      {/* Snackbar Feedback */}
-      <Snackbar
-        open={Boolean(toastMessage)}
-        autoHideDuration={3000}
-        onClose={() => setToastMessage(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastMessage(null)}
-          severity="success"
-          variant="filled"
-          role="status"
-          aria-live="polite"
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
-            color: 'common.white',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          {toastMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

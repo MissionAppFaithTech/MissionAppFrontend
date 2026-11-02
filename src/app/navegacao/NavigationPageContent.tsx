@@ -37,7 +37,6 @@ import CampaignBadge from '@/components/campaign/CampaignBadge';
 import MobileNavigationBar, {
   type BottomNavViewMode,
 } from '@/components/layout/MobileNavigationBar';
-import SkipToContent from '@/components/common/SkipToContent';
 
 export type SearchItemType = 'campanha' | 'projeto' | 'missionario';
 
@@ -235,12 +234,13 @@ const typeFilterOptions = [
   { label: 'Projetos de Impacto', value: 'projeto' },
 ];
 
+// Pixel strings: in MUI `sx`, a bare 1 means 100%.
 const visuallyHiddenSx = {
   position: 'absolute' as const,
-  width: 1,
-  height: 1,
+  width: '1px',
+  height: '1px',
   padding: 0,
-  margin: -1,
+  margin: '-1px',
   overflow: 'hidden',
   clip: 'rect(0, 0, 0, 0)',
   whiteSpace: 'nowrap' as const,
@@ -320,8 +320,6 @@ export default function NavigationPageContent({
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', pb: { xs: 10, md: 6 } }}>
-      <SkipToContent />
-
       {/* Top Navigation Bar: Dynamic Logged In vs Non-Registered View */}
       <AppTopNavbar isLoggedIn={isLoggedIn} role={role} maxWidth="lg" />
 

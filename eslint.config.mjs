@@ -39,6 +39,19 @@ const eslintConfig = defineConfig([
       'import/no-duplicates': 'error',
     },
   },
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    rules: {
+      // Prevenção estrita de código depreciado no código fonte do projeto
+      '@typescript-eslint/no-deprecated': 'error',
+    },
+  },
   globalIgnores([
     '.next/**',
     'out/**',

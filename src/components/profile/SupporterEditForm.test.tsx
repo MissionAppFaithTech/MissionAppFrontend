@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SupporterEditForm from '@/components/profile/SupporterEditForm';
 import { mockProfile } from '@/mocks/profile';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 vi.mock('@/services/username.service', () => ({
   checkUsernameAvailability: vi.fn().mockResolvedValue({
@@ -13,6 +14,10 @@ vi.mock('@/services/username.service', () => ({
 }));
 
 describe('SupporterEditForm Component', () => {
+  beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
+  });
+
   it('renders all basic supporter profile information and public contact fields', () => {
     render(<SupporterEditForm profile={mockProfile} />);
 
@@ -56,7 +61,10 @@ describe('SupporterEditForm Component', () => {
     const saveButton = screen.getByRole('button', { name: /salvar/i });
     await user.click(saveButton);
 
-    expect(screen.getByText(/perfil de apoiador atualizado com sucesso!/i)).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Perfil de apoiador atualizado com sucesso!',
+      severity: 'success',
+    });
   });
 
   it('blocks save when the typed username is already taken', async () => {
@@ -70,8 +78,6 @@ describe('SupporterEditForm Component', () => {
     expect(await screen.findByText(/este nome de usuário já está em uso/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /salvar/i }));
-    expect(
-      screen.queryByText(/perfil de apoiador atualizado com sucesso!/i)
-    ).not.toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toBeNull();
   });
 });

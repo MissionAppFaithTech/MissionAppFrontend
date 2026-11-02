@@ -1,11 +1,6 @@
 import type { ReactNode } from 'react';
-import ProfileLayoutShell from '@/components/layout/ProfileLayoutShell';
-import { mockProfile } from '@/mocks/profile';
+import MissionaryProfileLayout from '@/components/profile/MissionaryProfileLayout';
 
 export default function ProfileLayout({ children }: { children: ReactNode }) {
-  return (
-    <ProfileLayoutShell profile={mockProfile} role="missionary">
-      {children}
-    </ProfileLayoutShell>
-  );
+  return <MissionaryProfileLayout>{children}</MissionaryProfileLayout>;
 }

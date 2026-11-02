@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
+import { bffErrorResponse } from '@/lib/api/bff';
 
 const forgotPasswordSchema = z.object({
   login: z.email(),
@@ -18,7 +19,7 @@ export async function POST(request: Request) {
   const parsed = forgotPasswordSchema.safeParse(json);
   if (!parsed.success) {
     return NextResponse.json(
-      { message: 'Informe um e-mail válido', issues: parsed.error.flatten() },
+      { message: 'Informe um e-mail válido', issues: parsed.error.issues },
       { status: 422 }
     );
   }
@@ -37,12 +38,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof BackendApiError) {
-      return NextResponse.json(
-        typeof error.body === 'object' && error.body !== null
-          ? error.body
-          : { message: error.message },
-        { status: error.status }
-      );
+      return bffErrorResponse(error, 'Não foi possível enviar o link', 'api/auth/forgot-password');
     }
 
     // Sem back: resposta genérica (mesma UX de produção).

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import FinancialSettingsForm from './FinancialSettingsForm';
 import type { FinancialConfigData } from '@/types/profile';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 
 const mockFinancialData: FinancialConfigData = {
   supporterMessage: 'Obrigado por apoiar nosso ministério na África!',
@@ -26,6 +27,7 @@ const mockFinancialData: FinancialConfigData = {
 
 describe('FinancialSettingsForm Component', () => {
   beforeEach(() => {
+    useFeedbackStore.setState({ current: null });
     // Mock URL.createObjectURL for file uploads
     globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
   });
@@ -130,8 +132,9 @@ describe('FinancialSettingsForm Component', () => {
       })
     );
 
-    expect(
-      await screen.findByText(/configurações financeiras salvas com sucesso!/i)
-    ).toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Configurações financeiras salvas com sucesso!',
+      severity: 'success',
+    });
   });
 });

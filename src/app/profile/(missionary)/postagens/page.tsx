@@ -12,14 +12,12 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import Avatar from '@mui/material/Avatar';
-import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
-import Snackbar from '@mui/material/Snackbar';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
@@ -28,6 +26,7 @@ import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import { mockProfile } from '@/mocks/profile';
 import { newPostSchema, type NewPostFormData } from '@/schemas/content.schema';
+import { useFeedbackStore } from '@/stores/feedbackStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 type FeedView = 'mine' | 'general';
@@ -313,12 +312,12 @@ function PostCard({ showAuthor, onShare }: { showAuthor: boolean; onShare?: () =
 export default function ProfilePostsPage() {
   const [feedView, setFeedView] = useState<FeedView>('mine');
   const [isCreatingPost, setIsCreatingPost] = useState(false);
-  const [toastOpen, setToastOpen] = useState(false);
+  const notify = useFeedbackStore((s) => s.notify);
 
   const handleShare = () => {
     if (typeof window !== 'undefined') {
       navigator.clipboard.writeText(window.location.href);
-      setToastOpen(true);
+      notify('Link copiado para a área de transferência!');
     }
   };
 
@@ -347,39 +346,6 @@ export default function ProfilePostsPage() {
 
       <FeedNavigation value={feedView} onChange={setFeedView} />
       <PostCard showAuthor={feedView === 'general'} onShare={handleShare} />
-
-      {/* Toast Notification no Padrão de Cores do Sistema */}
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={3000}
-        onClose={() => setToastOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          onClose={() => setToastOpen(false)}
-          severity="success"
-          variant="filled"
-          role="status"
-          aria-live="polite"
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'brandFill.main' : 'primary.main'),
-            color: 'common.white',
-            fontWeight: 600,
-            borderRadius: 2,
-            border: (theme) =>
-              theme.palette.mode === 'dark'
-                ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                : 'none',
-            boxShadow: (theme) =>
-              theme.palette.mode === 'dark' ? 'var(--app-shadow-overlay)' : 'var(--app-shadow-sm)',
-            '& .MuiAlert-icon': {
-              color: (theme) => (theme.palette.mode === 'dark' ? 'success.light' : 'common.white'),
-            },
-          }}
-        >
-          Link copiado para a área de transferência!
-        </Alert>
-      </Snackbar>
     </Stack>
   );
 }

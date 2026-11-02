@@ -20,6 +20,7 @@ import { getMockCampaignForMissionary } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
 import type { CampaignData } from '@/types/campaign';
 import type { ProfileData, SavedPost } from '@/types/profile';
+import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 
 type VisitorTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
@@ -59,6 +60,8 @@ export default function VisitorProfileView({
 
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
+      {/* Public profiles have no backend endpoint yet: the whole view is example data. */}
+      <ExampleDataBadge subject="perfil público de demonstração" sx={{ alignSelf: 'flex-start' }} />
       {/* 1. Cartão Principal do Perfil do Missionário (Modo Visitante) */}
       <ProfileSummaryCard
         profile={profile}
