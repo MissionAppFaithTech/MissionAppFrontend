@@ -199,16 +199,20 @@ export default function ProfileAboutEditSection({
   } = useForm<ProfileAboutFormData>({
     resolver: zodResolver(profileAboutSchema),
     mode: 'onTouched',
+    shouldFocusError: false,
     values: toFormValues(data),
     resetOptions: { keepDirtyValues: true },
   });
 
   useLayoutEffect(() => {
     if (isSubmitting || saving || !focusRequest) return;
-    // NOTE: o clique deixa o foco em Salvar. O focus() do react-hook-form ocorre
-    // antes do commit em que o botão volta a ficar habilitado; no Chrome isso
-    // devolve o foco para o botão.
-    document.getElementById(focusRequest.id)?.focus();
+    const id = focusRequest.id;
+    // NOTE: o clique em Salvar termina depois deste efeito. focus() no mesmo
+    // turno perde para o botão; o macrotask corre depois do clique.
+    const timer = window.setTimeout(() => {
+      document.getElementById(id)?.focus();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [isSubmitting, saving, focusRequest]);
 
   const onSubmit = async (values: ProfileAboutFormData) => {
@@ -435,7 +439,17 @@ export default function ProfileAboutEditSection({
               >
                 Cancelar
               </PillButton>
-              <PillButton type="submit" tone="primaryFilled" size="medium" loading={saving}>
+              <PillButton
+                type="submit"
+                tone="primaryFilled"
+                size="medium"
+                loading={saving}
+                onMouseDown={(event) => {
+                  // NOTE: sem isto o mousedown foca Salvar e o Chrome devolve o
+                  // foco para o botão depois da validação.
+                  event.preventDefault();
+                }}
+              >
                 Salvar
               </PillButton>
             </Stack>

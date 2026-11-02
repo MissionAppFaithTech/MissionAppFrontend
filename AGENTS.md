@@ -26,22 +26,23 @@ Do **not** finish a task without all three. This is the default reminder for eve
 
 Skills live in `.agents/skills/` (canonical) and are symlinked into `.claude/skills/`. Sources are pinned in `skills-lock.json`; restore with `npx skills experimental_install`, update with `npx skills update -p`. Load the matching skill before working in its area:
 
-| Skill                                                                   | Use for                                                                |
-| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `nextjs`                                                                | App Router, route handlers, `proxy.ts`, caching, Server Components     |
-| `vercel-react-best-practices` / `vercel-composition-patterns`           | React 19 rendering, data fetching, component APIs (no `forwardRef`)    |
-| `zustand`                                                               | Stores, `persist` / `partialize`, SSR hydration, store tests           |
-| `frontend-design` / `web-design-guidelines`                             | MUI 9 + Tailwind 4 UI, tokens, interface guidelines review             |
-| `accessibility` / `modern-web-guidance`                                 | WCAG 2.2 AA, keyboard, screen readers, reduced motion, modern web APIs |
-| `frontend-testing` / `e2e-chrome-testing` / `playwright-screen-testing` | Vitest + RTL, Playwright E2E, axe and responsive checks                |
-| `format-check`                                                          | `pnpm format:check` before every commit (CI Prettier gate)             |
-| `test-check`                                                            | `pnpm test` before every commit (CI Vitest gate)                       |
+| Skill                                                                   | Use for                                                                       |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `nextjs`                                                                | App Router, route handlers, `proxy.ts`, caching, Server Components            |
+| `vercel-react-best-practices` / `vercel-composition-patterns`           | React 19 rendering, data fetching, component APIs (no `forwardRef`)           |
+| `zustand`                                                               | Stores, `persist` / `partialize`, SSR hydration, store tests                  |
+| `frontend-design` / `web-design-guidelines`                             | MUI 9 + Tailwind 4 UI, tokens, interface guidelines review                    |
+| `accessibility` / `modern-web-guidance`                                 | WCAG 2.2 AA, keyboard, screen readers, reduced motion, modern web APIs        |
+| `frontend-testing` / `e2e-chrome-testing` / `playwright-screen-testing` | Vitest + RTL, Playwright E2E, axe and responsive checks                       |
+| `format-check`                                                          | `pnpm format:check` before every commit (CI Prettier gate)                    |
+| `test-check`                                                            | `pnpm test` before every commit (CI Vitest gate)                              |
+| `e2e-check`                                                             | Playwright spec for the changed flow before every commit (CI `pnpm test:e2e`) |
 
 ---
 
 ## Mandatory contribution standards
 
-**Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).** Load the `format-check` and `test-check` skills and run `pnpm format:check` and `pnpm test` before every commit.
+**Before creating commits, branches, or pull requests, read and follow [`CONTRIBUTING.md`](./CONTRIBUTING.md).** Load the `format-check`, `test-check`, and `e2e-check` skills. Run `pnpm format:check`, `pnpm test`, and the Playwright spec that covers the change before every commit.
 
 Also follow the community [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) in all interactions (issues, PRs, reviews, chat). Report concerns to **missionapp.faithtech@gmail.com**.
 

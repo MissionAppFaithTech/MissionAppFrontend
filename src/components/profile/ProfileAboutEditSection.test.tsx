@@ -100,7 +100,7 @@ describe('ProfileAboutEditSection', () => {
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
     expect(await screen.findAllByText(/preencha para salvar o local de atuação/i)).toHaveLength(4);
-    expect(screen.getByLabelText(/^país$/i)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^país$/i)).toHaveFocus());
     expect(onSave).not.toHaveBeenCalled();
   });
 
@@ -114,7 +114,7 @@ describe('ProfileAboutEditSection', () => {
 
     expect(await screen.findByText(/preencha para salvar o local de atuação/i)).toBeInTheDocument();
     expect(city).toHaveAttribute('aria-invalid', 'true');
-    expect(city).toHaveFocus();
+    await waitFor(() => expect(city).toHaveFocus());
     expect(onSave).not.toHaveBeenCalled();
   });
 
@@ -136,7 +136,7 @@ describe('ProfileAboutEditSection', () => {
     expect(
       await screen.findByText(/o local de atuação não pode ser removido/i)
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/^país$/i)).toHaveFocus();
+    await waitFor(() => expect(screen.getByLabelText(/^país$/i)).toHaveFocus());
     expect(onSave).not.toHaveBeenCalled();
     expect(onDone).not.toHaveBeenCalled();
   });
