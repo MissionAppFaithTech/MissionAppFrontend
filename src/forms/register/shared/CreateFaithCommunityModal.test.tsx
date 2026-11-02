@@ -10,7 +10,9 @@ describe('CreateFaithCommunityModal', () => {
 
     render(<CreateFaithCommunityModal open onClose={vi.fn()} onSave={handleSave} />);
 
-    expect(screen.getByRole('heading', { name: /cadastrar comunidade de fé/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /cadastrar comunidade de fé/i })
+    ).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/igreja batista do centro/i)).toBeVisible();
     expect(screen.getByPlaceholderText('00000-000')).toBeVisible();
     expect(screen.getByPlaceholderText(/rua das palmeiras/i)).toBeVisible();
