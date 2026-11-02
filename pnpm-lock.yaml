@@ -177,7 +177,7 @@ importers:
         version: 11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1)
       '@hookform/resolvers':
         specifier: ^7.0.0
-        version: 7.0.0(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
+        version: 7.0.1(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)
       '@mui/icons-material':
         specifier: ^9.5.0
         version: 9.5.0(@mui/material@9.5.0(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react@19.3.1))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1)
@@ -839,8 +839,8 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@hookform/resolvers@7.0.0':
-    resolution: {integrity: sha512-aJugiXf4mijjZYaJKbap8jxJsIrZ94Er1oi8UxoN9fMGdSMRXPMPKc+EtsFK2iqnk/3E0hJQHH/RqZj2cIiGfw==}
+  '@hookform/resolvers@7.0.1':
+    resolution: {integrity: sha512-F3aM0dDWsRGmFjnnXjogaGLwP7gY2HA6/c5qp4v4Im/UV7pTNkX+WAjcOlM1V0PE0zoMzuPqCyaYtMzUhoFToA==}
     peerDependencies:
       '@standard-schema/spec': ^1.0.0
       '@vinejs/vine': ^2.0.0 || ^3.0.0 || ^4.0.0
@@ -5021,7 +5021,7 @@ snapshots:
   '@floating-ui/utils@0.2.12':
     optional: true
 
-  '@hookform/resolvers@7.0.0(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)':
+  '@hookform/resolvers@7.0.1(ajv@8.20.0)(react-hook-form@7.91.0(@types/react@19.3.0)(react@19.3.1))(zod@4.6.7)':
     dependencies:
       '@standard-schema/utils': 0.3.0
       react-hook-form: 7.91.0(@types/react@19.3.0)(react@19.3.1)
