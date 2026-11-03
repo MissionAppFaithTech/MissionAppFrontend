@@ -34,4 +34,4 @@ Quando um ADR do frontend depende de um ADR do backend, ele cita o número e o l
 | [ADR-0003](./0003-escopo-e-convencoes-do-zustand-para-estado-de-cliente.md)       | Escopo e Convenções do Zustand para Estado de Cliente                  | 🟢 Aceito   |
 | [ADR-0004](./0004-rotas-publicas-com-server-components-e-use-cache.md)            | Rotas Públicas com Server Components e `use cache`                     | 🟡 Proposto |
 | [ADR-0005](./0005-renderizacao-server-first-com-cache-components.md)              | Renderização Server-First com Cache Components                         | 🟢 Aceito   |
-| [ADR-0006](./0006-mutacoes-em-server-actions-e-renovacao-de-sessao-no-proxy.md)   | Mutações em Server Actions e Renovação de Sessão no Proxy              | 🟡 Proposto |
+| [ADR-0006](./0006-mutacoes-em-server-actions-e-renovacao-de-sessao-no-proxy.md)   | Mutações em Server Actions e Renovação de Sessão no Proxy              | 🟢 Aceito   |

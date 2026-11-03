@@ -136,9 +136,8 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
     try {
       await saveProfileHeader({ header, contacts });
       notify('Perfil atualizado com sucesso.');
+      // The save action already re-rendered the profile with the new data (ADR-0006).
       router.push(BACK_HREF);
-      // The profile layout re-reads the saved data on the server (ADR-0005).
-      router.refresh();
     } catch (error) {
       const fieldErrors = error instanceof ApiError ? error.fieldErrors : {};
       let focused = false;

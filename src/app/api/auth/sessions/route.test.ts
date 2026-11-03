@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DELETE, GET } from './route';
+import { GET } from './route';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
 import { clearRefreshCache } from '@/lib/api/bff';
@@ -180,80 +180,5 @@ describe('GET /api/auth/sessions', () => {
       message: 'Não foi possível carregar as sessões',
     });
     expect(res.headers.getSetCookie()).toEqual([]);
-  });
-});
-
-describe('DELETE /api/auth/sessions', () => {
-  it('ends every session on the backend and clears the auth cookies', async () => {
-    mockBackend({ 'DELETE /auth/sessions': () => '' });
-
-    const res = await DELETE();
-
-    expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ message: 'Todas as sessões foram encerradas.' });
-    expect(backendFetch).toHaveBeenCalledWith('/auth/sessions', {
-      method: 'DELETE',
-      accessToken: ACCESS,
-    });
-    expectCookiesCleared(res);
-  });
-
-  it('keeps the cookies when the backend fails', async () => {
-    mockBackend({
-      'DELETE /auth/sessions': () => {
-        throw new BackendApiError('Too many requests', 429, undefined);
-      },
-    });
-
-    const res = await DELETE();
-
-    expect(res.status).toBe(429);
-    await expect(res.json()).resolves.toEqual({
-      message: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
-    });
-    expect(res.headers.getSetCookie()).toEqual([]);
-  });
-
-  it('answers 502 with the DELETE fallback when the backend is unreachable', async () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    mockBackend({
-      'DELETE /auth/sessions': () => {
-        throw new TypeError('fetch failed');
-      },
-    });
-
-    const res = await DELETE();
-
-    expect(res.status).toBe(502);
-    await expect(res.json()).resolves.toEqual({
-      message: 'Não foi possível encerrar as sessões',
-    });
-    consoleError.mockRestore();
-  });
-
-  it('answers 401 and clears cookies without a session', async () => {
-    setSession();
-
-    const res = await DELETE();
-
-    expect(res.status).toBe(401);
-    expectCookiesCleared(res);
-    expect(backendFetch).not.toHaveBeenCalled();
-  });
-
-  it('answers 401 and clears cookies when the refresh after a 401 fails', async () => {
-    mockBackend({
-      'POST /auth/refresh': () => {
-        throw unauthorized();
-      },
-      'DELETE /auth/sessions': () => {
-        throw unauthorized();
-      },
-    });
-
-    const res = await DELETE();
-
-    expect(res.status).toBe(401);
-    expectCookiesCleared(res);
   });
 });

@@ -38,7 +38,7 @@ describe('ProfileSobreEditContent', () => {
     useFeedbackStore.setState({ current: null });
   });
 
-  it('saves once, confirms, returns to Sobre and re-reads the profile', async () => {
+  it('saves once, confirms and returns to Sobre without a second request', async () => {
     const user = userEvent.setup();
     saveAbout.mockResolvedValue(undefined);
     renderContent();
@@ -53,7 +53,7 @@ describe('ProfileSobreEditContent', () => {
       workAddress: undefined,
     });
     expect(useFeedbackStore.getState().current?.message).toBe('Sobre atualizado com sucesso.');
-    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it('cancel returns without saving', async () => {

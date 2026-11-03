@@ -20,7 +20,7 @@ test.describe('Impact Project & Edit Flow E2E', () => {
 
     // YouTube presentation video
     await expect(page.getByText(/vídeo de apresentação/i).filter({ visible: true })).toBeVisible();
-    const iframe = page.locator('iframe');
+    const iframe = page.locator('iframe').filter({ visible: true });
     await expect(iframe).toBeVisible();
 
     // Photo carousel

@@ -81,17 +81,17 @@ Only create a git commit when the user explicitly asks.
 
 MissionApp Frontend is the **Next.js** web client for Mission App (missionaries and supporters). Maintained by FaithTech.
 
-| Item                             | Value                                                                                                                                                    |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Framework                        | Next.js 16 (App Router)                                                                                                                                  |
-| UI                               | React 19 + MUI 9 + Tailwind 4                                                                                                                            |
-| Node.js                          | Pin in `.node-version` (align with backend)                                                                                                              |
-| Package manager                  | pnpm (`packageManager`: `pnpm@12.16.1`, lockfile: `pnpm-lock.yaml`, 24 h `minimumReleaseAge`) — never npm/yarn in this repo                              |
-| Theme / tokens                   | `src/theme/theme.ts`                                                                                                                                     |
-| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                                                                                          |
-| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build                                                                                        |
-| E2E / a11y                       | `pnpm test:e2e` / `pnpm test:a11y`; owner pages use `e2e/support/session.ts` (fake session + mocked BFF). Without Google Chrome: `PW_BUNDLED_CHROMIUM=1` |
-| Auth (BFF)                       | httpOnly cookies + refresh in `src/lib/api/bff.ts` (`withSession`); `src/proxy.ts` guards `/profile/**`                                                  |
+| Item                             | Value                                                                                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Framework                        | Next.js 16 (App Router)                                                                                                                                            |
+| UI                               | React 19 + MUI 9 + Tailwind 4                                                                                                                                      |
+| Node.js                          | Pin in `.node-version` (align with backend)                                                                                                                        |
+| Package manager                  | pnpm (`packageManager`: `pnpm@12.16.1`, lockfile: `pnpm-lock.yaml`, 24 h `minimumReleaseAge`) — never npm/yarn in this repo                                        |
+| Theme / tokens                   | `src/theme/theme.ts`                                                                                                                                               |
+| Auth mocks (until backend ready) | `src/mocks/` + `USE_AUTH_MOCKS`                                                                                                                                    |
+| CI                               | `.github/workflows/ci.yml` — lint, format:check, typecheck, build                                                                                                  |
+| E2E / a11y                       | `pnpm test:e2e` / `pnpm test:a11y`; owner pages use `e2e/support/session.ts` + fake API `e2e/support/mock-api.mjs`. Without Google Chrome: `PW_BUNDLED_CHROMIUM=1` |
+| Auth (BFF)                       | httpOnly cookies; `src/proxy.ts` renews the session and guards `/profile/**`; mutations are Server Actions in `src/app/actions/` (`runWithSession`)                |
 
 See `README.md` for setup. Env template: `.env.example`. PR/issue templates live under `.github/`.
 
@@ -108,7 +108,7 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 - Routes / metadata: `src/app/`
 - UI components: `src/components/`
 - Forms: `src/forms/`
-- API client / BFF helpers: `src/services/`, `src/app/api/`, `src/lib/api/`
+- API client / BFF helpers: `src/services/`, `src/app/actions/` (mutations), `src/app/api/` (reads for client islands), `src/lib/api/`
 - Brand colors via theme tokens — avoid hardcoding outside `src/theme/`
 - **Unit tests, accessibility, and responsiveness** are mandatory on every change (see Quality bar)
 - Identifiers in code: **English**

@@ -32,10 +32,10 @@ describe('loadMyProfile', () => {
     vi.mocked(fetchAccountProfile).mockReset();
   });
 
-  it('asks for login when there is no access cookie, without calling the API', async () => {
+  it('reports a logged-out visitor without calling the API', async () => {
     accessToken = undefined;
 
-    await expect(loadMyProfile()).resolves.toEqual({ kind: 'expired' });
+    await expect(loadMyProfile()).resolves.toEqual({ kind: 'anonymous' });
     expect(fetchAccountProfile).not.toHaveBeenCalled();
   });
 

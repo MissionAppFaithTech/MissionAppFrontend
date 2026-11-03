@@ -22,9 +22,8 @@ export default function ProfileSobreEditContent() {
           saved ? 'Sobre atualizado com sucesso.' : 'Nenhuma alteração para salvar.',
           saved ? 'success' : 'info'
         );
+        // The save action already re-rendered the profile with the new data (ADR-0006).
         router.push(ABOUT_HREF);
-        // The profile layout re-reads the saved data on the server (ADR-0005).
-        if (saved) router.refresh();
       }}
       onCancel={() => router.push(ABOUT_HREF)}
     />

@@ -12,8 +12,8 @@ import type { WorkAddressData } from '@/types/profile';
 const hasFields = (payload?: object) => Boolean(payload && Object.keys(payload).length > 0);
 
 /**
- * Saves header fields, then public contacts. The page re-renders from the server
- * afterwards (`router.refresh()`, ADR-0005), so nothing is merged locally.
+ * Saves header fields, then public contacts. Each Server Action re-renders the
+ * page with the saved data (ADR-0006), so nothing is merged locally.
  * Throws `ApiError` with `fieldErrors` for the form.
  */
 export async function saveProfileHeader(input: {

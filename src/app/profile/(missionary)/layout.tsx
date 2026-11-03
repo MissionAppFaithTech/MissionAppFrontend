@@ -20,6 +20,8 @@ export default function ProfileLayout({ children }: { children: ReactNode }) {
 
 async function OwnerProfile({ children }: { children: ReactNode }) {
   const result = await loadMyProfile();
+  // Logging out (or ending every session) re-renders this page without cookies.
+  if (result.kind === 'anonymous') redirect('/login');
   if (result.kind === 'expired') redirect('/login?reason=expired&next=/profile');
 
   return (

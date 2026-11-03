@@ -7,6 +7,13 @@ import {
   USE_AUTH_MOCKS,
 } from '@/mocks/auth';
 import type { AuthUser } from '@/lib/api/auth-response';
+import {
+  endAllSessionsAction,
+  loginAction,
+  requestPasswordResetAction,
+  resetPasswordAction,
+} from '@/app/actions/auth';
+import { callAction } from '@/lib/api/callAction';
 import { bffRequest } from '@/lib/api/client';
 
 export { USE_AUTH_MOCKS, RESET_PASSWORD_TOKEN_TTL_MINUTES };
@@ -17,27 +24,9 @@ export type LoginPayload = {
 };
 
 export async function login(data: LoginPayload): Promise<{ user: AuthUser }> {
-  const response = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      login: data.login.trim().toLowerCase(),
-      password: data.password,
-    }),
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string' ? payload.message : 'E-mail ou senha inválidos';
-    throw new Error(message);
-  }
-
-  return { user: payload.data.user as AuthUser };
+  return callAction(() =>
+    loginAction({ login: data.login.trim().toLowerCase(), password: data.password })
+  );
 }
 
 export type ForgotPasswordResult = {
@@ -68,32 +57,8 @@ export async function requestPasswordReset(data: { login: string }): Promise<For
     };
   }
 
-  const response = await fetch('/api/auth/forgot-password', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string'
-        ? payload.message
-        : 'Não foi possível enviar o link de redefinição';
-    throw new Error(message);
-  }
-
-  return {
-    found: Boolean(payload?.found ?? true),
-    message:
-      typeof payload?.message === 'string'
-        ? payload.message
-        : 'Enviamos um link para redefinir sua senha.',
-  };
+  const { message } = await callAction(() => requestPasswordResetAction(data));
+  return { found: true, message };
 }
 
 export type ResetPasswordResult = {
@@ -133,51 +98,12 @@ export async function resetPassword(data: {
     return { message: 'Senha redefinida com sucesso.' };
   }
 
-  const response = await fetch('/api/auth/reset-password', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string' ? payload.message : 'Não foi possível redefinir a senha';
-    throw new Error(message);
-  }
-
-  return {
-    message:
-      typeof payload?.message === 'string' ? payload.message : 'Senha redefinida com sucesso.',
-  };
+  return callAction(() => resetPasswordAction(data));
 }
 
+/** Ends every session, this one included: the caller sends the user to login. */
 export async function terminateAllSessions(): Promise<{ message: string }> {
-  const response = await fetch('/api/auth/sessions', {
-    method: 'DELETE',
-    headers: {
-      Accept: 'application/json',
-    },
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message =
-      typeof payload?.message === 'string'
-        ? payload.message
-        : 'Não foi possível encerrar as sessões';
-    throw new Error(message);
-  }
-
-  return {
-    message:
-      typeof payload?.message === 'string' ? payload.message : 'Sessões encerradas com sucesso.',
-  };
+  return callAction(() => endAllSessionsAction());
 }
 
 export type ActiveSession = {

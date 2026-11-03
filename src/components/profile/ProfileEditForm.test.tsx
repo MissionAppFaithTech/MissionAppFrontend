@@ -107,8 +107,8 @@ describe('ProfileEditForm', () => {
     });
     expect(useFeedbackStore.getState().current?.message).toBe('Perfil atualizado com sucesso.');
     expect(push).toHaveBeenCalledWith('/profile/sobre');
-    // The profile layout re-reads the saved data on the server (ADR-0005).
-    expect(refresh).toHaveBeenCalledTimes(1);
+    // The save action re-renders the page itself (ADR-0006): no second request.
+    expect(refresh).not.toHaveBeenCalled();
   });
 
   it('does not report success before the save resolves', async () => {

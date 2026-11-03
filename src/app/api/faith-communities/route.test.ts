@@ -21,7 +21,7 @@ vi.mock('@/lib/api/backend', () => ({
 
 import { backendFetch } from '@/lib/api/backend';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
-import { GET, POST } from './route';
+import { GET } from './route';
 import { clearRefreshCache } from '@/lib/api/bff';
 
 describe('/api/faith-communities', () => {
@@ -54,27 +54,6 @@ describe('/api/faith-communities', () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       data: [{ id: 'community-1', name: 'Igreja Batista' }],
-    });
-  });
-
-  it('forwards a create payload to the backend', async () => {
-    vi.mocked(backendFetch).mockResolvedValue({
-      data: { faithCommunity: { id: 'community-2', name: 'Igreja Nova' } },
-    });
-
-    const response = await POST(
-      new Request('http://localhost:3000/api/faith-communities', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Igreja Nova', city: 'Niterói' }),
-      })
-    );
-
-    expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/faith-communities', {
-      method: 'POST',
-      body: expect.objectContaining({ name: 'Igreja Nova' }),
-      accessToken: 'access-token',
     });
   });
 

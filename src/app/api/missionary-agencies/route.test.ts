@@ -21,7 +21,7 @@ vi.mock('@/lib/api/backend', () => ({
 
 import { backendFetch } from '@/lib/api/backend';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
-import { GET, POST } from './route';
+import { GET } from './route';
 import { clearRefreshCache } from '@/lib/api/bff';
 
 describe('/api/missionary-agencies', () => {
@@ -54,43 +54,6 @@ describe('/api/missionary-agencies', () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
       data: [{ id: 'agency-1', name: 'JOCUM' }],
-    });
-  });
-
-  it('returns 401 when creating without an access token', async () => {
-    cookiesGet.mockReturnValue(undefined);
-    const response = await POST(
-      new Request('http://localhost:3000/api/missionary-agencies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Nova Agência' }),
-      })
-    );
-    expect(response.status).toBe(401);
-  });
-
-  it('forwards a create payload to the backend', async () => {
-    vi.mocked(backendFetch).mockResolvedValue({
-      data: { missionaryAgency: { id: 'agency-2', name: 'Nova Agência' } },
-    });
-
-    const response = await POST(
-      new Request('http://localhost:3000/api/missionary-agencies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Nova Agência',
-          phoneNumber: '+5511987654321',
-          country: 'Brasil',
-        }),
-      })
-    );
-
-    expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/missionary-agencies', {
-      method: 'POST',
-      body: expect.objectContaining({ name: 'Nova Agência' }),
-      accessToken: 'access-token',
     });
   });
 

@@ -1,20 +1,16 @@
-import { bffRequest } from '@/lib/api/client';
-import type { BackendMissionary } from '@/types/backend';
+import { createMissionaryProfileAction, updateAboutAction } from '@/app/actions/missionary';
+import { callAction } from '@/lib/api/callAction';
+import { ApiError } from '@/lib/api/client';
 
 /**
  * Converts the logged-in supporter into a missionary. The backend revokes all
- * sessions afterwards (the BFF clears the cookies), so the caller must log in again.
+ * sessions afterwards (the action clears the cookies), so the caller must log in again.
  */
 export async function createMissionaryProfile(missionaryAgencyId: string): Promise<{ id: string }> {
-  const { data } = await bffRequest<{ data: { missionary: Partial<BackendMissionary> } }>(
-    '/api/missionaries/profile',
-    {
-      method: 'POST',
-      body: { missionaryAgencyId },
-      fallbackMessage: 'Não foi possível criar o perfil missionário',
-    }
+  const { missionary } = await callAction(() =>
+    createMissionaryProfileAction({ missionaryAgencyId })
   );
-  return { id: data.missionary.id ?? '' };
+  return { id: missionary.id ?? '' };
 }
 
 /**
@@ -25,9 +21,18 @@ export async function completeMissionaryAbout(payload: {
   faithCommunityId?: string;
   aboutMe?: string;
 }): Promise<void> {
-  await bffRequest('/api/missionaries/about', {
-    method: 'PATCH',
-    body: payload,
-    fallbackMessage: 'Não foi possível concluir os dados do seu perfil missionário',
-  });
+  try {
+    await callAction(() => updateAboutAction(payload));
+  } catch (error) {
+    // Keep the sign-up copy when the action has no specific message.
+    if (error instanceof ApiError && error.status === 502) {
+      throw new ApiError(
+        'Não foi possível concluir os dados do seu perfil missionário',
+        error.status,
+        error.fieldErrors,
+        error.code
+      );
+    }
+    throw error;
+  }
 }
