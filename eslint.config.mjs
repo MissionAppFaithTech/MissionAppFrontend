@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 import nextTs from 'eslint-config-next/typescript';
+import pluginQuery from '@tanstack/eslint-plugin-query';
 
 /**
  * Next.js ESLint flat config.
@@ -10,6 +11,8 @@ import nextTs from 'eslint-config-next/typescript';
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  // ADR-0002: query keys, stable query clients and other TanStack Query rules.
+  ...pluginQuery.configs['flat/recommended'],
   {
     settings: {
       react: {

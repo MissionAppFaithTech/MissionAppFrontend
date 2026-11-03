@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import UsernameAvailabilityField from './UsernameAvailabilityField';
@@ -21,7 +22,7 @@ describe('UsernameAvailabilityField', () => {
   });
 
   it('does not check availability while the username is still the current one', () => {
-    render(
+    renderWithQuery(
       <UsernameAvailabilityField
         value="_samimendonca"
         onChange={vi.fn()}
@@ -35,7 +36,7 @@ describe('UsernameAvailabilityField', () => {
   });
 
   it('shows a green mark when a new username is available', async () => {
-    render(
+    renderWithQuery(
       <UsernameAvailabilityField
         value="novo_user"
         onChange={vi.fn()}
@@ -56,7 +57,7 @@ describe('UsernameAvailabilityField', () => {
       suggestions: ['allanna1'],
     });
 
-    render(
+    renderWithQuery(
       <UsernameAvailabilityField
         value="allanna"
         onChange={handleChange}

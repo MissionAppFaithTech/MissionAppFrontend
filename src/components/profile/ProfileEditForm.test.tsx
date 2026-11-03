@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import ProfileEditForm, { buildPayloads } from '@/components/profile/ProfileEditForm';
@@ -52,7 +53,7 @@ describe('ProfileEditForm', () => {
   });
 
   it('renders the header fields with the current values and no private contact data', () => {
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     expect(screen.getByRole('heading', { name: /editar perfil/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel Mendonça');
@@ -71,7 +72,7 @@ describe('ProfileEditForm', () => {
 
   it('limits the mini-bio to 70 characters', async () => {
     const user = userEvent.setup();
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     const bio = screen.getByLabelText(/minibiografia/i);
     await user.clear(bio);
@@ -83,7 +84,7 @@ describe('ProfileEditForm', () => {
 
   it('fills the public e-mail from the sign-up e-mail only on explicit request', async () => {
     const user = userEvent.setup();
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.click(screen.getByRole('button', { name: /usar meu e-mail de cadastro/i }));
 
@@ -93,7 +94,7 @@ describe('ProfileEditForm', () => {
   it('sends only changed fields, clears an emptied bio with null and navigates after success', async () => {
     const user = userEvent.setup();
     saveHeader.mockResolvedValue(undefined);
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.clear(screen.getByLabelText(/nome completo/i));
     await user.type(screen.getByLabelText(/nome completo/i), 'Samuel M.');
@@ -115,7 +116,7 @@ describe('ProfileEditForm', () => {
     const user = userEvent.setup();
     let resolveSave: () => void = () => {};
     saveHeader.mockReturnValue(new Promise<void>((resolve) => (resolveSave = resolve)));
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
@@ -133,7 +134,7 @@ describe('ProfileEditForm', () => {
     saveHeader.mockRejectedValue(
       new ApiError('Revise os campos', 422, { username: 'Nome de usuário já está em uso' })
     );
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     const username = screen.getByLabelText(/nome de usuário/i);
     await user.clear(username);
@@ -149,7 +150,7 @@ describe('ProfileEditForm', () => {
   it('shows a form-level alert when the save fails without field errors', async () => {
     const user = userEvent.setup();
     saveHeader.mockRejectedValue(new ApiError('Não foi possível salvar o perfil', 502));
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
@@ -162,7 +163,7 @@ describe('ProfileEditForm', () => {
   it('does not touch an unchanged phone even though the phone input emits the country code', async () => {
     const user = userEvent.setup();
     saveHeader.mockResolvedValue(undefined);
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
@@ -173,7 +174,7 @@ describe('ProfileEditForm', () => {
 
   it('validates the username format like the backend', async () => {
     const user = userEvent.setup();
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     const username = screen.getByLabelText(/nome de usuário/i);
     await user.clear(username);
@@ -186,7 +187,7 @@ describe('ProfileEditForm', () => {
 
   it('rejects an invalid public e-mail', async () => {
     const user = userEvent.setup();
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/^e-mail:$/i), 'sem-arroba');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
@@ -197,7 +198,7 @@ describe('ProfileEditForm', () => {
 
   it('blocks save when the typed username is already taken', async () => {
     const user = userEvent.setup();
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     const username = screen.getByLabelText(/nome de usuário/i);
     await user.clear(username);
@@ -211,7 +212,7 @@ describe('ProfileEditForm', () => {
   it('asks whether the public phone is WhatsApp only after a phone is typed', async () => {
     const user = userEvent.setup();
     saveHeader.mockResolvedValue(undefined);
-    render(<ProfileEditForm profile={profile} />);
+    renderWithQuery(<ProfileEditForm profile={profile} />);
 
     const whatsappName = /este número é um número de whatsapp/i;
     expect(screen.queryByRole('checkbox', { name: whatsappName })).not.toBeInTheDocument();

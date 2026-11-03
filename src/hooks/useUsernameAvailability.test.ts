@@ -7,6 +7,7 @@ import {
   useUsernameAvailability,
 } from './useUsernameAvailability';
 import { checkUsernameAvailability } from '@/services/username.service';
+import { createQueryWrapper } from '@/test/query';
 
 vi.mock('@/services/username.service', () => ({
   checkUsernameAvailability: vi.fn(),
@@ -46,11 +47,13 @@ describe('useUsernameAvailability', () => {
   });
 
   it('does not call the API when the username is still the current one', () => {
-    const { result } = renderHook(() =>
-      useUsernameAvailability({
-        username: '_SamiMendonca',
-        currentUsername: '_samimendonca',
-      })
+    const { result } = renderHook(
+      () =>
+        useUsernameAvailability({
+          username: '_SamiMendonca',
+          currentUsername: '_samimendonca',
+        }),
+      { wrapper: createQueryWrapper() }
     );
 
     expect(result.current.status).toBe('idle');
@@ -65,12 +68,14 @@ describe('useUsernameAvailability', () => {
       suggestions: ['allanna1'],
     });
 
-    const { result } = renderHook(() =>
-      useUsernameAvailability({
-        username: 'allanna',
-        currentUsername: '_SamiMendonca',
-        onTaken,
-      })
+    const { result } = renderHook(
+      () =>
+        useUsernameAvailability({
+          username: 'allanna',
+          currentUsername: '_SamiMendonca',
+          onTaken,
+        }),
+      { wrapper: createQueryWrapper() }
     );
 
     await waitFor(() => {
@@ -79,5 +84,57 @@ describe('useUsernameAvailability', () => {
     expect(result.current.suggestions).toEqual(['allanna1']);
     expect(onTaken).toHaveBeenCalled();
     expect(mockedCheck).toHaveBeenCalledWith('allanna');
+  });
+
+  it('waits for typing to stop, then reports an available username once', async () => {
+    const onAvailable = vi.fn();
+    const { result, rerender } = renderHook(
+      ({ username }) => useUsernameAvailability({ username, onAvailable }),
+      { wrapper: createQueryWrapper(), initialProps: { username: 'nov' } }
+    );
+
+    expect(result.current.status).toBe('checking');
+    rerender({ username: 'novo_user' });
+
+    await waitFor(() => expect(result.current.status).toBe('available'));
+    expect(mockedCheck).toHaveBeenCalledTimes(1);
+    expect(mockedCheck).toHaveBeenCalledWith('novo_user');
+    expect(onAvailable).toHaveBeenCalledTimes(1);
+    expect(result.current.suggestions).toEqual([]);
+  });
+
+  it('answers a username checked before from the cache', async () => {
+    const { result, rerender } = renderHook(
+      ({ username }) => useUsernameAvailability({ username }),
+      { wrapper: createQueryWrapper(), initialProps: { username: 'novo_user' } }
+    );
+    await waitFor(() => expect(result.current.status).toBe('available'));
+
+    rerender({ username: 'outro_user' });
+    await waitFor(() => expect(mockedCheck).toHaveBeenCalledWith('outro_user'));
+    rerender({ username: 'novo_user' });
+
+    await waitFor(() => expect(result.current.status).toBe('available'));
+    expect(mockedCheck).toHaveBeenCalledTimes(2);
+  });
+
+  it('reports an error when the check fails', async () => {
+    mockedCheck.mockRejectedValue(new Error('offline'));
+
+    const { result } = renderHook(() => useUsernameAvailability({ username: 'novo_user' }), {
+      wrapper: createQueryWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.status).toBe('error'));
+  });
+
+  it('stays idle and asks nothing for an invalid username', async () => {
+    const { result } = renderHook(() => useUsernameAvailability({ username: 'No' }), {
+      wrapper: createQueryWrapper(),
+    });
+
+    expect(result.current.status).toBe('idle');
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(mockedCheck).not.toHaveBeenCalled();
   });
 });

@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { checkUsernameAvailability } from '@/services/username.service';
+import { useQuery } from '@tanstack/react-query';
+import { usernameAvailabilityQuery } from '@/services/queries/username';
 
 export type UsernameAvailabilityStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
+
+export const USERNAME_CHECK_DEBOUNCE_MS = 450;
 
 export function isUsernameFormatValid(value: string) {
   return value.length >= 3 && value.length <= 32 && /^[a-z0-9_]+$/.test(value);
@@ -20,64 +23,61 @@ type UseUsernameAvailabilityOptions = {
   onAvailable?: () => void;
 };
 
+/**
+ * Checks whether a username is free while the user types (ADR-0002 island):
+ * waits 450 ms after the last keystroke, then asks the BFF. Answers are cached
+ * by the normalized value, so going back to a checked name answers at once.
+ */
 export function useUsernameAvailability({
   username,
   currentUsername,
   onTaken,
   onAvailable,
 }: UseUsernameAvailabilityOptions) {
-  const [fetchedStatus, setFetchedStatus] = useState<UsernameAvailabilityStatus>('idle');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const requestIdRef = useRef(0);
-  const onTakenRef = useRef(onTaken);
-  const onAvailableRef = useRef(onAvailable);
-
   const normalized = normalizeUsername(username);
   const current = currentUsername ? normalizeUsername(currentUsername) : '';
   const isCurrentUsername = Boolean(current && normalized === current);
   const canCheck = !isCurrentUsername && isUsernameFormatValid(normalized);
-  const status: UsernameAvailabilityStatus = canCheck ? fetchedStatus : 'idle';
 
+  const [debounced, setDebounced] = useState('');
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebounced(normalized), USERNAME_CHECK_DEBOUNCE_MS);
+    return () => window.clearTimeout(timer);
+  }, [normalized]);
+
+  const settled = debounced === normalized;
+  const query = useQuery({
+    ...usernameAvailabilityQuery(normalized),
+    enabled: canCheck && settled,
+  });
+
+  let status: UsernameAvailabilityStatus = 'idle';
+  if (canCheck) {
+    if (!settled || query.isFetching) status = 'checking';
+    else if (query.isError) status = 'error';
+    else if (query.data) status = query.data.available ? 'available' : 'taken';
+  }
+
+  const onTakenRef = useRef(onTaken);
+  const onAvailableRef = useRef(onAvailable);
   useEffect(() => {
     onTakenRef.current = onTaken;
     onAvailableRef.current = onAvailable;
   }, [onTaken, onAvailable]);
 
+  // Notify once per answered username, including answers from the cache.
+  const notified = useRef('');
   useEffect(() => {
-    if (!canCheck) {
-      return;
-    }
+    if (status !== 'taken' && status !== 'available') return;
+    const key = `${normalized}:${status}`;
+    if (notified.current === key) return;
+    notified.current = key;
+    if (status === 'taken') onTakenRef.current?.();
+    else onAvailableRef.current?.();
+  }, [status, normalized]);
 
-    const requestId = ++requestIdRef.current;
-    const timer = window.setTimeout(async () => {
-      setFetchedStatus('checking');
-      setSuggestions([]);
-
-      try {
-        const result = await checkUsernameAvailability(normalized);
-        if (requestId !== requestIdRef.current) return;
-
-        if (result.available) {
-          setFetchedStatus('available');
-          setSuggestions([]);
-          onAvailableRef.current?.();
-          return;
-        }
-
-        setFetchedStatus('taken');
-        setSuggestions(result.suggestions ?? []);
-        onTakenRef.current?.();
-      } catch {
-        if (requestId !== requestIdRef.current) return;
-        setFetchedStatus('error');
-        setSuggestions([]);
-      }
-    }, 450);
-
-    return () => window.clearTimeout(timer);
-  }, [normalized, canCheck]);
-
-  return { status, suggestions: canCheck ? suggestions : [], setSuggestions };
+  const suggestions = status === 'taken' ? (query.data?.suggestions ?? []) : [];
+  return { status, suggestions };
 }
 
 export function usernameAvailabilityHelper(

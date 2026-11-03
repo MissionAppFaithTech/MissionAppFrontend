@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, beforeEach } from 'vitest';
 import AccountSettingsView from './AccountSettingsView';
@@ -10,7 +11,7 @@ describe('AccountSettingsView Component', () => {
   });
 
   it('renders all sections for missionary, including Agência Missionária and Soft Delete', () => {
-    render(<AccountSettingsView role="missionary" />);
+    renderWithQuery(<AccountSettingsView role="missionary" />);
 
     // Fast navigation chips
     expect(screen.getByText(/navegação rápida/i)).toBeInTheDocument();
@@ -52,7 +53,7 @@ describe('AccountSettingsView Component', () => {
   });
 
   it('renders correctly for supporter (common user) without Agência Missionária and with Hard Delete', () => {
-    render(<AccountSettingsView role="supporter" />);
+    renderWithQuery(<AccountSettingsView role="supporter" />);
 
     // Fast navigation shouldn't have Agência Missionária chip
     expect(
@@ -76,7 +77,7 @@ describe('AccountSettingsView Component', () => {
   });
 
   it('offers the light/dark appearance switch in its own section', () => {
-    render(<AccountSettingsView role="missionary" />);
+    renderWithQuery(<AccountSettingsView role="missionary" />);
 
     expect(screen.getByRole('heading', { level: 2, name: 'Aparência' })).toBeInTheDocument();
     const appearance = screen.getByRole('group', { name: 'Aparência' });
@@ -85,7 +86,7 @@ describe('AccountSettingsView Component', () => {
 
   it('validates and updates email successfully', async () => {
     const user = userEvent.setup();
-    render(<AccountSettingsView role="missionary" />);
+    renderWithQuery(<AccountSettingsView role="missionary" />);
 
     const updateEmailButton = screen.getByRole('button', { name: /atualizar e-mail/i });
     await user.click(updateEmailButton);
@@ -109,7 +110,7 @@ describe('AccountSettingsView Component', () => {
 
   it('triggers secure password reset link email and displays feedback toast', async () => {
     const user = userEvent.setup();
-    render(<AccountSettingsView role="missionary" initialEmail="teste@missao.org" />);
+    renderWithQuery(<AccountSettingsView role="missionary" initialEmail="teste@missao.org" />);
 
     const resetLinkButton = screen.getByRole('button', {
       name: /enviar link de redefinição para meu e-mail/i,
@@ -124,7 +125,7 @@ describe('AccountSettingsView Component', () => {
 
   it('allows saving ecclesiastical data and displays success notification', async () => {
     const user = userEvent.setup();
-    render(<AccountSettingsView role="missionary" />);
+    renderWithQuery(<AccountSettingsView role="missionary" />);
 
     const saveEcclesiasticalButton = screen.getByRole('button', {
       name: /salvar dados eclesiásticos/i,
@@ -139,7 +140,7 @@ describe('AccountSettingsView Component', () => {
 
   it('allows saving missionary agency data for missionary and displays success notification', async () => {
     const user = userEvent.setup();
-    render(<AccountSettingsView role="missionary" />);
+    renderWithQuery(<AccountSettingsView role="missionary" />);
 
     const saveAgencyButton = screen.getByRole('button', { name: /salvar agência missionária/i });
     await user.click(saveAgencyButton);
@@ -152,7 +153,7 @@ describe('AccountSettingsView Component', () => {
 
   it('handles soft delete confirmation modal for missionary', async () => {
     const user = userEvent.setup();
-    render(<AccountSettingsView role="missionary" />);
+    renderWithQuery(<AccountSettingsView role="missionary" />);
 
     const deactivateBtn = screen.getByRole('button', { name: /desativar conta de missionário/i });
     await user.click(deactivateBtn);
@@ -176,7 +177,7 @@ describe('AccountSettingsView Component', () => {
 
   it('handles hard delete confirmation modal for supporter requiring EXCLUIR confirmation', async () => {
     const user = userEvent.setup();
-    render(<AccountSettingsView role="supporter" />);
+    renderWithQuery(<AccountSettingsView role="supporter" />);
 
     const deleteBtn = screen.getByRole('button', { name: /excluir conta definitivamente/i });
     await user.click(deleteBtn);

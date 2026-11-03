@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SupporterEditForm from '@/components/profile/SupporterEditForm';
@@ -19,7 +20,7 @@ describe('SupporterEditForm Component', () => {
   });
 
   it('renders all basic supporter profile information and public contact fields', () => {
-    render(<SupporterEditForm profile={mockProfile} />);
+    renderWithQuery(<SupporterEditForm profile={mockProfile} />);
 
     expect(screen.getByRole('heading', { name: /editar perfil de apoiador/i })).toBeInTheDocument();
     expect(screen.getByText(/informações básicas/i)).toBeInTheDocument();
@@ -56,7 +57,7 @@ describe('SupporterEditForm Component', () => {
 
   it('allows form submission and triggers success toast notification', async () => {
     const user = userEvent.setup();
-    render(<SupporterEditForm profile={mockProfile} />);
+    renderWithQuery(<SupporterEditForm profile={mockProfile} />);
 
     const saveButton = screen.getByRole('button', { name: /salvar/i });
     await user.click(saveButton);
@@ -69,7 +70,7 @@ describe('SupporterEditForm Component', () => {
 
   it('blocks save when the typed username is already taken', async () => {
     const user = userEvent.setup();
-    render(<SupporterEditForm profile={mockProfile} />);
+    renderWithQuery(<SupporterEditForm profile={mockProfile} />);
 
     const username = screen.getByLabelText(/nome de usuário/i);
     await user.clear(username);

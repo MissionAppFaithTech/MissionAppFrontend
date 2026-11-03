@@ -2,7 +2,7 @@
 
 ## Dados
 
-- **Status:** 🟡 Proposto
+- **Status:** 🟢 Aceito
 - **Data:** 2026-11-02 (revisão da versão de 2026-11-01)
 - **Proponentes:** [@Amaro-peter](https://github.com/Amaro-peter)
 
@@ -52,6 +52,15 @@ O TanStack Query é uma biblioteca open-source mantida pela organização TanSta
 7. **Hidratação opcional:** quando a primeira página de uma ilha precisar vir no HTML (o feed, por exemplo), o Server Component faz `prefetchQuery`/`prefetchInfiniteQuery` com a mesma chave e envolve a ilha em `<HydrationBoundary>`.
 8. **Testes:** helper com um `QueryClient` novo por teste e `retry: false`.
 9. **Ferramentas:** `@tanstack/react-query-devtools` só em desenvolvimento; `@tanstack/eslint-plugin-query` no ESLint.
+
+**Notas de implementação (2026-11-03):**
+
+- Versão instalada: 5.105. Nela, o `isServer` booleano está depreciado; `getQueryClient()` (`src/lib/query/client.ts`) usa `environmentManager.isServer()`.
+- Hooks por domínio em `src/services/queries/` (`useCatalogItems`, `useActiveSessions`, `usernameAvailabilityQuery`). O `useUsernameAvailability` continua em `src/hooks/` com a mesma API; o `setSuggestions`, que ninguém usava, saiu.
+- Uma resposta de disponibilidade de username vale 30 s também quando o default muda; o backend confere de novo no envio.
+- A criação de agência ou igreja acontece na store do cadastro (ao concluir o passo 3), por isso o `setQueryData` fica no serviço de catálogo (`addCatalogItem`), logo depois da action.
+- `clearUserStores()` limpa também o cache de queries. Ele roda no 401, no login, no logout e ao encerrar todas as sessões, não só no 401: assim a lista de sessões de uma conta nunca aparece para a próxima pessoa no mesmo navegador.
+- As devtools carregam com `next/dynamic` só quando `NODE_ENV` é `development`.
 
 ## Justificativa
 

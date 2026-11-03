@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DevicesOutlinedIcon from '@mui/icons-material/DevicesOutlined';
 import Alert from '@mui/material/Alert';
@@ -13,11 +13,8 @@ import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
-import {
-  listActiveSessions,
-  terminateAllSessions,
-  type ActiveSession,
-} from '@/services/auth.service';
+import { terminateAllSessions, type ActiveSession } from '@/services/auth.service';
+import { useActiveSessions } from '@/services/queries/sessions';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { clearUserStores } from '@/stores/sessionStore';
 
@@ -32,44 +29,33 @@ function describeSession(session: ActiveSession) {
   return { device, lastUsed: dateFormatter.format(new Date(lastUsed)) };
 }
 
-/** Lists the account's active sessions and ends all of them (backend `/auth/sessions`). */
+/**
+ * Lists the account's active sessions (client island, ADR-0002) and ends all of
+ * them through a Server Action (ADR-0006).
+ */
 export default function ActiveSessionsSection() {
   const router = useRouter();
   const notify = useFeedbackStore((s) => s.notify);
-  const [sessions, setSessions] = useState<ActiveSession[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const sessionsQuery = useActiveSessions();
+  const sessions = sessionsQuery.data ?? null;
+  const [endError, setEndError] = useState<string | null>(null);
   const [ending, setEnding] = useState(false);
 
-  const [reloadKey, setReloadKey] = useState(0);
-
-  const showError = (err: unknown, fallback: string) =>
-    setError(err instanceof Error ? err.message : fallback);
-
-  useEffect(() => {
-    let active = true;
-    listActiveSessions().then(
-      (data) => {
-        if (active) setSessions(data);
-      },
-      (err: unknown) => {
-        if (active) {
-          setError(err instanceof Error ? err.message : 'Não foi possível carregar as sessões');
-        }
-      }
-    );
-    return () => {
-      active = false;
-    };
-  }, [reloadKey]);
+  const loadError = sessionsQuery.error
+    ? sessionsQuery.error instanceof Error
+      ? sessionsQuery.error.message
+      : 'Não foi possível carregar as sessões'
+    : null;
+  const error = endError ?? loadError;
 
   const retry = () => {
-    setError(null);
-    setSessions(null);
-    setReloadKey((key) => key + 1);
+    setEndError(null);
+    if (loadError) void sessionsQuery.refetch();
   };
 
   const endAll = async () => {
     setEnding(true);
+    setEndError(null);
     try {
       await terminateAllSessions();
       clearUserStores();
@@ -77,7 +63,7 @@ export default function ActiveSessionsSection() {
       router.replace('/login');
       router.refresh();
     } catch (err) {
-      showError(err, 'Não foi possível encerrar as sessões');
+      setEndError(err instanceof Error ? err.message : 'Não foi possível encerrar as sessões');
       setEnding(false);
     }
   };
@@ -120,7 +106,7 @@ export default function ActiveSessionsSection() {
             </Alert>
           ) : null}
 
-          {sessions === null && !error ? (
+          {sessionsQuery.isPending && !loadError ? (
             <Stack spacing={1} role="status" aria-busy="true" aria-label="Carregando sessões">
               <Skeleton variant="rounded" height={48} />
               <Skeleton variant="rounded" height={48} />

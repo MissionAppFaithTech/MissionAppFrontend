@@ -8,6 +8,7 @@ import { SessionWatcher } from '@/components/auth/SessionWatcher';
 import { SessionProvider } from '@/components/auth/SessionProvider';
 import type { SessionSnapshot } from '@/lib/auth/session';
 import FeedbackToast from '@/components/common/FeedbackToast';
+import { QueryProvider } from '@/components/QueryProvider';
 import { A11yPreferencesSync } from '@/components/a11y/AccessibilityPreferences';
 
 export function Providers({
@@ -21,15 +22,17 @@ export function Providers({
   // operating system never opens the app in dark mode.
   return (
     <SessionProvider session={session}>
-      <ThemeProvider attribute="class" defaultTheme="light">
-        <AppThemeProvider>
-          <ThemeColorMeta />
-          <SessionWatcher />
-          <A11yPreferencesSync />
-          {children}
-          <FeedbackToast />
-        </AppThemeProvider>
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider attribute="class" defaultTheme="light">
+          <AppThemeProvider>
+            <ThemeColorMeta />
+            <SessionWatcher />
+            <A11yPreferencesSync />
+            {children}
+            <FeedbackToast />
+          </AppThemeProvider>
+        </ThemeProvider>
+      </QueryProvider>
     </SessionProvider>
   );
 }

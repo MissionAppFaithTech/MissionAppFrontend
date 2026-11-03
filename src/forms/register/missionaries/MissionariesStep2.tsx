@@ -8,7 +8,6 @@ import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommun
 import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
 import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
-import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
 import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
 import {
   EMPTY_FAITH_COMMUNITY,
@@ -22,12 +21,12 @@ import {
   createMissionaryAgencySchema,
 } from '@/schemas/catalog-create.schema';
 import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
-import { listFaithCommunities, listMissionaryAgencies } from '@/services/catalog.service';
+import { useCatalogItems } from '@/services/queries/catalog';
 
 export default function MissionariesStep2() {
   const { formData, completeStep2, goBack } = useMissionaryRegisterWizard();
-  const agencies = useCatalogItems(listMissionaryAgencies);
-  const communities = useCatalogItems(listFaithCommunities);
+  const agencies = useCatalogItems('missionaryAgencies');
+  const communities = useCatalogItems('faithCommunities');
   const agencyEntry = useOtherCatalogEntry();
   const communityEntry = useOtherCatalogEntry();
   const {

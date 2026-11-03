@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import MissionariesStep2 from './MissionariesStep2';
@@ -10,7 +11,7 @@ vi.mock('@/services/catalog.service', () => ({
 }));
 
 function renderStep() {
-  return render(
+  return renderWithQuery(
     <MissionaryRegisterWizardProvider>
       <MissionariesStep2 />
     </MissionaryRegisterWizardProvider>

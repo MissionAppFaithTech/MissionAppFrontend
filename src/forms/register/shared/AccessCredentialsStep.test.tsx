@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import AccessCredentialsStep from './AccessCredentialsStep';
@@ -28,7 +29,7 @@ describe('AccessCredentialsStep component', () => {
     const handleSubmit = vi.fn();
     const handleBack = vi.fn();
 
-    render(
+    renderWithQuery(
       <AccessCredentialsStep
         onSubmit={handleSubmit}
         onBack={handleBack}
@@ -54,7 +55,7 @@ describe('AccessCredentialsStep component', () => {
     const handleSubmit = vi.fn();
     const handleBack = vi.fn();
 
-    render(
+    renderWithQuery(
       <AccessCredentialsStep
         onSubmit={handleSubmit}
         onBack={handleBack}
@@ -76,7 +77,7 @@ describe('AccessCredentialsStep component', () => {
     const handleSubmit = vi.fn();
     const handleBack = vi.fn();
 
-    render(
+    renderWithQuery(
       <AccessCredentialsStep
         onSubmit={handleSubmit}
         onBack={handleBack}
@@ -107,7 +108,7 @@ describe('AccessCredentialsStep component', () => {
     const handleSubmit = vi.fn();
     const handleBack = vi.fn();
 
-    render(
+    renderWithQuery(
       <AccessCredentialsStep
         onSubmit={handleSubmit}
         onBack={handleBack}
@@ -127,7 +128,7 @@ describe('AccessCredentialsStep component', () => {
       suggestions: [],
     });
 
-    render(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
+    renderWithQuery(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
     await user.type(screen.getByLabelText(/nome de usuário/i), 'allanna_c');
 
     expect(await screen.findByText(/nome de usuário disponível/i)).toBeInTheDocument();
@@ -143,7 +144,7 @@ describe('AccessCredentialsStep component', () => {
       suggestions: ['allanna1'],
     });
 
-    render(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
+    renderWithQuery(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
     await user.type(screen.getByLabelText(/nome de usuário/i), 'allanna');
 
     expect(await screen.findByText(/este nome de usuário já está em uso/i)).toBeInTheDocument();
@@ -156,7 +157,7 @@ describe('AccessCredentialsStep component', () => {
   it('warns while the confirmation password differs', async () => {
     const user = userEvent.setup();
 
-    render(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
+    renderWithQuery(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
     await user.type(screen.getByLabelText(/^senha/i), 'SenhaForte@123');
     await user.type(screen.getByLabelText(/confirmar senha/i), 'SenhaDiferente@1');
 
