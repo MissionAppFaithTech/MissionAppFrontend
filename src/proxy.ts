@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { BackendApiError } from '@/lib/api/backend';
 import { refreshTokens } from '@/lib/api/bff';
 import { clientHeadersFrom } from '@/lib/api/clientIp';
+import { getBackendOrigin } from '@/lib/api/config';
 import { AUTH_COOKIE, applyAuthCookies, clearAuthCookies } from '@/lib/auth/cookies';
 import { decodeAccessToken, isAccessTokenExpiring } from '@/lib/auth/jwt';
 import { accessAreaFor, accessDecision } from '@/lib/auth/rbac';
@@ -23,6 +24,32 @@ function roleFromAccessToken(token: string | undefined): BackendRole | null {
   return role && ROLES.has(role as BackendRole) ? (role as BackendRole) : null;
 }
 
+/** One warning per minute while the API is down, instead of a stack trace per request. */
+export const UNREACHABLE_LOG_INTERVAL_MS = 60_000;
+let lastUnreachableLog = 0;
+
+/** Tests only: lets the next failure log again. */
+export function resetUnreachableLog() {
+  lastUnreachableLog = 0;
+}
+
+function warnApiUnreachable(error: unknown) {
+  const now = Date.now();
+  if (now - lastUnreachableLog < UNREACHABLE_LOG_INTERVAL_MS) return;
+  lastUnreachableLog = now;
+
+  const cause = error instanceof Error ? error.cause : undefined;
+  const reason =
+    error instanceof BackendApiError
+      ? `HTTP ${error.status}`
+      : ((cause as { code?: string } | undefined)?.code ??
+        (error instanceof Error ? error.message : String(error)));
+  console.warn(
+    `[proxy] API ${getBackendOrigin()} não respondeu ao renovar a sessão (${reason}). ` +
+      'Os cookies foram mantidos; o próximo pedido tenta de novo.'
+  );
+}
+
 /**
  * Server Components cannot write cookies, so the session is renewed here, before
  * any page, Server Action or route handler runs (ADR-0006). Being the single place
@@ -42,8 +69,8 @@ async function refreshSession(request: NextRequest): Promise<SessionRefresh> {
     if (error instanceof BackendApiError && (error.status === 401 || error.status === 403)) {
       return { kind: 'ended' };
     }
-    // Network or 5xx: keep the cookies; the route handlers retry on their own.
-    console.error('[proxy] refresh', error);
+    // Network or 5xx: keep the cookies; the next request tries again.
+    warnApiUnreachable(error);
     return { kind: 'unchanged' };
   }
 }
