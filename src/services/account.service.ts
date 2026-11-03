@@ -2,8 +2,6 @@ import type { AuthUser } from '@/lib/api/auth-response';
 import type { Gender } from '@/forms/register/types';
 import { registerAccountAction } from '@/app/actions/account';
 import { callAction } from '@/lib/api/callAction';
-import { ApiError } from '@/lib/api/client';
-import { localizeApiErrorMessage } from '@/lib/api/errors';
 
 export type SignupPayload = {
   fullName: string;
@@ -27,16 +25,7 @@ export function toApiGender(gender: Gender | '' | undefined): 'MALE' | 'FEMALE' 
   throw new Error('Selecione o gênero');
 }
 
+/** Throws `ApiError` with the pt-BR message and field errors from the action. */
 export async function registerAccount(payload: SignupPayload): Promise<{ user: AuthUser }> {
-  try {
-    return await callAction(() => registerAccountAction(payload));
-  } catch (error) {
-    if (!(error instanceof ApiError)) throw error;
-    throw new ApiError(
-      localizeApiErrorMessage(error.message),
-      error.status,
-      error.fieldErrors,
-      error.code
-    );
-  }
+  return callAction(() => registerAccountAction(payload));
 }

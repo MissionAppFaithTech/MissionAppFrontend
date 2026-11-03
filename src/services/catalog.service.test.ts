@@ -132,18 +132,22 @@ describe('catalog.service', () => {
     ).resolves.toEqual({ id: 'church-2', name: 'Igreja Nova' });
   });
 
-  it('localizes the error message of a failed create', async () => {
+  it('passes on the pt-BR message and code of a failed create', async () => {
     vi.mocked(createFaithCommunityAction).mockResolvedValue({
       ok: false,
-      status: 422,
-      message: 'The name has already been taken',
+      status: 409,
+      message: 'Esta ação entra em conflito com dados já existentes.',
+      code: 'E_CONFLICT',
     });
 
     const error = await createFaithCommunity({ ...EMPTY_FAITH_COMMUNITY, name: 'Igreja' }).catch(
       (e: unknown) => e
     );
     expect(error).toBeInstanceOf(ApiError);
-    expect((error as ApiError).status).toBe(422);
-    expect((error as ApiError).message).not.toBe('The name has already been taken');
+    expect(error).toMatchObject({
+      status: 409,
+      message: 'Esta ação entra em conflito com dados já existentes.',
+      code: 'E_CONFLICT',
+    });
   });
 });
