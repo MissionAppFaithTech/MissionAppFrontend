@@ -3,9 +3,6 @@ import LandingPage from '@/components/landing/LandingPage';
 import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import { getSiteUrl, siteConfig } from '@/lib/site';
 
-/** Landing is static marketing content — regenerate at most once per hour. */
-export const revalidate = 3600;
-
 export const metadata: Metadata = {
   title: {
     absolute: `${siteConfig.name} — Conectamos missionários e apoiadores`,

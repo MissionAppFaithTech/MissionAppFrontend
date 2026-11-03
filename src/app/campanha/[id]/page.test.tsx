@@ -1,22 +1,18 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import CampaignPage, { generateMetadata } from './page';
 import { mockCampaign } from '@/mocks/campaign';
 
+vi.mock('./CampaignContent', () => ({
+  CampaignBody: () => <div data-testid="campaign-body" />,
+}));
+
 describe('Dedicated Campaign Page (/campanha/[id])', () => {
-  it('renders campaign hero, details and associated projects', async () => {
-    const Component = await CampaignPage({
-      params: Promise.resolve({ id: 'campanha-educacao-esperanca' }),
-    });
+  it('renders the visitor shell around the streamed campaign body', () => {
+    render(CampaignPage({ params: Promise.resolve({ id: 'campanha-educacao-esperanca' }) }));
 
-    render(Component);
-
-    expect(screen.getByRole('heading', { level: 1, name: mockCampaign.title })).toBeInTheDocument();
-    expect(screen.getByText(mockCampaign.subtitle)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /ofertar na campanha/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: /projetos de impacto vinculados/i })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('campaign-body')).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /^entrar$/i }).length).toBeGreaterThanOrEqual(1);
   });
 
   it('generates correct metadata and OpenGraph tags for the campaign', async () => {

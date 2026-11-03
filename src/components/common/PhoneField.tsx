@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, type ChangeEvent, type Ref } from 'react';
+import { Suspense, useId, type ChangeEvent, type Ref } from 'react';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -48,7 +48,53 @@ function isOnlyDialCode(phone: string): boolean {
   return /^\+\d{1,4}$/.test(trimmed);
 }
 
-export default function PhoneField({
+/**
+ * International phone input. `react-international-phone` reads `Date.now()` while
+ * rendering, which Cache Components cannot prerender (ADR-0005): the interactive
+ * field renders inside `<Suspense>`, with a same-size static field as fallback in
+ * the prerendered shell.
+ */
+export default function PhoneField(props: PhoneFieldProps) {
+  return (
+    <Suspense fallback={<PhoneFieldPlaceholder {...props} />}>
+      <PhoneFieldInput {...props} />
+    </Suspense>
+  );
+}
+
+/** Static, non-interactive stand-in with the same label and size. */
+function PhoneFieldPlaceholder({
+  id,
+  label = 'Telefone',
+  hideLabel = false,
+  required = false,
+  placeholder = '(11) 98765-4321',
+  size = 'medium',
+}: PhoneFieldProps) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+
+  return (
+    <FormControl variant="outlined" fullWidth required={required} size={size} disabled>
+      {hideLabel ? null : (
+        <InputLabel htmlFor={inputId} shrink required={required}>
+          {label}
+        </InputLabel>
+      )}
+      <OutlinedInput
+        id={inputId}
+        label={hideLabel ? undefined : label}
+        notched={hideLabel ? false : true}
+        size={size}
+        placeholder={placeholder}
+        inputMode="tel"
+        sx={{ bgcolor: 'var(--mui-palette-action2-fieldBg)' }}
+      />
+    </FormControl>
+  );
+}
+
+function PhoneFieldInput({
   inputRef,
   id,
   value,

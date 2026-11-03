@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import Box from '@mui/material/Box';
 import VisitorNavbar from '@/components/layout/VisitorNavbar';
 import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
-import CampaignDetailView from '@/components/campaign/CampaignDetailView';
 import { mockCampaign } from '@/mocks/campaign';
+import { CampaignBody } from './CampaignContent';
 import { getSiteUrl } from '@/lib/site';
+import PublicPageFallback from '@/components/common/PublicPageFallback';
 
 type CampaignPageProps = {
   params: Promise<{ id: string }>;
 };
-
-export const revalidate = 300;
 
 export async function generateMetadata({ params }: CampaignPageProps): Promise<Metadata> {
   const { id } = await params;
@@ -51,14 +51,7 @@ export async function generateMetadata({ params }: CampaignPageProps): Promise<M
   };
 }
 
-export default async function CampaignPage({ params }: CampaignPageProps) {
-  const { id } = await params;
-  // Use mock campaign (or customized with id)
-  const campaign = {
-    ...mockCampaign,
-    id,
-  };
-
+export default function CampaignPage({ params }: CampaignPageProps) {
   return (
     <Box
       sx={{
@@ -68,7 +61,9 @@ export default async function CampaignPage({ params }: CampaignPageProps) {
       }}
     >
       <VisitorNavbar maxWidth="lg" />
-      <CampaignDetailView campaign={campaign} />
+      <Suspense fallback={<PublicPageFallback label="Carregando campanha" />}>
+        <CampaignBody params={params} />
+      </Suspense>
       <VisitorBottomNav />
     </Box>
   );

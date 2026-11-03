@@ -52,6 +52,33 @@ const eslintConfig = defineConfig([
       '@typescript-eslint/no-deprecated': 'error',
     },
   },
+  {
+    // ADR-0003: Zustand stores are client state. A module-level store written on
+    // the server would leak one user's data into another request, so server code
+    // never imports them.
+    files: [
+      'src/app/api/**/*.{ts,tsx}',
+      'src/app/actions/**/*.{ts,tsx}',
+      'src/proxy.ts',
+      'src/lib/api/**/*.{ts,tsx}',
+      'src/lib/server/**/*.{ts,tsx}',
+    ],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/stores/*', '**/stores/*'],
+              message:
+                'Server code must not import Zustand stores (ADR-0003): they are client state.',
+            },
+          ],
+        },
+      ],
+    },
+  },
   globalIgnores([
     '.next/**',
     'out/**',

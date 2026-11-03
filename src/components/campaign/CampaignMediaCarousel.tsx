@@ -79,6 +79,7 @@ export default function CampaignMediaCarousel({
           overflow: 'hidden',
           bgcolor: 'surface.main',
           boxShadow: 'var(--app-shadow-lg)',
+          '&:hover .zoom-badge, &:focus-within .zoom-badge': { opacity: 1 },
         }}
       >
         {/* Active Image */}
@@ -86,7 +87,7 @@ export default function CampaignMediaCarousel({
           onClick={() => setLightboxIndex(activeIndex)}
           role="button"
           tabIndex={0}
-          aria-label={`Ampliar imagem ${activeIndex + 1} de ${total} da campanha`}
+          aria-label={`Ampliar imagem ${activeIndex + 1} de ${total} da campanha ${title}`}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               setLightboxIndex(activeIndex);
@@ -98,69 +99,76 @@ export default function CampaignMediaCarousel({
             height: '100%',
             cursor: 'pointer',
             '&:hover img': { transform: 'scale(1.02)' },
-            '&:hover .zoom-badge': { opacity: 1 },
           }}
         >
+          {/* Decorative inside the button: its label already names the photo, and an
+              alt text would show as loose text while the image loads (WCAG 2.5.3). */}
           <Image
             src={images[activeIndex]}
-            alt={`${title} - Foto ${activeIndex + 1}`}
+            alt=""
             fill
             sizes="(max-width: 600px) 100vw, 850px"
             priority={activeIndex === 0}
             style={{ objectFit: 'cover', transition: 'transform 0.4s ease' }}
           />
+        </Box>
 
-          {/* Indicator Counter Badge */}
-          {total > 1 && (
-            <Chip
-              icon={
-                <CollectionsOutlinedIcon
-                  sx={{ fontSize: '15px !important', color: 'common.white' }}
-                />
-              }
-              label={`${activeIndex + 1}/${total}`}
-              size="small"
-              sx={{
-                position: 'absolute',
-                top: { xs: 10, sm: 14 },
-                left: { xs: 10, sm: 14 },
-                bgcolor: 'rgba(15, 23, 42, 0.75)',
-                color: 'common.white',
-                fontWeight: 700,
-                fontSize: '0.75rem',
-                backdropFilter: 'blur(4px)',
-                zIndex: 2,
-              }}
-            />
-          )}
-
-          {/* Zoom hint */}
-          <Box
-            className="zoom-badge"
+        {/* Decorative overlays live outside the button so its accessible name matches
+            its visible text (WCAG 2.5.3); they never take clicks. */}
+        {/* Indicator Counter Badge */}
+        {total > 1 && (
+          <Chip
+            aria-hidden
+            icon={
+              <CollectionsOutlinedIcon
+                sx={{ fontSize: '15px !important', color: 'common.white' }}
+              />
+            }
+            label={`${activeIndex + 1}/${total}`}
+            size="small"
             sx={{
               position: 'absolute',
               top: { xs: 10, sm: 14 },
-              right: { xs: 10, sm: 14 },
+              left: { xs: 10, sm: 14 },
               bgcolor: 'rgba(15, 23, 42, 0.75)',
-              backdropFilter: 'blur(4px)',
               color: 'common.white',
-              px: 1.25,
-              py: 0.5,
-              borderRadius: 1.5,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
+              fontWeight: 700,
               fontSize: '0.75rem',
-              fontWeight: 600,
-              opacity: { xs: 0.9, sm: 0 },
-              transition: 'opacity 0.2s ease',
+              backdropFilter: 'blur(4px)',
               zIndex: 2,
+              pointerEvents: 'none',
             }}
-          >
-            <ZoomInIcon sx={{ fontSize: 16 }} />
-            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-              Ampliar
-            </Box>
+          />
+        )}
+
+        {/* Zoom hint */}
+        <Box
+          className="zoom-badge"
+          aria-hidden
+          sx={{
+            position: 'absolute',
+            top: { xs: 10, sm: 14 },
+            right: { xs: 10, sm: 14 },
+            bgcolor: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(4px)',
+            color: 'common.white',
+            px: 1.25,
+            py: 0.5,
+            borderRadius: 1.5,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            opacity: { xs: 0.9, sm: 0 },
+            transition: 'opacity 0.2s ease',
+            zIndex: 2,
+            pointerEvents: 'none',
+          }}
+        >
+          <ZoomInIcon sx={{ fontSize: 16 }} />
+          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+            Ampliar
           </Box>
         </Box>
 
