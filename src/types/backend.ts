@@ -62,3 +62,32 @@ export type SessionInfo = {
   userId: string | null;
   role: BackendRole | null;
 };
+
+/**
+ * `GET /api/v1/public/missionaries/:username` (backend ADR-0036): only the fields
+ * product approved for anonymous visitors. No document, account e-mail/phone,
+ * status, finances, zip or district.
+ */
+export type PublicMissionaryProfile = {
+  username: string;
+  fullName: string;
+  biography: string | null;
+  role: BackendRole;
+  missionaryAgency: NamedRef | null;
+  faithCommunity: NamedRef | null;
+  about: {
+    aboutMe: string | null;
+    missionStorySummary: string | null;
+    originLocation: string | null;
+    prayerRequest: string | null;
+    lifeVerse: string | null;
+  };
+  workLocation: { city: string; state: string; country: string } | null;
+  followersCount: number;
+  followingCount: number;
+  contact: {
+    publicEmail: string | null;
+    publicPhone: string | null;
+    publicPhoneIsWhatsapp: boolean;
+  };
+};

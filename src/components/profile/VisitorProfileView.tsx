@@ -24,6 +24,13 @@ import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 
 type VisitorTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
+/** Tabs still showing example data, read by screen readers with the badge. */
+const EXAMPLE_TAB_SUBJECTS: Record<Exclude<VisitorTabKey, 'sobre'>, string> = {
+  projetos: 'projetos de impacto',
+  postagens: 'postagens',
+  campanha: 'campanha',
+};
+
 interface TabItem {
   key: VisitorTabKey;
   label: string;
@@ -60,8 +67,6 @@ export default function VisitorProfileView({
 
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
-      {/* Public profiles have no backend endpoint yet: the whole view is example data. */}
-      <ExampleDataBadge subject="perfil público de demonstração" sx={{ alignSelf: 'flex-start' }} />
       {/* 1. Cartão Principal do Perfil do Missionário (Modo Visitante) */}
       <ProfileSummaryCard
         profile={profile}
@@ -146,6 +151,14 @@ export default function VisitorProfileView({
 
       {/* 4. Conteúdo Dinâmico por Aba */}
       {activeTab === 'sobre' && <VisitorProfileAboutSection data={profile.about} />}
+
+      {/* Header, stats and "Sobre" are real; these tabs have no API yet. */}
+      {activeTab !== 'sobre' && (
+        <ExampleDataBadge
+          subject={EXAMPLE_TAB_SUBJECTS[activeTab]}
+          sx={{ alignSelf: 'flex-start' }}
+        />
+      )}
 
       {activeTab === 'projetos' && (
         <ImpactProjectCard

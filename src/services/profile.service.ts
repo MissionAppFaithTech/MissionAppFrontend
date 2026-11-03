@@ -11,6 +11,7 @@ import type {
   BackendMissionary,
   BackendUser,
   BackendWorkAddress,
+  PublicMissionaryProfile,
 } from '@/types/backend';
 import type { ProfileData, WorkAddressData } from '@/types/profile';
 
@@ -104,6 +105,46 @@ export function mapAccountProfile(payload: AccountProfilePayload): ProfileData {
       allowWhatsappContact: missionary?.publicPhoneIsWhatsapp === true,
       accountEmail: user.email,
       accountPhone: user.phoneNumber,
+    },
+  };
+}
+
+/**
+ * Maps the anonymous public profile (backend ADR-0036) to the UI model. Only
+ * public fields exist in it, so nothing private can leak into the page.
+ */
+export function mapPublicProfile(missionary: PublicMissionaryProfile): ProfileData {
+  const currentLocation = formatWorkAddress(
+    missionary.workLocation ? { ...missionary.workLocation, zip: '', district: '' } : null
+  );
+  const { about, contact } = missionary;
+
+  return {
+    ...emptyProfile,
+    userId: undefined,
+    missionaryId: undefined,
+    username: missionary.username,
+    displayName: missionary.fullName,
+    roleDescription: missionary.biography ?? '',
+    role: 'missionary',
+    location: currentLocation,
+    followersCount: missionary.followersCount,
+    followingCount: missionary.followingCount,
+    about: {
+      introduction: about.aboutMe ?? '',
+      missionHistory: about.missionStorySummary ?? '',
+      originLocation: about.originLocation ?? '',
+      currentLocation,
+      missionaryAgency: missionary.missionaryAgency?.name ?? '',
+      faithCommunity: missionary.faithCommunity?.name ?? '',
+      prayerRequests: about.prayerRequest ?? '',
+      lifeVerse: about.lifeVerse ?? '',
+      workAddress: null,
+    },
+    contact: {
+      publicEmail: contact.publicEmail ?? '',
+      publicPhone: contact.publicPhone ?? '',
+      allowWhatsappContact: contact.publicPhoneIsWhatsapp === true,
     },
   };
 }

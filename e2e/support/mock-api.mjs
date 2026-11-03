@@ -106,9 +106,54 @@ const routes = {
   }),
 };
 
+/** The anonymous public profile (backend ADR-0036) of the fixture missionary. */
+function publicProfile() {
+  const { user, missionary, workAddress, missionaryAgency, faithCommunity } = missionaryProfile;
+  return {
+    username: user.username,
+    fullName: user.fullName,
+    biography: user.biography,
+    role: user.role,
+    missionaryAgency,
+    faithCommunity,
+    about: {
+      aboutMe: missionary.aboutMe,
+      missionStorySummary: missionary.missionStorySummary,
+      originLocation: missionary.originLocation,
+      prayerRequest: missionary.prayerRequest,
+      lifeVerse: missionary.lifeVerse,
+    },
+    workLocation: {
+      city: workAddress.city,
+      state: workAddress.state,
+      country: workAddress.country,
+    },
+    followersCount: 12,
+    followingCount: 3,
+    contact: {
+      publicEmail: missionary.publicEmail,
+      publicPhone: missionary.publicPhone,
+      publicPhoneIsWhatsapp: true,
+    },
+  };
+}
+
+const PUBLIC_PROFILE = /^\/api\/v1\/public\/missionaries\/([^/]+)$/;
+
 const server = createServer((request, response) => {
   const path = new URL(request.url ?? '/', 'http://localhost').pathname;
   if (path === '/health') return send(response, 200, { ok: true });
+
+  const publicMatch = request.method === 'GET' && PUBLIC_PROFILE.exec(path);
+  if (publicMatch) {
+    // Only the fixture missionary is approved and active; the rest get the same 404.
+    return decodeURIComponent(publicMatch[1]) === missionaryProfile.user.username
+      ? send(response, 200, { data: { missionary: publicProfile() } })
+      : send(response, 404, {
+          message: 'Missionary profile not found',
+          code: 'E_MISSIONARY_PROFILE_NOT_FOUND',
+        });
+  }
 
   const handler = routes[`${request.method} ${path}`];
   if (handler) {

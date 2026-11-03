@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { mockProfile } from '../src/mocks/profile';
 
 test.describe('SEO & GEO (Generative Engine Optimization) End-to-End Verification', () => {
   test('validates Landing Page HTML metadata and Schema.org JSON-LD structured data', async ({
@@ -43,10 +42,10 @@ test.describe('SEO & GEO (Generative Engine Optimization) End-to-End Verificatio
   test('validates Public Missionary Profile Page dynamic SEO, OpenGraph and JSON-LD entities', async ({
     page,
   }) => {
-    await page.goto(`/user/${mockProfile.username}`);
+    await page.goto('/user/samuel_missionary');
 
     // Title & OpenGraph
-    await expect(page).toHaveTitle(new RegExp(mockProfile.displayName));
+    await expect(page).toHaveTitle(/Samuel Mendonça/);
     const ogType = page.locator('meta[property="og:type"]');
     await expect(ogType).toHaveAttribute('content', 'profile');
 
@@ -74,7 +73,8 @@ test.describe('SEO & GEO (Generative Engine Optimization) End-to-End Verificatio
 
     expect(foundProfilePage).toBe(true);
     expect(foundPerson).toBe(true);
-    expect(foundProject).toBe(true);
+    // The impact project tab still shows example data, so it stays out of structured data.
+    expect(foundProject).toBe(false);
   });
 
   test('validates robots.txt endpoint serves rules for default crawlers and AI search engines', async ({
@@ -107,8 +107,9 @@ test.describe('SEO & GEO (Generative Engine Optimization) End-to-End Verificatio
     expect(text).toContain('<?xml');
     expect(text).toContain('<urlset');
     expect(text).toContain('<loc>');
-    expect(text).toContain('/user/');
     expect(text).toContain('/select-role');
+    // Example profiles are gone; real profiles are not listed yet.
+    expect(text).not.toContain('/user/');
   });
 
   test('validates Web App Manifest endpoint serves valid PWA metadata', async ({ request }) => {

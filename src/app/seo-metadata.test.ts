@@ -1,9 +1,13 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import * as cheerio from 'cheerio';
 import { metadata as rootMetadata } from '@/app/layout';
 import { generateMetadata as generateUserMetadata } from '@/app/user/[username]/page';
 import { siteConfig } from '@/lib/site';
+import { getPublicProfile } from '@/lib/server/publicProfile';
 import { mockProfile } from '@/mocks/profile';
+import { publicProfileFixture } from '@/test/publicProfile';
+
+vi.mock('@/lib/server/publicProfile', () => ({ getPublicProfile: vi.fn() }));
 
 describe('SEO Metadata & OpenGraph Specifications', () => {
   describe('Root Layout Metadata', () => {
@@ -44,27 +48,48 @@ describe('SEO Metadata & OpenGraph Specifications', () => {
   });
 
   describe('Dynamic User Profile Metadata (generateMetadata)', () => {
-    it('generates customized metadata for known mock missionary', async () => {
+    it('generates metadata from the public profile of the backend', async () => {
+      vi.mocked(getPublicProfile).mockResolvedValue(publicProfileFixture);
       const metadata = await generateUserMetadata({
-        params: Promise.resolve({ username: mockProfile.username }),
+        params: Promise.resolve({ username: 'samuel_missionary' }),
       });
 
-      expect(metadata.title).toBe(`${mockProfile.displayName} (@${mockProfile.username})`);
-      expect(metadata.description).toContain(mockProfile.roleDescription);
-      expect(metadata.alternates?.canonical).toBe(`/user/${mockProfile.username}`);
+      expect(metadata.title).toBe('Samuel Mendonça (@samuel_missionary)');
+      expect(metadata.description).toContain(publicProfileFixture.about.introduction);
+      expect(metadata.alternates?.canonical).toBe('/user/samuel_missionary');
       expect((metadata.openGraph as Record<string, unknown>)?.type).toBe('profile');
-      expect(metadata.openGraph?.title).toContain(mockProfile.displayName);
+      expect(metadata.openGraph?.title).toContain('Samuel Mendonça');
       expect((metadata.twitter as Record<string, unknown>)?.card).toBe('summary_large_image');
     });
 
-    it('generates fallback metadata for arbitrary usernames', async () => {
-      const metadata = await generateUserMetadata({
-        params: Promise.resolve({ username: 'marcos-oliveira' }),
+    it('falls back to the mini-bio and keeps the description short', async () => {
+      vi.mocked(getPublicProfile).mockResolvedValue({
+        ...publicProfileFixture,
+        about: { ...publicProfileFixture.about, introduction: '' },
       });
+      const withBio = await generateUserMetadata({
+        params: Promise.resolve({ username: 'samuel_missionary' }),
+      });
+      expect(withBio.description).toBe('Samuel Mendonça: Missionário na África do Sul');
 
-      expect(metadata.title).toBe('marcos oliveira (@marcos-oliveira)');
-      expect(metadata.description).toContain('marcos oliveira');
-      expect(metadata.alternates?.canonical).toBe('/user/marcos-oliveira');
+      vi.mocked(getPublicProfile).mockResolvedValue({
+        ...publicProfileFixture,
+        about: { ...publicProfileFixture.about, introduction: 'a'.repeat(200) },
+      });
+      const long = await generateUserMetadata({
+        params: Promise.resolve({ username: 'samuel_missionary' }),
+      });
+      expect(long.description).toBe(`Samuel Mendonça: ${'a'.repeat(150)}…`);
+
+      vi.mocked(getPublicProfile).mockResolvedValue({
+        ...publicProfileFixture,
+        roleDescription: '',
+        about: { ...publicProfileFixture.about, introduction: '' },
+      });
+      const empty = await generateUserMetadata({
+        params: Promise.resolve({ username: 'samuel_missionary' }),
+      });
+      expect(empty.description).toContain('Perfil público de Samuel Mendonça');
     });
   });
 

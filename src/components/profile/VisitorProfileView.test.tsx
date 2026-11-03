@@ -51,4 +51,25 @@ describe('VisitorProfileView component', () => {
     expect(screen.getByRole('heading', { name: mockCampaign.title })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ofertar na campanha/i })).toBeInTheDocument();
   });
+
+  it('labels only the tabs that still show example data', async () => {
+    const user = userEvent.setup();
+    render(<VisitorProfileView profile={{ ...mockProfile, statsAreExample: false }} />);
+
+    expect(screen.queryByText('Dados de exemplo')).not.toBeInTheDocument();
+
+    for (const [tab, subject] of [
+      [/projetos/i, 'projetos de impacto'],
+      [/postagens/i, 'postagens'],
+      [/campanha/i, 'campanha'],
+    ] as const) {
+      await user.click(screen.getByRole('tab', { name: tab }));
+      expect(
+        screen.getByLabelText(`Dados de exemplo: ${subject} ainda não disponíveis`)
+      ).toBeInTheDocument();
+    }
+
+    await user.click(screen.getByRole('tab', { name: /sobre/i }));
+    expect(screen.queryByText('Dados de exemplo')).not.toBeInTheDocument();
+  });
 });

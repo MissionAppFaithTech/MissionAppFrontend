@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
+import { getPublicProfile } from '@/lib/server/publicProfile';
+import { publicProfileFixture } from '@/test/publicProfile';
 import SupporterMissionaryPage, { generateMetadata } from './page';
+
+vi.mock('@/lib/server/publicProfile', () => ({ getPublicProfile: vi.fn() }));
 
 vi.mock('./MissionaryProfileContent', () => ({
   MissionaryProfileBody: () => <div data-testid="missionary-profile-body" />,
@@ -8,6 +12,7 @@ vi.mock('./MissionaryProfileContent', () => ({
 
 describe('Supporter Missionary Route (/profile/supporter/missionario/[username])', () => {
   it('generates proper title metadata for missionary', async () => {
+    vi.mocked(getPublicProfile).mockResolvedValue(publicProfileFixture);
     const meta = await generateMetadata({
       params: Promise.resolve({ username: '_SamiMendonca' }),
     });
