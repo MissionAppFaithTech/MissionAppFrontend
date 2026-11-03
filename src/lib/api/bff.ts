@@ -33,7 +33,14 @@ export function clearRefreshCache() {
   recentRotations.clear();
 }
 
-export function refreshTokens(refreshToken: string): Promise<AuthTokens> {
+/**
+ * Rotates the session tokens. `headers` lets callers without `next/headers`
+ * (the proxy) forward the end-user IP themselves (ADR-0032 do backend).
+ */
+export function refreshTokens(
+  refreshToken: string,
+  headers?: Record<string, string>
+): Promise<AuthTokens> {
   const recent = recentRotations.get(refreshToken);
   if (recent && recent.expiresAt > Date.now()) return Promise.resolve(recent.tokens);
   recentRotations.delete(refreshToken);
@@ -44,6 +51,7 @@ export function refreshTokens(refreshToken: string): Promise<AuthTokens> {
   const request = backendFetch<{ data: AuthTokens }>('/auth/refresh', {
     method: 'POST',
     body: { refreshToken },
+    headers,
   })
     .then((result) => {
       recentRotations.set(refreshToken, {
