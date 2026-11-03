@@ -1,47 +1,22 @@
 import { describe, it, expect } from 'vitest';
-import {
-  extractErrorMessage,
-  formatWait,
-  localizeApiErrorMessage,
-  localizeFieldError,
-  toBffError,
-} from './errors';
-
-describe('localizeApiErrorMessage', () => {
-  it('translates Vine unique e-mail and username messages to Portuguese', () => {
-    expect(localizeApiErrorMessage('The email has already been taken')).toBe(
-      'Este e-mail já está em uso'
-    );
-    expect(localizeApiErrorMessage('The username has already been taken')).toBe(
-      'Este nome de usuário já está em uso'
-    );
-    expect(localizeApiErrorMessage('Invalid user credentials')).toBe(
-      'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.'
-    );
-    expect(localizeApiErrorMessage('E_INVALID_CREDENTIALS')).toBe(
-      'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.'
-    );
-  });
-
-  it('leaves Portuguese messages unchanged', () => {
-    expect(localizeApiErrorMessage('Este e-mail já está em uso')).toBe(
-      'Este e-mail já está em uso'
-    );
-  });
-});
-
-describe('extractErrorMessage', () => {
-  it('reads the first Vine error and localizes it', () => {
-    expect(
-      extractErrorMessage(
-        { errors: [{ message: 'The email has already been taken', field: 'email' }] },
-        'Não foi possível concluir o cadastro'
-      )
-    ).toBe('Este e-mail já está em uso');
-  });
-});
+import { formatWait, localizeFieldError, toBffError } from './errors';
 
 describe('localizeFieldError', () => {
+  it.each([
+    ['email', 'Este e-mail já está em uso.'],
+    ['username', 'Este nome de usuário já está em uso.'],
+    ['phoneNumber', 'Este telefone já está em uso.'],
+    ['website', 'Este valor já está em uso.'],
+  ])('names the taken %s from the unique rule, not from English text', (field, expected) => {
+    expect(
+      localizeFieldError({
+        field,
+        rule: 'database.unique',
+        message: 'The x has already been taken',
+      })
+    ).toBe(expected);
+  });
+
   it.each([
     [{ rule: 'required' }, 'Campo obrigatório.'],
     [{ rule: 'maxLength', meta: { max: 255 } }, 'Use no máximo 255 caracteres.'],
@@ -56,17 +31,20 @@ describe('localizeFieldError', () => {
     expect(localizeFieldError({ field: 'x', message: 'english copy', ...error })).toBe(expected);
   });
 
-  it('falls back to the localized backend message for unknown rules', () => {
-    expect(
-      localizeFieldError({
-        field: 'email',
-        rule: 'custom',
-        message: 'The email has already been taken',
-      })
-    ).toBe('Este e-mail já está em uso');
-    expect(localizeFieldError({ field: 'x', rule: 'custom', message: 'Mensagem própria' })).toBe(
+  it('keeps the backend message for rules without copy here (custom rules send pt-BR)', () => {
+    expect(localizeFieldError({ field: 'x', rule: 'custom', message: ' Mensagem própria ' })).toBe(
       'Mensagem própria'
     );
+  });
+
+  it('says the current password is wrong from its rule', () => {
+    expect(
+      localizeFieldError({
+        field: 'currentPassword',
+        rule: 'current_password',
+        message: 'The current password is incorrect',
+      })
+    ).toBe('A senha atual está incorreta.');
   });
 
   it('uses a generic message when there is no rule match and no message', () => {
@@ -106,12 +84,33 @@ describe('toBffError', () => {
     ).toEqual({ message: 'Campo obrigatório.', fieldErrors: { zip: 'Campo obrigatório.' } });
   });
 
-  it('maps the auth 400 `{ errors: [{ message }] }` shape to a localized message', () => {
+  it('translates wrong credentials by code, not by the English message', () => {
     expect(
-      toBffError(400, { errors: [{ message: 'Invalid user credentials' }] }, FALLBACK)
+      toBffError(
+        400,
+        { message: 'Invalid user credentials', code: 'E_INVALID_CREDENTIALS' },
+        FALLBACK
+      )
     ).toEqual({
       message: 'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.',
+      code: 'E_INVALID_CREDENTIALS',
     });
+  });
+
+  it.each([
+    ['E_BAD_REQUEST', 400],
+    ['E_CONFLICT', 409],
+    ['E_LOCKED', 423],
+    ['E_METHOD_NOT_ALLOWED', 405],
+    ['E_PAYLOAD_TOO_LARGE', 413],
+    ['E_HTTP_ERROR', 418],
+    ['E_REQUEST_ENTITY_TOO_LARGE', 413],
+    ['E_ENCODING_UNSUPPORTED', 415],
+    ['E_REQUEST_ABORTED', 400],
+  ])('never shows the English message of the generic code %s', (code, status) => {
+    const result = toBffError(status, { message: 'Some English text', code }, FALLBACK);
+    expect(result.message).not.toBe('Some English text');
+    expect(result.code).toBe(code);
   });
 
   it('maps `{ message }` bodies tied to a field into fieldErrors', () => {
@@ -127,18 +126,46 @@ describe('toBffError', () => {
     );
   });
 
-  it('localizes generic `{ message }` bodies without fieldErrors', () => {
-    expect(toBffError(400, { message: 'The current password is incorrect' }, FALLBACK)).toEqual({
+  it('shows the wrong current password on its field', () => {
+    expect(
+      toBffError(
+        422,
+        {
+          message: 'Validation Error',
+          code: 'E_VALIDATION_ERROR',
+          errors: [
+            {
+              field: 'currentPassword',
+              rule: 'current_password',
+              message: 'The current password is incorrect',
+            },
+          ],
+        },
+        FALLBACK
+      )
+    ).toEqual({
       message: 'A senha atual está incorreta.',
-    });
-    expect(toBffError(404, { message: 'Perfil não encontrado' }, FALLBACK)).toEqual({
-      message: 'Perfil não encontrado',
+      fieldErrors: { currentPassword: 'A senha atual está incorreta.' },
+      code: 'E_VALIDATION_ERROR',
     });
   });
 
-  it('never leaks backend wording for 401 `{ message }` bodies', () => {
-    expect(toBffError(401, { message: 'E_UNAUTHORIZED_ACCESS: token' }, FALLBACK)).toEqual({
+  it('keeps the pt-BR message of a domain code as is', () => {
+    expect(
+      toBffError(
+        404,
+        { message: ' Perfil não encontrado ', code: 'E_MISSIONARY_PROFILE_NOT_FOUND' },
+        FALLBACK
+      )
+    ).toEqual({ message: 'Perfil não encontrado', code: 'E_MISSIONARY_PROFILE_NOT_FOUND' });
+  });
+
+  it('never leaks the guard wording of a 401', () => {
+    expect(
+      toBffError(401, { message: 'Unauthorized access', code: 'E_UNAUTHORIZED_ACCESS' }, FALLBACK)
+    ).toEqual({
       message: 'Sua sessão expirou. Entre novamente para continuar.',
+      code: 'E_UNAUTHORIZED_ACCESS',
     });
   });
 
@@ -148,7 +175,7 @@ describe('toBffError', () => {
     ).toEqual({ message: 'Token de redefinição inválido ou expirado' });
   });
 
-  it('uses the known translation for a unique-field error and promotes it to the message', () => {
+  it('names the taken field from the unique rule and promotes it to the message', () => {
     expect(
       toBffError(
         422,
@@ -164,8 +191,8 @@ describe('toBffError', () => {
         FALLBACK
       )
     ).toEqual({
-      message: 'Este e-mail já está em uso',
-      fieldErrors: { email: 'Este e-mail já está em uso' },
+      message: 'Este e-mail já está em uso.',
+      fieldErrors: { email: 'Este e-mail já está em uso.' },
     });
   });
 
@@ -264,9 +291,10 @@ describe('toBffError edge cases', () => {
 });
 
 describe('toBffError status-specific session message', () => {
-  it('maps "Unauthorized" wording to the session message only for 401', () => {
-    expect(toBffError(403, { message: 'Unauthorized' }, 'Falhou')).toEqual({
-      message: 'Acesso não autorizado. Por favor, realize o login novamente.',
+  it('explains a 403 by its code', () => {
+    expect(toBffError(403, { message: 'Forbidden', code: 'E_FORBIDDEN' }, 'Falhou')).toEqual({
+      message: 'Você não tem permissão para realizar esta ação.',
+      code: 'E_FORBIDDEN',
     });
   });
 });

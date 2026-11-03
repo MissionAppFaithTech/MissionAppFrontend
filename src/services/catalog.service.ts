@@ -1,8 +1,6 @@
 import { createFaithCommunityAction, createMissionaryAgencyAction } from '@/app/actions/catalog';
-import type { ActionResult } from '@/lib/api/actionResult';
 import { callAction } from '@/lib/api/callAction';
 import { ApiError } from '@/lib/api/client';
-import { localizeApiErrorMessage } from '@/lib/api/errors';
 import { addCatalogItem } from '@/services/queries/catalog';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 
@@ -45,25 +43,10 @@ async function fetchCatalog(path: string, fallbackMessage: string): Promise<Cata
   if (!response.ok) {
     const message = typeof payload?.message === 'string' ? payload.message : fallbackMessage;
     // ApiError carries the status, so the query cache never retries a 4xx (ADR-0002).
-    throw new ApiError(localizeApiErrorMessage(message), response.status);
+    throw new ApiError(message, response.status);
   }
 
   return Array.isArray(payload?.data) ? payload.data : [];
-}
-
-/** Runs a catalog create action; errors keep the localized backend message. */
-async function createCatalogEntry(run: () => Promise<ActionResult<CatalogItem>>) {
-  try {
-    return await callAction(run);
-  } catch (error) {
-    if (!(error instanceof ApiError)) throw error;
-    throw new ApiError(
-      localizeApiErrorMessage(error.message),
-      error.status,
-      error.fieldErrors,
-      error.code
-    );
-  }
 }
 
 export function toCreateMissionaryAgencyPayload(input: MissionaryAgencyData) {
@@ -106,7 +89,7 @@ export function listFaithCommunities(): Promise<CatalogItem[]> {
 }
 
 export async function createMissionaryAgency(input: MissionaryAgencyData): Promise<CatalogItem> {
-  const item = await createCatalogEntry(() =>
+  const item = await callAction(() =>
     createMissionaryAgencyAction(toCreateMissionaryAgencyPayload(input))
   );
   addCatalogItem('missionaryAgencies', item);
@@ -114,7 +97,7 @@ export async function createMissionaryAgency(input: MissionaryAgencyData): Promi
 }
 
 export async function createFaithCommunity(input: FaithCommunityData): Promise<CatalogItem> {
-  const item = await createCatalogEntry(() =>
+  const item = await callAction(() =>
     createFaithCommunityAction(toCreateFaithCommunityPayload(input))
   );
   addCatalogItem('faithCommunities', item);

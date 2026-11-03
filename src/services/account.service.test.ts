@@ -35,12 +35,13 @@ describe('account.service', () => {
     expect(result.user.email).toBe('ana@example.com');
   });
 
-  it('translates a taken e-mail error to Portuguese', async () => {
+  it('passes on the pt-BR message and field errors the action built from the backend code', async () => {
     vi.mocked(registerAccountAction).mockResolvedValue({
       ok: false,
       status: 422,
-      message: 'The email has already been taken',
+      message: 'Este e-mail já está em uso',
       fieldErrors: { email: 'Este e-mail já está em uso' },
+      code: 'E_VALIDATION_ERROR',
     });
 
     const failure = registerAccount({
