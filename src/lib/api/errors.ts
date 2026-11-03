@@ -94,12 +94,6 @@ const STATUS_MESSAGES_PT: Record<number, string> = {
   429: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
 };
 
-/** Backend `{ message }` errors that belong to a single form field. */
-const MESSAGE_FIELDS: Record<string, string> = {
-  'Nome de usuário já está em uso': 'username',
-  'Comunidade de fé informada não existe': 'faithCommunityId',
-};
-
 type VineFieldError = {
   field?: unknown;
   message?: unknown;
@@ -189,9 +183,7 @@ function toBffErrorBody(
 
     const message = (body as { message?: unknown }).message;
     if (typeof message === 'string' && message.trim()) {
-      const text = message.trim();
-      const field = MESSAGE_FIELDS[text];
-      return field ? { message: text, fieldErrors: { [field]: text } } : { message: text };
+      return { message: message.trim() };
     }
   }
 
