@@ -5,7 +5,9 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public fieldErrors: Record<string, string> = {}
+    public fieldErrors: Record<string, string> = {},
+    /** Stable backend error code (`E_*`, backend ADR-0034), when known. */
+    public code?: string
   ) {
     super(message);
     this.name = 'ApiError';
@@ -54,7 +56,8 @@ export async function bffRequest<T>(path: string, options: BffRequestOptions): P
     throw new ApiError(
       typeof error.message === 'string' && error.message ? error.message : fallbackMessage,
       response.status,
-      error.fieldErrors ?? {}
+      error.fieldErrors ?? {},
+      typeof error.code === 'string' ? error.code : undefined
     );
   }
 

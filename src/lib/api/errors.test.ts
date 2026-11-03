@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   extractErrorMessage,
+  formatWait,
   localizeApiErrorMessage,
   localizeFieldError,
   toBffError,
@@ -275,5 +276,116 @@ describe('toBffError rate limit', () => {
     expect(toBffError(429, { message: 'Too many requests' }, 'Falhou')).toEqual({
       message: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
     });
+  });
+});
+
+describe('toBffError with the backend envelope (ADR-0034)', () => {
+  it('maps English or generic messages by code and keeps the code', () => {
+    expect(
+      toBffError(401, { message: 'Unauthorized access', code: 'E_UNAUTHORIZED_ACCESS' }, 'x')
+    ).toEqual({
+      message: 'Sua sessão expirou. Entre novamente para continuar.',
+      code: 'E_UNAUTHORIZED_ACCESS',
+    });
+    expect(
+      toBffError(400, { message: 'Invalid user credentials', code: 'E_INVALID_CREDENTIALS' }, 'x')
+        .message
+    ).toBe('E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.');
+    expect(
+      toBffError(404, { message: 'Rota não encontrada.', code: 'E_ROUTE_NOT_FOUND' }, 'x').message
+    ).toBe('Não encontramos o que você procurava.');
+    expect(
+      toBffError(500, { message: 'Erro interno', code: 'E_INTERNAL_SERVER_ERROR' }, 'x').message
+    ).toBe('Ocorreu um erro inesperado. Tente novamente mais tarde.');
+    expect(
+      toBffError(503, { message: 'x', code: 'E_REFRESH_UNAVAILABLE' }, 'fallback').message
+    ).toBe('Não foi possível renovar sua sessão agora. Tente novamente em instantes.');
+  });
+
+  it('keeps specific pt-BR domain messages for codes it does not map', () => {
+    expect(
+      toBffError(
+        404,
+        { message: 'Agência missionária não encontrada', code: 'E_MISSIONARY_AGENCY_NOT_FOUND' },
+        'x'
+      )
+    ).toEqual({
+      message: 'Agência missionária não encontrada',
+      code: 'E_MISSIONARY_AGENCY_NOT_FOUND',
+    });
+  });
+
+  it('tells how long to wait on a locked account (423)', () => {
+    expect(
+      toBffError(
+        423,
+        { message: 'Conta bloqueada', code: 'E_ACCOUNT_LOCKED', meta: { retryAfterSeconds: 300 } },
+        'x'
+      )
+    ).toEqual({
+      message:
+        'Sua conta foi temporariamente bloqueada. Tente novamente em 5 minutos ou redefina sua senha.',
+      code: 'E_ACCOUNT_LOCKED',
+    });
+  });
+
+  it('tells how long to wait on a rate limit (429)', () => {
+    expect(
+      toBffError(
+        429,
+        { message: 'Muitas', code: 'E_TOO_MANY_REQUESTS', meta: { retryAfterSeconds: 60 } },
+        'x'
+      ).message
+    ).toBe('Muitas tentativas em pouco tempo. Aguarde 1 minuto e tente novamente.');
+    expect(toBffError(429, { message: 'Muitas', code: 'E_TOO_MANY_REQUESTS' }, 'x').message).toBe(
+      'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.'
+    );
+  });
+
+  it('still maps field errors of a 422 envelope', () => {
+    const result = toBffError(
+      422,
+      {
+        message: 'Dados inválidos.',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          { field: 'email', rule: 'email', message: 'The email field must be a valid email' },
+        ],
+      },
+      'x'
+    );
+    expect(result).toEqual({
+      message: 'Informe um e-mail válido.',
+      fieldErrors: { email: 'Informe um e-mail válido.' },
+      code: 'E_VALIDATION_ERROR',
+    });
+  });
+
+  it('maps a business-rule 422 without field errors onto its field', () => {
+    expect(
+      toBffError(
+        422,
+        { message: 'Nome de usuário já está em uso', code: 'E_VALIDATION_ERROR' },
+        'x'
+      )
+    ).toEqual({
+      message: 'Nome de usuário já está em uso',
+      fieldErrors: { username: 'Nome de usuário já está em uso' },
+      code: 'E_VALIDATION_ERROR',
+    });
+  });
+
+  it('ignores codes that do not follow the E_* contract', () => {
+    expect(toBffError(400, { message: 'Bad', code: 'oops' }, 'x')).toEqual({ message: 'Bad' });
+  });
+});
+
+describe('formatWait', () => {
+  it('rounds up to minutes and says "alguns segundos" under a minute', () => {
+    expect(formatWait(1)).toBe('alguns segundos');
+    expect(formatWait(59)).toBe('alguns segundos');
+    expect(formatWait(60)).toBe('1 minuto');
+    expect(formatWait(61)).toBe('2 minutos');
+    expect(formatWait(900)).toBe('15 minutos');
   });
 });

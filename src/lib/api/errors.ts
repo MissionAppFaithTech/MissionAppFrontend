@@ -71,7 +71,67 @@ export type BffErrorBody = {
   message: string;
   /** Field name (backend camelCase) → pt-BR message, for react-hook-form `setError`. */
   fieldErrors?: Record<string, string>;
+  /** Stable backend error code (`E_*`, backend ADR-0034), when the API sent one. */
+  code?: string;
 };
+
+/**
+ * pt-BR copy for backend codes whose `message` is English or too generic. Domain
+ * codes not listed here already arrive with a specific pt-BR message.
+ */
+const CODE_MESSAGES_PT: Record<string, string> = {
+  E_UNAUTHORIZED_ACCESS: 'Sua sessão expirou. Entre novamente para continuar.',
+  E_INVALID_REFRESH_TOKEN: 'Sua sessão expirou. Entre novamente para continuar.',
+  E_INVALID_CREDENTIALS:
+    'E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.',
+  E_REFRESH_UNAVAILABLE: 'Não foi possível renovar sua sessão agora. Tente novamente em instantes.',
+  E_SESSION_NOT_FOUND: 'Esta sessão já foi encerrada.',
+  E_ROUTE_NOT_FOUND: 'Não encontramos o que você procurava.',
+  E_ROW_NOT_FOUND: 'Não encontramos o que você procurava.',
+  E_NOT_FOUND: 'Não encontramos o que você procurava.',
+  E_FORBIDDEN: 'Você não tem permissão para realizar esta ação.',
+  E_INVALID_CURSOR: 'Não foi possível carregar mais itens. Atualize a página e tente novamente.',
+  E_INTERNAL_SERVER_ERROR: 'Ocorreu um erro inesperado. Tente novamente mais tarde.',
+};
+
+/** "alguns segundos", "1 minuto", "5 minutos" — rounded up. */
+export function formatWait(seconds: number): string {
+  if (seconds < 60) return 'alguns segundos';
+  const minutes = Math.ceil(seconds / 60);
+  return minutes === 1 ? '1 minuto' : `${minutes} minutos`;
+}
+
+/** Copy for codes that depend on how long the user must wait (`meta.retryAfterSeconds`). */
+function waitMessage(code: string, retryAfterSeconds?: number): string | undefined {
+  const wait =
+    typeof retryAfterSeconds === 'number' && retryAfterSeconds > 0
+      ? formatWait(retryAfterSeconds)
+      : undefined;
+  if (code === 'E_ACCOUNT_LOCKED') {
+    return wait
+      ? `Sua conta foi temporariamente bloqueada. Tente novamente em ${wait} ou redefina sua senha.`
+      : STATUS_MESSAGES_PT[423];
+  }
+  if (code === 'E_TOO_MANY_REQUESTS') {
+    return wait
+      ? `Muitas tentativas em pouco tempo. Aguarde ${wait} e tente novamente.`
+      : STATUS_MESSAGES_PT[429];
+  }
+  return undefined;
+}
+
+type EnvelopeFields = { code?: string; retryAfterSeconds?: number };
+
+/** Reads `code` and `meta.retryAfterSeconds` from the backend envelope (ADR-0034). */
+function envelopeFields(body: unknown): EnvelopeFields {
+  if (typeof body !== 'object' || body === null) return {};
+  const { code, meta } = body as { code?: unknown; meta?: { retryAfterSeconds?: unknown } };
+  return {
+    code: typeof code === 'string' && /^E_[A-Z0-9_]+$/.test(code) ? code : undefined,
+    retryAfterSeconds:
+      typeof meta?.retryAfterSeconds === 'number' ? meta.retryAfterSeconds : undefined,
+  };
+}
 
 const STATUS_MESSAGES_PT: Record<number, string> = {
   401: 'Sua sessão expirou. Entre novamente para continuar.',
@@ -125,12 +185,26 @@ export function localizeFieldError(error: VineFieldError): string {
 }
 
 /**
- * Normalizes every backend error shape into `{ message, fieldErrors? }`:
- * Vine 422 `{ errors: [{ field, message, rule }] }`, custom `{ message }`,
- * auth 400 `{ errors: [{ message }] }` and the plain-text 401 body.
+ * Normalizes every backend error into `{ message, fieldErrors?, code? }`. The
+ * envelope `{ message, code, errors?, meta? }` (backend ADR-0034) is read by
+ * `code` first; older shapes (`{ errors }`, `{ message }`, plain text) still work.
  */
 export function toBffError(status: number, body: unknown, fallback: string): BffErrorBody {
+  const { code, retryAfterSeconds } = envelopeFields(body);
+  const result = toBffErrorBody(status, body, fallback, code, retryAfterSeconds);
+  return code ? { ...result, code } : result;
+}
+
+function toBffErrorBody(
+  status: number,
+  body: unknown,
+  fallback: string,
+  code: string | undefined,
+  retryAfterSeconds: number | undefined
+): BffErrorBody {
   const statusMessage = STATUS_MESSAGES_PT[status];
+  const waited = code ? waitMessage(code, retryAfterSeconds) : undefined;
+  if (waited) return { message: waited };
   // Rate-limit bodies are generic English text: the pt-BR status copy says it better.
   if (status === 429) return { message: STATUS_MESSAGES_PT[429] };
 
@@ -163,6 +237,9 @@ export function toBffError(status: number, body: unknown, fallback: string): Bff
       if (fieldMessages.length > 1) return { message: statusMessage ?? fallback, fieldErrors };
       if (firstMessage) return { message: firstMessage };
     }
+
+    const coded = code ? CODE_MESSAGES_PT[code] : undefined;
+    if (coded) return { message: coded };
 
     const message = (body as { message?: unknown }).message;
     if (typeof message === 'string' && message.trim()) {
