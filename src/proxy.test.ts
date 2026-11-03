@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { config, proxy } from './proxy';
+import { config, proxy, resetUnreachableLog } from './proxy';
 import { BackendApiError } from '@/lib/api/backend';
 import { refreshTokens } from '@/lib/api/bff';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
@@ -171,19 +171,54 @@ describe('proxy session refresh', () => {
     expect(forwardedCookie(res)).not.toContain(AUTH_COOKIE.refreshToken);
   });
 
-  it('keeps the cookies when the backend is unreachable', async () => {
+  it('keeps the cookies when the backend is unreachable and warns once, in one line', async () => {
+    resetUnreachableLog();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    mockedRefresh.mockRejectedValue(new TypeError('fetch failed'));
-    const res = await proxy(
+    mockedRefresh.mockRejectedValue(
+      new TypeError('fetch failed', { cause: { code: 'ECONNREFUSED' } })
+    );
+    const expiredSession = () =>
       request(
         '/profile/sobre',
         `${accessCookie('MISSIONARY', expired())}; ${AUTH_COOKIE.refreshToken}=rt-old`
-      )
-    );
+      );
+
+    const res = await proxy(expiredSession());
+    await proxy(expiredSession());
+
     expect(res.headers.get('set-cookie')).toBeNull();
     expect(res.headers.get('location')).toBeNull();
-    expect(error).toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn.mock.calls[0][0]).toMatch(
+      /\[proxy\] API http:\/\/\S+ não respondeu .*\(ECONNREFUSED\)/
+    );
+    expect(error).not.toHaveBeenCalled();
+    warn.mockRestore();
     error.mockRestore();
+  });
+
+  it('warns again after a minute and names the HTTP status of a 5xx', async () => {
+    resetUnreachableLog();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mockedRefresh.mockRejectedValue(new BackendApiError('Erro na API (503)', 503, {}));
+    const expiredSession = () =>
+      request(
+        '/profile/sobre',
+        `${accessCookie('MISSIONARY', expired())}; ${AUTH_COOKIE.refreshToken}=rt-old`
+      );
+
+    await proxy(expiredSession());
+    vi.advanceTimersByTime(59_000);
+    await proxy(expiredSession());
+    vi.advanceTimersByTime(2_000);
+    await proxy(expiredSession());
+
+    expect(warn).toHaveBeenCalledTimes(2);
+    expect(warn.mock.calls[0][0]).toContain('(HTTP 503)');
+    warn.mockRestore();
+    vi.useRealTimers();
   });
 
   it('forwards the end-user IP with the BFF secret (ADR-0032)', async () => {
