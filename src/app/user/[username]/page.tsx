@@ -1,20 +1,16 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
 import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import VisitorNavbar from '@/components/layout/VisitorNavbar';
-import VisitorProfileView from '@/components/profile/VisitorProfileView';
-import JsonLd, { generateProfilePageSchema } from '@/components/seo/JsonLd';
 import { getSiteUrl } from '@/lib/site';
+import PublicPageFallback from '@/components/common/PublicPageFallback';
 import { mockProfile } from '@/mocks/profile';
-import type { ProfileData } from '@/types/profile';
+import { UserProfileBody } from './UserProfileContent';
 
 type UserPageProps = {
   params: Promise<{ username: string }>;
 };
-
-/** Public profiles — refresh cached HTML periodically when data is wired. */
-export const revalidate = 300;
 
 export async function generateMetadata({ params }: UserPageProps): Promise<Metadata> {
   const { username } = await params;
@@ -74,28 +70,7 @@ export async function generateMetadata({ params }: UserPageProps): Promise<Metad
   };
 }
 
-export default async function UserPage({ params }: UserPageProps) {
-  const { username } = await params;
-
-  const isMockMissionary =
-    username.toLowerCase() === mockProfile.username.toLowerCase() ||
-    username.toLowerCase() === 'samuel-mendonca' ||
-    username.toLowerCase() === 'samuel';
-
-  const profile: ProfileData = isMockMissionary
-    ? mockProfile
-    : {
-        ...mockProfile,
-        username,
-        displayName: username.replace(/-/g, ' '),
-        about: {
-          ...mockProfile.about,
-          introduction: `Perfil público de ${username.replace(/-/g, ' ')} no Mission App.`,
-        },
-      };
-
-  const profileSchemas = generateProfilePageSchema(profile, `/user/${username}`);
-
+export default function UserPage({ params }: UserPageProps) {
   return (
     <Box
       sx={{
@@ -104,22 +79,12 @@ export default async function UserPage({ params }: UserPageProps) {
         pb: { xs: 'calc(env(safe-area-inset-bottom, 0px) + 76px)', md: 6 },
       }}
     >
-      {/* Schema.org JSON-LD para motores de busca e IAs */}
-      <JsonLd data={profileSchemas} />
-
       {/* TopBar do Visitante / Não Autenticado */}
       <VisitorNavbar maxWidth="lg" />
 
-      {/* Área Central de Conteúdo */}
-      <Container
-        component="main"
-        id="main-content"
-        tabIndex={-1}
-        maxWidth="lg"
-        sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4 }, outline: 'none' }}
-      >
-        <VisitorProfileView profile={profile} />
-      </Container>
+      <Suspense fallback={<PublicPageFallback label="Carregando perfil" />}>
+        <UserProfileBody params={params} />
+      </Suspense>
 
       {/* Navegação Inferior Mobile para Usuário Não Logado */}
       <VisitorBottomNav />

@@ -7,7 +7,9 @@ test.describe('Visitor Profile E2E', () => {
     await page.goto('/user/_SamiMendonca');
 
     // Profile heading / name
-    await expect(page.locator('text=_SamiMendonca')).toBeVisible();
+    // NOTE: with Cache Components the <title> streams into <body>, so match the
+    // visible handle exactly instead of any node containing the username.
+    await expect(page.getByText('@_SamiMendonca', { exact: true })).toBeVisible();
 
     // Guest CTA Banner
     await expect(page.getByText(/crie sua conta para acompanhar/i)).toBeVisible();

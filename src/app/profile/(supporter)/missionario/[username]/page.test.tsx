@@ -1,6 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import SupporterMissionaryPage, { generateMetadata } from './page';
+
+vi.mock('./MissionaryProfileContent', () => ({
+  MissionaryProfileBody: () => <div data-testid="missionary-profile-body" />,
+}));
 
 describe('Supporter Missionary Route (/profile/supporter/missionario/[username])', () => {
   it('generates proper title metadata for missionary', async () => {
@@ -11,25 +15,14 @@ describe('Supporter Missionary Route (/profile/supporter/missionario/[username])
     expect(meta.title).toContain('Samuel Mendonça');
   });
 
-  it('renders missionary profile with supporter authenticated navbar and no edit profile button', async () => {
-    const PageComponent = await SupporterMissionaryPage({
-      params: Promise.resolve({ username: '_SamiMendonca' }),
-    });
+  it('renders the supporter navbar and the main landmark around the streamed profile', () => {
+    render(SupporterMissionaryPage({ params: Promise.resolve({ username: '_SamiMendonca' }) }));
 
-    render(PageComponent);
-
-    // Supporter authenticated header components
     expect(
       screen.getByPlaceholderText(/buscar missionários, projetos, campanhas/i)
     ).toBeInTheDocument();
-
-    // Missionary name rendered
-    expect(screen.getByText('Samuel Mendonça')).toBeInTheDocument();
-
-    // No "Editar perfil" button
-    expect(screen.queryByRole('link', { name: /editar perfil/i })).not.toBeInTheDocument();
-
-    // "Ofertar" button rendered
-    expect(screen.getByRole('button', { name: /ofertar/i })).toBeInTheDocument();
+    const main = screen.getByRole('main');
+    expect(main).toHaveAttribute('id', 'main-content');
+    expect(screen.getByTestId('missionary-profile-body')).toBeInTheDocument();
   });
 });

@@ -4,6 +4,18 @@ import path from 'path';
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig: NextConfig = {
+  // Server-first rendering (ADR-0005): `use cache` + `cacheLife` replace the
+  // route segment configs (`revalidate`, `dynamic`).
+  cacheComponents: true,
+  cacheLife: {
+    // Public pages shared by every visitor (ADR-0004): same 300 s window the
+    // routes used with `revalidate = 300`, refreshed at once by `updateTag`.
+    public: {
+      stale: 300,
+      revalidate: 300,
+      expire: 60 * 60 * 24,
+    },
+  },
   turbopack: {
     root: path.resolve(__dirname),
   },

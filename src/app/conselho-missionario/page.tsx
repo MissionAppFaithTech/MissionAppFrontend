@@ -5,8 +5,6 @@ import VisitorBottomNav from '@/components/layout/VisitorBottomNav';
 import ChurchGuideView from '@/components/church/ChurchGuideView';
 import { getSiteUrl } from '@/lib/site';
 
-export const revalidate = 3600;
-
 export async function generateMetadata(): Promise<Metadata> {
   const baseUrl = getSiteUrl();
   const title = 'Guia Prático do Conselho Missionário & Mobilização da Igreja | Mission App';

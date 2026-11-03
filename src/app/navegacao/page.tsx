@@ -4,8 +4,6 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import NavigationPageContent from './NavigationPageContent';
 
-export const revalidate = 3600;
-
 export const metadata: Metadata = {
   title: 'Navegação e Descoberta | Mission App',
   description:

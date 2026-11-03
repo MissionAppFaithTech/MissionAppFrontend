@@ -4,8 +4,6 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import LoginPageContent from './LoginPageContent';
 
-export const revalidate = 3600;
-
 export const metadata: Metadata = {
   title: 'Entrar',
   description: 'Acesse sua conta no Mission App para acompanhar missões, oração e apoio.',
