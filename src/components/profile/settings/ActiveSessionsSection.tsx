@@ -19,7 +19,7 @@ import {
   type ActiveSession,
 } from '@/services/auth.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useSessionStore } from '@/stores/sessionStore';
+import { clearUserStores } from '@/stores/sessionStore';
 
 const dateFormatter = new Intl.DateTimeFormat('pt-BR', {
   dateStyle: 'short',
@@ -36,7 +36,6 @@ function describeSession(session: ActiveSession) {
 export default function ActiveSessionsSection() {
   const router = useRouter();
   const notify = useFeedbackStore((s) => s.notify);
-  const expire = useSessionStore((s) => s.expire);
   const [sessions, setSessions] = useState<ActiveSession[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ending, setEnding] = useState(false);
@@ -73,9 +72,10 @@ export default function ActiveSessionsSection() {
     setEnding(true);
     try {
       await terminateAllSessions();
-      expire();
+      clearUserStores();
       notify('Todas as sessões foram encerradas. Entre novamente.');
       router.replace('/login');
+      router.refresh();
     } catch (err) {
       showError(err, 'Não foi possível encerrar as sessões');
       setEnding(false);

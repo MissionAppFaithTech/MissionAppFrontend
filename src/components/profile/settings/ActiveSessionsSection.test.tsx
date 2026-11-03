@@ -4,11 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ActiveSessionsSection from './ActiveSessionsSection';
 import { listActiveSessions, terminateAllSessions } from '@/services/auth.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useSessionStore } from '@/stores/sessionStore';
+import { clearUserStores } from '@/stores/sessionStore';
 
 const replace = vi.fn();
-const router = { replace, push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() };
+const refresh = vi.fn();
+const router = { replace, push: vi.fn(), refresh, prefetch: vi.fn() };
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
+vi.mock('@/stores/sessionStore', () => ({ clearUserStores: vi.fn() }));
 
 vi.mock('@/services/auth.service', () => ({
   listActiveSessions: vi.fn(),
@@ -37,14 +39,12 @@ const sessions = [
 ];
 
 describe('ActiveSessionsSection', () => {
-  const expire = vi.fn();
-
   beforeEach(() => {
     vi.mocked(listActiveSessions).mockReset();
     vi.mocked(terminateAllSessions).mockReset();
     replace.mockClear();
-    expire.mockClear();
-    useSessionStore.setState({ expire });
+    refresh.mockClear();
+    vi.mocked(clearUserStores).mockClear();
     useFeedbackStore.setState({ current: null });
   });
 
@@ -80,7 +80,8 @@ describe('ActiveSessionsSection', () => {
     await user.click(screen.getByRole('button', { name: /encerrar todas as sessões/i }));
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
-    expect(expire).toHaveBeenCalled();
+    expect(clearUserStores).toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalled();
     expect(useFeedbackStore.getState().current?.message).toMatch(/sessões foram encerradas/i);
   });
 });

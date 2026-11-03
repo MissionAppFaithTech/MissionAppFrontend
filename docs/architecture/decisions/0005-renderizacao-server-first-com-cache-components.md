@@ -2,7 +2,7 @@
 
 ## Dados
 
-- **Status:** 🟡 Proposto
+- **Status:** 🟢 Aceito
 - **Data:** 2026-11-02
 - **Proponentes:** [@Amaro-peter](https://github.com/Amaro-peter)
 
@@ -32,7 +32,8 @@ Adotar a renderização **server-first** com **Cache Components**.
 
 1. **Ativar `cacheComponents: true`** em `next.config.ts` e migrar as 9 exportações `revalidate` para `'use cache'` + `cacheLife` (perfil custom de 300 s onde era 300; `'hours'` onde era 3600).
 2. **Sessão lida no servidor** por `getCurrentUser()` em `src/lib/server/session.ts`:
-   - marcada com `'use cache: private'`;
+   - envolvida em `cache()` do React, que deduplica a leitura dentro de uma requisição;
+   - **sem** `'use cache: private'`: essa entrada fica na memória do navegador pelo tempo `stale` e continuaria mostrando a sessão anterior logo depois do login ou do logout. Decodificar um cookie é barato, então não há o que ganhar com esse cache;
    - lê o cookie de acesso, já renovado pelo proxy ([ADR-0006](./0006-mutacoes-em-server-actions-e-renovacao-de-sessao-no-proxy.md)), e decodifica `sub` e `role` com `decodeAccessToken`. Isso serve só para decidir a tela: o backend continua autorizando cada chamada.
 3. **Compartilhamento da sessão** como promise num contexto (`SessionProvider`), desembrulhada com `use()` nos componentes cliente (`Logo`, menus, guard). A sessão **não** é lida no topo do layout, porque isso seguraria todo o segmento (guia de autenticação, seção sobre layouts). Cada leitura fica numa fronteira `<Suspense>` pequena.
 4. **Dados do usuário em componentes dinâmicos sob `<Suspense>`:**
@@ -48,7 +49,7 @@ Adotar a renderização **server-first** com **Cache Components**.
 - **Primeiro paint com dados:** some a sequência "skeleton → fetch → conteúdo" nas páginas autenticadas e o snapshot em `sessionStorage` que existia só para mascarar essa espera.
 - **Modelo atual do framework:** `revalidate` e `unstable_cache` foram substituídos por `use cache`; adiar a migração só aumenta o custo.
 - **Shell estático preservado:** com `<Suspense>` em volta de cada leitura de sessão ou perfil, o resto da página continua pré-renderizado.
-- **Privacidade:** `use cache: private` não guarda dado do usuário no servidor.
+- **Privacidade:** a sessão e o perfil do dono não entram em nenhum cache compartilhado: são lidos a cada requisição, e `cache()` só vale dentro dela.
 
 ## Alternativas Consideradas
 

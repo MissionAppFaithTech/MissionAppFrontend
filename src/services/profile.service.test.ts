@@ -5,7 +5,6 @@ import {
   changeAccountPassword,
   emptyProfile,
   formatWorkAddress,
-  getMyProfile,
   mapAccountProfile,
   updateAbout,
   updateHeader,
@@ -249,26 +248,6 @@ describe('profile.service BFF calls', () => {
       body: typeof init?.body === 'string' ? JSON.parse(init.body) : init?.body,
     };
   }
-
-  describe('getMyProfile', () => {
-    it('GETs /api/account/profile and unwraps data', async () => {
-      const payload = buildPayload();
-      fetchSpy.mockResolvedValue(jsonResponse({ data: payload }));
-
-      await expect(getMyProfile()).resolves.toEqual(payload);
-      expect(lastCall()).toEqual({ path: '/api/account/profile', method: 'GET', body: undefined });
-    });
-
-    it('rejects with an ApiError carrying the fallback message', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({}, 500));
-
-      await expect(getMyProfile()).rejects.toMatchObject({
-        name: 'ApiError',
-        status: 500,
-        message: 'Não foi possível carregar o seu perfil',
-      });
-    });
-  });
 
   describe('updateHeader', () => {
     it('PATCHes /api/account/profile (null clears the bio) and returns the user', async () => {

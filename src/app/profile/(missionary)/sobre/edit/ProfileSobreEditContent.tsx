@@ -2,32 +2,31 @@
 
 import { useRouter } from 'next/navigation';
 import ProfileAboutEditSection from '@/components/profile/ProfileAboutEditSection';
-import ProfileDataGate from '@/components/profile/ProfileDataGate';
+import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
+import { saveProfileAbout } from '@/services/profileSave.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useProfileStore } from '@/stores/profileStore';
 
 const ABOUT_HREF = '/profile/sobre';
 
 export default function ProfileSobreEditContent() {
   const router = useRouter();
-  const about = useProfileStore((state) => state.profile.about);
-  const saveAbout = useProfileStore((state) => state.saveAbout);
+  const { about } = useOwnerProfile();
   const notify = useFeedbackStore((state) => state.notify);
 
   return (
-    <ProfileDataGate loadingLabel="Carregando dados do Sobre" skeletonHeight={720}>
-      <ProfileAboutEditSection
-        data={about}
-        onSave={saveAbout}
-        onDone={(saved) => {
-          notify(
-            saved ? 'Sobre atualizado com sucesso.' : 'Nenhuma alteração para salvar.',
-            saved ? 'success' : 'info'
-          );
-          router.push(ABOUT_HREF);
-        }}
-        onCancel={() => router.push(ABOUT_HREF)}
-      />
-    </ProfileDataGate>
+    <ProfileAboutEditSection
+      data={about}
+      onSave={saveProfileAbout}
+      onDone={(saved) => {
+        notify(
+          saved ? 'Sobre atualizado com sucesso.' : 'Nenhuma alteração para salvar.',
+          saved ? 'success' : 'info'
+        );
+        router.push(ABOUT_HREF);
+        // The profile layout re-reads the saved data on the server (ADR-0005).
+        if (saved) router.refresh();
+      }}
+      onCancel={() => router.push(ABOUT_HREF)}
+    />
   );
 }

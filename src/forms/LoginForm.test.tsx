@@ -21,10 +21,8 @@ vi.mock('@/services/auth.service', () => ({
 }));
 
 const mockClearUserStores = vi.fn();
-const mockSetAuthenticated = vi.fn();
 vi.mock('@/stores/sessionStore', () => ({
   clearUserStores: () => mockClearUserStores(),
-  useSessionStore: { getState: () => ({ setAuthenticated: mockSetAuthenticated }) },
 }));
 
 describe('LoginForm component', () => {
@@ -89,10 +87,6 @@ describe('LoginForm component', () => {
       expect(mockPush).toHaveBeenCalledWith('/profile');
     });
     expect(mockClearUserStores).toHaveBeenCalled();
-    // The logo and the guards read the role right away, without another session request.
-    expect(mockSetAuthenticated).toHaveBeenCalledWith(
-      expect.objectContaining({ id: '1', role: 'MISSIONARY' })
-    );
   });
 
   it('sends a supporter to the supporter area', async () => {

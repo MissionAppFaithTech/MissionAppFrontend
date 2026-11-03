@@ -27,8 +27,8 @@ import {
   type ProfileEditFormData,
 } from '@/schemas/profile.schema';
 import type { UpdateHeaderPayload, UpdatePublicContactsPayload } from '@/services/profile.service';
+import { saveProfileHeader } from '@/services/profileSave.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useProfileStore } from '@/stores/profileStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
 
@@ -93,7 +93,6 @@ export function buildPayloads(
 
 export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const router = useRouter();
-  const saveHeader = useProfileStore((s) => s.saveHeader);
   const notify = useFeedbackStore((s) => s.notify);
   const [usernameStatus, setUsernameStatus] = useState<UsernameAvailabilityStatus>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -135,9 +134,11 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
     }
 
     try {
-      await saveHeader({ header, contacts });
+      await saveProfileHeader({ header, contacts });
       notify('Perfil atualizado com sucesso.');
       router.push(BACK_HREF);
+      // The profile layout re-reads the saved data on the server (ADR-0005).
+      router.refresh();
     } catch (error) {
       const fieldErrors = error instanceof ApiError ? error.fieldErrors : {};
       let focused = false;

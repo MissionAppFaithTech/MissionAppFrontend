@@ -5,12 +5,13 @@ import ProfileEditForm, { buildPayloads } from '@/components/profile/ProfileEdit
 import { ApiError } from '@/lib/api/client';
 import { emptyProfile } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useProfileStore } from '@/stores/profileStore';
+import { saveProfileHeader } from '@/services/profileSave.service';
 import type { ProfileData } from '@/types/profile';
 
 const push = vi.fn();
+const refresh = vi.fn();
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push, replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() }),
+  useRouter: () => ({ push, replace: vi.fn(), refresh, prefetch: vi.fn() }),
   usePathname: () => '/profile/edit-profile',
   useSearchParams: () => new URLSearchParams(),
 }));
@@ -38,13 +39,15 @@ const profile: ProfileData = {
   },
 };
 
-const saveHeader = vi.fn();
+vi.mock('@/services/profileSave.service', () => ({ saveProfileHeader: vi.fn() }));
+
+const saveHeader = vi.mocked(saveProfileHeader);
 
 describe('ProfileEditForm', () => {
   beforeEach(() => {
     push.mockClear();
+    refresh.mockClear();
     saveHeader.mockReset();
-    useProfileStore.setState({ saveHeader });
     useFeedbackStore.setState({ current: null });
   });
 
@@ -104,6 +107,8 @@ describe('ProfileEditForm', () => {
     });
     expect(useFeedbackStore.getState().current?.message).toBe('Perfil atualizado com sucesso.');
     expect(push).toHaveBeenCalledWith('/profile/sobre');
+    // The profile layout re-reads the saved data on the server (ADR-0005).
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 
   it('does not report success before the save resolves', async () => {

@@ -4,44 +4,44 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProfileSobreEditContent from './ProfileSobreEditContent';
 import { emptyProfile } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useProfileStore } from '@/stores/profileStore';
+import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
+import { saveProfileAbout } from '@/services/profileSave.service';
 
 const push = vi.fn();
-const router = { push, replace: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() };
+const refresh = vi.fn();
+const router = { push, replace: vi.fn(), refresh, prefetch: vi.fn() };
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
   usePathname: () => '/profile/sobre/edit',
 }));
 
-describe('ProfileSobreEditContent', () => {
-  const saveAbout = vi.fn();
+vi.mock('@/services/profileSave.service', () => ({ saveProfileAbout: vi.fn() }));
 
+const saveAbout = vi.mocked(saveProfileAbout);
+const profile = {
+  ...emptyProfile,
+  username: 'samuel',
+  about: { ...emptyProfile.about, lifeVerse: 'João 3:16' },
+};
+const renderContent = () =>
+  render(
+    <OwnerProfileProvider profile={profile}>
+      <ProfileSobreEditContent />
+    </OwnerProfileProvider>
+  );
+
+describe('ProfileSobreEditContent', () => {
   beforeEach(() => {
     push.mockClear();
+    refresh.mockClear();
     saveAbout.mockReset();
     useFeedbackStore.setState({ current: null });
-    useProfileStore.setState({
-      status: 'ready',
-      saveAbout,
-      profile: {
-        ...emptyProfile,
-        username: 'samuel',
-        about: { ...emptyProfile.about, lifeVerse: 'João 3:16' },
-      },
-    });
   });
 
-  it('shows a loading state until the fresh profile arrives', () => {
-    useProfileStore.setState({ status: 'loading' });
-    render(<ProfileSobreEditContent />);
-
-    expect(screen.getByRole('status', { name: /carregando dados do sobre/i })).toBeInTheDocument();
-  });
-
-  it('saves through the store once, then confirms and returns to Sobre', async () => {
+  it('saves once, confirms, returns to Sobre and re-reads the profile', async () => {
     const user = userEvent.setup();
     saveAbout.mockResolvedValue(undefined);
-    render(<ProfileSobreEditContent />);
+    renderContent();
 
     await user.type(screen.getByLabelText(/versículo para a vida/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
@@ -53,15 +53,17 @@ describe('ProfileSobreEditContent', () => {
       workAddress: undefined,
     });
     expect(useFeedbackStore.getState().current?.message).toBe('Sobre atualizado com sucesso.');
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 
   it('cancel returns without saving', async () => {
     const user = userEvent.setup();
-    render(<ProfileSobreEditContent />);
+    renderContent();
 
     await user.click(screen.getByRole('button', { name: /cancelar/i }));
 
     expect(push).toHaveBeenCalledWith('/profile/sobre');
     expect(saveAbout).not.toHaveBeenCalled();
+    expect(refresh).not.toHaveBeenCalled();
   });
 });

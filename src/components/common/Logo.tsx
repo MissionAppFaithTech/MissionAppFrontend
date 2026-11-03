@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense } from 'react';
 import Box from '@mui/material/Box';
 import Image from 'next/image';
 import Link from 'next/link';
 import { homePathForRole } from '@/lib/auth/rbac';
-import { useSessionStore } from '@/stores/sessionStore';
+import { useSession } from '@/components/auth/SessionProvider';
 
 const LOGO_PATHS = {
   light: '/logos/logo_light.PNG',
@@ -39,21 +39,25 @@ function resolveSize(size?: string): LogoSize {
 }
 
 /** Role home for a logged-in user (RBAC), the landing page for visitors. */
-function useHomeHref(): string {
-  const status = useSessionStore((state) => state.status);
-  const role = useSessionStore((state) => state.role);
-  const loadSession = useSessionStore((state) => state.loadSession);
-
-  useEffect(() => {
-    if (status === 'unknown') void loadSession();
-  }, [status, loadSession]);
-
-  return status === 'authenticated' ? homePathForRole(role) : '/';
+function SessionHomeLogo(props: Omit<LogoProps, 'href'>) {
+  const session = useSession();
+  const href = session.status === 'authenticated' ? homePathForRole(session.role) : '/';
+  return <LogoMark {...props} href={href} />;
 }
 
-export default function Logo({ href: hrefOverride, size, variant = 'auto' }: LogoProps) {
-  const homeHref = useHomeHref();
-  const href = hrefOverride ?? homeHref;
+export default function Logo({ href, ...props }: LogoProps) {
+  if (href) return <LogoMark {...props} href={href} />;
+
+  // The session streams from the server (ADR-0005); until it arrives the mark
+  // links to the landing page, which is also right for visitors.
+  return (
+    <Suspense fallback={<LogoMark {...props} href="/" />}>
+      <SessionHomeLogo {...props} />
+    </Suspense>
+  );
+}
+
+function LogoMark({ href, size, variant = 'auto' }: LogoProps) {
   const resolvedSize = resolveSize(size);
   const { height, maxWidth } = sizes[resolvedSize];
 
