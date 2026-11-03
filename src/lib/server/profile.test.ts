@@ -84,4 +84,16 @@ describe('loadMyProfile', () => {
     expect(consoleError).toHaveBeenCalledWith('[profile] load failed', expect.any(TypeError));
     consoleError.mockRestore();
   });
+
+  it('lets Next.js handle an aborted prerender instead of reporting a failure', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const aborted = Object.assign(new Error('During prerendering, fetch() rejects'), {
+      digest: 'HANGING_PROMISE_REJECTION',
+    });
+    vi.mocked(fetchAccountProfile).mockRejectedValue(aborted);
+
+    await expect(loadMyProfile()).rejects.toBe(aborted);
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
 });

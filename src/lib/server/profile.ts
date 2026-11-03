@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { unstable_rethrow } from 'next/navigation';
 import { fetchAccountProfile } from '@/lib/api/accountProfile';
 import { BackendApiError } from '@/lib/api/backend';
 import { toBffError } from '@/lib/api/errors';
@@ -27,6 +28,9 @@ export async function loadMyProfile(): Promise<OwnerProfileResult> {
   try {
     return { kind: 'ok', profile: mapAccountProfile(await fetchAccountProfile(accessToken)) };
   } catch (error) {
+    // Next.js aborts request-time work when a prerender (e.g. the prefetched App
+    // Shell) completes; that is not a failed load, so let Next handle it.
+    unstable_rethrow(error);
     if (error instanceof BackendApiError) {
       if (error.status === 401) return { kind: 'expired' };
       return { kind: 'error', message: toBffError(error.status, error.body, LOAD_ERROR).message };

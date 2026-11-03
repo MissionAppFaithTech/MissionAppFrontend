@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
   // Server-first rendering (ADR-0005): `use cache` + `cacheLife` replace the
   // route segment configs (`revalidate`, `dynamic`).
   cacheComponents: true,
+  // A `<Link>` prefetches the route's shared App Shell (static + cached parts);
+  // URL-specific content streams in after navigation. No `prefetch={true}`
+  // links needed migrating (2026-11-03).
+  partialPrefetching: true,
   cacheLife: {
     // Public pages shared by every visitor (ADR-0004): same 300 s window the
     // routes used with `revalidate = 300`, refreshed at once by `updateTag`.

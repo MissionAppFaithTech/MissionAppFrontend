@@ -264,4 +264,22 @@ describe('fetchAccountProfile', () => {
 
     await expect(fetchAccountProfile(ACCESS)).rejects.toBe(notFound);
   });
+
+  it('lets Next.js handle an aborted prerender during a name lookup', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const aborted = Object.assign(new Error('During prerendering, fetch() rejects'), {
+      digest: 'HANGING_PROMISE_REJECTION',
+    });
+    mockBackend({
+      'GET /account/profile': () => profileResponse(),
+      [AGENCY_PATH]: () => {
+        throw aborted;
+      },
+      [COMMUNITY_PATH]: communityResponse,
+    });
+
+    await expect(fetchAccountProfile(ACCESS)).rejects.toBe(aborted);
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
 });

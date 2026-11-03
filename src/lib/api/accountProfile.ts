@@ -1,3 +1,4 @@
+import { unstable_rethrow } from 'next/navigation';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
 import type {
   AccountProfilePayload,
@@ -39,6 +40,8 @@ async function lookupName(key: CatalogKey, id: string, accessToken: string) {
     const entry = result.data[key];
     return entry ? { id: entry.id, name: entry.name } : null;
   } catch (error) {
+    // Aborted prerender work and other Next.js control flow are not lookup failures.
+    unstable_rethrow(error);
     if (error instanceof BackendApiError && error.status === 401) throw error;
     if (!(error instanceof BackendApiError && error.status === 404)) {
       console.error(`[account profile] ${key} name lookup failed`, error);
