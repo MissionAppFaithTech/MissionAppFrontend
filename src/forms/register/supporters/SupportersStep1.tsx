@@ -9,7 +9,6 @@ import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommun
 import GenderField from '@/forms/register/shared/GenderField';
 import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
-import { useCatalogItems } from '@/forms/register/shared/useCatalogItems';
 import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
 import { EMPTY_FAITH_COMMUNITY, SELECT_OTHER } from '@/forms/register/options';
 import { maskBirthDate } from '@/lib/masks';
@@ -17,11 +16,11 @@ import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { yieldToMain } from '@/lib/scheduler';
 import { createFaithCommunitySchema } from '@/schemas/catalog-create.schema';
 import { supporterStep1Schema, type SupporterStep1FormData } from '@/schemas/register.schema';
-import { listFaithCommunities } from '@/services/catalog.service';
+import { useCatalogItems } from '@/services/queries/catalog';
 
 export default function SupportersStep1() {
   const { formData, completeStep1 } = useSupporterRegisterWizard();
-  const communities = useCatalogItems(listFaithCommunities);
+  const communities = useCatalogItems('faithCommunities');
   const communityEntry = useOtherCatalogEntry();
   const {
     register,

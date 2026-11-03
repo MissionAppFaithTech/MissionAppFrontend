@@ -30,7 +30,7 @@ Quando um ADR do frontend depende de um ADR do backend, ele cita o número e o l
 | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------- |
 | [ADR-0000](./0000-uso-de-architecture-decision-records.md)                        | Adoção de Architecture Decision Records no Frontend                    | 🟡 Proposto |
 | [ADR-0001](./0001-separacao-entre-estado-de-servidor-cliente-url-e-formulario.md) | Separação entre Estado de Servidor, de Cliente, de URL e de Formulário | 🟢 Aceito   |
-| [ADR-0002](./0002-adocao-do-tanstack-query-para-estado-de-servidor.md)            | Adoção do TanStack Query nas Ilhas de Estado de Servidor no Cliente    | 🟡 Proposto |
+| [ADR-0002](./0002-adocao-do-tanstack-query-para-estado-de-servidor.md)            | Adoção do TanStack Query nas Ilhas de Estado de Servidor no Cliente    | 🟢 Aceito   |
 | [ADR-0003](./0003-escopo-e-convencoes-do-zustand-para-estado-de-cliente.md)       | Escopo e Convenções do Zustand para Estado de Cliente                  | 🟢 Aceito   |
 | [ADR-0004](./0004-rotas-publicas-com-server-components-e-use-cache.md)            | Rotas Públicas com Server Components e `use cache`                     | 🟡 Proposto |
 | [ADR-0005](./0005-renderizacao-server-first-com-cache-components.md)              | Renderização Server-First com Cache Components                         | 🟢 Aceito   |

@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ActiveSessionsSection from './ActiveSessionsSection';
@@ -50,7 +51,7 @@ describe('ActiveSessionsSection', () => {
 
   it('lists the sessions and marks the current device with text', async () => {
     vi.mocked(listActiveSessions).mockResolvedValue(sessions);
-    render(<ActiveSessionsSection />);
+    renderWithQuery(<ActiveSessionsSection />);
 
     expect(await screen.findByText('Chrome no Windows')).toBeInTheDocument();
     expect(screen.getByText('Celular')).toBeInTheDocument();
@@ -63,7 +64,7 @@ describe('ActiveSessionsSection', () => {
     vi.mocked(listActiveSessions)
       .mockRejectedValueOnce(new Error('Não foi possível carregar as sessões'))
       .mockResolvedValueOnce(sessions);
-    render(<ActiveSessionsSection />);
+    renderWithQuery(<ActiveSessionsSection />);
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/não foi possível carregar/i);
     await user.click(screen.getByRole('button', { name: /tentar novamente/i }));
@@ -75,7 +76,7 @@ describe('ActiveSessionsSection', () => {
     const user = userEvent.setup();
     vi.mocked(listActiveSessions).mockResolvedValue(sessions);
     vi.mocked(terminateAllSessions).mockResolvedValue({ message: 'ok' });
-    render(<ActiveSessionsSection />);
+    renderWithQuery(<ActiveSessionsSection />);
 
     await user.click(screen.getByRole('button', { name: /encerrar todas as sessões/i }));
 

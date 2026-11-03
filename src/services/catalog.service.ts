@@ -3,6 +3,7 @@ import type { ActionResult } from '@/lib/api/actionResult';
 import { callAction } from '@/lib/api/callAction';
 import { ApiError } from '@/lib/api/client';
 import { localizeApiErrorMessage } from '@/lib/api/errors';
+import { addCatalogItem } from '@/services/queries/catalog';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 
 export type CatalogItem = {
@@ -43,7 +44,8 @@ async function fetchCatalog(path: string, fallbackMessage: string): Promise<Cata
 
   if (!response.ok) {
     const message = typeof payload?.message === 'string' ? payload.message : fallbackMessage;
-    throw new Error(localizeApiErrorMessage(message));
+    // ApiError carries the status, so the query cache never retries a 4xx (ADR-0002).
+    throw new ApiError(localizeApiErrorMessage(message), response.status);
   }
 
   return Array.isArray(payload?.data) ? payload.data : [];
@@ -103,12 +105,18 @@ export function listFaithCommunities(): Promise<CatalogItem[]> {
   return fetchCatalog('/api/faith-communities', 'Não foi possível carregar as comunidades de fé');
 }
 
-export function createMissionaryAgency(input: MissionaryAgencyData): Promise<CatalogItem> {
-  return createCatalogEntry(() =>
+export async function createMissionaryAgency(input: MissionaryAgencyData): Promise<CatalogItem> {
+  const item = await createCatalogEntry(() =>
     createMissionaryAgencyAction(toCreateMissionaryAgencyPayload(input))
   );
+  addCatalogItem('missionaryAgencies', item);
+  return item;
 }
 
-export function createFaithCommunity(input: FaithCommunityData): Promise<CatalogItem> {
-  return createCatalogEntry(() => createFaithCommunityAction(toCreateFaithCommunityPayload(input)));
+export async function createFaithCommunity(input: FaithCommunityData): Promise<CatalogItem> {
+  const item = await createCatalogEntry(() =>
+    createFaithCommunityAction(toCreateFaithCommunityPayload(input))
+  );
+  addCatalogItem('faithCommunities', item);
+  return item;
 }

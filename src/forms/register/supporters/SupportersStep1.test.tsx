@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import SupportersStep1 from './SupportersStep1';
@@ -10,7 +11,7 @@ vi.mock('@/services/catalog.service', () => ({
 
 describe('SupportersStep1 component', () => {
   it('renders all personal fields including email and submit button', () => {
-    render(
+    renderWithQuery(
       <SupporterRegisterWizardProvider>
         <SupportersStep1 />
       </SupporterRegisterWizardProvider>
@@ -26,7 +27,7 @@ describe('SupportersStep1 component', () => {
 
   it('displays validation errors when submitting empty fields', async () => {
     const user = userEvent.setup();
-    render(
+    renderWithQuery(
       <SupporterRegisterWizardProvider>
         <SupportersStep1 />
       </SupporterRegisterWizardProvider>
@@ -42,7 +43,7 @@ describe('SupportersStep1 component', () => {
 
   it('does not show required errors until submit', async () => {
     const user = userEvent.setup();
-    render(
+    renderWithQuery(
       <SupporterRegisterWizardProvider>
         <SupportersStep1 />
       </SupporterRegisterWizardProvider>
@@ -59,7 +60,7 @@ describe('SupportersStep1 component', () => {
 
   it('shows the @ error while typing an email without it', async () => {
     const user = userEvent.setup();
-    render(
+    renderWithQuery(
       <SupporterRegisterWizardProvider>
         <SupportersStep1 />
       </SupporterRegisterWizardProvider>
@@ -73,7 +74,7 @@ describe('SupportersStep1 component', () => {
 
   it('opens the church modal from Não encontrei na lista', async () => {
     const user = userEvent.setup();
-    render(
+    renderWithQuery(
       <SupporterRegisterWizardProvider>
         <SupportersStep1 />
       </SupporterRegisterWizardProvider>

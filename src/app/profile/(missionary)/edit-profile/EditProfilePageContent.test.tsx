@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import { describe, it, expect, vi } from 'vitest';
 import EditProfilePageContent from './EditProfilePageContent';
 import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
@@ -16,7 +17,7 @@ vi.mock('next/navigation', () => ({
 
 describe('EditProfilePageContent', () => {
   it('edits the profile the server layout loaded', () => {
-    render(
+    renderWithQuery(
       <OwnerProfileProvider
         profile={{ ...emptyProfile, displayName: 'Pastor Samuel Teste', username: 'samuel_teste' }}
       >

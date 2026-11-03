@@ -1,3 +1,4 @@
+import { getQueryClient } from '@/lib/query/client';
 import { useMissionaryRegisterStore } from '@/stores/missionaryRegisterStore';
 import { useSupporterRegisterStore } from '@/stores/supporterRegisterStore';
 
@@ -23,12 +24,14 @@ export function purgeLegacyProfileCache() {
 }
 
 /**
- * Drops every piece of user data kept in memory or Web Storage (ADR-0003). The
- * session itself is read on the server from the cookies (ADR-0005); this only
- * clears client state on login, logout and an expired session.
+ * Drops every piece of user data kept in memory or Web Storage (ADR-0003): the
+ * stores and the query cache of the client islands (ADR-0002). The session
+ * itself is read on the server from the cookies (ADR-0005); this only clears
+ * client state on login, logout and an expired session.
  */
 export function clearUserStores() {
   useMissionaryRegisterStore.getState().reset();
   useSupporterRegisterStore.getState().reset();
+  getQueryClient().clear();
   purgeLegacyProfileCache();
 }

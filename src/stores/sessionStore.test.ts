@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getQueryClient } from '@/lib/query/client';
 import { useMissionaryRegisterStore } from './missionaryRegisterStore';
 import { clearUserStores, purgeLegacyProfileCache } from './sessionStore';
 import { useSupporterRegisterStore } from './supporterRegisterStore';
@@ -54,7 +55,7 @@ describe('clearUserStores', () => {
     window.sessionStorage.clear();
   });
 
-  it('resets the register wizards and drops their Web Storage and the old caches', () => {
+  it('resets the wizards and drops Web Storage, the query cache and the old caches', () => {
     useMissionaryRegisterStore.setState({
       step: 2,
       formData: { fullName: 'Ana', email: 'ana@example.com' },
@@ -62,8 +63,11 @@ describe('clearUserStores', () => {
     });
     useSupporterRegisterStore.setState({ step: 2, formData: { fullName: 'Bia' } });
     seedLegacyCache();
+    getQueryClient().setQueryData(['active-sessions'], [{ id: 's-1' }]);
 
     clearUserStores();
+
+    expect(getQueryClient().getQueryData(['active-sessions'])).toBeUndefined();
 
     expect(useMissionaryRegisterStore.getState()).toMatchObject({
       step: 1,
