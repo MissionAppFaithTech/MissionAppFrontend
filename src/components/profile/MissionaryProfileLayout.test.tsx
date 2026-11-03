@@ -1,12 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import MissionaryProfileLayout from './MissionaryProfileLayout';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import MissionaryProfileLayout, { MissionaryProfileLoading } from './MissionaryProfileLayout';
+import { useOwnerProfile } from './OwnerProfileProvider';
 import { emptyProfile } from '@/services/profile.service';
-import { useProfileStore } from '@/stores/profileStore';
-import { useSessionStore, type SessionStatus } from '@/stores/sessionStore';
 
-const replace = vi.fn();
-const router = { push: vi.fn(), replace, prefetch: vi.fn(), refresh: vi.fn() };
+const refresh = vi.fn();
+const router = { push: vi.fn(), replace: vi.fn(), prefetch: vi.fn(), refresh };
 vi.mock('next/navigation', () => ({
   usePathname: () => '/profile/sobre',
   useRouter: () => router,
@@ -15,100 +15,56 @@ vi.mock('next/navigation', () => ({
 
 const loadedProfile = { ...emptyProfile, username: 'daniel', displayName: 'Missionário Daniel' };
 
-type SetupOptions = {
-  session?: SessionStatus;
-  role?: 'MISSIONARY' | 'SUPPORTER' | 'ADMIN';
-  fetchResult?: 'ready' | 'error';
-};
-
-function setup({
-  session = 'authenticated',
-  role = 'MISSIONARY',
-  fetchResult = 'ready',
-}: SetupOptions = {}) {
-  const fetchProfile = vi.fn(async () => {
-    if (fetchResult === 'ready') {
-      useProfileStore.setState({ profile: loadedProfile, status: 'ready' });
-      return loadedProfile;
-    }
-    useProfileStore.setState({ status: 'error', error: 'Servidor indisponível' });
-    return null;
-  });
-  useProfileStore.setState({ fetchProfile });
-  useSessionStore.setState({
-    loadSession: vi.fn(async () => {
-      useSessionStore.setState({ status: session, role: session === 'anonymous' ? null : role });
-      return session;
-    }),
-  });
-  return { fetchProfile };
-}
-
-function renderLayout() {
-  return render(
-    <MissionaryProfileLayout>
-      <div data-testid="child-content">Conteúdo da aba</div>
-    </MissionaryProfileLayout>
-  );
+function OwnerName() {
+  return <p>Dono: {useOwnerProfile().displayName}</p>;
 }
 
 describe('MissionaryProfileLayout', () => {
   beforeEach(() => {
-    replace.mockClear();
-    sessionStorage.clear();
-    useProfileStore.setState({ profile: emptyProfile, status: 'idle', error: null });
+    refresh.mockClear();
   });
 
-  it('shows an accessible loading state, then the page once the profile loads', async () => {
-    const { fetchProfile } = setup();
-    renderLayout();
-
-    expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
-    expect(await screen.findByTestId('child-content')).toBeInTheDocument();
-    expect(fetchProfile).toHaveBeenCalledTimes(1);
-    expect(screen.getAllByText('Missionário Daniel').length).toBeGreaterThan(0);
-  });
-
-  it('offers a retry when the first load fails', async () => {
-    setup({ fetchResult: 'error' });
-    renderLayout();
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('Servidor indisponível');
-    expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument();
-    expect(screen.queryByTestId('child-content')).not.toBeInTheDocument();
-  });
-
-  it('sends logged-out visitors to login', async () => {
-    const { fetchProfile } = setup({ session: 'anonymous' });
-    renderLayout();
-
-    await waitFor(() =>
-      expect(replace).toHaveBeenCalledWith(`/login?next=${encodeURIComponent('/profile/sobre')}`)
+  it('shows the area and shares the server-loaded profile with the page', () => {
+    render(
+      <MissionaryProfileLayout profile={loadedProfile}>
+        <OwnerName />
+      </MissionaryProfileLayout>
     );
-    expect(fetchProfile).not.toHaveBeenCalled();
+
+    expect(screen.getByText('Dono: Missionário Daniel')).toBeInTheDocument();
+    expect(screen.getAllByText('Missionário Daniel').length).toBeGreaterThan(0);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
-  it('sends supporters to the supporter area', async () => {
-    const { fetchProfile } = setup({ role: 'SUPPORTER' });
-    renderLayout();
+  it('explains a failed load and retries by re-rendering on the server', async () => {
+    const user = userEvent.setup();
+    render(
+      <MissionaryProfileLayout error="Servidor indisponível">
+        <OwnerName />
+      </MissionaryProfileLayout>
+    );
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/profile/supporter'));
-    expect(fetchProfile).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toHaveTextContent('Servidor indisponível');
+    expect(screen.queryByText(/Dono:/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Tentar novamente' }));
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 
-  it('sends admins to the admin area', async () => {
-    const { fetchProfile } = setup({ role: 'ADMIN' });
-    renderLayout();
+  it('falls back to a generic message when the error has no text', () => {
+    render(
+      <MissionaryProfileLayout>
+        <OwnerName />
+      </MissionaryProfileLayout>
+    );
 
-    await waitFor(() => expect(replace).toHaveBeenCalledWith('/admin'));
-    expect(fetchProfile).not.toHaveBeenCalled();
+    expect(screen.getByRole('alert')).toHaveTextContent('Não foi possível carregar o seu perfil.');
   });
 
-  it('still loads the profile when the session check fails (the backend authorizes)', async () => {
-    const { fetchProfile } = setup({ session: 'unknown' });
-    renderLayout();
+  it('announces the loading state while the profile streams in', () => {
+    render(<MissionaryProfileLoading />);
 
-    await waitFor(() => expect(fetchProfile).toHaveBeenCalledTimes(1));
-    expect(replace).not.toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('Carregando seu perfil…');
+    expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
   });
 });

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
@@ -8,9 +8,19 @@ import { useRoleGuard } from '@/lib/auth/useRoleGuard';
 
 /** Renders its area only after the role check passes (see `lib/auth/rbac.ts`). */
 export default function RoleGate({ children }: { children: ReactNode }) {
-  const status = useRoleGuard();
-  if (status === 'allowed') return children;
+  return (
+    <Suspense fallback={<AccessCheck />}>
+      <GuardedArea>{children}</GuardedArea>
+    </Suspense>
+  );
+}
 
+function GuardedArea({ children }: { children: ReactNode }) {
+  const status = useRoleGuard();
+  return status === 'allowed' ? children : <AccessCheck />;
+}
+
+function AccessCheck() {
   return (
     <Box
       role="status"

@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { SESSION_EXPIRED_EVENT } from '@/lib/api/client';
-import { useSessionStore } from '@/stores/sessionStore';
+import { clearUserStores, purgeLegacyProfileCache } from '@/stores/sessionStore';
 
 /** Pages that need a session (mirrors `src/proxy.ts`). */
 export function isProtectedPath(pathname: string) {
@@ -15,26 +15,31 @@ export function isProtectedPath(pathname: string) {
 
 /**
  * Listens for 401s reported by `bffRequest`: wipes user data from memory and
- * Web Storage and, on a protected page, sends the user to login. The current path
- * is read from `window.location` when the event fires, so the root layout does
- * not depend on `usePathname()` (it would suspend dynamic routes under Cache
+ * Web Storage, sends the user to login from a protected page, and refreshes the
+ * route so the server reads the session again (ADR-0005). The current path is
+ * read from `window.location` when the event fires, so the root layout does not
+ * depend on `usePathname()` (it would suspend dynamic routes under Cache
  * Components).
  */
 export function SessionWatcher() {
   const router = useRouter();
-  const expire = useSessionStore((s) => s.expire);
+
+  useEffect(() => {
+    purgeLegacyProfileCache();
+  }, []);
 
   useEffect(() => {
     const onExpired = () => {
-      expire();
+      clearUserStores();
       if (isProtectedPath(window.location.pathname)) {
         const next = `${window.location.pathname}${window.location.search}`;
         router.replace(`/login?reason=expired&next=${encodeURIComponent(next)}`);
       }
+      router.refresh();
     };
     window.addEventListener(SESSION_EXPIRED_EVENT, onExpired);
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, onExpired);
-  }, [expire, router]);
+  }, [router]);
 
   return null;
 }

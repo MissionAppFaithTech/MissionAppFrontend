@@ -1,57 +1,46 @@
-import { render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, render, screen, waitFor } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import Logo from './Logo';
-import { useSessionStore } from '@/stores/sessionStore';
+import { SessionProvider as SessionProviderForTest } from '@/components/auth/SessionProvider';
+import { authenticatedSession, renderWithSession } from '@/test/session';
 
-const loadSession = vi.fn();
+const link = () => screen.getByRole('link', { name: 'Mission App' });
+const expectHref = (href: string) => waitFor(() => expect(link()).toHaveAttribute('href', href));
 
 describe('Logo', () => {
-  beforeEach(() => {
-    loadSession.mockReset();
-    loadSession.mockResolvedValue('anonymous');
-    useSessionStore.setState({ status: 'unknown', role: null, loadSession });
-  });
-
-  const link = () => screen.getByRole('link', { name: 'Mission App' });
-
-  it('sends visitors to the landing page and checks the session once', async () => {
-    render(<Logo />);
-
-    expect(link()).toHaveAttribute('href', '/');
-    await waitFor(() => expect(loadSession).toHaveBeenCalledTimes(1));
+  it('sends visitors to the landing page', async () => {
+    await renderWithSession(<Logo />);
+    await expectHref('/');
   });
 
   it.each([
     ['MISSIONARY', '/profile'],
     ['SUPPORTER', '/profile/supporter'],
     ['ADMIN', '/admin'],
-  ] as const)('sends a logged-in %s to its home', (role, home) => {
-    useSessionStore.setState({ status: 'authenticated', role });
-    render(<Logo />);
-
-    expect(link()).toHaveAttribute('href', home);
-    expect(loadSession).not.toHaveBeenCalled();
+  ] as const)('sends a logged-in %s to its home', async (role, home) => {
+    await renderWithSession(<Logo />, authenticatedSession(role));
+    await expectHref(home);
   });
 
-  it('does not ask again once the visitor is known to be logged out', () => {
-    useSessionStore.setState({ status: 'anonymous', role: null });
-    render(<Logo />);
-
-    expect(link()).toHaveAttribute('href', '/');
-    expect(loadSession).not.toHaveBeenCalled();
+  it('keeps an explicit destination without waiting for the session', async () => {
+    await renderWithSession(<Logo href="/navegacao" />, authenticatedSession('SUPPORTER'));
+    expect(screen.getByRole('link', { name: 'Mission App' })).toHaveAttribute('href', '/navegacao');
   });
 
-  it('keeps an explicit destination', () => {
-    useSessionStore.setState({ status: 'authenticated', role: 'SUPPORTER' });
-    render(<Logo href="/navegacao" />);
-
-    expect(link()).toHaveAttribute('href', '/navegacao');
+  it('links to the landing page while the session is still streaming', () => {
+    const pending = new Promise<never>(() => {});
+    render(
+      <SessionProviderForTest session={pending}>
+        <Logo />
+      </SessionProviderForTest>
+    );
+    expect(screen.getByRole('link', { name: 'Mission App' })).toHaveAttribute('href', '/');
   });
 
-  it('falls back to the landing page while the session is unknown, even with a stale role', () => {
-    useSessionStore.setState({ status: 'unknown', role: 'MISSIONARY' });
-    render(<Logo />);
-
-    expect(link()).toHaveAttribute('href', '/');
+  it('works without a session provider (visitor)', async () => {
+    await act(async () => {
+      render(<Logo />);
+    });
+    await expectHref('/');
   });
 });

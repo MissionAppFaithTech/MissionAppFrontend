@@ -3,11 +3,13 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProfileAccountMenu from './ProfileAccountMenu';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useSessionStore } from '@/stores/sessionStore';
+import { logout } from '@/services/session.service';
 
 const replace = vi.fn();
-const router = { replace, push: vi.fn(), refresh: vi.fn(), prefetch: vi.fn() };
+const refresh = vi.fn();
+const router = { replace, push: vi.fn(), refresh, prefetch: vi.fn() };
 vi.mock('next/navigation', () => ({ useRouter: () => router }));
+vi.mock('@/services/session.service', () => ({ logout: vi.fn() }));
 
 const profile = { username: 'samuel', displayName: 'Samuel' };
 
@@ -19,12 +21,10 @@ async function openMenu(role?: 'missionary' | 'supporter') {
 }
 
 describe('ProfileAccountMenu', () => {
-  const logout = vi.fn();
-
   beforeEach(() => {
-    logout.mockReset();
+    vi.mocked(logout).mockReset();
+    refresh.mockClear();
     replace.mockClear();
-    useSessionStore.setState({ logout });
     useFeedbackStore.setState({ current: null });
   });
 
@@ -83,17 +83,18 @@ describe('ProfileAccountMenu', () => {
   });
 
   it('logs out and goes to the login page', async () => {
-    logout.mockResolvedValue(undefined);
+    vi.mocked(logout).mockResolvedValue(undefined);
     const user = await openMenu();
 
     await user.click(screen.getByRole('button', { name: /sair da conta/i }));
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith('/login'));
     expect(logout).toHaveBeenCalledTimes(1);
+    expect(refresh).toHaveBeenCalled();
   });
 
   it('stays on the page and explains when logout fails', async () => {
-    logout.mockRejectedValue(new Error('offline'));
+    vi.mocked(logout).mockRejectedValue(new Error('offline'));
     const user = await openMenu();
 
     await user.click(screen.getByRole('button', { name: /sair da conta/i }));

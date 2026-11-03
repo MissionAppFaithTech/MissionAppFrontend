@@ -19,12 +19,12 @@ test.describe('Impact Project & Edit Flow E2E', () => {
     ).toBeVisible();
 
     // YouTube presentation video
-    await expect(page.getByText(/vídeo de apresentação/i)).toBeVisible();
+    await expect(page.getByText(/vídeo de apresentação/i).filter({ visible: true })).toBeVisible();
     const iframe = page.locator('iframe');
     await expect(iframe).toBeVisible();
 
     // Photo carousel
-    await expect(page.getByText(/fotos do projeto/i)).toBeVisible();
+    await expect(page.getByText(/fotos do projeto/i).filter({ visible: true })).toBeVisible();
 
     // Ofertar button
     const ofertarBtn = page.getByRole('button', { name: /ofertar/i });

@@ -101,13 +101,6 @@ export function mapAccountProfile(payload: AccountProfilePayload): ProfileData {
   };
 }
 
-export async function getMyProfile(): Promise<AccountProfilePayload> {
-  const { data } = await bffRequest<{ data: AccountProfilePayload }>('/api/account/profile', {
-    fallbackMessage: 'Não foi possível carregar o seu perfil',
-  });
-  return data;
-}
-
 /** Header fields (RF 10.5). `biography: null` clears the mini-bio. */
 export type UpdateHeaderPayload = {
   fullName?: string;

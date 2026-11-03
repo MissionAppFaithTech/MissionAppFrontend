@@ -55,6 +55,12 @@ async function openDialog(page: Page, trigger: Locator) {
  * resolve in the gap before the transition starts.
  */
 async function settleForScan(page: Page) {
+  // Streamed Suspense content (ADR-0005) waits in hidden `S:` segments until React
+  // reveals it in place of the `B:` fallback; scan only the final page.
+  await page.waitForLoadState('load');
+  await page.waitForFunction(
+    () => !document.querySelector('template[id^="B:"], div[hidden][id^="S:"]')
+  );
   await page.addStyleTag({
     content: `*, *::before, *::after {
       transition: none !important;
@@ -263,13 +269,15 @@ test.describe('Keyboard and motion', () => {
     page,
   }) => {
     await page.goto('/profile/sobre/edit');
-    const city = page.getByLabel(/^cidade$/i);
+    const city = page.getByLabel(/^cidade$/i).filter({ visible: true });
     await city.fill('');
     await page.getByRole('button', { name: /^salvar$/i }).click();
 
     await expect(city).toHaveAttribute('aria-invalid', 'true');
     await expect(city).toBeFocused();
-    await expect(page.getByText(/preencha para salvar o local de atuação/i)).toBeVisible();
+    await expect(
+      page.getByText(/preencha para salvar o local de atuação/i).filter({ visible: true })
+    ).toBeVisible();
   });
 
   test('reduce motion stops the campaign carousel from advancing on its own', async ({ page }) => {

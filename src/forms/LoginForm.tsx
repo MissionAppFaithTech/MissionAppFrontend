@@ -21,7 +21,7 @@ import { validateOnSubmit, withLiveEmailFormat } from '@/lib/formValidation';
 import { loginSchema, type LoginFormData } from '@/schemas/auth.schema';
 import { postLoginPath } from '@/lib/auth/redirect';
 import { login } from '@/services/auth.service';
-import { clearUserStores, useSessionStore } from '@/stores/sessionStore';
+import { clearUserStores } from '@/stores/sessionStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 
 function parseLoginError(errorMessage: string): string {
@@ -82,7 +82,6 @@ export default function LoginForm() {
       const { user } = await login({ login: data.email, password: data.password });
       // Drop anything cached for a previous user before entering the new session.
       clearUserStores();
-      useSessionStore.getState().setAuthenticated(user);
       router.push(postLoginPath(user.role, searchParams.get('next')));
       router.refresh();
     } catch (err) {

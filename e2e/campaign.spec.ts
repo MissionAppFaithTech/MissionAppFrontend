@@ -14,16 +14,22 @@ test.describe('Missionary Campaign & Dedicated Campaign Page E2E Flow', () => {
     await page.goto('/profile/campanha');
 
     // 2. Check Campaign Badge & Titles
-    await expect(page.getByText('Selo Oficial de Campanha')).toBeVisible();
+    await expect(
+      page.getByText('Selo Oficial de Campanha').filter({ visible: true })
+    ).toBeVisible();
     await expect(
       page.getByRole('heading', { name: 'Campanha de Educação & Esperança' })
     ).toBeVisible();
     await expect(
-      page.getByText(/mobilizando comunidades de fé para transformar a infância/i)
+      page
+        .getByText(/mobilizando comunidades de fé para transformar a infância/i)
+        .filter({ visible: true })
     ).toBeVisible();
 
     // 3. Check Official Church Day
-    await expect(page.getByText(/dia oficial nas igrejas: 20 de outubro de 2026/i)).toBeVisible();
+    await expect(
+      page.getByText(/dia oficial nas igrejas: 20 de outubro de 2026/i).filter({ visible: true })
+    ).toBeVisible();
 
     // 4. Check Ofertar button and modal
     const ofertarBtn = page.getByRole('button', { name: /ofertar na campanha/i });
@@ -56,6 +62,8 @@ test.describe('Missionary Campaign & Dedicated Campaign Page E2E Flow', () => {
     await expect(
       page.getByRole('heading', { name: /projetos de impacto vinculados/i })
     ).toBeVisible();
-    await expect(page.getByText('Projeto social na favela do Lixão')).toBeVisible();
+    await expect(
+      page.getByText('Projeto social na favela do Lixão').filter({ visible: true })
+    ).toBeVisible();
   });
 });

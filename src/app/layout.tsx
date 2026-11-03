@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import JsonLd, { generateOrganizationAndWebsiteSchema } from '@/components/seo/JsonLd';
 import SkipToContent from '@/components/common/SkipToContent';
 import { getSiteUrl, siteConfig } from '@/lib/site';
+import { getCurrentUser } from '@/lib/server/session';
 import { A11Y_PRE_PAINT_SCRIPT } from '@/stores/a11yPreferencesStore';
 
 const dmSans = DM_Sans({
@@ -125,7 +126,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <JsonLd data={orgWebsiteSchema} />
       </head>
       <body className={dmSans.className}>
-        <Providers>
+        {/* The session promise is never awaited here: pages stay prerendered and each
+            consumer reads it inside its own <Suspense> boundary (ADR-0005). */}
+        <Providers session={getCurrentUser()}>
           <SkipToContent />
           {children}
         </Providers>

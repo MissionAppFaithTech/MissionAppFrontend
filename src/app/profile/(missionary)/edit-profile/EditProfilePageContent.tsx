@@ -1,15 +1,9 @@
 'use client';
 
-import ProfileDataGate from '@/components/profile/ProfileDataGate';
 import ProfileEditForm from '@/components/profile/ProfileEditForm';
-import { useProfileStore } from '@/stores/profileStore';
+import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
 
+/** The profile comes fresh from the server layout (ADR-0005), so the form edits real values. */
 export default function EditProfilePageContent() {
-  const profile = useProfileStore((state) => state.profile);
-
-  return (
-    <ProfileDataGate loadingLabel="Carregando dados do perfil" skeletonHeight={560}>
-      <ProfileEditForm profile={profile} />
-    </ProfileDataGate>
-  );
+  return <ProfileEditForm profile={useOwnerProfile()} />;
 }

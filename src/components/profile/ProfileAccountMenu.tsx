@@ -15,8 +15,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import type { Theme } from '@mui/material/styles';
 import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
+import { logout } from '@/services/session.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useSessionStore } from '@/stores/sessionStore';
 import { focusVisibleSx } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
 
@@ -45,7 +45,6 @@ export default function ProfileAccountMenu({
   role = 'missionary',
 }: ProfileAccountMenuProps) {
   const router = useRouter();
-  const logout = useSessionStore((state) => state.logout);
   const notify = useFeedbackStore((state) => state.notify);
   const [anchorElement, setAnchorElement] = useState<HTMLElement | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -66,6 +65,7 @@ export default function ProfileAccountMenu({
       await logout();
       setAnchorElement(null);
       router.replace('/login');
+      router.refresh();
     } catch {
       // Cookies may still be set: stay here and let the user retry.
       notify('Não foi possível sair agora. Verifique sua conexão e tente novamente.', 'error');

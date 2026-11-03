@@ -3,6 +3,9 @@ import { defineConfig, devices } from '@playwright/test';
 /** Google Chrome by default; `PW_BUNDLED_CHROMIUM=1` uses Playwright's Chromium where Chrome is not installed. */
 const chromeChannel = process.env.PW_BUNDLED_CHROMIUM ? {} : { channel: 'chrome' };
 
+const mockApiPort = process.env.E2E_MOCK_API_PORT || '3335';
+const mockApiUrl = `http://localhost:${mockApiPort}`;
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -32,13 +35,25 @@ export default defineConfig({
       },
     },
   ],
-  webServer: {
-    command: 'pnpm start',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    timeout: 120 * 1000,
-    env: {
-      PATH: `${process.env.HOME}/.nvm/versions/node/v24.19.0/bin:${process.env.PATH}`,
+  webServer: [
+    {
+      // Fake backend for the server-rendered reads (ADR-0005). Its own port, so
+      // the suite never reaches a real API.
+      command: 'node e2e/support/mock-api.mjs',
+      url: `${mockApiUrl}/health`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30 * 1000,
+      env: { E2E_MOCK_API_PORT: mockApiPort },
     },
-  },
+    {
+      command: 'pnpm start',
+      url: 'http://localhost:3000',
+      reuseExistingServer: true,
+      timeout: 120 * 1000,
+      env: {
+        PATH: `${process.env.HOME}/.nvm/versions/node/v24.19.0/bin:${process.env.PATH}`,
+        API_URL: mockApiUrl,
+      },
+    },
+  ],
 });

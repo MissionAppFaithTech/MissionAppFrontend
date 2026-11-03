@@ -6,15 +6,19 @@ test.describe('Auth Flow E2E', () => {
   }) => {
     await page.goto('/login');
 
-    // Email and Password inputs
-    const emailInput = page.getByPlaceholder(/seu@email.com/i);
-    const passwordInput = page.getByPlaceholder(/sua senha/i);
+    // Email and Password inputs, by accessible name: while the page streams, a
+    // hidden copy of the form may briefly sit in the DOM (out of the a11y tree).
+    const emailInput = page.getByRole('textbox', { name: 'E-mail' });
+    const passwordInput = page.getByRole('textbox', { name: 'Senha' });
 
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
 
     await emailInput.fill('user@domain.com');
     await passwordInput.fill('Secret123!');
+    // What the user typed survives the end of streaming.
+    await page.waitForLoadState('networkidle');
+    await expect(emailInput).toHaveValue('user@domain.com');
 
     // Check link to forgot password
     const forgotLink = page.getByRole('link', { name: /esqueceu sua senha/i });

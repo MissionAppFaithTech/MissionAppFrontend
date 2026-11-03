@@ -12,13 +12,12 @@ import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import RoleGate from '@/components/common/RoleGate';
 import PageNavbar from '@/components/layout/PageNavbar';
+import { logout } from '@/services/session.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { useSessionStore } from '@/stores/sessionStore';
 
 /** ADMIN home until the admin panel (RF 17–18) exists. Only ADMIN gets past the gate. */
 export default function AdminComingSoon() {
   const router = useRouter();
-  const logout = useSessionStore((state) => state.logout);
   const notify = useFeedbackStore((state) => state.notify);
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -27,6 +26,7 @@ export default function AdminComingSoon() {
     try {
       await logout();
       router.replace('/login');
+      router.refresh();
     } catch {
       notify('Não foi possível sair agora. Verifique sua conexão e tente novamente.', 'error');
       setLoggingOut(false);
