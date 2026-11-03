@@ -23,9 +23,14 @@ test.describe('Owner profile read on the server', () => {
     await page.goto('/profile/sobre');
 
     await expect(
-      page.getByText(missionaryProfileFixture.user.fullName, { exact: true }).first()
+      page
+        .getByText(missionaryProfileFixture.user.fullName, { exact: true })
+        .filter({ visible: true })
+        .first()
     ).toBeVisible();
-    await expect(page.getByText(missionaryProfileFixture.missionary.lifeVerse)).toBeVisible();
+    await expect(
+      page.getByText(missionaryProfileFixture.missionary.lifeVerse).filter({ visible: true })
+    ).toBeVisible();
     expect(clientReads).toEqual([]);
   });
 
