@@ -11,8 +11,7 @@ export const BFF_SECRET_HEADER = 'x-missionapp-bff-secret';
  * overwrite `x-real-ip`/`x-forwarded-for` (Vercel does), or users could spoof them.
  */
 export async function forwardedClientHeaders(): Promise<Record<string, string>> {
-  const secret = process.env.BFF_SHARED_SECRET;
-  if (!secret) return {};
+  if (!process.env.BFF_SHARED_SECRET) return {};
 
   let incoming: Awaited<ReturnType<typeof headers>>;
   try {
@@ -21,6 +20,17 @@ export async function forwardedClientHeaders(): Promise<Record<string, string>> 
     // Outside a request (build, scripts): nothing to forward.
     return {};
   }
+
+  return clientHeadersFrom(incoming);
+}
+
+/**
+ * Same as {@link forwardedClientHeaders} for code that already holds the request
+ * headers, such as the proxy, where `next/headers` is not available.
+ */
+export function clientHeadersFrom(incoming: Pick<Headers, 'get'>): Record<string, string> {
+  const secret = process.env.BFF_SHARED_SECRET;
+  if (!secret) return {};
 
   const ip =
     incoming.get('x-real-ip')?.trim() || incoming.get('x-forwarded-for')?.split(',')[0]?.trim();
