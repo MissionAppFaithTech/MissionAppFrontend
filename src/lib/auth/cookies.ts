@@ -19,21 +19,40 @@ export const accessTokenCookieMaxAge = 60 * 20;
 /** Refresh web padrão ~7d (ADR-0023). */
 export const refreshTokenCookieMaxAge = 60 * 60 * 24 * 7;
 
-export function applyAuthCookies(
-  response: NextResponse,
+/**
+ * Anything that can set a cookie: `NextResponse.cookies` in route handlers and
+ * the proxy, or the `cookies()` store inside a Server Action (ADR-0006).
+ */
+export type CookieWriter = {
+  set(name: string, value: string, options: typeof authCookieOptions & { maxAge: number }): unknown;
+};
+
+export function setAuthCookies(
+  jar: CookieWriter,
   tokens: { accessToken: string; refreshToken: string }
 ) {
-  response.cookies.set(AUTH_COOKIE.accessToken, tokens.accessToken, {
+  jar.set(AUTH_COOKIE.accessToken, tokens.accessToken, {
     ...authCookieOptions,
     maxAge: accessTokenCookieMaxAge,
   });
-  response.cookies.set(AUTH_COOKIE.refreshToken, tokens.refreshToken, {
+  jar.set(AUTH_COOKIE.refreshToken, tokens.refreshToken, {
     ...authCookieOptions,
     maxAge: refreshTokenCookieMaxAge,
   });
 }
 
+export function expireAuthCookies(jar: CookieWriter) {
+  jar.set(AUTH_COOKIE.accessToken, '', { ...authCookieOptions, maxAge: 0 });
+  jar.set(AUTH_COOKIE.refreshToken, '', { ...authCookieOptions, maxAge: 0 });
+}
+
+export function applyAuthCookies(
+  response: NextResponse,
+  tokens: { accessToken: string; refreshToken: string }
+) {
+  setAuthCookies(response.cookies, tokens);
+}
+
 export function clearAuthCookies(response: NextResponse) {
-  response.cookies.set(AUTH_COOKIE.accessToken, '', { ...authCookieOptions, maxAge: 0 });
-  response.cookies.set(AUTH_COOKIE.refreshToken, '', { ...authCookieOptions, maxAge: 0 });
+  expireAuthCookies(response.cookies);
 }

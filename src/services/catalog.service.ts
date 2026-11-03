@@ -1,3 +1,7 @@
+import { createFaithCommunityAction, createMissionaryAgencyAction } from '@/app/actions/catalog';
+import type { ActionResult } from '@/lib/api/actionResult';
+import { callAction } from '@/lib/api/callAction';
+import { ApiError } from '@/lib/api/client';
 import { localizeApiErrorMessage } from '@/lib/api/errors';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 
@@ -28,57 +32,6 @@ function optionalWebsite(value?: string) {
   return trimmed.includes('://') ? trimmed : `https://${trimmed}`;
 }
 
-function catalogItemsFrom(payload: unknown, collectionKey: string): CatalogItem[] {
-  const root =
-    payload && typeof payload === 'object' && 'data' in payload
-      ? (payload as { data: unknown }).data
-      : payload;
-
-  const source = Array.isArray(root)
-    ? root
-    : root && typeof root === 'object' && collectionKey in root
-      ? (root as Record<string, unknown>)[collectionKey]
-      : [];
-
-  if (!Array.isArray(source)) return [];
-
-  return source.flatMap((item) => {
-    if (!item || typeof item !== 'object') return [];
-    const id = 'id' in item && typeof item.id === 'string' ? item.id : '';
-    const name = 'name' in item && typeof item.name === 'string' ? item.name : '';
-    return id && name ? [{ id, name }] : [];
-  });
-}
-
-function createdItemFrom(payload: unknown, resourceKey: string): CatalogItem {
-  const root =
-    payload && typeof payload === 'object' && 'data' in payload
-      ? (payload as { data: unknown }).data
-      : payload;
-  const resource =
-    root && typeof root === 'object' && resourceKey in root
-      ? (root as Record<string, unknown>)[resourceKey]
-      : root;
-
-  const id =
-    resource && typeof resource === 'object' && 'id' in resource && typeof resource.id === 'string'
-      ? resource.id
-      : '';
-  const name =
-    resource &&
-    typeof resource === 'object' &&
-    'name' in resource &&
-    typeof resource.name === 'string'
-      ? resource.name
-      : '';
-
-  if (!id || !name) {
-    throw new Error('Resposta inválida ao cadastrar o item');
-  }
-
-  return { id, name };
-}
-
 async function fetchCatalog(path: string, fallbackMessage: string): Promise<CatalogItem[]> {
   const response = await fetch(path, {
     method: 'GET',
@@ -96,30 +49,19 @@ async function fetchCatalog(path: string, fallbackMessage: string): Promise<Cata
   return Array.isArray(payload?.data) ? payload.data : [];
 }
 
-async function postCatalog(
-  path: string,
-  body: Record<string, unknown>,
-  resourceKey: string,
-  fallbackMessage: string
-): Promise<CatalogItem> {
-  const response = await fetch(path, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    cache: 'no-store',
-  });
-
-  const payload = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    const message = typeof payload?.message === 'string' ? payload.message : fallbackMessage;
-    throw new Error(localizeApiErrorMessage(message));
+/** Runs a catalog create action; errors keep the localized backend message. */
+async function createCatalogEntry(run: () => Promise<ActionResult<CatalogItem>>) {
+  try {
+    return await callAction(run);
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
+    throw new ApiError(
+      localizeApiErrorMessage(error.message),
+      error.status,
+      error.fieldErrors,
+      error.code
+    );
   }
-
-  return createdItemFrom(payload, resourceKey);
 }
 
 export function toCreateMissionaryAgencyPayload(input: MissionaryAgencyData) {
@@ -162,23 +104,11 @@ export function listFaithCommunities(): Promise<CatalogItem[]> {
 }
 
 export function createMissionaryAgency(input: MissionaryAgencyData): Promise<CatalogItem> {
-  return postCatalog(
-    '/api/missionary-agencies',
-    toCreateMissionaryAgencyPayload(input),
-    'missionaryAgency',
-    'Não foi possível cadastrar a agência missionária'
+  return createCatalogEntry(() =>
+    createMissionaryAgencyAction(toCreateMissionaryAgencyPayload(input))
   );
 }
 
 export function createFaithCommunity(input: FaithCommunityData): Promise<CatalogItem> {
-  return postCatalog(
-    '/api/faith-communities',
-    toCreateFaithCommunityPayload(input),
-    'faithCommunity',
-    'Não foi possível cadastrar a igreja'
-  );
-}
-
-export function normalizeCatalogList(payload: unknown, collectionKey: string): CatalogListResponse {
-  return { data: catalogItemsFrom(payload, collectionKey) };
+  return createCatalogEntry(() => createFaithCommunityAction(toCreateFaithCommunityPayload(input)));
 }

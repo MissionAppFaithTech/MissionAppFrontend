@@ -1,41 +1,35 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { logoutAction } from '@/app/actions/auth';
 import { ApiError } from '@/lib/api/client';
 import { useSupporterRegisterStore } from '@/stores/supporterRegisterStore';
 import { logout } from './session.service';
 
-describe('logout', () => {
-  let fetchSpy: MockInstance<typeof fetch>;
+vi.mock('@/app/actions/auth', () => ({ logoutAction: vi.fn() }));
 
+describe('logout', () => {
   beforeEach(() => {
-    fetchSpy = vi.spyOn(globalThis, 'fetch');
+    vi.mocked(logoutAction).mockReset();
     useSupporterRegisterStore.setState({ step: 2, formData: { fullName: 'Bia' } });
   });
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('ends the session in the BFF and then clears the user stores', async () => {
-    fetchSpy.mockResolvedValue(new Response(null, { status: 204 }));
+  it('ends the session on the server and then clears the user stores', async () => {
+    vi.mocked(logoutAction).mockResolvedValue({
+      ok: true,
+      data: { message: 'Você saiu da sua conta.' },
+    });
 
     await logout();
 
-    expect(fetchSpy).toHaveBeenCalledWith(
-      '/api/auth/logout',
-      expect.objectContaining({ method: 'POST' })
-    );
+    expect(logoutAction).toHaveBeenCalledTimes(1);
     expect(useSupporterRegisterStore.getState()).toMatchObject({ step: 1, formData: {} });
   });
 
-  it('keeps the stores when the BFF fails, since the cookies are still set', async () => {
-    fetchSpy.mockResolvedValue(
-      new Response(JSON.stringify({ message: 'falhou' }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    );
+  it('keeps the stores when the request fails, since the cookies are still set', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.mocked(logoutAction).mockRejectedValue(new TypeError('Failed to fetch'));
 
     await expect(logout()).rejects.toBeInstanceOf(ApiError);
     expect(useSupporterRegisterStore.getState().step).toBe(2);
+    vi.mocked(console.error).mockRestore();
   });
 });

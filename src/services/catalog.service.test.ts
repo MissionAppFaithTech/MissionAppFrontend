@@ -1,4 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createFaithCommunityAction, createMissionaryAgencyAction } from '@/app/actions/catalog';
+import { ApiError } from '@/lib/api/client';
+
+vi.mock('@/app/actions/catalog', () => ({
+  createFaithCommunityAction: vi.fn(),
+  createMissionaryAgencyAction: vi.fn(),
+}));
 import {
   createFaithCommunity,
   createMissionaryAgency,
@@ -100,33 +107,43 @@ describe('catalog.service', () => {
     });
   });
 
-  it('creates an agency through the BFF', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({
-          data: { missionaryAgency: { id: 'agency-2', name: 'Nova Agência' } },
-        }),
-      })
-    );
+  it('creates an agency through the Server Action with the backend payload', async () => {
+    vi.mocked(createMissionaryAgencyAction).mockResolvedValue({
+      ok: true,
+      data: { id: 'agency-2', name: 'Nova Agência' },
+    });
 
     await expect(
       createMissionaryAgency({ ...EMPTY_MISSIONARY_AGENCY, name: 'Nova Agência' })
     ).resolves.toEqual({ id: 'agency-2', name: 'Nova Agência' });
+    expect(createMissionaryAgencyAction).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Nova Agência' })
+    );
   });
 
-  it('creates a faith community through the BFF', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ data: { faithCommunity: { id: 'church-2', name: 'Igreja Nova' } } }),
-      })
-    );
+  it('creates a faith community through the Server Action', async () => {
+    vi.mocked(createFaithCommunityAction).mockResolvedValue({
+      ok: true,
+      data: { id: 'church-2', name: 'Igreja Nova' },
+    });
 
     await expect(
       createFaithCommunity({ ...EMPTY_FAITH_COMMUNITY, name: 'Igreja Nova' })
     ).resolves.toEqual({ id: 'church-2', name: 'Igreja Nova' });
+  });
+
+  it('localizes the error message of a failed create', async () => {
+    vi.mocked(createFaithCommunityAction).mockResolvedValue({
+      ok: false,
+      status: 422,
+      message: 'The name has already been taken',
+    });
+
+    const error = await createFaithCommunity({ ...EMPTY_FAITH_COMMUNITY, name: 'Igreja' }).catch(
+      (e: unknown) => e
+    );
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(422);
+    expect((error as ApiError).message).not.toBe('The name has already been taken');
   });
 });

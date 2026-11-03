@@ -2,7 +2,7 @@
 
 ## Dados
 
-- **Status:** 🟡 Proposto
+- **Status:** 🟢 Aceito
 - **Data:** 2026-11-02
 - **Proponentes:** [@Amaro-peter](https://github.com/Amaro-peter)
 
@@ -55,6 +55,13 @@ A documentação mostra o repasse de headers do request, mas não documenta expl
 5. **Depois de salvar:** `updateTag()` nas tags afetadas (ex.: `profile:<username>`, [ADR-0004](./0004-rotas-publicas-com-server-components-e-use-cache.md)) e `refresh()` para reenviar a página atual.
 6. **Interface estável:** `src/services/*.service.ts` mantêm a assinatura e passam a chamar as actions, convertendo o retorno em `ApiError`. Formulários e stores de cadastro não mudam, e um 401 continua disparando `SESSION_EXPIRED_EVENT`.
 7. **UI otimista:** `useOptimistic` com Server Action para curtir e seguir quando o backend existir; ilhas com várias listas afetadas seguem o [ADR-0002](./0002-adocao-do-tanstack-query-para-estado-de-servidor.md).
+
+**Notas de implementação (2026-11-03):**
+
+- O núcleo comum é `callWithSession` (`src/lib/api/bff.ts`): `withSession` o usa nos route handlers que ficaram, e `runWithSession` (`src/lib/server/action.ts`) nas actions, gravando os cookies com `cookies()`.
+- O backend não devolve o `username` ao salvar dados de missionário, então a action o lê (`GET /account/profile`) para expirar `profile:<username>`. É uma chamada a mais por salvamento; se ela falhar, a página ainda é reenviada e o perfil público fica no cache por até 5 minutos. Ao trocar o username, as tags do nome antigo e do novo expiram.
+- Logout, "encerrar todas as sessões" e troca de senha limpam os cookies na própria action, o que já reenvia a página atual. Por isso o layout do perfil distingue "sem cookie" (vai para `/login`) de "sessão recusada pelo backend" (vai para `/login?reason=expired`).
+- No e2e, as actions falam com o backend falso `e2e/support/mock-api.mjs`, que guarda uma cópia do perfil por usuário.
 
 ## Justificativa
 

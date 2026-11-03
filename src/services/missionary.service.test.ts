@@ -1,56 +1,45 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMissionaryProfileAction, updateAboutAction } from '@/app/actions/missionary';
 import { ApiError } from '@/lib/api/client';
 import { completeMissionaryAbout, createMissionaryProfile } from './missionary.service';
 
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+vi.mock('@/app/actions/missionary', () => ({
+  createMissionaryProfileAction: vi.fn(),
+  updateAboutAction: vi.fn(),
+}));
 
 describe('missionary.service', () => {
-  let fetchSpy: MockInstance<typeof fetch>;
-
   beforeEach(() => {
-    fetchSpy = vi.spyOn(globalThis, 'fetch');
+    vi.clearAllMocks();
   });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  function lastCall() {
-    const [path, init] = fetchSpy.mock.calls.at(-1)!;
-    return { path, method: init?.method, body: JSON.parse(String(init?.body)) };
-  }
 
   describe('createMissionaryProfile', () => {
-    it('POSTs the agency id to /api/missionaries/profile and returns the new id', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse({ data: { missionary: { id: 'missionary-1', missionaryAgencyId: 'a-1' } } })
-      );
+    it('sends the agency id and returns the new id', async () => {
+      vi.mocked(createMissionaryProfileAction).mockResolvedValue({
+        ok: true,
+        data: { missionary: { id: 'missionary-1' } as never, reauthenticationRequired: true },
+      });
 
       await expect(createMissionaryProfile('a-1')).resolves.toEqual({ id: 'missionary-1' });
-      expect(lastCall()).toEqual({
-        path: '/api/missionaries/profile',
-        method: 'POST',
-        body: { missionaryAgencyId: 'a-1' },
-      });
+      expect(createMissionaryProfileAction).toHaveBeenCalledWith({ missionaryAgencyId: 'a-1' });
     });
 
     it('returns an empty id when the backend omits it', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({ data: { missionary: {} } }));
+      vi.mocked(createMissionaryProfileAction).mockResolvedValue({
+        ok: true,
+        data: { missionary: {} as never, reauthenticationRequired: true },
+      });
+
       await expect(createMissionaryProfile('a-1')).resolves.toEqual({ id: '' });
     });
 
-    it('rejects with the BFF message and field errors', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse(
-          { message: 'Agência inválida', fieldErrors: { missionaryAgencyId: 'Não existe' } },
-          422
-        )
-      );
+    it('rejects with the message and field errors', async () => {
+      vi.mocked(createMissionaryProfileAction).mockResolvedValue({
+        ok: false,
+        status: 422,
+        message: 'Agência inválida',
+        fieldErrors: { missionaryAgencyId: 'Não existe' },
+      });
 
       const error = await createMissionaryProfile('missing').catch((e: unknown) => e);
       expect(error).toBeInstanceOf(ApiError);
@@ -60,41 +49,44 @@ describe('missionary.service', () => {
         fieldErrors: { missionaryAgencyId: 'Não existe' },
       });
     });
-
-    it('falls back to a localized message when the BFF sends none', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({}, 500));
-      await expect(createMissionaryProfile('a-1')).rejects.toThrow(
-        'Não foi possível criar o perfil missionário'
-      );
-    });
   });
 
   describe('completeMissionaryAbout', () => {
-    it('PATCHes the community id and description to /api/missionaries/about', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({ data: { missionary: { id: 'm-1' } } }));
+    it('sends the community id and description', async () => {
+      vi.mocked(updateAboutAction).mockResolvedValue({
+        ok: true,
+        data: { missionary: { id: 'm-1' } as never },
+      });
 
       await expect(
         completeMissionaryAbout({ faithCommunityId: 'fc-1', aboutMe: 'Bio' })
       ).resolves.toBeUndefined();
-      expect(lastCall()).toEqual({
-        path: '/api/missionaries/about',
-        method: 'PATCH',
-        body: { faithCommunityId: 'fc-1', aboutMe: 'Bio' },
+      expect(updateAboutAction).toHaveBeenCalledWith({ faithCommunityId: 'fc-1', aboutMe: 'Bio' });
+    });
+
+    it('keeps the sign-up copy when the server is unreachable', async () => {
+      vi.mocked(updateAboutAction).mockResolvedValue({
+        ok: false,
+        status: 502,
+        message: 'Não foi possível salvar o Sobre',
+      });
+
+      await expect(completeMissionaryAbout({ aboutMe: 'Bio' })).rejects.toMatchObject({
+        status: 502,
+        message: 'Não foi possível concluir os dados do seu perfil missionário',
       });
     });
 
-    it('falls back to a localized message on failure', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse(null, 500));
-      await expect(
-        completeMissionaryAbout({ faithCommunityId: 'fc-1', aboutMe: 'Bio' })
-      ).rejects.toThrow('Não foi possível concluir os dados do seu perfil missionário');
-    });
-
     it('rejects with status 401 when the missionary session is missing', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({ message: 'Não autenticado' }, 401));
-      await expect(
-        completeMissionaryAbout({ faithCommunityId: 'fc-1', aboutMe: 'Bio' })
-      ).rejects.toMatchObject({ status: 401 });
+      vi.mocked(updateAboutAction).mockResolvedValue({
+        ok: false,
+        status: 401,
+        message: 'Sua sessão expirou. Entre novamente para continuar.',
+      });
+
+      await expect(completeMissionaryAbout({ aboutMe: 'Bio' })).rejects.toMatchObject({
+        status: 401,
+      });
     });
   });
 });

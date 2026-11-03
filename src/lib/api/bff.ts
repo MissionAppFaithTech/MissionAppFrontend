@@ -6,12 +6,12 @@ import { toBffError } from '@/lib/api/errors';
 import { AUTH_COOKIE, applyAuthCookies, clearAuthCookies } from '@/lib/auth/cookies';
 import { isAccessTokenExpiring } from '@/lib/auth/jwt';
 
-type AuthTokens = { accessToken: string; refreshToken: string };
+export type AuthTokens = { accessToken: string; refreshToken: string };
 
 // BFF validation messages reach the UI as `fieldErrors`: keep them in Portuguese.
 z.config(z.locales.pt());
 
-const SESSION_EXPIRED_MESSAGE = 'Sua sessão expirou. Entre novamente para continuar.';
+export const SESSION_EXPIRED_MESSAGE = 'Sua sessão expirou. Entre novamente para continuar.';
 
 /**
  * Concurrent refreshes with the same refresh token would trip the backend's
@@ -120,28 +120,32 @@ function sessionExpiredResponse() {
   return response;
 }
 
+type SessionRun<T> = { ok: true; value: T } | { ok: false };
+
 /**
  * Runs `handler` with the session access token. Refreshes the token when it is
- * missing/expiring or when the backend answers 401, retries once, and rewrites
- * the auth cookies. A failed refresh clears the cookies and answers 401.
+ * missing/expiring or when the backend answers 401, and retries once.
+ * `onRefreshed` receives the new tokens so the caller can store them. Answers
+ * `{ ok: false }` when there is no session left; other errors propagate.
+ * Shared by {@link withSession} (route handlers) and `runWithSession` (Server Actions).
  */
-export async function withSession(
+export async function callWithSession<T>(
   tag: string,
-  fallbackMessage: string,
-  handler: (accessToken: string) => Promise<NextResponse>
-): Promise<NextResponse> {
+  handler: (accessToken: string) => Promise<T>,
+  onRefreshed: (tokens: AuthTokens) => void
+): Promise<SessionRun<T>> {
   const store = await cookies();
   let accessToken = store.get(AUTH_COOKIE.accessToken)?.value;
   const refreshToken = store.get(AUTH_COOKIE.refreshToken)?.value;
-  let refreshed: AuthTokens | undefined;
   let refreshAttempted = false;
 
   const refresh = async () => {
     if (!refreshToken || refreshAttempted) return false;
     refreshAttempted = true;
     try {
-      refreshed = await refreshTokens(refreshToken);
-      accessToken = refreshed.accessToken;
+      const tokens = await refreshTokens(refreshToken);
+      accessToken = tokens.accessToken;
+      onRefreshed(tokens);
       return true;
     } catch (error) {
       if (!(error instanceof BackendApiError)) console.error(`[${tag}] refresh`, error);
@@ -151,22 +155,46 @@ export async function withSession(
 
   if (!accessToken || isAccessTokenExpiring(accessToken)) {
     const ok = await refresh();
-    if (!ok && !accessToken) return sessionExpiredResponse();
+    if (!ok && !accessToken) return { ok: false };
   }
 
-  const run = async (): Promise<NextResponse> => {
+  const run = async (): Promise<SessionRun<T>> => {
     try {
-      return await handler(accessToken as string);
+      return { ok: true, value: await handler(accessToken as string) };
     } catch (error) {
       if (error instanceof BackendApiError && error.status === 401) {
         if (await refresh()) return run();
-        return sessionExpiredResponse();
+        return { ok: false };
       }
-      return bffErrorResponse(error, fallbackMessage, tag);
+      throw error;
     }
   };
 
-  const response = await run();
+  return run();
+}
+
+/**
+ * Route-handler wrapper around {@link callWithSession}: rewrites the auth cookies
+ * after a refresh, clears them and answers 401 when the session is gone, and maps
+ * other failures to a JSON error.
+ */
+export async function withSession(
+  tag: string,
+  fallbackMessage: string,
+  handler: (accessToken: string) => Promise<NextResponse>
+): Promise<NextResponse> {
+  let refreshed: AuthTokens | undefined;
+  let response: NextResponse;
+  try {
+    const result = await callWithSession(tag, handler, (tokens) => {
+      refreshed = tokens;
+    });
+    if (!result.ok) return sessionExpiredResponse();
+    response = result.value;
+  } catch (error) {
+    response = bffErrorResponse(error, fallbackMessage, tag);
+  }
+
   // A handler that ended the session (logout, password change...) already cleared
   // the cookies: never resurrect them with the refreshed tokens.
   const handlerSetAuthCookies = response.cookies.has(AUTH_COOKIE.accessToken);

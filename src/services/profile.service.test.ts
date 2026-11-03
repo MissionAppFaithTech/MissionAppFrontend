@@ -1,4 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { changePasswordAction, updateAccountProfileAction } from '@/app/actions/account';
+import {
+  updateAboutAction,
+  updateIdentityAction,
+  updatePublicContactsAction,
+  updateWorkAddressAction,
+} from '@/app/actions/missionary';
 import { ApiError } from '@/lib/api/client';
 import type { AccountProfilePayload, BackendUser } from '@/types/backend';
 import {
@@ -13,12 +20,16 @@ import {
   upsertWorkAddress,
 } from './profile.service';
 
-function jsonResponse(body: unknown, status = 200): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
+vi.mock('@/app/actions/account', () => ({
+  changePasswordAction: vi.fn(),
+  updateAccountProfileAction: vi.fn(),
+}));
+vi.mock('@/app/actions/missionary', () => ({
+  updateAboutAction: vi.fn(),
+  updateIdentityAction: vi.fn(),
+  updatePublicContactsAction: vi.fn(),
+  updateWorkAddressAction: vi.fn(),
+}));
 
 const user: BackendUser = {
   id: 'user-1',
@@ -229,184 +240,123 @@ describe('mapAccountProfile', () => {
   });
 });
 
-describe('profile.service BFF calls', () => {
-  let fetchSpy: MockInstance<typeof fetch>;
-
+describe('profile.service saves (Server Actions)', () => {
   beforeEach(() => {
-    fetchSpy = vi.spyOn(globalThis, 'fetch');
+    vi.clearAllMocks();
   });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  function lastCall() {
-    const [path, init] = fetchSpy.mock.calls.at(-1)!;
-    return {
-      path,
-      method: init?.method,
-      body: typeof init?.body === 'string' ? JSON.parse(init.body) : init?.body,
-    };
-  }
 
   describe('updateHeader', () => {
-    it('PATCHes /api/account/profile (null clears the bio) and returns the user', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse({ data: { user: { fullName: 'Novo Nome', biography: null } } })
-      );
+    it('sends the payload (null clears the bio) and returns the user', async () => {
+      vi.mocked(updateAccountProfileAction).mockResolvedValue({ ok: true, data: { user } });
 
-      await expect(updateHeader({ fullName: 'Novo Nome', biography: null })).resolves.toEqual({
-        fullName: 'Novo Nome',
+      await expect(updateHeader({ fullName: 'Pastor Elias', biography: null })).resolves.toEqual(
+        user
+      );
+      expect(updateAccountProfileAction).toHaveBeenCalledWith({
+        fullName: 'Pastor Elias',
         biography: null,
       });
-      expect(lastCall()).toEqual({
-        path: '/api/account/profile',
-        method: 'PATCH',
-        body: { fullName: 'Novo Nome', biography: null },
-      });
     });
 
-    it('surfaces field errors from the BFF', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse({ message: 'Inválido', fieldErrors: { username: 'Em uso' } }, 409)
-      );
+    it('surfaces field errors', async () => {
+      vi.mocked(updateAccountProfileAction).mockResolvedValue({
+        ok: false,
+        status: 422,
+        message: 'Dados de perfil inválidos',
+        fieldErrors: { username: 'Este nome de usuário já está em uso' },
+      });
 
-      const error = await updateHeader({ username: 'taken' }).catch((e: unknown) => e);
+      const error = await updateHeader({ username: 'usado' }).catch((e: unknown) => e);
       expect(error).toBeInstanceOf(ApiError);
-      expect(error).toMatchObject({ status: 409, fieldErrors: { username: 'Em uso' } });
+      expect(error).toMatchObject({
+        status: 422,
+        fieldErrors: { username: 'Este nome de usuário já está em uso' },
+      });
     });
   });
 
-  describe('updatePublicContacts', () => {
-    it('PATCHes /api/missionaries/profile and returns the missionary', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse({ data: { missionary: { id: 'm-1', publicEmail: null } } })
-      );
+  it('updatePublicContacts returns the missionary', async () => {
+    const missionary = { id: 'm-1', publicEmail: 'contato@missao.org' };
+    vi.mocked(updatePublicContactsAction).mockResolvedValue({ ok: true, data: { missionary } });
 
-      await expect(updatePublicContacts({ publicEmail: null })).resolves.toEqual({
-        id: 'm-1',
-        publicEmail: null,
-      });
-      expect(lastCall()).toEqual({
-        path: '/api/missionaries/profile',
-        method: 'PATCH',
-        body: { publicEmail: null },
-      });
-    });
-
-    it('uses its own fallback message on failure', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse(null, 500));
-      await expect(updatePublicContacts({ publicPhone: '+55' })).rejects.toThrow(
-        'Não foi possível salvar os contatos públicos'
-      );
-    });
+    await expect(updatePublicContacts({ publicEmail: 'contato@missao.org' })).resolves.toEqual(
+      missionary
+    );
+    expect(updatePublicContactsAction).toHaveBeenCalledWith({ publicEmail: 'contato@missao.org' });
   });
 
-  describe('updateAbout', () => {
-    it('PATCHes /api/missionaries/about and returns the missionary', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse({ data: { missionary: { id: 'm-1', aboutMe: 'Olá', lifeVerse: null } } })
-      );
+  it('updateAbout returns the missionary', async () => {
+    const missionary = { id: 'm-1', lifeVerse: 'Fp 4:13' };
+    vi.mocked(updateAboutAction).mockResolvedValue({ ok: true, data: { missionary } });
 
-      await expect(updateAbout({ aboutMe: 'Olá', lifeVerse: null })).resolves.toEqual({
-        id: 'm-1',
-        aboutMe: 'Olá',
-        lifeVerse: null,
-      });
-      expect(lastCall()).toEqual({
-        path: '/api/missionaries/about',
-        method: 'PATCH',
-        body: { aboutMe: 'Olá', lifeVerse: null },
-      });
-    });
-
-    it('uses its own fallback message on failure', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({}, 500));
-      await expect(updateAbout({ aboutMe: 'x' })).rejects.toThrow(
-        'Não foi possível salvar o Sobre'
-      );
-    });
+    await expect(updateAbout({ lifeVerse: 'Fp 4:13' })).resolves.toEqual(missionary);
   });
 
-  describe('upsertWorkAddress', () => {
-    const address = {
-      zip: '69000-000',
+  it('upsertWorkAddress strips backend ids', async () => {
+    vi.mocked(updateWorkAddressAction).mockResolvedValue({
+      ok: true,
+      data: {
+        workAddress: {
+          id: 'wa-1',
+          missionaryId: 'm-1',
+          zip: '48900-000',
+          district: 'Centro',
+          city: 'Juazeiro',
+          state: 'BA',
+          country: 'Brasil',
+        } as never,
+      },
+    });
+
+    await expect(
+      upsertWorkAddress({
+        zip: '48900-000',
+        district: 'Centro',
+        city: 'Juazeiro',
+        state: 'BA',
+        country: 'Brasil',
+      })
+    ).resolves.toEqual({
+      zip: '48900-000',
       district: 'Centro',
-      city: 'Manaus',
-      state: 'AM',
+      city: 'Juazeiro',
+      state: 'BA',
       country: 'Brasil',
-    };
-
-    it('PATCHes /api/missionaries/work-address and strips backend ids', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse({ data: { workAddress: { id: 'wa-1', missionaryId: 'm-1', ...address } } })
-      );
-
-      await expect(upsertWorkAddress(address)).resolves.toEqual(address);
-      expect(lastCall()).toEqual({
-        path: '/api/missionaries/work-address',
-        method: 'PATCH',
-        body: address,
-      });
-    });
-
-    it('uses its own fallback message on failure', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({}, 500));
-      await expect(upsertWorkAddress(address)).rejects.toThrow(
-        'Não foi possível salvar o local de atuação'
-      );
     });
   });
 
-  describe('updateMissionaryIdentity', () => {
-    it('PATCHes /api/missionaries/identity and resolves to undefined', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({ data: {} }));
-
-      await expect(
-        updateMissionaryIdentity({ identityType: 'CPF', identityDocument: '12345678909' })
-      ).resolves.toBeUndefined();
-      expect(lastCall()).toEqual({
-        path: '/api/missionaries/identity',
-        method: 'PATCH',
-        body: { identityType: 'CPF', identityDocument: '12345678909' },
-      });
+  it('updateMissionaryIdentity resolves to undefined', async () => {
+    vi.mocked(updateIdentityAction).mockResolvedValue({
+      ok: true,
+      data: { missionary: {} as never },
     });
 
-    it('rejects with the BFF message on failure', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({ message: 'CPF inválido' }, 422));
-      await expect(
-        updateMissionaryIdentity({ identityType: 'CPF', identityDocument: '0' })
-      ).rejects.toThrow('CPF inválido');
+    await expect(
+      updateMissionaryIdentity({ identityType: 'CPF', identityDocument: '52998224725' })
+    ).resolves.toBeUndefined();
+    expect(updateIdentityAction).toHaveBeenCalledWith({
+      identityType: 'CPF',
+      identityDocument: '52998224725',
     });
   });
 
-  describe('changeAccountPassword', () => {
-    const payload = {
-      currentPassword: 'Old@1234',
-      newPassword: 'New@12345',
-      newPasswordConfirmation: 'New@12345',
-    };
-
-    it('PATCHes /api/account/password', async () => {
-      fetchSpy.mockResolvedValue(jsonResponse({ data: {} }));
-
-      await expect(changeAccountPassword(payload)).resolves.toBeUndefined();
-      expect(lastCall()).toEqual({ path: '/api/account/password', method: 'PATCH', body: payload });
+  it('changeAccountPassword rejects with field errors when the current password is wrong', async () => {
+    vi.mocked(changePasswordAction).mockResolvedValue({
+      ok: false,
+      status: 400,
+      message: 'Senha atual incorreta',
+      fieldErrors: { currentPassword: 'Senha atual incorreta' },
     });
 
-    it('rejects with field errors when the current password is wrong', async () => {
-      fetchSpy.mockResolvedValue(
-        jsonResponse(
-          { message: 'Senha atual incorreta', fieldErrors: { currentPassword: 'Incorreta' } },
-          400
-        )
-      );
-
-      await expect(changeAccountPassword(payload)).rejects.toMatchObject({
-        message: 'Senha atual incorreta',
-        status: 400,
-        fieldErrors: { currentPassword: 'Incorreta' },
-      });
+    await expect(
+      changeAccountPassword({
+        currentPassword: 'x',
+        newPassword: 'Nova1234!',
+        newPasswordConfirmation: 'Nova1234!',
+      })
+    ).rejects.toMatchObject({
+      status: 400,
+      fieldErrors: { currentPassword: 'Senha atual incorreta' },
     });
   });
 });

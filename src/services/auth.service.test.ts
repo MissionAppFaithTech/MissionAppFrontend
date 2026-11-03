@@ -8,42 +8,46 @@ import {
   terminateAllSessions,
 } from './auth.service';
 import { MOCK_RESET_TOKEN, MOCK_EXPIRED_RESET_TOKEN } from '@/mocks/auth';
+import { endAllSessionsAction, loginAction } from '@/app/actions/auth';
+import { ApiError } from '@/lib/api/client';
+
+vi.mock('@/app/actions/auth', () => ({
+  endAllSessionsAction: vi.fn(),
+  loginAction: vi.fn(),
+  logoutAction: vi.fn(),
+  requestPasswordResetAction: vi.fn(),
+  resetPasswordAction: vi.fn(),
+}));
 
 describe('auth.service', () => {
   const validUserEmail = 'admin@missionapp.test';
 
   describe('login', () => {
-    afterEach(() => {
-      vi.unstubAllGlobals();
-    });
+    it('normalizes the e-mail and returns the user', async () => {
+      vi.mocked(loginAction).mockResolvedValue({
+        ok: true,
+        data: { user: { id: '1', fullName: 'Admin Seed', email: validUserEmail } as never },
+      });
 
-    it('successfully logs in with valid credentials', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue({
-          ok: true,
-          json: async () => ({
-            data: {
-              user: { id: '1', fullName: 'Admin Seed', email: validUserEmail },
-            },
-          }),
-        })
-      );
+      const res = await login({ login: '  Admin@MissionApp.test ', password: 'Password123!' });
 
-      const res = await login({ login: validUserEmail, password: 'Password123!' });
       expect(res.user.email).toBe(validUserEmail);
+      expect(loginAction).toHaveBeenCalledWith({ login: validUserEmail, password: 'Password123!' });
     });
 
-    it('rejects invalid password or user', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue({
-          ok: false,
-          json: async () => ({ message: 'E-mail ou senha inválidos' }),
-        })
-      );
+    it('rejects invalid password or user with the pt-BR message', async () => {
+      vi.mocked(loginAction).mockResolvedValue({
+        ok: false,
+        status: 400,
+        message: 'E-mail ou senha inválidos',
+        code: 'E_INVALID_CREDENTIALS',
+      });
 
-      await expect(login({ login: 'nonexistent@domain.com', password: 'wrong' })).rejects.toThrow();
+      const error = await login({ login: 'nobody@domain.com', password: 'wrong' }).catch(
+        (e: unknown) => e
+      );
+      expect(error).toBeInstanceOf(ApiError);
+      expect(error).toMatchObject({ message: 'E-mail ou senha inválidos', status: 400 });
     });
   });
 
@@ -143,31 +147,23 @@ describe('auth.service', () => {
   });
 
   describe('terminateAllSessions', () => {
-    afterEach(() => {
-      vi.unstubAllGlobals();
-    });
-
     it('terminates all sessions successfully', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue({
-          ok: true,
-          json: async () => ({ message: 'Todas as sessões foram encerradas' }),
-        })
-      );
+      vi.mocked(endAllSessionsAction).mockResolvedValue({
+        ok: true,
+        data: { message: 'Todas as sessões foram encerradas.' },
+      });
 
-      const res = await terminateAllSessions();
-      expect(res.message).toBe('Todas as sessões foram encerradas');
+      await expect(terminateAllSessions()).resolves.toEqual({
+        message: 'Todas as sessões foram encerradas.',
+      });
     });
 
     it('throws error when termination fails', async () => {
-      vi.stubGlobal(
-        'fetch',
-        vi.fn().mockResolvedValue({
-          ok: false,
-          json: async () => ({ message: 'Erro ao revogar sessões' }),
-        })
-      );
+      vi.mocked(endAllSessionsAction).mockResolvedValue({
+        ok: false,
+        status: 500,
+        message: 'Erro ao revogar sessões',
+      });
 
       await expect(terminateAllSessions()).rejects.toThrow('Erro ao revogar sessões');
     });

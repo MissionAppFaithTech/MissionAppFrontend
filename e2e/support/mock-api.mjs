@@ -1,7 +1,11 @@
 /**
  * Fake MissionApp backend for the e2e suite. Owner pages read the profile on the
- * server (ADR-0005), so `page.route` can no longer answer those calls: the app
- * under test talks to this server instead (`API_URL`, see playwright.config.ts).
+ * server (ADR-0005) and save it through Server Actions (ADR-0006), so
+ * `page.route` can no longer answer those calls: the app under test talks to
+ * this server instead (`API_URL`, see playwright.config.ts).
+ *
+ * Each user (the token `sub`) gets their own copy of the fixture, so a spec that
+ * edits its profile never changes what other specs read.
  *
  * Runs on its own port (3335 by default) so it never touches a real backend.
  */
@@ -10,31 +14,96 @@ import missionaryProfile from './missionary-profile.json' with { type: 'json' };
 
 const port = Number(process.env.E2E_MOCK_API_PORT || 3335);
 
-function send(response, status, body) {
-  response.writeHead(status, { 'Content-Type': 'application/json' });
-  response.end(JSON.stringify(body));
+/** Tokens for this user act like a session the backend already ended. */
+const REVOKED_USER = 'e2e-revoked';
+/** The only account `POST /auth/login` accepts. */
+const LOGIN = { email: 'samuel@privado.test', password: 'Senha@123', sub: 'e2e-login' };
+
+const profiles = new Map();
+
+function profileOf(sub) {
+  if (!profiles.has(sub)) profiles.set(sub, structuredClone(missionaryProfile));
+  return profiles.get(sub);
 }
 
-/** Tokens for `REVOKED_USER` act like a session the backend already ended. */
-export const REVOKED_USER = 'e2e-revoked';
+function send(response, status, body) {
+  response.writeHead(status, { 'Content-Type': 'application/json' });
+  response.end(body === undefined ? '' : JSON.stringify(body));
+}
 
-function isRevoked(request) {
-  const payload = request.headers.authorization?.split('.')[1];
-  if (!payload) return false;
+const base64url = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
+
+function accessTokenFor(sub) {
+  const exp = Math.floor(Date.now() / 1000) + 3600;
+  return `${base64url({ alg: 'HS256' })}.${base64url({ sub, role: 'MISSIONARY', exp })}.e2e`;
+}
+
+/** The `sub` of a valid bearer token, or null. */
+function userOf(request) {
+  const header = request.headers.authorization;
+  if (!header?.startsWith('Bearer ')) return null;
   try {
-    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')).sub === REVOKED_USER;
+    const { sub } = JSON.parse(Buffer.from(header.split('.')[1], 'base64url').toString('utf8'));
+    return sub && sub !== REVOKED_USER ? sub : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
+async function readBody(request) {
+  let raw = '';
+  for await (const chunk of request) raw += chunk;
+  return raw ? JSON.parse(raw) : {};
+}
+
+const unauthorized = (response) =>
+  send(response, 401, { message: 'Unauthorized access', code: 'E_UNAUTHORIZED_ACCESS' });
+
+/** Routes that need a session receive the user's profile copy. */
+const authenticated = (handler) => async (request, response) => {
+  const sub = userOf(request);
+  if (!sub) return unauthorized(response);
+  return handler(profileOf(sub), await readBody(request), response);
+};
+
 const routes = {
-  'GET /api/v1/account/profile': (request, response) => {
-    if (!request.headers.authorization?.startsWith('Bearer ') || isRevoked(request)) {
-      return send(response, 401, { message: 'Unauthorized access', code: 'E_UNAUTHORIZED_ACCESS' });
+  'POST /api/v1/auth/login': async (request, response) => {
+    const { login, password } = await readBody(request);
+    if (login !== LOGIN.email || password !== LOGIN.password) {
+      return send(response, 400, {
+        message: 'Invalid user credentials',
+        code: 'E_INVALID_CREDENTIALS',
+      });
     }
-    return send(response, 200, { data: missionaryProfile });
+    return send(response, 200, {
+      data: {
+        user: { ...profileOf(LOGIN.sub).user, id: LOGIN.sub },
+        accessToken: accessTokenFor(LOGIN.sub),
+        refreshToken: `refresh-${LOGIN.sub}`,
+      },
+    });
   },
+  'DELETE /api/v1/auth/logout': (_request, response) => send(response, 204),
+  'DELETE /api/v1/auth/sessions': authenticated((_profile, _body, response) => send(response, 204)),
+  'GET /api/v1/account/profile': authenticated((profile, _body, response) =>
+    send(response, 200, { data: profile })
+  ),
+  'PATCH /api/v1/account/profile': authenticated((profile, body, response) => {
+    Object.assign(profile.user, body);
+    return send(response, 200, { data: { user: profile.user } });
+  }),
+  'PATCH /api/v1/missionaries/profile': authenticated((profile, body, response) => {
+    Object.assign(profile.missionary, body);
+    return send(response, 200, { data: { missionary: profile.missionary } });
+  }),
+  'PATCH /api/v1/missionaries/about': authenticated((profile, body, response) => {
+    Object.assign(profile.missionary, body);
+    return send(response, 200, { data: { missionary: profile.missionary } });
+  }),
+  'PATCH /api/v1/missionaries/work-address': authenticated((profile, body, response) => {
+    profile.workAddress = { ...body };
+    return send(response, 200, { data: { workAddress: profile.workAddress } });
+  }),
 };
 
 const server = createServer((request, response) => {
@@ -42,7 +111,12 @@ const server = createServer((request, response) => {
   if (path === '/health') return send(response, 200, { ok: true });
 
   const handler = routes[`${request.method} ${path}`];
-  if (handler) return handler(request, response);
+  if (handler) {
+    return Promise.resolve(handler(request, response)).catch((error) => {
+      console.error('[mock-api]', error);
+      send(response, 500, { message: 'Mock API error' });
+    });
+  }
 
   return send(response, 404, {
     message: `Cannot ${request.method}:${path}`,

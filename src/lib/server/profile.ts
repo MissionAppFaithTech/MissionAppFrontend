@@ -8,7 +8,9 @@ import type { ProfileData } from '@/types/profile';
 
 export type OwnerProfileResult =
   | { kind: 'ok'; profile: ProfileData }
-  /** No usable session: the page sends the user to login. */
+  /** No session cookie: the user logged out or ended every session. */
+  | { kind: 'anonymous' }
+  /** The backend no longer accepts the session. */
   | { kind: 'expired' }
   | { kind: 'error'; message: string };
 
@@ -20,7 +22,7 @@ const LOAD_ERROR = 'Não foi possível carregar o seu perfil.';
  */
 export async function loadMyProfile(): Promise<OwnerProfileResult> {
   const accessToken = (await cookies()).get(AUTH_COOKIE.accessToken)?.value;
-  if (!accessToken) return { kind: 'expired' };
+  if (!accessToken) return { kind: 'anonymous' };
 
   try {
     return { kind: 'ok', profile: mapAccountProfile(await fetchAccountProfile(accessToken)) };

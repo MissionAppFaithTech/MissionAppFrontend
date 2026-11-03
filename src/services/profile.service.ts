@@ -1,4 +1,11 @@
-import { bffRequest } from '@/lib/api/client';
+import { changePasswordAction, updateAccountProfileAction } from '@/app/actions/account';
+import {
+  updateAboutAction,
+  updateIdentityAction,
+  updatePublicContactsAction,
+  updateWorkAddressAction,
+} from '@/app/actions/missionary';
+import { callAction } from '@/lib/api/callAction';
 import type {
   AccountProfilePayload,
   BackendMissionary,
@@ -109,11 +116,8 @@ export type UpdateHeaderPayload = {
 };
 
 export async function updateHeader(payload: UpdateHeaderPayload): Promise<Partial<BackendUser>> {
-  const { data } = await bffRequest<{ data: { user: Partial<BackendUser> } }>(
-    '/api/account/profile',
-    { method: 'PATCH', body: payload, fallbackMessage: 'Não foi possível salvar o perfil' }
-  );
-  return data.user;
+  const { user } = await callAction(() => updateAccountProfileAction(payload));
+  return user;
 }
 
 /** `null` removes a public contact. */
@@ -127,15 +131,8 @@ export type UpdatePublicContactsPayload = {
 export async function updatePublicContacts(
   payload: UpdatePublicContactsPayload
 ): Promise<Partial<BackendMissionary>> {
-  const { data } = await bffRequest<{ data: { missionary: Partial<BackendMissionary> } }>(
-    '/api/missionaries/profile',
-    {
-      method: 'PATCH',
-      body: payload,
-      fallbackMessage: 'Não foi possível salvar os contatos públicos',
-    }
-  );
-  return data.missionary;
+  const { missionary } = await callAction(() => updatePublicContactsAction(payload));
+  return missionary;
 }
 
 /** "Sobre" fields (RF 10.7.2). `null` clears a field. */
@@ -150,23 +147,13 @@ export type UpdateAboutPayload = {
 export async function updateAbout(
   payload: UpdateAboutPayload
 ): Promise<Partial<BackendMissionary>> {
-  const { data } = await bffRequest<{ data: { missionary: Partial<BackendMissionary> } }>(
-    '/api/missionaries/about',
-    { method: 'PATCH', body: payload, fallbackMessage: 'Não foi possível salvar o Sobre' }
-  );
-  return data.missionary;
+  const { missionary } = await callAction(() => updateAboutAction(payload));
+  return missionary;
 }
 
 export async function upsertWorkAddress(payload: WorkAddressData): Promise<WorkAddressData> {
-  const { data } = await bffRequest<{ data: { workAddress: BackendWorkAddress } }>(
-    '/api/missionaries/work-address',
-    {
-      method: 'PATCH',
-      body: payload,
-      fallbackMessage: 'Não foi possível salvar o local de atuação',
-    }
-  );
-  return toWorkAddressData(data.workAddress) as WorkAddressData;
+  const { workAddress } = await callAction(() => updateWorkAddressAction(payload));
+  return toWorkAddressData(workAddress) as WorkAddressData;
 }
 
 export type UpdateMissionaryIdentityPayload = {
@@ -177,11 +164,7 @@ export type UpdateMissionaryIdentityPayload = {
 export async function updateMissionaryIdentity(
   payload: UpdateMissionaryIdentityPayload
 ): Promise<void> {
-  await bffRequest('/api/missionaries/identity', {
-    method: 'PATCH',
-    body: payload,
-    fallbackMessage: 'Não foi possível salvar o documento de identidade',
-  });
+  await callAction(() => updateIdentityAction(payload));
 }
 
 export type ChangeAccountPasswordPayload = {
@@ -192,9 +175,5 @@ export type ChangeAccountPasswordPayload = {
 
 /** The backend ends every session afterwards; the caller must send the user to login. */
 export async function changeAccountPassword(payload: ChangeAccountPasswordPayload): Promise<void> {
-  await bffRequest('/api/account/password', {
-    method: 'PATCH',
-    body: payload,
-    fallbackMessage: 'Não foi possível alterar a senha',
-  });
+  await callAction(() => changePasswordAction(payload));
 }

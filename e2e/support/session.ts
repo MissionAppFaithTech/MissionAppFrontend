@@ -22,14 +22,21 @@ export function fakeAccessToken(role: 'MISSIONARY' | 'SUPPORTER' = 'MISSIONARY',
  * and the server read (ADR-0005). The profile comes from `mock-api.mjs`; only the
  * client-side BFF calls are answered here.
  */
-export async function mockMissionarySession(page: Page, context: BrowserContext = page.context()) {
+export async function mockMissionarySession(
+  page: Page,
+  context: BrowserContext = page.context(),
+  /** A user of its own keeps a spec's saves away from the other specs. */
+  sub = 'e2e-user'
+) {
   const baseURL = process.env.BASE_URL || 'http://localhost:3000';
   await context.addCookies([
-    { name: 'ma_access_token', value: fakeAccessToken(), url: baseURL, httpOnly: true },
+    {
+      name: 'ma_access_token',
+      value: fakeAccessToken('MISSIONARY', sub),
+      url: baseURL,
+      httpOnly: true,
+    },
   ]);
-  await page.route('**/api/account/profile', (route) =>
-    route.fulfill({ json: { data: missionaryProfileFixture } })
-  );
   await page.route('**/api/auth/sessions', (route) =>
     route.fulfill({
       json: {
