@@ -469,6 +469,10 @@ describe('withSession', () => {
     const handler = vi.fn(async () => {
       throw new BackendApiError('Nome de usuário já está em uso', 422, {
         message: 'Nome de usuário já está em uso',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          { field: 'username', rule: 'database.unique', message: 'Nome de usuário já está em uso' },
+        ],
       });
     });
 
@@ -476,8 +480,9 @@ describe('withSession', () => {
 
     expect(response.status).toBe(422);
     await expect(response.json()).resolves.toEqual({
-      message: 'Nome de usuário já está em uso',
-      fieldErrors: { username: 'Nome de usuário já está em uso' },
+      message: 'Este nome de usuário já está em uso.',
+      fieldErrors: { username: 'Este nome de usuário já está em uso.' },
+      code: 'E_VALIDATION_ERROR',
     });
     expect(response.headers.getSetCookie()).toEqual([]);
   });

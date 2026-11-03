@@ -113,17 +113,59 @@ describe('toBffError', () => {
     expect(result.code).toBe(code);
   });
 
-  it('maps `{ message }` bodies tied to a field into fieldErrors', () => {
-    expect(toBffError(422, { message: 'Nome de usuário já está em uso' }, FALLBACK)).toEqual({
-      message: 'Nome de usuário já está em uso',
-      fieldErrors: { username: 'Nome de usuário já está em uso' },
+  it('puts business-rule errors on the field the backend names', () => {
+    expect(
+      toBffError(
+        422,
+        {
+          message: 'Nome de usuário já está em uso',
+          code: 'E_VALIDATION_ERROR',
+          errors: [
+            {
+              field: 'username',
+              rule: 'database.unique',
+              message: 'Nome de usuário já está em uso',
+            },
+          ],
+        },
+        FALLBACK
+      )
+    ).toEqual({
+      message: 'Este nome de usuário já está em uso.',
+      fieldErrors: { username: 'Este nome de usuário já está em uso.' },
+      code: 'E_VALIDATION_ERROR',
     });
-    expect(toBffError(422, { message: 'Comunidade de fé informada não existe' }, FALLBACK)).toEqual(
-      {
-        message: 'Comunidade de fé informada não existe',
-        fieldErrors: { faithCommunityId: 'Comunidade de fé informada não existe' },
-      }
-    );
+    expect(
+      toBffError(
+        422,
+        {
+          message: 'Comunidade de fé informada não existe',
+          code: 'E_VALIDATION_ERROR',
+          errors: [
+            {
+              field: 'faithCommunityId',
+              rule: 'database.exists',
+              message: 'Comunidade de fé informada não existe',
+            },
+          ],
+        },
+        FALLBACK
+      )
+    ).toEqual({
+      message: 'Comunidade de fé informada não existe',
+      fieldErrors: { faithCommunityId: 'Comunidade de fé informada não existe' },
+      code: 'E_VALIDATION_ERROR',
+    });
+  });
+
+  it('never guesses a field from the message text', () => {
+    expect(
+      toBffError(
+        422,
+        { message: 'Nome de usuário já está em uso', code: 'E_VALIDATION_ERROR' },
+        FALLBACK
+      )
+    ).toEqual({ message: 'Nome de usuário já está em uso', code: 'E_VALIDATION_ERROR' });
   });
 
   it('shows the wrong current password on its field', () => {
@@ -248,19 +290,10 @@ describe('toBffError', () => {
 describe('toBffError edge cases', () => {
   const FALLBACK_MSG = 'Falhou';
 
-  it('falls back to `message` when `errors` is an empty array', () => {
+  it('falls back to the trimmed `message` when `errors` is an empty array', () => {
     expect(
-      toBffError(422, { errors: [], message: 'Nome de usuário já está em uso' }, FALLBACK_MSG)
-    ).toEqual({
-      message: 'Nome de usuário já está em uso',
-      fieldErrors: { username: 'Nome de usuário já está em uso' },
-    });
-  });
-
-  it('matches field-bound messages even with surrounding spaces', () => {
-    expect(
-      toBffError(422, { message: '  Nome de usuário já está em uso  ' }, FALLBACK_MSG).fieldErrors
-    ).toEqual({ username: 'Nome de usuário já está em uso' });
+      toBffError(422, { errors: [], message: '  Nome de usuário já está em uso  ' }, FALLBACK_MSG)
+    ).toEqual({ message: 'Nome de usuário já está em uso' });
   });
 
   it('keeps the first error per field and ignores field-less entries for fieldErrors', () => {
@@ -385,20 +418,6 @@ describe('toBffError with the backend envelope (ADR-0034)', () => {
     expect(result).toEqual({
       message: 'Informe um e-mail válido.',
       fieldErrors: { email: 'Informe um e-mail válido.' },
-      code: 'E_VALIDATION_ERROR',
-    });
-  });
-
-  it('maps a business-rule 422 without field errors onto its field', () => {
-    expect(
-      toBffError(
-        422,
-        { message: 'Nome de usuário já está em uso', code: 'E_VALIDATION_ERROR' },
-        'x'
-      )
-    ).toEqual({
-      message: 'Nome de usuário já está em uso',
-      fieldErrors: { username: 'Nome de usuário já está em uso' },
       code: 'E_VALIDATION_ERROR',
     });
   });
