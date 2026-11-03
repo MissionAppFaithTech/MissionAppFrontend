@@ -13,6 +13,7 @@ import {
   emptyProfile,
   formatWorkAddress,
   mapAccountProfile,
+  mapPublicProfile,
   updateAbout,
   updateHeader,
   updateMissionaryIdentity,
@@ -30,6 +31,8 @@ vi.mock('@/app/actions/missionary', () => ({
   updatePublicContactsAction: vi.fn(),
   updateWorkAddressAction: vi.fn(),
 }));
+
+import { publicMissionaryPayload } from '@/test/publicProfile';
 
 const user: BackendUser = {
   id: 'user-1',
@@ -358,5 +361,70 @@ describe('profile.service saves (Server Actions)', () => {
       status: 400,
       fieldErrors: { currentPassword: 'Senha atual incorreta' },
     });
+  });
+});
+
+describe('mapPublicProfile', () => {
+  it('maps the anonymous profile to the UI model', () => {
+    expect(mapPublicProfile(publicMissionaryPayload)).toMatchObject({
+      username: 'samuel_missionary',
+      displayName: 'Samuel Mendonça',
+      roleDescription: 'Missionário na África do Sul',
+      role: 'missionary',
+      location: 'Juazeiro - BA - Brasil',
+      followersCount: 12,
+      followingCount: 3,
+      statsAreExample: false,
+      about: {
+        introduction: 'Sirvo comunidades rurais há dez anos.',
+        missionHistory: 'Comecei em 2015 no sertão nordestino.',
+        originLocation: 'Recife - Brasil',
+        currentLocation: 'Juazeiro - BA - Brasil',
+        missionaryAgency: 'JOCUM',
+        faithCommunity: 'Igreja Batista Central',
+        prayerRequests: 'Pela saúde da equipe.',
+        lifeVerse: 'Filipenses 4:13',
+        workAddress: null,
+      },
+      contact: {
+        publicEmail: 'contato@missao.test',
+        publicPhone: '+5521912345678',
+        allowWhatsappContact: true,
+      },
+    });
+  });
+
+  it('turns missing fields into empty text and never invents private data', () => {
+    const profile = mapPublicProfile({
+      ...publicMissionaryPayload,
+      biography: null,
+      missionaryAgency: null,
+      faithCommunity: null,
+      about: {
+        aboutMe: null,
+        missionStorySummary: null,
+        originLocation: null,
+        prayerRequest: null,
+        lifeVerse: null,
+      },
+      workLocation: null,
+      contact: { publicEmail: null, publicPhone: null, publicPhoneIsWhatsapp: false },
+    });
+
+    expect(profile.roleDescription).toBe('');
+    expect(profile.location).toBe('');
+    expect(profile.about).toMatchObject({
+      introduction: '',
+      missionaryAgency: '',
+      faithCommunity: '',
+      lifeVerse: '',
+    });
+    expect(profile.contact).toEqual({
+      publicEmail: '',
+      publicPhone: '',
+      allowWhatsappContact: false,
+    });
+    expect(profile.userId).toBeUndefined();
+    expect(profile.contact).not.toHaveProperty('accountEmail');
   });
 });

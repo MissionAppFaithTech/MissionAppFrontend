@@ -57,7 +57,7 @@ describe('SEO & GEO (Generative Engine Optimization) Infrastructure Files', () =
   });
 
   describe('sitemap.ts dynamic route indexing', () => {
-    it('indexes key marketing, registration, and missionary profile pages', () => {
+    it('indexes key marketing and registration pages, never example profiles', () => {
       const sitemapEntries = sitemap();
 
       expect(sitemapEntries.length).toBeGreaterThanOrEqual(6);
@@ -71,10 +71,8 @@ describe('SEO & GEO (Generative Engine Optimization) Infrastructure Files', () =
       expect(homeEntry?.changeFrequency).toBe('weekly');
       expect(homeEntry?.images).toBeDefined();
 
-      const userEntry = sitemapEntries.find((e) => e.url.includes('/user/'));
-      expect(userEntry).toBeDefined();
-      expect(userEntry?.priority).toBe(0.9);
-      expect(userEntry?.changeFrequency).toBe('weekly');
+      // Profiles come from the backend; the example profile no longer exists (2026-11-03).
+      expect(sitemapEntries.some((e) => e.url.includes('/user/'))).toBe(false);
 
       const roleEntry = sitemapEntries.find((e) => e.url.includes('/select-role'));
       expect(roleEntry).toBeDefined();

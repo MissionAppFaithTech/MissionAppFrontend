@@ -1,44 +1,29 @@
-import { cacheLife } from 'next/cache';
+import { notFound } from 'next/navigation';
 import Container from '@mui/material/Container';
 import VisitorProfileView from '@/components/profile/VisitorProfileView';
 import JsonLd, { generateProfilePageSchema } from '@/components/seo/JsonLd';
+import { getPublicProfile } from '@/lib/server/publicProfile';
 import { mockProfile } from '@/mocks/profile';
-import type { ProfileData } from '@/types/profile';
 
 type UserProfileBodyProps = {
   params: Promise<{ username: string }>;
 };
 
-/** Shared by every visitor: cached for the `public` profile (ADR-0004). */
+/**
+ * Public missionary profile for visitors, from the backend's anonymous profile
+ * (ADR-0004, cached per username). Tabs without an API yet (projects, posts,
+ * campaign) keep example data, labelled as such in the view.
+ */
 export async function UserProfileContent({ username }: { username: string }) {
-  'use cache';
-  cacheLife('public');
+  const profile = await getPublicProfile(username);
+  if (!profile) notFound();
 
-  const isMockMissionary =
-    username.toLowerCase() === mockProfile.username.toLowerCase() ||
-    username.toLowerCase() === 'samuel-mendonca' ||
-    username.toLowerCase() === 'samuel';
-
-  const profile: ProfileData = isMockMissionary
-    ? mockProfile
-    : {
-        ...mockProfile,
-        username,
-        displayName: username.replace(/-/g, ' '),
-        about: {
-          ...mockProfile.about,
-          introduction: `Perfil público de ${username.replace(/-/g, ' ')} no Mission App.`,
-        },
-      };
-
-  const profileSchemas = generateProfilePageSchema(profile, `/user/${username}`);
+  // Structured data only describes real data: the example project stays out of it.
+  const profileSchemas = generateProfilePageSchema(profile, `/user/${profile.username}`);
 
   return (
     <>
-      {/* Schema.org JSON-LD para motores de busca e IAs */}
       <JsonLd data={profileSchemas} />
-
-      {/* Área Central de Conteúdo */}
       <Container
         component="main"
         id="main-content"
@@ -46,7 +31,7 @@ export async function UserProfileContent({ username }: { username: string }) {
         maxWidth="lg"
         sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 4 }, outline: 'none' }}
       >
-        <VisitorProfileView profile={profile} />
+        <VisitorProfileView profile={{ ...profile, impactProject: mockProfile.impactProject }} />
       </Container>
     </>
   );

@@ -2,7 +2,7 @@
 
 ## Dados
 
-- **Status:** 🟡 Proposto
+- **Status:** 🟢 Aceito
 - **Data:** 2026-11-02 (revisão da versão de 2026-11-01)
 - **Proponentes:** [@Amaro-peter](https://github.com/Amaro-peter)
 
@@ -37,6 +37,15 @@ Nas rotas públicas indexáveis, o dado compartilhado é lido em Server Componen
 
 - **Backend:** precisa expor GETs públicos e anônimos de perfil, campanha, projetos e primeira página de posts, com o envelope do ADR-0033 do backend. Até lá, as páginas seguem com dados de exemplo identificados pelo `ExampleDataBadge`.
 - **Rate limit dessas leituras:** dentro de `use cache` não há IP do visitante para repassar, e o resultado é compartilhado. A API precisa reconhecer esse tráfego vindo do servidor do Next (por exemplo, o mesmo `x-missionapp-bff-secret` do ADR-0032, sem `x-missionapp-client-ip`, com orçamento próprio). Isso é contrato e deve ser registrado no backend junto com os endpoints públicos.
+
+**Notas de implementação (2026-11-03):**
+
+- Implementado para o perfil público de missionário, com o endpoint anônimo do backend (`GET /api/v1/public/missionaries/:username`, ADR-0036 do backend). `getPublicProfile` (`src/lib/server/publicProfile.ts`) usa `'use cache'`, `cacheTag('profile:<username>')` e `cacheLife('public')` e serve `/user/[username]` e `/profile/missionario/[username]`, página e metadata. Campanha, projetos e posts esperam os endpoints públicos do backend.
+- `publicBackendFetch` (`src/lib/api/public.ts`) envia o segredo do BFF sem o IP do visitante, o que coloca essas leituras no orçamento próprio do servidor do Next (600/min).
+- Username fora do formato do backend nem chega à API. Perfil inexistente, pendente, inativo ou excluído (o backend responde o mesmo 404) vai para `notFound()`, com o `not-found.tsx` da raiz em pt-BR e `noindex`. Falha da API vai para o `error.tsx` da rota, com "Tentar novamente".
+- Decisão do usuário (2026-11-03): **só dados reais**. Os usernames de exemplo (`_SamiMendonca`, `MariaSilva`…) também dão 404, e o perfil de exemplo saiu do `sitemap.xml`. Os links de exemplo em `/navegacao`, na campanha e em "missionários que sigo" ficam assim até essas telas terem dados reais.
+- O cabeçalho, as estatísticas e o "Sobre" vêm do backend. As abas sem API (projetos, postagens e campanha) mostram o selo "Dados de exemplo", e o JSON-LD descreve só o que é real (o projeto de exemplo fica de fora).
+- "Seguir" e "Doar" mantêm o comportamento atual, porque ainda não há endpoint para eles.
 
 ## Justificativa
 

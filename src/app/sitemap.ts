@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
 import { getSiteUrl } from '@/lib/site';
-import { mockProfile } from '@/mocks/profile';
 
 /** Public marketing / entry routes — keep in sync with crawlable pages. */
 const publicRoutes: Array<{
@@ -39,15 +38,6 @@ const publicRoutes: Array<{
     path: '/forgot-password',
     changeFrequency: 'yearly',
     priority: 0.3,
-  },
-  {
-    path: `/user/${mockProfile.username}`,
-    changeFrequency: 'weekly',
-    priority: 0.9,
-    images: [
-      mockProfile.impactProject?.imageUrl || '/images/projects/projeto-impacto.jpg',
-      '/landing-page/landing-page.png',
-    ],
   },
 ];
 

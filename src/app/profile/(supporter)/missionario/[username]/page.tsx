@@ -10,7 +10,8 @@ import TextField from '@mui/material/TextField';
 import Logo from '@/components/common/Logo';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
 import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
-import { mockProfile, mockFollowedMissionaries, mockSupporterProfile } from '@/mocks/profile';
+import { getPublicProfile } from '@/lib/server/publicProfile';
+import { mockSupporterProfile } from '@/mocks/profile';
 import { MissionaryProfileBody } from './MissionaryProfileContent';
 
 type PageProps = {
@@ -19,18 +20,12 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
-  const missionary = mockFollowedMissionaries.find(
-    (m) => m.username.toLowerCase() === username.toLowerCase()
-  );
-  const displayName =
-    missionary?.displayName ||
-    (username.toLowerCase() === mockProfile.username.toLowerCase()
-      ? mockProfile.displayName
-      : username.replace(/-/g, ' '));
+  const profile = await getPublicProfile(username);
+  if (!profile) return { title: 'Perfil não encontrado', robots: { index: false } };
 
   return {
-    title: `${displayName} | Mission App`,
-    description: `Perfil missionário de ${displayName} visualizado por apoiador.`,
+    title: `${profile.displayName} | Mission App`,
+    description: `Perfil missionário de ${profile.displayName} visualizado por apoiador.`,
   };
 }
 

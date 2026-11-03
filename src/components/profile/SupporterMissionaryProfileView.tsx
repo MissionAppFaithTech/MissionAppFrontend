@@ -34,6 +34,13 @@ import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 
 type SupporterTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
+/** Tabs still showing example data, read by screen readers with the badge. */
+const EXAMPLE_TAB_SUBJECTS: Record<Exclude<SupporterTabKey, 'sobre'>, string> = {
+  projetos: 'projetos de impacto',
+  postagens: 'postagens',
+  campanha: 'campanha',
+};
+
 const supporterTabs: { key: SupporterTabKey; label: string; mobileLabel?: string }[] = [
   { key: 'sobre', label: 'Sobre' },
   { key: 'projetos', label: 'Projetos de Impacto', mobileLabel: 'Projetos' },
@@ -217,8 +224,6 @@ export default function SupporterMissionaryProfileView({
 
   return (
     <Stack spacing={{ xs: 2, sm: 2.5 }}>
-      {/* Public profiles have no backend endpoint yet: the whole view is example data. */}
-      <ExampleDataBadge subject="perfil público de demonstração" sx={{ alignSelf: 'flex-start' }} />
       {/* 1. Header do Perfil do Missionário (Modo Apoiador: sem editar perfil, com botão Ofertar) */}
       <ProfileSummaryCard profile={profile} isOwnProfile={false} viewerRole="supporter" />
 
@@ -283,6 +288,14 @@ export default function SupporterMissionaryProfileView({
 
       {/* 3. Conteúdo da Aba Ativa */}
       {activeTab === 'sobre' && <MissionaryAboutSection data={profile.about} />}
+
+      {/* Header, stats and "Sobre" are real; these tabs have no API yet. */}
+      {activeTab !== 'sobre' && (
+        <ExampleDataBadge
+          subject={EXAMPLE_TAB_SUBJECTS[activeTab]}
+          sx={{ alignSelf: 'flex-start' }}
+        />
+      )}
 
       {activeTab === 'projetos' && (
         <ImpactProjectCard
