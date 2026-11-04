@@ -13,6 +13,7 @@ export function MissionaryRegisterWizardProvider({ children }: { children: React
 
 export function useMissionaryRegisterWizard() {
   const step = useMissionaryRegisterStore((s) => s.step);
+  const stepErrors = useMissionaryRegisterStore((s) => s.stepErrors);
   const formData = useMissionaryRegisterStore((s) => s.formData);
   const completeStep1 = useMissionaryRegisterStore((s) => s.completeStep1);
   const completeStep2 = useMissionaryRegisterStore((s) => s.completeStep2);
@@ -22,6 +23,7 @@ export function useMissionaryRegisterWizard() {
 
   return {
     step,
+    stepErrors,
     formData,
     completeStep1,
     completeStep2,

@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import AuthLayout from '@/components/common/AuthLayout';
 import RegistrationStepper from '@/components/register/RegistrationStepper';
+import { useStepHeadingFocus } from '@/components/register/useStepHeadingFocus';
 import SupportersStep1 from '@/forms/register/supporters/SupportersStep1';
 import SupportersStep2 from '@/forms/register/supporters/SupportersStep2';
 import SupportersStep3 from '@/forms/register/supporters/SupportersStep3';
@@ -17,6 +18,7 @@ const stepLabels = ['Dados pessoais', 'Dados de acesso'];
 function SupportersRegisterContent() {
   const { step } = useSupporterRegisterWizard();
   const isConfirmation = step === 3;
+  useStepHeadingFocus(step);
 
   return (
     <AuthLayout

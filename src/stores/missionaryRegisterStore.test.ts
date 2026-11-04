@@ -311,17 +311,61 @@ describe('missionaryRegisterStore', () => {
   });
 
   describe('completeStep3 failures and retries', () => {
-    it('stays on step 3 with no progress when registerAccount fails', async () => {
+    it('goes back to step 1 with the error when the API rejects a personal field', async () => {
       startStep3();
-      const error = new ApiError('E-mail já cadastrado', 409, { email: 'Em uso' });
+      registerAccount.mockRejectedValueOnce(
+        new ApiError('Validation failure', 422, { email: 'Este e-mail já está em uso' })
+      );
+
+      await expect(submit()).resolves.toBeUndefined();
+
+      expect(useMissionaryRegisterStore.getState()).toMatchObject({
+        step: 1,
+        stepErrors: { email: 'Este e-mail já está em uso' },
+        submission: {},
+      });
+      expect(createMissionaryProfile).not.toHaveBeenCalled();
+      expect(login).not.toHaveBeenCalled();
+    });
+
+    it('maps the API field names to the form (phoneNumber → phone)', async () => {
+      startStep3();
+      registerAccount.mockRejectedValueOnce(
+        new ApiError('Validation failure', 422, { phoneNumber: 'Telefone inválido' })
+      );
+
+      await submit();
+
+      expect(useMissionaryRegisterStore.getState().stepErrors).toEqual({
+        phone: 'Telefone inválido',
+      });
+    });
+
+    it('stays on step 3 with no progress when the error is about the credentials', async () => {
+      startStep3();
+      const error = new ApiError('Validation failure', 422, { username: 'Em uso' });
       registerAccount.mockRejectedValueOnce(error);
 
       await expect(submit()).rejects.toBe(error);
 
       expect(useMissionaryRegisterStore.getState().step).toBe(3);
+      expect(useMissionaryRegisterStore.getState().stepErrors).toEqual({});
       expect(useMissionaryRegisterStore.getState().submission).toEqual({});
-      expect(createMissionaryProfile).not.toHaveBeenCalled();
-      expect(login).not.toHaveBeenCalled();
+    });
+
+    it('clears the API errors once step 1 is completed again', () => {
+      useMissionaryRegisterStore.setState({ step: 1, stepErrors: { email: 'Em uso' } });
+
+      useMissionaryRegisterStore.getState().completeStep1({
+        fullName: 'Ana',
+        email: 'nova@example.com',
+        birthDate: '01/01/1990',
+        gender: 'feminino',
+        document: '123',
+        phone: '+5521999999999',
+      });
+
+      expect(useMissionaryRegisterStore.getState().stepErrors).toEqual({});
     });
 
     it('does not re-create the account or catalog items when retrying after createMissionaryProfile fails', async () => {

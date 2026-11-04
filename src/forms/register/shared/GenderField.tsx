@@ -16,6 +16,7 @@ type GenderFieldProps = {
   onBlur?: () => void;
   error?: boolean;
   helperText?: string;
+  required?: boolean;
 };
 
 const radioSx = {
@@ -26,6 +27,8 @@ const optionSx = {
   mr: { xs: 1.5, sm: 2 },
   ml: 0,
   my: 0,
+  // The whole label is the tap target: at least 44px tall on touch screens.
+  minHeight: 44,
   '& .MuiFormControlLabel-label': { typography: 'body2' },
 } as const;
 
@@ -35,12 +38,15 @@ export default function GenderField({
   onBlur,
   error,
   helperText,
+  required = false,
 }: GenderFieldProps) {
   const labelId = useId();
+  const helperId = useId();
 
   return (
     <FormControl
       error={error}
+      required={required}
       component="fieldset"
       fullWidth
       sx={{ m: 0, p: 0, minWidth: 0, border: 0 }}
@@ -61,6 +67,8 @@ export default function GenderField({
       <RadioGroup
         row
         aria-labelledby={labelId}
+        aria-describedby={helperText ? helperId : undefined}
+        aria-required={required || undefined}
         name="gender"
         value={value ?? ''}
         onChange={(event) => onChange(event.target.value as GenderValue)}
@@ -80,7 +88,11 @@ export default function GenderField({
           sx={optionSx}
         />
       </RadioGroup>
-      {helperText ? <FormHelperText sx={{ mx: 0 }}>{helperText}</FormHelperText> : null}
+      {helperText ? (
+        <FormHelperText id={helperId} sx={{ mx: 0 }}>
+          {helperText}
+        </FormHelperText>
+      ) : null}
     </FormControl>
   );
 }

@@ -13,6 +13,7 @@ export function SupporterRegisterWizardProvider({ children }: { children: ReactN
 
 export function useSupporterRegisterWizard() {
   const step = useSupporterRegisterStore((s) => s.step);
+  const stepErrors = useSupporterRegisterStore((s) => s.stepErrors);
   const formData = useSupporterRegisterStore((s) => s.formData);
   const completeStep1 = useSupporterRegisterStore((s) => s.completeStep1);
   const completeStep2 = useSupporterRegisterStore((s) => s.completeStep2);
@@ -21,6 +22,7 @@ export function useSupporterRegisterWizard() {
 
   return {
     step,
+    stepErrors,
     formData,
     completeStep1,
     completeStep2,

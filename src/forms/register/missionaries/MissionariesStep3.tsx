@@ -12,6 +12,7 @@ export default function MissionariesStep3() {
       onSubmit={completeStep3}
       onBack={goBack}
       submitLabel="Finalizar cadastro"
+      progress={{ step: 3, total: 3 }}
     />
   );
 }

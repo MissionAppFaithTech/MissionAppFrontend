@@ -1,7 +1,9 @@
 'use client';
 
+import CheckIcon from '@mui/icons-material/Check';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import { visuallyHiddenSx } from '@/lib/a11y';
 
 export interface RegistrationStepperProps {
   currentStep: number;
@@ -10,6 +12,17 @@ export interface RegistrationStepperProps {
   tone?: 'mission' | 'supporter';
 }
 
+function stepStatus(stepNum: number, currentStep: number) {
+  if (stepNum < currentStep) return 'concluída';
+  if (stepNum === currentStep) return 'atual';
+  return 'pendente';
+}
+
+/**
+ * Registration progress as an ordered list: each step says in text whether it is
+ * done, current or pending (never color alone), and the current one carries
+ * `aria-current="step"`. The connecting line is decorative.
+ */
 export default function RegistrationStepper({
   currentStep,
   totalSteps,
@@ -20,25 +33,17 @@ export default function RegistrationStepper({
 
   return (
     <Box component="nav" aria-label="Progresso do cadastro" sx={{ width: '100%', mb: 4, pt: 0.5 }}>
-      <Box
-        role="progressbar"
-        aria-valuenow={currentStep}
-        aria-valuemin={1}
-        aria-valuemax={totalSteps}
-        aria-label={`Etapa ${currentStep} de ${totalSteps}: ${stepLabels[currentStep - 1] ?? ''}`}
-        sx={{
-          display: 'flex',
-          position: 'relative',
-          width: '100%',
-        }}
-      >
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+        Etapa {currentStep} de {totalSteps}
+      </Typography>
+      <Box sx={{ position: 'relative', width: '100%' }}>
         <Box
           aria-hidden
           sx={{
             position: 'absolute',
             left: `calc(100% / ${totalSteps} / 2)`,
             right: `calc(100% / ${totalSteps} / 2)`,
-            bottom: 7,
+            bottom: 9,
             height: 2,
             bgcolor: 'action2.borderStrong',
             zIndex: 0,
@@ -49,66 +54,85 @@ export default function RegistrationStepper({
           sx={{
             position: 'absolute',
             left: `calc(100% / ${totalSteps} / 2)`,
-            bottom: 7,
+            bottom: 9,
             height: 2,
             width: `calc((100% - 100% / ${totalSteps}) * ${progressPercent / 100})`,
             bgcolor: 'primary.main',
             zIndex: 1,
             transition: 'width 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+            '@media (prefers-reduced-motion: reduce)': { transition: 'none' },
           }}
         />
 
-        {stepLabels.slice(0, totalSteps).map((label, index) => {
-          const stepNum = index + 1;
-          const isCompleted = stepNum < currentStep;
-          const isCurrent = stepNum === currentStep;
-          const isActive = isCompleted || isCurrent;
+        <Box
+          component="ol"
+          sx={{ display: 'flex', listStyle: 'none', m: 0, p: 0, position: 'relative', zIndex: 2 }}
+        >
+          {stepLabels.slice(0, totalSteps).map((label, index) => {
+            const stepNum = index + 1;
+            const isCompleted = stepNum < currentStep;
+            const isCurrent = stepNum === currentStep;
+            const isActive = isCompleted || isCurrent;
 
-          return (
-            <Box
-              key={label}
-              aria-current={isCurrent ? 'step' : undefined}
-              title={`Etapa ${stepNum}: ${label}`}
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                position: 'relative',
-                zIndex: 2,
-                px: 0.5,
-              }}
-            >
-              <Typography
-                component="span"
+            return (
+              <Box
+                component="li"
+                key={label}
+                aria-current={isCurrent ? 'step' : undefined}
                 sx={{
-                  mb: 1,
-                  fontSize: { xs: '0.625rem', sm: '0.75rem' },
-                  fontWeight: isActive ? 600 : 400,
-                  lineHeight: 1.25,
-                  textAlign: 'center',
-                  color: isActive ? 'primary.main' : 'text.secondary',
-                  wordBreak: 'break-word',
+                  flex: 1,
+                  minWidth: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  px: 0.5,
                 }}
               >
-                {label}
-              </Typography>
-              <Box
-                aria-hidden
-                sx={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: '50%',
-                  border: '2px solid',
-                  borderColor: isActive ? 'primary.main' : 'action2.borderStrong',
-                  bgcolor: isCompleted ? 'primary.main' : 'common.white',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </Box>
-          );
-        })}
+                <Typography
+                  component="span"
+                  sx={{
+                    mb: 1,
+                    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
+                    fontWeight: isCurrent ? 700 : isActive ? 600 : 400,
+                    lineHeight: 1.25,
+                    textAlign: 'center',
+                    color: isActive ? 'primary.main' : 'text.secondary',
+                    textDecoration: isCurrent ? 'underline' : 'none',
+                    textUnderlineOffset: 3,
+                    overflowWrap: 'anywhere',
+                  }}
+                >
+                  {label}
+                  <Box component="span" sx={visuallyHiddenSx}>
+                    {`, etapa ${stepNum}, ${stepStatus(stepNum, currentStep)}`}
+                  </Box>
+                </Typography>
+                <Box
+                  aria-hidden
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    border: '2px solid',
+                    borderColor: isActive ? 'primary.main' : 'action2.borderStrong',
+                    bgcolor: isCompleted ? 'primary.main' : 'background.paper',
+                    color: 'primary.contrastText',
+                    boxSizing: 'border-box',
+                    display: 'grid',
+                    placeItems: 'center',
+                  }}
+                >
+                  {isCompleted ? <CheckIcon sx={{ fontSize: 14 }} /> : null}
+                  {isCurrent ? (
+                    <Box
+                      sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }}
+                    />
+                  ) : null}
+                </Box>
+              </Box>
+            );
+          })}
+        </Box>
       </Box>
     </Box>
   );

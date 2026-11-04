@@ -12,6 +12,7 @@ export default function SupportersStep2() {
       onSubmit={completeStep2}
       onBack={goBack}
       submitLabel="Finalizar cadastro"
+      progress={{ step: 2, total: 2 }}
     />
   );
 }

@@ -14,7 +14,7 @@ import {
   EMPTY_MISSIONARY_AGENCY,
   SELECT_OTHER,
 } from '@/forms/register/options';
-import { validateOnSubmit } from '@/lib/formValidation';
+import { validateOnLeave } from '@/lib/formValidation';
 import { yieldToMain } from '@/lib/scheduler';
 import {
   createFaithCommunitySchema,
@@ -35,10 +35,10 @@ export default function MissionariesStep2() {
     control,
     setValue,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, submitCount },
   } = useForm<MissionaryStep2FormData>({
     resolver: zodResolver(missionaryStep2Schema),
-    ...validateOnSubmit,
+    ...validateOnLeave,
     defaultValues: {
       missionaryAgency: formData.missionaryAgency || '',
       agencyDetails: formData.agencyDetails || EMPTY_MISSIONARY_AGENCY,
@@ -60,8 +60,11 @@ export default function MissionariesStep2() {
     <RegisterStepForm
       onSubmit={handleSubmit(handleStepSubmit)}
       sectionTitle="Dados ministeriais"
+      progress={{ step: 2, total: 3 }}
       onBack={goBack}
       isSubmitting={isSubmitting}
+      errors={errors}
+      submitCount={submitCount}
     >
       <Controller
         name="missionaryAgency"
@@ -70,6 +73,8 @@ export default function MissionariesStep2() {
           <RegisterCatalogSelect
             id="missionaryAgency"
             label="Agência missionária"
+            required
+            onBlur={field.onBlur}
             value={field.value}
             onChange={(value) => agencyEntry.selectValue(value, field.value, field.onChange)}
             options={agencies.items}
@@ -86,6 +91,7 @@ export default function MissionariesStep2() {
       <TextField
         {...register('missionDescription')}
         label="Projeto ou atuação missionária"
+        required
         fullWidth
         multiline
         minRows={3}
@@ -94,7 +100,9 @@ export default function MissionariesStep2() {
         helperText={errors.missionDescription?.message}
       />
 
-      <Typography variant="body1">Dados da comunidade de fé</Typography>
+      <Typography component="h3" variant="body1" sx={{ fontWeight: 600 }}>
+        Dados da comunidade de fé
+      </Typography>
 
       <Controller
         name="faithCommunity"
@@ -103,6 +111,8 @@ export default function MissionariesStep2() {
           <RegisterCatalogSelect
             id="faithCommunity"
             label="Comunidade de fé"
+            required
+            onBlur={field.onBlur}
             value={field.value}
             onChange={(value) => communityEntry.selectValue(value, field.value, field.onChange)}
             options={communities.items}
