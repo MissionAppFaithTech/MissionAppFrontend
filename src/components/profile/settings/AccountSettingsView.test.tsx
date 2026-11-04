@@ -207,4 +207,122 @@ describe('AccountSettingsView Component', () => {
     );
     expect(useFeedbackStore.getState().current?.severity).toBe('info');
   });
+
+  describe('Voltar e Cancelar', () => {
+    it.each([
+      ['missionary', '/profile/sobre'],
+      ['supporter', '/profile/supporter/missionarios'],
+    ] as const)('shows "Voltar" at the top and bottom leading to the %s profile', (role, href) => {
+      renderWithQuery(<AccountSettingsView role={role} />);
+
+      const back = screen.getAllByRole('link', { name: 'Voltar para o perfil' });
+      expect(back).toHaveLength(2);
+      back.forEach((link) => {
+        expect(link).toHaveAttribute('href', href);
+        expect(link).toHaveTextContent('Voltar');
+      });
+    });
+
+    it('keeps every "Cancelar" disabled while nothing was changed', () => {
+      renderWithQuery(<AccountSettingsView role="missionary" />);
+
+      expect(screen.getByRole('button', { name: 'Cancelar alteração de e-mail' })).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'Cancelar alterações dos dados eclesiásticos' })
+      ).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
+      ).toBeDisabled();
+    });
+
+    it('discards the typed e-mail, password and errors', async () => {
+      const user = userEvent.setup();
+      renderWithQuery(<AccountSettingsView role="missionary" />);
+
+      const email = screen.getByLabelText(/novo e-mail/i);
+      await user.type(email, 'invalido');
+      await user.click(screen.getByRole('button', { name: /atualizar e-mail/i }));
+      expect(email).toHaveAttribute('aria-invalid', 'true');
+
+      await user.click(screen.getByRole('button', { name: 'Cancelar alteração de e-mail' }));
+
+      expect(email).toHaveValue('');
+      expect(screen.getByLabelText(/senha atual \(para confirmar\)/i)).toHaveValue('');
+      expect(email).toHaveAttribute('aria-invalid', 'false');
+      expect(screen.getByRole('button', { name: 'Cancelar alteração de e-mail' })).toBeDisabled();
+      expect(useFeedbackStore.getState().current).toBeNull();
+    });
+
+    it('restores the last saved ecclesiastical data and stays on the page', async () => {
+      const user = userEvent.setup();
+      renderWithQuery(<AccountSettingsView role="missionary" />);
+
+      const pastor = screen.getByLabelText(/nome do pastor responsável/i);
+      const saved = (pastor as HTMLInputElement).value;
+      await user.clear(pastor);
+      await user.type(pastor, 'Pr. Outro Nome');
+
+      const cancel = screen.getByRole('button', {
+        name: 'Cancelar alterações dos dados eclesiásticos',
+      });
+      expect(cancel).toBeEnabled();
+      await user.click(cancel);
+
+      expect(pastor).toHaveValue(saved);
+      expect(cancel).toBeDisabled();
+    });
+
+    it('after saving, "Cancelar" returns to the newly saved values', async () => {
+      const user = userEvent.setup();
+      renderWithQuery(<AccountSettingsView role="missionary" />);
+
+      const pastor = screen.getByLabelText(/nome do pastor responsável/i);
+      await user.clear(pastor);
+      await user.type(pastor, 'Pr. Salvo');
+      await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
+
+      const cancel = screen.getByRole('button', {
+        name: 'Cancelar alterações dos dados eclesiásticos',
+      });
+      expect(cancel).toBeDisabled();
+
+      await user.type(pastor, ' e mais');
+      await user.click(cancel);
+      expect(pastor).toHaveValue('Pr. Salvo');
+    });
+
+    it('restores the last saved agency data and clears its error', async () => {
+      const user = userEvent.setup();
+      renderWithQuery(<AccountSettingsView role="missionary" />);
+
+      const phone = screen.getByLabelText(/telefone de contato/i);
+      const saved = (phone as HTMLInputElement).value;
+      await user.clear(phone);
+      await user.type(phone, '+55 (11) 0000-0000');
+
+      await user.click(
+        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
+      );
+
+      expect(phone).toHaveValue(saved);
+      expect(
+        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
+      ).toBeDisabled();
+    });
+
+    it('treats removing the faith community link as saved (supporter)', async () => {
+      const user = userEvent.setup();
+      renderWithQuery(
+        <AccountSettingsView role="supporter" initialFaithCommunity={{ name: 'Igreja Local' }} />
+      );
+
+      await user.click(
+        screen.getByRole('button', { name: /remover vínculo com comunidade de fé/i })
+      );
+
+      expect(
+        screen.getByRole('button', { name: 'Cancelar alterações dos dados eclesiásticos' })
+      ).toBeDisabled();
+    });
+  });
 });

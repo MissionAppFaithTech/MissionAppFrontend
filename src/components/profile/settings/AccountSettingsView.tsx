@@ -19,6 +19,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -28,6 +29,7 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import PillButton from '@/components/common/PillButton';
+import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
 import { mockFaithCommunities, mockMissionaryAgencies } from '@/mocks/ecclesiastical';
 import { useFeedbackStore } from '@/stores/feedbackStore';
@@ -39,6 +41,58 @@ export type AccountSettingsViewProps = {
   initialEmail?: string;
   initialFaithCommunity?: Partial<FaithCommunityData>;
   initialAgency?: Partial<MissionaryAgencyData>;
+};
+
+function initialFaithCommunityFor(
+  role: AccountSettingsViewProps['role'],
+  initialFaithCommunity?: Partial<FaithCommunityData>
+): FaithCommunityData {
+  return {
+    name: initialFaithCommunity?.name || (role === 'missionary' ? 'Igreja Batista Central' : ''),
+    address1: initialFaithCommunity?.address1 || (role === 'missionary' ? 'Av. Brasil, 1500' : ''),
+    address2: initialFaithCommunity?.address2 || (role === 'missionary' ? 'Bairro Centro' : ''),
+    country: initialFaithCommunity?.country || (role === 'missionary' ? 'Brasil' : ''),
+    state: initialFaithCommunity?.state || (role === 'missionary' ? 'RJ' : ''),
+    city: initialFaithCommunity?.city || (role === 'missionary' ? 'Rio de Janeiro' : ''),
+    zipCode: initialFaithCommunity?.zipCode || (role === 'missionary' ? '20040-002' : ''),
+    website:
+      initialFaithCommunity?.website || (role === 'missionary' ? 'https://ibcentral.org.br' : ''),
+    churchPhone:
+      initialFaithCommunity?.churchPhone || (role === 'missionary' ? '+55 (21) 3214-5500' : ''),
+    pastorName:
+      initialFaithCommunity?.pastorName ||
+      (role === 'missionary' ? 'Pr. Carlos Alberto Santos' : ''),
+    pastorPhone:
+      initialFaithCommunity?.pastorPhone || (role === 'missionary' ? '+55 (21) 99876-1234' : ''),
+  };
+}
+
+function initialAgencyFor(
+  role: AccountSettingsViewProps['role'],
+  initialAgency?: Partial<MissionaryAgencyData>
+): MissionaryAgencyData {
+  return {
+    name: initialAgency?.name || (role === 'missionary' ? 'JOCUM (Jovens com uma Missão)' : ''),
+    address1: initialAgency?.address1 || (role === 'missionary' ? 'Estrada da Missão, 100' : ''),
+    address2: initialAgency?.address2 || (role === 'missionary' ? 'Base Missionária' : ''),
+    country: initialAgency?.country || (role === 'missionary' ? 'Brasil' : ''),
+    state: initialAgency?.state || (role === 'missionary' ? 'PR' : ''),
+    city: initialAgency?.city || (role === 'missionary' ? 'Curitiba' : ''),
+    zipCode: initialAgency?.zipCode || (role === 'missionary' ? '80010-000' : ''),
+    website: initialAgency?.website || (role === 'missionary' ? 'https://jocum.org.br' : ''),
+    phone: initialAgency?.phone || (role === 'missionary' ? '+55 (41) 3657-2200' : ''),
+  };
+}
+
+/** True when a form still shows what was last saved. */
+function sameValues<T extends object>(a: T, b: T) {
+  return (Object.keys(a) as (keyof T)[]).every((key) => a[key] === b[key]);
+}
+
+/** Where "Voltar" leads: the user's own profile home. */
+const BACK_HREF: Record<AccountSettingsViewProps['role'], string> = {
+  missionary: '/profile/sobre',
+  supporter: '/profile/supporter/missionarios',
 };
 
 export default function AccountSettingsView({
@@ -59,39 +113,45 @@ export default function AccountSettingsView({
   const [emailErrors, setEmailErrors] = useState<{ newEmail?: string; password?: string }>({});
 
   // Faith Community Form State (RF 15.3)
-  const [faithCommunity, setFaithCommunity] = useState<FaithCommunityData>({
-    name: initialFaithCommunity?.name || (role === 'missionary' ? 'Igreja Batista Central' : ''),
-    address1: initialFaithCommunity?.address1 || (role === 'missionary' ? 'Av. Brasil, 1500' : ''),
-    address2: initialFaithCommunity?.address2 || (role === 'missionary' ? 'Bairro Centro' : ''),
-    country: initialFaithCommunity?.country || (role === 'missionary' ? 'Brasil' : ''),
-    state: initialFaithCommunity?.state || (role === 'missionary' ? 'RJ' : ''),
-    city: initialFaithCommunity?.city || (role === 'missionary' ? 'Rio de Janeiro' : ''),
-    zipCode: initialFaithCommunity?.zipCode || (role === 'missionary' ? '20040-002' : ''),
-    website:
-      initialFaithCommunity?.website || (role === 'missionary' ? 'https://ibcentral.org.br' : ''),
-    churchPhone:
-      initialFaithCommunity?.churchPhone || (role === 'missionary' ? '+55 (21) 3214-5500' : ''),
-    pastorName:
-      initialFaithCommunity?.pastorName ||
-      (role === 'missionary' ? 'Pr. Carlos Alberto Santos' : ''),
-    pastorPhone:
-      initialFaithCommunity?.pastorPhone || (role === 'missionary' ? '+55 (21) 99876-1234' : ''),
-  });
+  const [faithCommunity, setFaithCommunity] = useState<FaithCommunityData>(() =>
+    initialFaithCommunityFor(role, initialFaithCommunity)
+  );
+  // Last saved values: "Cancelar" goes back to them.
+  const [savedFaithCommunity, setSavedFaithCommunity] = useState<FaithCommunityData>(() =>
+    initialFaithCommunityFor(role, initialFaithCommunity)
+  );
   const [ecclesiasticalError, setEcclesiasticalError] = useState<string | null>(null);
 
   // Missionary Agency Form State (RF 3.1.2, only for missionaries)
-  const [agency, setAgency] = useState<MissionaryAgencyData>({
-    name: initialAgency?.name || (role === 'missionary' ? 'JOCUM (Jovens com uma Missão)' : ''),
-    address1: initialAgency?.address1 || (role === 'missionary' ? 'Estrada da Missão, 100' : ''),
-    address2: initialAgency?.address2 || (role === 'missionary' ? 'Base Missionária' : ''),
-    country: initialAgency?.country || (role === 'missionary' ? 'Brasil' : ''),
-    state: initialAgency?.state || (role === 'missionary' ? 'PR' : ''),
-    city: initialAgency?.city || (role === 'missionary' ? 'Curitiba' : ''),
-    zipCode: initialAgency?.zipCode || (role === 'missionary' ? '80010-000' : ''),
-    website: initialAgency?.website || (role === 'missionary' ? 'https://jocum.org.br' : ''),
-    phone: initialAgency?.phone || (role === 'missionary' ? '+55 (41) 3657-2200' : ''),
-  });
+  const [agency, setAgency] = useState<MissionaryAgencyData>(() =>
+    initialAgencyFor(role, initialAgency)
+  );
+  const [savedAgency, setSavedAgency] = useState<MissionaryAgencyData>(() =>
+    initialAgencyFor(role, initialAgency)
+  );
   const [agencyError, setAgencyError] = useState<string | null>(null);
+
+  const emailDirty = newEmail !== '' || currentPasswordForEmail !== '';
+  const ecclesiasticalDirty = !sameValues(faithCommunity, savedFaithCommunity);
+  const agencyDirty = !sameValues(agency, savedAgency);
+
+  // "Cancelar" discards the block's unsaved changes and stays on the page.
+  const handleCancelEmail = () => {
+    setNewEmail('');
+    setCurrentPasswordForEmail('');
+    setShowPassword(false);
+    setEmailErrors({});
+  };
+
+  const handleCancelEcclesiastical = () => {
+    setFaithCommunity(savedFaithCommunity);
+    setEcclesiasticalError(null);
+  };
+
+  const handleCancelAgency = () => {
+    setAgency(savedAgency);
+    setAgencyError(null);
+  };
 
   // Danger Zone dialogs & state (RF 15.5)
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
@@ -160,6 +220,7 @@ export default function AccountSettingsView({
     }
 
     setEcclesiasticalError(null);
+    setSavedFaithCommunity(faithCommunity);
     notify(
       'Dados eclesiásticos atualizados com sucesso! Alterações salvas na plataforma.',
       'success'
@@ -168,7 +229,7 @@ export default function AccountSettingsView({
 
   // Clear faith community data (for supporters)
   const handleClearFaithCommunity = () => {
-    setFaithCommunity({
+    const cleared: FaithCommunityData = {
       name: '',
       address1: '',
       address2: '',
@@ -180,7 +241,10 @@ export default function AccountSettingsView({
       churchPhone: '',
       pastorName: '',
       pastorPhone: '',
-    });
+    };
+    // NOTE: removing the link is applied at once (see the notice), so it is the new saved state.
+    setFaithCommunity(cleared);
+    setSavedFaithCommunity(cleared);
     setEcclesiasticalError(null);
     notify('Vínculo com comunidade de fé removido.', 'info');
   };
@@ -203,6 +267,7 @@ export default function AccountSettingsView({
     }
 
     setAgencyError(null);
+    setSavedAgency(agency);
     notify('Dados da agência missionária atualizados com sucesso!', 'success');
   };
 
@@ -262,6 +327,23 @@ export default function AccountSettingsView({
         },
       }}
     >
+      <Box sx={{ display: 'flex', mb: 2 }}>
+        <PillButton
+          href={BACK_HREF[role]}
+          tone="primarySoftOutline"
+          size="medium"
+          startIcon={<ArrowBackIcon />}
+          aria-label="Voltar para o perfil"
+          sx={{
+            ...FORM_ACTION_BUTTON_SX,
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: 'center',
+          }}
+        >
+          Voltar
+        </PillButton>
+      </Box>
+
       {/* Quick Navigation Anchors Bar */}
       <Card
         variant="outlined"
@@ -437,11 +519,33 @@ export default function AccountSettingsView({
                       },
                     }}
                   />
-                  <Box sx={{ pt: 0.5 }}>
+                  <Stack
+                    direction={{ xs: 'column-reverse', sm: 'row' }}
+                    spacing={1.5}
+                    useFlexGap
+                    sx={{
+                      pt: 0.5,
+                      '& .MuiButton-root': {
+                        width: { xs: '100%', sm: 'auto' },
+                        minHeight: 44,
+                        justifyContent: 'center',
+                      },
+                    }}
+                  >
+                    <PillButton
+                      type="button"
+                      tone="primarySoftOutline"
+                      size="small"
+                      onClick={handleCancelEmail}
+                      disabled={!emailDirty}
+                      aria-label="Cancelar alteração de e-mail"
+                    >
+                      Cancelar
+                    </PillButton>
                     <PillButton type="submit" tone="primaryFilled" size="small">
                       Atualizar E-mail
                     </PillButton>
-                  </Box>
+                  </Stack>
                 </Stack>
               </Box>
 
@@ -692,7 +796,29 @@ export default function AccountSettingsView({
                 </Box>
 
                 {/* Botões de Ação */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ pt: 1 }}>
+                <Stack
+                  direction={{ xs: 'column-reverse', sm: 'row' }}
+                  spacing={1.5}
+                  useFlexGap
+                  sx={{
+                    pt: 1,
+                    '& .MuiButton-root': {
+                      width: { xs: '100%', sm: 'auto' },
+                      minHeight: 44,
+                      justifyContent: 'center',
+                    },
+                  }}
+                >
+                  <PillButton
+                    type="button"
+                    tone="primarySoftOutline"
+                    size="small"
+                    onClick={handleCancelEcclesiastical}
+                    disabled={!ecclesiasticalDirty}
+                    aria-label="Cancelar alterações dos dados eclesiásticos"
+                  >
+                    Cancelar
+                  </PillButton>
                   <PillButton type="submit" tone="primaryFilled" size="small">
                     Salvar Dados Eclesiásticos
                   </PillButton>
@@ -876,11 +1002,33 @@ export default function AccountSettingsView({
                     </Stack>
                   </Box>
 
-                  <Box sx={{ pt: 1 }}>
+                  <Stack
+                    direction={{ xs: 'column-reverse', sm: 'row' }}
+                    spacing={1.5}
+                    useFlexGap
+                    sx={{
+                      pt: 1,
+                      '& .MuiButton-root': {
+                        width: { xs: '100%', sm: 'auto' },
+                        minHeight: 44,
+                        justifyContent: 'center',
+                      },
+                    }}
+                  >
+                    <PillButton
+                      type="button"
+                      tone="primarySoftOutline"
+                      size="small"
+                      onClick={handleCancelAgency}
+                      disabled={!agencyDirty}
+                      aria-label="Cancelar alterações da agência missionária"
+                    >
+                      Cancelar
+                    </PillButton>
                     <PillButton type="submit" tone="primaryFilled" size="small">
                       Salvar Agência Missionária
                     </PillButton>
-                  </Box>
+                  </Stack>
                 </Stack>
               </Box>
             </CardContent>
@@ -977,6 +1125,23 @@ export default function AccountSettingsView({
             )}
           </CardContent>
         </Card>
+
+        <Box sx={{ display: 'flex', justifyContent: { sm: 'flex-end' } }}>
+          <PillButton
+            href={BACK_HREF[role]}
+            tone="primarySoftOutline"
+            size="medium"
+            startIcon={<ArrowBackIcon />}
+            aria-label="Voltar para o perfil"
+            sx={{
+              ...FORM_ACTION_BUTTON_SX,
+              width: { xs: '100%', sm: 'auto' },
+              justifyContent: 'center',
+            }}
+          >
+            Voltar
+          </PillButton>
+        </Box>
       </Stack>
 
       {/* ========================================================================= */}
