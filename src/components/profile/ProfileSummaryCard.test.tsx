@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProfileSummaryCard from './ProfileSummaryCard';
 import { mockProfile, mockSupporterProfile } from '@/mocks/profile';
 import { ApiError } from '@/lib/api/client';
-import { uploadProfilePicture } from '@/services/profilePicture.service';
+import { removeProfilePicture, uploadProfilePicture } from '@/services/profilePicture.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 
 vi.mock('@/services/profilePicture.service', async (importOriginal) => ({
@@ -15,6 +15,7 @@ vi.mock('@/services/profilePicture.service', async (importOriginal) => ({
 
 beforeEach(() => {
   vi.mocked(uploadProfilePicture).mockReset();
+  vi.mocked(removeProfilePicture).mockReset();
   useFeedbackStore.setState({ current: null });
 });
 
@@ -273,5 +274,54 @@ describe('ProfileSummaryCard component', () => {
     };
     rerender(<ProfileSummaryCard profile={profileNoLocation} isOwnProfile />);
     expect(screen.queryByText('Curitiba/PR')).not.toBeInTheDocument();
+  });
+
+  it('removes the photo after confirming in an accessible dialog', async () => {
+    const user = userEvent.setup();
+    vi.mocked(removeProfilePicture).mockResolvedValue();
+    const withPhoto = { ...mockProfile, avatarUrl: 'https://cdn.test/p.webp' };
+    render(<ProfileSummaryCard profile={withPhoto} isOwnProfile />);
+
+    expect(screen.getByLabelText(/alterar foto de perfil/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /remover foto de perfil/i }));
+
+    const dialog = await screen.findByRole('dialog', { name: /remover foto de perfil\?/i });
+    expect(dialog).toHaveAccessibleDescription(/ícone padrão/i);
+    await user.click(screen.getByRole('button', { name: /^cancelar$/i }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(removeProfilePicture).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /remover foto de perfil/i }));
+    await user.click(await screen.findByRole('button', { name: /^remover foto$/i }));
+
+    await waitFor(() => expect(removeProfilePicture).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.queryByRole('img', { name: /foto de perfil/i })).not.toBeInTheDocument()
+    );
+    expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /remover foto de perfil/i })
+    ).not.toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({ severity: 'success' });
+  });
+
+  it('offers no remove action without a photo or to visitors', () => {
+    const { unmount } = render(
+      <ProfileSummaryCard profile={{ ...mockProfile, avatarUrl: undefined }} isOwnProfile />
+    );
+    expect(
+      screen.queryByRole('button', { name: /remover foto de perfil/i })
+    ).not.toBeInTheDocument();
+    unmount();
+
+    render(
+      <ProfileSummaryCard
+        profile={{ ...mockProfile, avatarUrl: 'https://cdn.test/p.webp' }}
+        isOwnProfile={false}
+      />
+    );
+    expect(
+      screen.queryByRole('button', { name: /remover foto de perfil/i })
+    ).not.toBeInTheDocument();
   });
 });

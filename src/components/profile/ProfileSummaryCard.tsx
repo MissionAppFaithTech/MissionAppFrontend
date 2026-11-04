@@ -15,6 +15,7 @@ import PillButton from '@/components/common/PillButton';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
 import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
+import ProfilePhotoRemoveButton from '@/components/profile/ProfilePhotoRemoveButton';
 import DonationModal from '@/components/profile/DonationModal';
 import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
 import { PROFILE_PICTURE_ACCEPT } from '@/services/profilePicture.service';
@@ -177,6 +178,13 @@ export default function ProfileSummaryCard({
                       onChange={photo.selectFile}
                     />
                   </ProfilePhotoAddButton>
+                ) : null}
+                {isOwnProfile && photoSrc ? (
+                  <ProfilePhotoRemoveButton
+                    onConfirm={photo.remove}
+                    disabled={photo.busy}
+                    loading={photo.status === 'removing'}
+                  />
                 ) : null}
               </Box>
 
