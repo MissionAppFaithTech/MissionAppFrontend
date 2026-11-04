@@ -11,7 +11,6 @@ const mockFinancialData: FinancialConfigData = {
     enabled: true,
     key: 'missionario@email.com',
     keyType: 'email',
-    qrCodeUrl: '/images/test-qr.png',
   },
   bankTransfer: {
     enabled: true,
@@ -106,16 +105,20 @@ describe('FinancialSettingsForm Component', () => {
     });
   });
 
-  it('allows removing static QR Code and submitting the form', async () => {
+  it('configures PIX by key only: no QR Code upload or preview (ADR-0008)', () => {
+    const { container } = render(<FinancialSettingsForm initialData={mockFinancialData} />);
+
+    expect(screen.queryByText(/qr code/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/upload/i)).not.toBeInTheDocument();
+    expect(container.querySelector('input[type="file"]')).toBeNull();
+    expect(screen.getByText('Transferência instantânea pela chave Pix.')).toBeInTheDocument();
+  });
+
+  it('saves the PIX key without any QR Code field', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
 
     render(<FinancialSettingsForm initialData={mockFinancialData} onSave={handleSave} />);
-
-    // Click remove QR Code
-    const removeQrBtn = screen.getByRole('button', { name: /remover/i });
-    await user.click(removeQrBtn);
-    expect(screen.getByText(/sem qr code/i)).toBeInTheDocument();
 
     // Submit form
     const saveBtn = screen.getByRole('button', { name: /salvar configurações/i });
@@ -124,11 +127,7 @@ describe('FinancialSettingsForm Component', () => {
     expect(handleSave).toHaveBeenCalledTimes(1);
     expect(handleSave).toHaveBeenCalledWith(
       expect.objectContaining({
-        pix: expect.objectContaining({
-          enabled: true,
-          key: 'missionario@email.com',
-          qrCodeUrl: undefined,
-        }),
+        pix: { enabled: true, key: 'missionario@email.com', keyType: 'email' },
       })
     );
 

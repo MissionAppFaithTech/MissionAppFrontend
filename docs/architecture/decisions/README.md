@@ -36,3 +36,4 @@ Quando um ADR do frontend depende de um ADR do backend, ele cita o número e o l
 | [ADR-0005](./0005-renderizacao-server-first-com-cache-components.md)              | Renderização Server-First com Cache Components                         | 🟢 Aceito   |
 | [ADR-0006](./0006-mutacoes-em-server-actions-e-renovacao-de-sessao-no-proxy.md)   | Mutações em Server Actions e Renovação de Sessão no Proxy              | 🟢 Aceito   |
 | [ADR-0007](./0007-identificacao-do-aparelho-e-gestao-de-sessoes.md)               | Identificação do Aparelho e Gestão de Sessões                          | 🟢 Aceito   |
+| [ADR-0008](./0008-doacao-via-pix-somente-com-chave.md)                            | Doação via PIX Somente com Chave                                       | 🟢 Aceito   |
