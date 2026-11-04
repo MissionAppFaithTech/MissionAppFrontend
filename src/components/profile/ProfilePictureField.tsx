@@ -84,7 +84,7 @@ export default function ProfilePictureField({ currentUrl, displayName }: Profile
         </Typography>
       ) : null}
 
-      {photoUrl && status !== 'uploading' ? (
+      {photoUrl && status !== 'uploading' && status !== 'processing' ? (
         <PillButton
           type="button"
           tone="primarySoftOutline"

@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useRouter } from 'next/navigation';
 import ProfilePictureField from './ProfilePictureField';
 import { ApiError } from '@/lib/api/client';
 import { removeProfilePicture, uploadProfilePicture } from '@/services/profilePicture.service';
@@ -85,5 +86,74 @@ describe('ProfilePictureField', () => {
       expect(screen.queryByRole('img', { name: /foto de perfil/i })).not.toBeInTheDocument()
     );
     expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
+  });
+
+  it('announces the processing and blocks the controls until the backend finishes', async () => {
+    const user = userEvent.setup();
+    let finish!: (value: { url: string | null }) => void;
+    vi.mocked(uploadProfilePicture).mockImplementation(async (_file, options) => {
+      options?.onProcessing?.();
+      return new Promise((resolve) => {
+        finish = resolve;
+      });
+    });
+    render(<ProfilePictureField displayName="Ana" />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/processando a foto/i);
+    expect(screen.getByLabelText(/alterar foto de perfil/i).querySelector('input')).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /remover foto/i })).not.toBeInTheDocument();
+
+    finish({ url: 'https://cdn.test/new.webp' });
+
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent('Foto de perfil atualizada.')
+    );
+    expect(screen.getByRole('img', { name: 'Foto de perfil de Ana' })).toHaveAttribute(
+      'src',
+      'https://cdn.test/new.webp'
+    );
+  });
+
+  it('refreshes the server data after saving and after removing the photo', async () => {
+    const user = userEvent.setup();
+    const { refresh } = useRouter();
+    vi.mocked(uploadProfilePicture).mockResolvedValue({ url: 'https://cdn.test/new.webp' });
+    vi.mocked(removeProfilePicture).mockResolvedValue(undefined);
+    render(<ProfilePictureField displayName="Ana" />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
+
+    await user.click(screen.getByRole('button', { name: /remover foto/i }));
+    await waitFor(() => expect(refresh).toHaveBeenCalledTimes(2));
+  });
+
+  it('does not refresh when the upload fails', async () => {
+    const user = userEvent.setup();
+    const { refresh } = useRouter();
+    vi.mocked(uploadProfilePicture).mockRejectedValue(new ApiError('Falha', 422));
+    render(<ProfilePictureField displayName="Ana" />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Falha');
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it('refreshes after a processing failure, since the old photo was already replaced', async () => {
+    const user = userEvent.setup();
+    const { refresh } = useRouter();
+    vi.mocked(uploadProfilePicture).mockImplementation(async (_file, options) => {
+      options?.onProcessing?.();
+      throw new ApiError('Não foi possível processar a imagem. Tente enviar outra foto.', 422);
+    });
+    render(<ProfilePictureField displayName="Ana" currentUrl="https://cdn.test/old.webp" />);
+
+    await user.upload(screen.getByLabelText(/alterar foto de perfil/i), png());
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(/processar a imagem/i);
+    expect(refresh).toHaveBeenCalledTimes(1);
   });
 });

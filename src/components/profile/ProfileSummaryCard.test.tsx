@@ -139,7 +139,9 @@ describe('ProfileSummaryCard component', () => {
     const file = new File(['photo'], 'foto.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), file);
 
-    expect(uploadProfilePicture).toHaveBeenCalledWith(file);
+    expect(uploadProfilePicture).toHaveBeenCalledWith(file, {
+      onProcessing: expect.any(Function),
+    });
     expect(screen.getByRole('img', { name: /foto de perfil de samuel mendonça/i })).toHaveAttribute(
       'src',
       previewUrl

@@ -3,7 +3,7 @@
 import { backendFetch } from '@/lib/api/backend';
 import { parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
 import { mediaAssetIdSchema, profilePictureUploadInputSchema } from '@/schemas/actions.schema';
-import type { MediaUploadTicket } from '@/types/backend';
+import type { MediaAssetState, MediaUploadTicket } from '@/types/backend';
 
 /**
  * Direct upload of media (backend `media_asset`). The file never passes through
@@ -53,6 +53,30 @@ export async function completeMediaUploadAction(
         accessToken,
       });
       return { id: parsed.data };
+    }
+  );
+}
+
+/**
+ * Reads the asset's processing state. `url` stays `null` until the backend
+ * worker finishes compressing the image (`status: 'READY'`).
+ */
+export async function getMediaAssetAction(
+  mediaAssetId: string
+): Promise<ActionResult<MediaAssetState>> {
+  const parsed = parseInput(mediaAssetIdSchema, mediaAssetId, 'Arquivo inválido');
+  if (!parsed.ok) return parsed;
+
+  return runWithSession(
+    'actions/media-asset',
+    'Não foi possível verificar o processamento da foto',
+    async (accessToken) => {
+      const result = await backendFetch<{ data: { mediaAsset: MediaAssetState } }>(
+        `/media-assets/${encodeURIComponent(parsed.data)}`,
+        { accessToken }
+      );
+      const { id, status, url } = result.data.mediaAsset;
+      return { id, status, url: url ?? null };
     }
   );
 }

@@ -33,6 +33,60 @@ function profileOf(sub) {
   return profiles.get(sub);
 }
 
+/**
+ * Direct upload (backend ADR-0040): the browser PUTs the file to the presigned
+ * URL (`/storage/<id>` here), confirms it and the worker compresses it. The
+ * first status read after the completion still says PROCESSING, like a real
+ * queue, so the front has to wait for READY.
+ */
+const mediaAssets = new Map();
+let mediaSequence = 0;
+
+const assetUrl = (asset) =>
+  asset.status === 'READY' ? `http://localhost:${port}/storage/${asset.id}` : null;
+const assetJson = (asset) => ({
+  id: asset.id,
+  purpose: asset.purpose,
+  mimeType: asset.mimeType,
+  status: asset.status,
+  url: assetUrl(asset),
+});
+
+/** `user.profilePictureUrl` follows the linked asset, `null` while processing. */
+function withPicture(user) {
+  const asset = user.profilePictureId ? mediaAssets.get(user.profilePictureId) : undefined;
+  return { ...user, profilePictureUrl: asset ? assetUrl(asset) : null };
+}
+
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'PUT, GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+async function storeFile(request, response, id) {
+  const asset = mediaAssets.get(id);
+  if (!asset) {
+    response.writeHead(404, CORS_HEADERS);
+    return response.end();
+  }
+  const chunks = [];
+  for await (const chunk of request) chunks.push(chunk);
+  asset.bytes = Buffer.concat(chunks);
+  response.writeHead(200, CORS_HEADERS);
+  return response.end();
+}
+
+function serveFile(response, id) {
+  const asset = mediaAssets.get(id);
+  if (!asset?.bytes || asset.status !== 'READY') {
+    response.writeHead(404, CORS_HEADERS);
+    return response.end();
+  }
+  response.writeHead(200, { ...CORS_HEADERS, 'Content-Type': asset.mimeType });
+  return response.end(asset.bytes);
+}
+
 function send(response, status, body) {
   response.writeHead(status, { 'Content-Type': 'application/json' });
   response.end(body === undefined ? '' : JSON.stringify(body));
@@ -261,11 +315,33 @@ const routes = {
     return send(response, 204);
   },
   'GET /api/v1/account/profile': authenticated((profile, _body, response) =>
-    send(response, 200, { data: profile })
+    send(response, 200, { data: { ...profile, user: withPicture(profile.user) } })
   ),
   'PATCH /api/v1/account/profile': authenticated((profile, body, response) => {
+    if (body.profilePictureId && !mediaAssets.has(body.profilePictureId)) {
+      return send(response, 422, {
+        message: 'Imagem de perfil informada não existe',
+        errors: [{ field: 'profilePictureId', message: 'Imagem de perfil informada não existe' }],
+      });
+    }
     Object.assign(profile.user, body);
-    return send(response, 200, { data: { user: profile.user } });
+    return send(response, 200, { data: { user: withPicture(profile.user) } });
+  }),
+  'POST /api/v1/media-assets/uploads': authenticated((_profile, body, response) => {
+    mediaSequence += 1;
+    const id = `019a0000-0000-7000-8000-${String(mediaSequence).padStart(12, '0')}`;
+    const asset = { id, purpose: body.purpose, mimeType: body.mimeType, status: 'PENDING_UPLOAD' };
+    mediaAssets.set(id, asset);
+    return send(response, 200, {
+      data: {
+        mediaAsset: assetJson(asset),
+        upload: {
+          url: `http://localhost:${port}/storage/${id}`,
+          method: 'PUT',
+          headers: { 'Content-Type': body.mimeType, 'Content-Length': String(body.fileSizeBytes) },
+        },
+      },
+    });
   }),
   'PATCH /api/v1/missionaries/profile': authenticated((profile, body, response) => {
     Object.assign(profile.missionary, body);
@@ -327,6 +403,9 @@ function publicProfile() {
 
 const PUBLIC_PROFILE = /^\/api\/v1\/public\/missionaries\/([^/]+)$/;
 const SESSION = /^\/api\/v1\/auth\/sessions\/([^/]+)$/;
+const STORAGE = /^\/storage\/([^/]+)$/;
+const MEDIA_ASSET = /^\/api\/v1\/media-assets\/([^/]+)$/;
+const MEDIA_COMPLETION = /^\/api\/v1\/media-assets\/([^/]+)\/completion$/;
 
 const server = createServer((request, response) => {
   const path = new URL(request.url ?? '/', 'http://localhost').pathname;
@@ -341,6 +420,40 @@ const server = createServer((request, response) => {
           message: 'Missionary profile not found',
           code: 'E_MISSIONARY_PROFILE_NOT_FOUND',
         });
+  }
+
+  const storageMatch = STORAGE.exec(path);
+  if (storageMatch) {
+    const id = decodeURIComponent(storageMatch[1]);
+    if (request.method === 'OPTIONS') {
+      response.writeHead(204, CORS_HEADERS);
+      return response.end();
+    }
+    if (request.method === 'PUT') return storeFile(request, response, id);
+    if (request.method === 'GET') return serveFile(response, id);
+  }
+
+  const completionMatch = request.method === 'POST' && MEDIA_COMPLETION.exec(path);
+  if (completionMatch) {
+    if (!userOf(request)) return unauthorized(response);
+    const asset = mediaAssets.get(decodeURIComponent(completionMatch[1]));
+    if (!asset?.bytes) return send(response, 404, { message: 'Arquivo não encontrado' });
+    asset.status = 'PROCESSING';
+    asset.pendingReads = 1;
+    return send(response, 202, { data: { mediaAsset: assetJson(asset) } });
+  }
+
+  const mediaMatch = request.method === 'GET' && MEDIA_ASSET.exec(path);
+  if (mediaMatch) {
+    if (!userOf(request)) return unauthorized(response);
+    const asset = mediaAssets.get(decodeURIComponent(mediaMatch[1]));
+    if (!asset) return send(response, 404, { message: 'Arquivo não encontrado' });
+    // The "worker" finishes after one PROCESSING answer.
+    if (asset.status === 'PROCESSING') {
+      if (asset.pendingReads > 0) asset.pendingReads -= 1;
+      else asset.status = 'READY';
+    }
+    return send(response, 200, { data: { mediaAsset: assetJson(asset) } });
   }
 
   const sessionMatch = request.method === 'DELETE' && SESSION.exec(path);

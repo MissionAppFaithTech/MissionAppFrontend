@@ -8,7 +8,11 @@ import {
   resetActionHarness,
   setSession,
 } from '@/test/actionHarness';
-import { completeMediaUploadAction, requestProfilePictureUploadAction } from './media';
+import {
+  completeMediaUploadAction,
+  getMediaAssetAction,
+  requestProfilePictureUploadAction,
+} from './media';
 
 vi.mock('next/headers', async () => (await import('@/test/actionHarness')).headersMock);
 vi.mock('@/lib/api/backend', async () => (await import('@/test/actionHarness')).backendMock);
@@ -107,5 +111,70 @@ describe('completeMediaUploadAction', () => {
       status: 409,
       message: 'Upload já confirmado',
     });
+  });
+});
+
+describe('getMediaAssetAction', () => {
+  it('returns the processing state and the public URL once READY', async () => {
+    mockBackend({
+      [`GET /media-assets/${ASSET_ID}`]: () => ({
+        data: {
+          mediaAsset: {
+            id: ASSET_ID,
+            status: 'READY',
+            url: 'https://cdn.test/p.optimized.webp',
+            fileKey: 'users/profile-pictures/x.optimized.webp',
+          },
+        },
+      }),
+    });
+
+    await expect(getMediaAssetAction(ASSET_ID)).resolves.toEqual({
+      ok: true,
+      data: { id: ASSET_ID, status: 'READY', url: 'https://cdn.test/p.optimized.webp' },
+    });
+    expect(backendMock.backendFetch).toHaveBeenCalledWith(`/media-assets/${ASSET_ID}`, {
+      accessToken: ACCESS,
+    });
+  });
+
+  it('keeps url null while the worker still processes the image', async () => {
+    mockBackend({
+      [`GET /media-assets/${ASSET_ID}`]: () => ({
+        data: { mediaAsset: { id: ASSET_ID, status: 'PROCESSING' } },
+      }),
+    });
+
+    await expect(getMediaAssetAction(ASSET_ID)).resolves.toEqual({
+      ok: true,
+      data: { id: ASSET_ID, status: 'PROCESSING', url: null },
+    });
+  });
+
+  it('rejects an id that is not a UUID (no path injection)', async () => {
+    await expect(getMediaAssetAction('../account/profile')).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+    });
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
+  });
+
+  it('passes the backend error through (asset of another user)', async () => {
+    mockBackend({
+      [`GET /media-assets/${ASSET_ID}`]: () => {
+        throw backendError(403, { message: 'Você não tem permissão para acessar este arquivo' });
+      },
+    });
+
+    await expect(getMediaAssetAction(ASSET_ID)).resolves.toMatchObject({
+      ok: false,
+      status: 403,
+    });
+  });
+
+  it('needs a session', async () => {
+    setSession();
+
+    await expect(getMediaAssetAction(ASSET_ID)).resolves.toMatchObject({ ok: false, status: 401 });
   });
 });
