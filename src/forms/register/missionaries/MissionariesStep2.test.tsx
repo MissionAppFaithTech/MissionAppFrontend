@@ -1,7 +1,8 @@
 import { screen, waitFor } from '@testing-library/react';
 import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { useMissionaryRegisterStore } from '@/stores/missionaryRegisterStore';
 import MissionariesStep2 from './MissionariesStep2';
 import { MissionaryRegisterWizardProvider } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
 
@@ -19,6 +20,21 @@ function renderStep() {
 }
 
 describe('MissionariesStep2', () => {
+  afterEach(() => useMissionaryRegisterStore.setState({ stepErrors: {} }));
+
+  it('shows the errors the API sent back for this step and focuses them', async () => {
+    useMissionaryRegisterStore.setState({
+      stepErrors: { missionaryAgency: 'Agência missionária informada não existe' },
+    });
+    renderStep();
+
+    const summary = await screen.findByRole('alert');
+    expect(summary).toHaveFocus();
+    expect(summary).toHaveTextContent(
+      'Agência missionária: Agência missionária informada não existe'
+    );
+  });
+
   it('opens the agency modal from Não encontrei na lista and keeps the page behind it', async () => {
     const user = userEvent.setup();
     renderStep();

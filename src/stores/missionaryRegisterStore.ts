@@ -7,7 +7,11 @@ import type {
   MissionaryRegisterData,
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
-import { personalStepErrors, signupFieldErrors } from '@/forms/register/shared/fieldErrors';
+import {
+  ministryStepErrors,
+  personalStepErrors,
+  signupFieldErrors,
+} from '@/forms/register/shared/fieldErrors';
 import {
   registerMissionary,
   toApiBirthDate,
@@ -83,6 +87,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         set((state) => ({
           formData: { ...state.formData, ...values },
           step: 3,
+          stepErrors: {},
         }));
       },
 
@@ -147,6 +152,12 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
           const personal = personalStepErrors(signupFieldErrors(error));
           if (Object.keys(personal).length > 0) {
             set({ step: 1, stepErrors: personal });
+            return;
+          }
+          // NOTE: agency, faith community and mission description are fixed on step 2.
+          const ministry = ministryStepErrors(error);
+          if (Object.keys(ministry).length > 0) {
+            set({ step: 2, stepErrors: ministry });
             return;
           }
           throw error;

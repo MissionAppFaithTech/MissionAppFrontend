@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ApiError } from '@/lib/api/client';
 import {
+  ministryStepErrors,
   personalStepErrors,
   REGISTER_FIELD_LABELS,
   signupFieldErrors,
@@ -43,6 +44,28 @@ describe('registration field errors', () => {
       birthDate: 'a',
       document: 'b',
     });
+  });
+
+  it('maps the "Dados ministeriais" fields, including a new agency or community', () => {
+    const error = new ApiError('Validation failure', 422, {
+      missionaryAgency: 'Informe a agência',
+      'missionaryAgency.name': 'Nome obrigatório',
+      faithCommunityId: 'Comunidade de fé informada não existe',
+      aboutMe: 'Texto longo demais',
+      email: 'Em uso',
+    });
+
+    expect(ministryStepErrors(error)).toEqual({
+      missionaryAgency: 'Informe a agência',
+      faithCommunity: 'Comunidade de fé informada não existe',
+      missionDescription: 'Texto longo demais',
+    });
+    expect(
+      ministryStepErrors(
+        new ApiError('Validation failure', 422, { 'faithCommunity.pastorPhone': 'Inválido' })
+      )
+    ).toEqual({ faithCommunity: 'Nova comunidade de fé: Inválido' });
+    expect(ministryStepErrors(new Error('boom'))).toEqual({});
   });
 
   it('has nothing to map for errors that are not from the API', () => {

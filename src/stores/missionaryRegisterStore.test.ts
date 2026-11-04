@@ -312,6 +312,63 @@ describe('missionaryRegisterStore', () => {
       });
     });
 
+    it('goes back to step 2 when the API rejects the agency, the community or the description', async () => {
+      startStep3();
+      registerMissionary.mockRejectedValueOnce(
+        new ApiError('Validation failure', 422, {
+          missionaryAgencyId: 'Agência missionária informada não existe',
+          'faithCommunity.pastorPhone': 'Telefone inválido',
+          aboutMe: 'Texto longo demais',
+        })
+      );
+
+      await expect(submit()).resolves.toBeUndefined();
+
+      expect(useMissionaryRegisterStore.getState()).toMatchObject({
+        step: 2,
+        stepErrors: {
+          missionaryAgency: 'Agência missionária informada não existe',
+          faithCommunity: 'Nova comunidade de fé: Telefone inválido',
+          missionDescription: 'Texto longo demais',
+        },
+        submission: {},
+      });
+    });
+
+    it('prefers step 1 when personal and ministry fields fail together', async () => {
+      startStep3();
+      registerMissionary.mockRejectedValueOnce(
+        new ApiError('Validation failure', 422, {
+          email: 'Em uso',
+          missionaryAgencyId: 'Não existe',
+        })
+      );
+
+      await submit();
+
+      expect(useMissionaryRegisterStore.getState()).toMatchObject({
+        step: 1,
+        stepErrors: { email: 'Em uso' },
+      });
+    });
+
+    it('clears the API errors once step 2 is completed again', () => {
+      useMissionaryRegisterStore.setState({
+        step: 2,
+        stepErrors: { missionaryAgency: 'Não existe' },
+      });
+
+      useMissionaryRegisterStore.getState().completeStep2({
+        missionaryAgency: 'ma-1',
+        agencyDetails: EMPTY_MISSIONARY_AGENCY,
+        missionDescription: 'Projeto',
+        faithCommunity: '',
+        communityDetails: EMPTY_FAITH_COMMUNITY,
+      });
+
+      expect(useMissionaryRegisterStore.getState()).toMatchObject({ step: 3, stepErrors: {} });
+    });
+
     it('stays on step 3 with no progress when the error is about the credentials', async () => {
       startStep3();
       const error = new ApiError('Validation failure', 422, { username: 'Em uso' });
