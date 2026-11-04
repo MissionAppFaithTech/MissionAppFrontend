@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
   // URL-specific content streams in after navigation. No `prefetch={true}`
   // links needed migrating (2026-11-03).
   partialPrefetching: true,
+  // Dev logs print every Server Function's arguments, including the password
+  // passed to `loginAction`. Keep secrets out of the terminal.
+  logging: {
+    serverFunctions: false,
+  },
   cacheLife: {
     // Public pages shared by every visitor (ADR-0004): same 300 s window the
     // routes used with `revalidate = 300`, refreshed at once by `updateTag`.
