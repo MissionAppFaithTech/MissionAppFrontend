@@ -74,6 +74,11 @@ export function setSession(accessToken?: string, refreshToken?: string) {
   if (refreshToken) jar.set(AUTH_COOKIE.refreshToken, refreshToken);
 }
 
+/** Puts a cookie in the jar as if the browser had sent it (no write is recorded). */
+export function setCookie(name: string, value: string) {
+  jar.set(name, value);
+}
+
 export function cookieValue(name: string) {
   return jar.get(name);
 }
@@ -111,6 +116,7 @@ export function onlyNewToken(result: unknown): BackendRoute {
 
 export function resetActionHarness() {
   backendMock.backendFetch.mockReset();
+  headersMock.headers.mockClear();
   cacheMock.updateTag.mockReset();
   cacheMock.refresh.mockReset();
   setSession(ACCESS, 'rt-1');

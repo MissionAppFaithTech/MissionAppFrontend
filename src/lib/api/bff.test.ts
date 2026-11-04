@@ -11,7 +11,12 @@ import {
   ROTATION_REUSE_WINDOW_MS,
 } from '@/lib/api/bff';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
+import { DEVICE_COOKIE } from '@/lib/auth/device';
 
+const DEVICE_ID = '6f1c2a9e-4b7d-4e2a-9c3f-1d2e3f4a5b6c';
+
+const CHROME_ON_WINDOWS =
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
 const cookieJar = new Map<string, string>();
 const mockCookieStore = {
   get: vi.fn((name: string) => {
@@ -22,6 +27,7 @@ const mockCookieStore = {
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn(async () => mockCookieStore),
+  headers: vi.fn(async () => new Headers({ 'user-agent': CHROME_ON_WINDOWS })),
 }));
 
 vi.mock('@/lib/api/backend', () => ({
@@ -326,15 +332,22 @@ describe('withSession', () => {
 
   it('refreshes when the access cookie is missing and rewrites both cookies', async () => {
     setSession(undefined, 'rt-missing-access');
+    cookieJar.set(DEVICE_COOKIE, DEVICE_ID);
     mockRefresh(() => ({ data: NEW_TOKENS }));
     const handler = okHandler();
 
     const response = await withSession(TAG, FALLBACK, handler);
 
     expect(response.status).toBe(200);
+    // NOTE: same device headers as the proxy, so the API keeps the device on the new token.
     expect(backendFetch).toHaveBeenCalledWith('/auth/refresh', {
       method: 'POST',
       body: { refreshToken: 'rt-missing-access' },
+      headers: {
+        'x-device-id': DEVICE_ID,
+        'x-device-kind': 'desktop',
+        'x-device-name': 'Chrome no Windows',
+      },
     });
     expect(handler).toHaveBeenCalledExactlyOnceWith('new-access');
     expectCookiesRewritten(response);

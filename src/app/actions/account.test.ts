@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearRefreshCache } from '@/lib/api/bff';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
+import { DEVICE_COOKIE } from '@/lib/auth/device';
 import {
   ACCESS,
   NEW_TOKENS,
@@ -43,9 +44,12 @@ describe('registerAccountAction', () => {
     });
 
     await expect(registerAccountAction(input)).resolves.toEqual({ ok: true, data: { user } });
+    const deviceId = cookieValue(DEVICE_COOKIE);
+    expect(deviceId).toMatch(/^[\w-]{16,128}$/);
     expect(backendMock.backendFetch).toHaveBeenCalledWith('/accounts', {
       method: 'POST',
       body: input,
+      headers: { 'x-device-id': deviceId, 'x-device-kind': 'unknown' },
     });
     expect(cookieValue(AUTH_COOKIE.accessToken)).toBe('acc');
   });

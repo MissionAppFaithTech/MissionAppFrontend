@@ -22,6 +22,9 @@ export const loginInputSchema = z.object({
   password: z.string().min(1).max(128),
 });
 
+/** Session family id from `GET /auth/sessions` (UUID v7). */
+export const sessionIdSchema = z.uuid();
+
 export const forgotPasswordInputSchema = z.object({
   login: z.email(),
 });

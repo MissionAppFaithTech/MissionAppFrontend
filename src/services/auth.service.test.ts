@@ -6,13 +6,15 @@ import {
   getResetTokenStatus,
   resetPassword,
   terminateAllSessions,
+  endSession,
 } from './auth.service';
 import { MOCK_RESET_TOKEN, MOCK_EXPIRED_RESET_TOKEN } from '@/mocks/auth';
-import { endAllSessionsAction, loginAction } from '@/app/actions/auth';
+import { endAllSessionsAction, endSessionAction, loginAction } from '@/app/actions/auth';
 import { ApiError } from '@/lib/api/client';
 
 vi.mock('@/app/actions/auth', () => ({
   endAllSessionsAction: vi.fn(),
+  endSessionAction: vi.fn(),
   loginAction: vi.fn(),
   logoutAction: vi.fn(),
   requestPasswordResetAction: vi.fn(),
@@ -142,6 +144,31 @@ describe('auth.service', () => {
       await expect(listActiveSessions()).rejects.toMatchObject({
         status: 500,
         message: 'Não foi possível carregar as sessões',
+      });
+    });
+  });
+
+  describe('endSession', () => {
+    it('ends the chosen session through the Server Action', async () => {
+      vi.mocked(endSessionAction).mockResolvedValue({
+        ok: true,
+        data: { message: 'Sessão encerrada.' },
+      });
+
+      await expect(endSession('s-2')).resolves.toEqual({ message: 'Sessão encerrada.' });
+      expect(endSessionAction).toHaveBeenCalledWith('s-2');
+    });
+
+    it('rejects with the action error', async () => {
+      vi.mocked(endSessionAction).mockResolvedValue({
+        ok: false,
+        status: 404,
+        message: 'Esta sessão já foi encerrada.',
+      });
+
+      await expect(endSession('s-2')).rejects.toMatchObject({
+        status: 404,
+        message: 'Esta sessão já foi encerrada.',
       });
     });
   });
