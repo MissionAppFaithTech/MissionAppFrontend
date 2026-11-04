@@ -240,6 +240,9 @@ test.describe('Keyboard and motion', () => {
   test('the skip link is the first tab stop and moves focus to main content', async ({ page }) => {
     await page.goto('/profile/sobre');
     await page.getByRole('heading', { name: 'Sobre', exact: true }).waitFor();
+    // NOTE: the Suspense fallback renders its own shell (and <main>) until the
+    // profile streams in; test the keyboard once the page has settled on one.
+    await expect(page.locator('#main-content')).toHaveCount(1);
 
     await page.keyboard.press('Tab');
     const skip = page.getByRole('link', { name: /pular para o conteúdo principal/i });
