@@ -4,6 +4,7 @@ import { refreshTokens } from '@/lib/api/bff';
 import { clientHeadersFrom } from '@/lib/api/clientIp';
 import { getBackendOrigin } from '@/lib/api/config';
 import { AUTH_COOKIE, applyAuthCookies, clearAuthCookies } from '@/lib/auth/cookies';
+import { deviceHeaders, readDeviceId } from '@/lib/auth/device';
 import { decodeAccessToken, isAccessTokenExpiring } from '@/lib/auth/jwt';
 import { accessAreaFor, accessDecision } from '@/lib/auth/rbac';
 import type { BackendRole } from '@/types/backend';
@@ -63,7 +64,10 @@ async function refreshSession(request: NextRequest): Promise<SessionRefresh> {
   if (accessToken && !isAccessTokenExpiring(accessToken)) return { kind: 'unchanged' };
 
   try {
-    const tokens = await refreshTokens(refreshToken, clientHeadersFrom(request.headers));
+    const tokens = await refreshTokens(refreshToken, {
+      ...clientHeadersFrom(request.headers),
+      ...deviceHeaders(request.headers, readDeviceId(request.cookies)),
+    });
     return { kind: 'refreshed', tokens };
   } catch (error) {
     if (error instanceof BackendApiError && (error.status === 401 || error.status === 403)) {

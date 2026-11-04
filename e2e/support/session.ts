@@ -19,8 +19,8 @@ export function fakeAccessToken(role: 'MISSIONARY' | 'SUPPORTER' = 'MISSIONARY',
 
 /**
  * Logs a fake missionary in without a backend: sets the session cookie the proxy
- * and the server read (ADR-0005). The profile comes from `mock-api.mjs`; only the
- * client-side BFF calls are answered here.
+ * and the server read (ADR-0005). The profile and the active sessions (this
+ * browser and a phone) come from `mock-api.mjs`.
  */
 export async function mockMissionarySession(
   page: Page,
@@ -37,21 +37,4 @@ export async function mockMissionarySession(
       httpOnly: true,
     },
   ]);
-  await page.route('**/api/auth/sessions', (route) =>
-    route.fulfill({
-      json: {
-        data: [
-          {
-            id: 's1',
-            deviceType: 'web',
-            deviceName: 'Chrome',
-            ipAddress: null,
-            lastUsedAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            current: true,
-          },
-        ],
-      },
-    })
-  );
 }

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearRefreshCache } from '@/lib/api/bff';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
+import { DEVICE_COOKIE, deviceCookieMaxAge } from '@/lib/auth/device';
 import {
   ACCESS,
   NEW_TOKENS,
@@ -9,14 +10,17 @@ import {
   backendMock,
   cookieValue,
   cookieWrites,
+  headersMock,
   jwt,
   mockBackend,
   onlyNewToken,
   resetActionHarness,
+  setCookie,
   setSession,
 } from '@/test/actionHarness';
 import {
   endAllSessionsAction,
+  endSessionAction,
   loginAction,
   logoutAction,
   requestPasswordResetAction,
@@ -27,6 +31,8 @@ vi.mock('next/headers', async () => (await import('@/test/actionHarness')).heade
 vi.mock('@/lib/api/backend', async () => (await import('@/test/actionHarness')).backendMock);
 
 const user = { id: 'usr-1', fullName: 'Ana', email: 'ana@example.com', role: 'MISSIONARY' };
+const KNOWN_DEVICE_ID = '0b8e5d4c-3a2f-4e1d-8c7b-6a5f4e3d2c1b';
+const SESSION_ID = '019a1b2c-3d4e-7f50-8a6b-7c8d9e0f1a2b';
 
 beforeEach(() => {
   clearRefreshCache();
@@ -45,12 +51,59 @@ describe('loginAction', () => {
     const result = await loginAction({ login: 'ana@example.com', password: 'Secret123!' });
 
     expect(result).toEqual({ ok: true, data: { user } });
+    const deviceId = cookieValue(DEVICE_COOKIE);
+    expect(deviceId).toMatch(/^[\w-]{16,128}$/);
     expect(backendMock.backendFetch).toHaveBeenCalledWith('/auth/login', {
       method: 'POST',
       body: { login: 'ana@example.com', password: 'Secret123!' },
+      headers: { 'x-device-id': deviceId, 'x-device-kind': 'unknown' },
     });
     expect(cookieValue(AUTH_COOKIE.accessToken)).toBe('acc');
     expect(cookieValue(AUTH_COOKIE.refreshToken)).toBe('ref');
+    expect(cookieWrites.find((write) => write.name === DEVICE_COOKIE)?.maxAge).toBe(
+      deviceCookieMaxAge
+    );
+  });
+
+  it('reuses the device id of earlier logins so the API replaces that session (ADR-0007)', async () => {
+    setSession();
+    setCookie(DEVICE_COOKIE, KNOWN_DEVICE_ID);
+    headersMock.headers.mockResolvedValueOnce(
+      new Headers({
+        'user-agent':
+          'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',
+      })
+    );
+    mockBackend({
+      'POST /auth/login': () => ({ data: { user, accessToken: 'acc', refreshToken: 'ref' } }),
+    });
+
+    await loginAction({ login: 'ana@example.com', password: 'Secret123!' });
+
+    expect(backendMock.backendFetch).toHaveBeenCalledWith(
+      '/auth/login',
+      expect.objectContaining({
+        headers: {
+          'x-device-id': KNOWN_DEVICE_ID,
+          'x-device-kind': 'mobile',
+          'x-device-name': 'Chrome no Android',
+        },
+      })
+    );
+    expect(cookieValue(DEVICE_COOKIE)).toBe(KNOWN_DEVICE_ID);
+  });
+
+  it('replaces a device cookie the API would refuse', async () => {
+    setSession();
+    setCookie(DEVICE_COOKIE, 'curto');
+    mockBackend({
+      'POST /auth/login': () => ({ data: { user, accessToken: 'acc', refreshToken: 'ref' } }),
+    });
+
+    await loginAction({ login: 'ana@example.com', password: 'Secret123!' });
+
+    expect(cookieValue(DEVICE_COOKIE)).not.toBe('curto');
+    expect(cookieValue(DEVICE_COOKIE)).toMatch(/^[\w-]{16,128}$/);
   });
 
   it('rejects an invalid e-mail without calling the backend', async () => {
@@ -107,6 +160,16 @@ describe('logoutAction', () => {
       accessToken: ACCESS,
     });
     expect(authCookiesCleared()).toBe(true);
+  });
+
+  it('keeps the device cookie: it names the browser, not the session (ADR-0007)', async () => {
+    setCookie(DEVICE_COOKIE, KNOWN_DEVICE_ID);
+    mockBackend({ 'DELETE /auth/logout': () => null });
+
+    await logoutAction();
+
+    expect(cookieValue(DEVICE_COOKIE)).toBe(KNOWN_DEVICE_ID);
+    expect(cookieWrites.some((write) => write.name === DEVICE_COOKIE)).toBe(false);
   });
 
   it('does not send an expired bearer', async () => {
@@ -254,6 +317,51 @@ describe('resetPasswordAction', () => {
     });
 
     await expect(resetPasswordAction(input)).resolves.toMatchObject({ ok: false, status: 400 });
+  });
+});
+
+describe('endSessionAction', () => {
+  it("ends another device's session and keeps this one", async () => {
+    mockBackend({ [`DELETE /auth/sessions/${SESSION_ID}`]: () => ({ message: 'ok' }) });
+
+    await expect(endSessionAction(SESSION_ID)).resolves.toEqual({
+      ok: true,
+      data: { message: 'Sessão encerrada.' },
+    });
+    expect(backendMock.backendFetch).toHaveBeenCalledWith(`/auth/sessions/${SESSION_ID}`, {
+      method: 'DELETE',
+      accessToken: ACCESS,
+    });
+    expect(cookieWrites).toEqual([]);
+  });
+
+  it('rejects an id that is not a session id without calling the backend', async () => {
+    await expect(endSessionAction('../auth/sessions')).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+      message: 'Sessão inválida',
+    });
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
+  });
+
+  it('maps a session that no longer exists', async () => {
+    mockBackend({
+      [`DELETE /auth/sessions/${SESSION_ID}`]: () => {
+        throw backendError(404, { message: 'Session not found', code: 'E_SESSION_NOT_FOUND' });
+      },
+    });
+
+    await expect(endSessionAction(SESSION_ID)).resolves.toMatchObject({
+      ok: false,
+      status: 404,
+      code: 'E_SESSION_NOT_FOUND',
+    });
+  });
+
+  it('answers 401 without a session', async () => {
+    setSession();
+
+    await expect(endSessionAction(SESSION_ID)).resolves.toMatchObject({ ok: false, status: 401 });
   });
 });
 

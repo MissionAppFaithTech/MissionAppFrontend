@@ -1,9 +1,10 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import type { AuthTokensResponse, AuthUser } from '@/lib/api/auth-response';
 import { backendFetch } from '@/lib/api/backend';
 import { expireAuthCookies, setAuthCookies } from '@/lib/auth/cookies';
+import { deviceHeaders, deviceIdFor, rememberDeviceId } from '@/lib/auth/device';
 import { actionFailure, parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
 import { ownerUsername, showSavedProfile } from '@/lib/server/profileCache';
 import {
@@ -31,14 +32,18 @@ export async function registerAccountAction(input: {
   }
 
   try {
+    const store = await cookies();
+    const deviceId = deviceIdFor(store);
     const result = await backendFetch<AuthTokensResponse>('/accounts', {
       method: 'POST',
       body: parsed.data,
+      headers: deviceHeaders(await headers(), deviceId),
     });
-    setAuthCookies(await cookies(), {
+    setAuthCookies(store, {
       accessToken: result.data.accessToken,
       refreshToken: result.data.refreshToken,
     });
+    rememberDeviceId(store, deviceId);
     return { ok: true, data: { user: result.data.user } };
   } catch (error) {
     return actionFailure(

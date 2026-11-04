@@ -14,6 +14,7 @@ const mockCookieStore = {
 
 vi.mock('next/headers', () => ({
   cookies: vi.fn(async () => mockCookieStore),
+  headers: vi.fn(async () => new Headers()),
 }));
 
 vi.mock('@/lib/api/backend', () => ({

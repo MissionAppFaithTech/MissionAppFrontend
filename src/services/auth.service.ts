@@ -9,6 +9,7 @@ import {
 import type { AuthUser } from '@/lib/api/auth-response';
 import {
   endAllSessionsAction,
+  endSessionAction,
   loginAction,
   requestPasswordResetAction,
   resetPasswordAction,
@@ -106,13 +107,23 @@ export async function terminateAllSessions(): Promise<{ message: string }> {
   return callAction(() => endAllSessionsAction());
 }
 
+/** Ends another device's session (the list never offers it for this one). */
+export async function endSession(sessionId: string): Promise<{ message: string }> {
+  return callAction(() => endSessionAction(sessionId));
+}
+
 export type ActiveSession = {
   id: string;
   deviceType: 'web' | 'mobile';
+  /** Computer, phone or tablet, sent by the client at login (ADR-0007). */
+  deviceKind: 'desktop' | 'mobile' | 'tablet' | 'unknown';
   deviceName: string | null;
   ipAddress: string | null;
   lastUsedAt: string | null;
+  /** Issue date of the current refresh token (last rotation). */
   createdAt: string;
+  /** When the session began (first login on this device). */
+  startedAt: string;
   current: boolean;
 };
 

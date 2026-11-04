@@ -5,6 +5,9 @@ import { BackendApiError } from '@/lib/api/backend';
 import { refreshTokens } from '@/lib/api/bff';
 import { AUTH_COOKIE } from '@/lib/auth/cookies';
 
+import { DEVICE_COOKIE } from '@/lib/auth/device';
+
+const DEVICE_ID = '0b8e5d4c-3a2f-4e1d-8c7b-6a5f4e3d2c1b';
 vi.mock('@/lib/api/bff', () => ({ refreshTokens: vi.fn() }));
 
 const mockedRefresh = vi.mocked(refreshTokens);
@@ -120,7 +123,7 @@ describe('proxy session refresh', () => {
       )
     );
 
-    expect(mockedRefresh).toHaveBeenCalledWith('rt-old', {});
+    expect(mockedRefresh).toHaveBeenCalledWith('rt-old', { 'x-device-kind': 'unknown' });
     expect(res.headers.get('location')).toBeNull();
     const setCookie = res.headers.get('set-cookie') ?? '';
     expect(setCookie).toContain(`${AUTH_COOKIE.accessToken}=${NEW_TOKENS.accessToken}`);
@@ -232,6 +235,22 @@ describe('proxy session refresh', () => {
     expect(mockedRefresh).toHaveBeenCalledWith('rt-old', {
       'x-missionapp-bff-secret': 'secret',
       'x-missionapp-client-ip': '203.0.113.7',
+      'x-device-kind': 'unknown',
+    });
+  });
+
+  it('describes the device on refresh so the API keeps it on the new token (ADR-0007)', async () => {
+    mockedRefresh.mockResolvedValue(NEW_TOKENS);
+    await proxy(
+      request('/', `${AUTH_COOKIE.refreshToken}=rt-old; ${DEVICE_COOKIE}=${DEVICE_ID}`, {
+        'user-agent':
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1',
+      })
+    );
+    expect(mockedRefresh).toHaveBeenCalledWith('rt-old', {
+      'x-device-id': DEVICE_ID,
+      'x-device-kind': 'mobile',
+      'x-device-name': 'Mobile Safari no iOS',
     });
   });
 });

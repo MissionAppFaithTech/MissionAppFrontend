@@ -1,9 +1,10 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
 import { toBffError } from '@/lib/api/errors';
 import { AUTH_COOKIE, applyAuthCookies, clearAuthCookies } from '@/lib/auth/cookies';
+import { deviceHeaders, readDeviceId } from '@/lib/auth/device';
 import { isAccessTokenExpiring } from '@/lib/auth/jwt';
 
 export type AuthTokens = { accessToken: string; refreshToken: string };
@@ -143,7 +144,10 @@ export async function callWithSession<T>(
     if (!refreshToken || refreshAttempted) return false;
     refreshAttempted = true;
     try {
-      const tokens = await refreshTokens(refreshToken);
+      const tokens = await refreshTokens(
+        refreshToken,
+        deviceHeaders(await headers(), readDeviceId(store))
+      );
       accessToken = tokens.accessToken;
       onRefreshed(tokens);
       return true;

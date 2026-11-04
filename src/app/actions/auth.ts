@@ -1,16 +1,18 @@
 'use server';
 
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import type { AuthTokensResponse, AuthUser } from '@/lib/api/auth-response';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
 import { toBffError } from '@/lib/api/errors';
 import { expireAuthCookies, setAuthCookies, AUTH_COOKIE } from '@/lib/auth/cookies';
+import { deviceHeaders, deviceIdFor, rememberDeviceId } from '@/lib/auth/device';
 import { isAccessTokenExpiring } from '@/lib/auth/jwt';
 import { actionFailure, parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
 import {
   forgotPasswordInputSchema,
   loginInputSchema,
   resetPasswordInputSchema,
+  sessionIdSchema,
 } from '@/schemas/actions.schema';
 
 /** Authentication mutations (ADR-0006). Inputs are untrusted: always validated here. */
@@ -26,14 +28,19 @@ export async function loginAction(input: {
   if (!parsed.ok) return parsed;
 
   try {
+    const store = await cookies();
+    // NOTE: same device id as earlier logins → the API replaces that session (ADR-0007).
+    const deviceId = deviceIdFor(store);
     const result = await backendFetch<AuthTokensResponse>('/auth/login', {
       method: 'POST',
       body: parsed.data,
+      headers: deviceHeaders(await headers(), deviceId),
     });
-    setAuthCookies(await cookies(), {
+    setAuthCookies(store, {
       accessToken: result.data.accessToken,
       refreshToken: result.data.refreshToken,
     });
+    rememberDeviceId(store, deviceId);
     return { ok: true, data: { user: result.data.user } };
   } catch (error) {
     return actionFailure(
@@ -134,6 +141,29 @@ export async function resetPasswordAction(input: {
     }
     return actionFailure(error, 'Não foi possível redefinir a senha', 'actions/reset-password');
   }
+}
+
+/**
+ * Ends another device's session. The list only offers it for other sessions:
+ * this one ends through logout (ADR-0007).
+ */
+export async function endSessionAction(
+  sessionId: string
+): Promise<ActionResult<{ message: string }>> {
+  const parsed = parseInput(sessionIdSchema, sessionId, 'Sessão inválida');
+  if (!parsed.ok) return parsed;
+
+  return runWithSession(
+    'actions/end-session',
+    'Não foi possível encerrar a sessão',
+    async (accessToken) => {
+      await backendFetch(`/auth/sessions/${encodeURIComponent(parsed.data)}`, {
+        method: 'DELETE',
+        accessToken,
+      });
+      return { message: 'Sessão encerrada.' };
+    }
+  );
 }
 
 /** Ends every session, including this one, so the auth cookies are cleared too. */
