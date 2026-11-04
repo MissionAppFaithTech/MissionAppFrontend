@@ -37,6 +37,10 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
         .filter({ visible: true })
     ).toBeVisible();
 
+    // PIX is configured by key only (ADR-0008): no QR Code upload.
+    await expect(page.getByText(/qr code/i)).toHaveCount(0);
+    await expect(page.locator('input[type="file"]')).toHaveCount(0);
+
     // 5. Open Supporter Preview Modal
     const previewBtn = page.getByRole('button', { name: /visualizar prévia do apoiador/i });
     await expect(previewBtn).toBeVisible();
@@ -52,6 +56,8 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
         .filter({ visible: true })
     ).toBeVisible();
     await expect(page.getByRole('button', { name: /copiar chave pix/i })).toBeVisible();
+    const donationDialog = page.getByRole('dialog');
+    await expect(donationDialog.getByText(/escaneie|qr code/i)).toHaveCount(0);
 
     // Switch to Bank Transfer tab in modal
     const bankTab = page.getByRole('tab', { name: /transferência bancária/i });

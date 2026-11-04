@@ -5,7 +5,6 @@ export const financialSettingsSchema = z
     pixEnabled: z.boolean(),
     pixKeyType: z.enum(['cpf', 'cnpj', 'email', 'phone', 'random']),
     pixKey: z.string(),
-    pixQrCodeUrl: z.string(),
     bankEnabled: z.boolean(),
     bankName: z.string(),
     bankNumber: z.string(),

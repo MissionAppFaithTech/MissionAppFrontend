@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import QrCode2Icon from '@mui/icons-material/QrCode2';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -20,7 +19,6 @@ import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { FinancialConfigData } from '@/types/profile';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import PillButton from '@/components/common/PillButton';
-import Image from 'next/image';
 
 type DonationModalProps = {
   open: boolean;
@@ -68,7 +66,6 @@ export default function DonationModal({
 
   const pixKey = financialConfig ? financialConfig.pix?.key || '' : EXAMPLE_PIX_KEY;
   const pixKeyType = financialConfig?.pix?.keyType || 'email';
-  const pixQrCodeUrl = financialConfig?.pix?.qrCodeUrl;
 
   const bankData = financialConfig?.bankTransfer
     ? {
@@ -252,45 +249,6 @@ CPF/CNPJ: ${bankData.documento}`;
             {/* Seção Pix */}
             {(activeTab === 'pix' && hasPix) || (!hasBank && hasPix) ? (
               <Stack spacing={2} sx={{ pt: 1, alignItems: 'center' }}>
-                <Box
-                  sx={{
-                    // This card is white in both themes on purpose: a QR code needs a
-                    // light quiet zone to be scannable. So its contents do NOT follow
-                    // the color scheme — in dark they were inheriting the dark theme's
-                    // ink and rendering the code in light blue at 2.46:1.
-                    bgcolor: 'common.white',
-                    color: 'common.black',
-                    p: 2,
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: 'rgba(0, 0, 0, 0.12)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: 1,
-                  }}
-                >
-                  {pixQrCodeUrl ? (
-                    <Box sx={{ position: 'relative', width: 140, height: 140 }}>
-                      <Image
-                        src={pixQrCodeUrl}
-                        alt="QR Code Pix"
-                        fill
-                        sizes="140px"
-                        style={{ objectFit: 'contain' }}
-                      />
-                    </Box>
-                  ) : (
-                    <QrCode2Icon sx={{ fontSize: 130, color: 'common.black' }} />
-                  )}
-                  <Typography
-                    variant="caption"
-                    sx={{ color: 'rgba(0, 0, 0, 0.66)', textAlign: 'center' }}
-                  >
-                    Escaneie o QR Code no app do seu banco
-                  </Typography>
-                </Box>
-
                 <Box sx={{ width: '100%' }}>
                   <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
                     Chave Pix ({pixKeyTypeLabels[pixKeyType] || 'E-mail'}):

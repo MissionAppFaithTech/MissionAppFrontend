@@ -55,7 +55,6 @@ export const mockProfile: ProfileData = {
       enabled: true,
       key: 'samuelhe@gmail.com',
       keyType: 'email',
-      qrCodeUrl: '/images/projects/projeto-impacto.jpg',
     },
     bankTransfer: {
       enabled: true,

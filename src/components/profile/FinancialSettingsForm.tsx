@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, type ChangeEvent } from 'react';
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import QrCode2Icon from '@mui/icons-material/QrCode2';
+import PixIcon from '@mui/icons-material/Pix';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
@@ -30,7 +28,6 @@ import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
 import StyledTextArea from '@/components/common/StyledTextArea';
 import DonationModal from '@/components/profile/DonationModal';
@@ -55,7 +52,6 @@ const defaultFinancialData: FinancialConfigData = {
     enabled: true,
     key: '',
     keyType: 'email',
-    qrCodeUrl: '',
   },
   bankTransfer: {
     enabled: false,
@@ -84,7 +80,6 @@ export default function FinancialSettingsForm({
     handleSubmit,
     control,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<FinancialSettingsFormData>({
     resolver: zodResolver(financialSettingsSchema),
@@ -94,7 +89,6 @@ export default function FinancialSettingsForm({
       pixEnabled: source.pix.enabled,
       pixKey: source.pix.key,
       pixKeyType: source.pix.keyType,
-      pixQrCodeUrl: source.pix.qrCodeUrl || '',
       bankEnabled: source.bankTransfer.enabled,
       bankName: source.bankTransfer.bankName,
       bankNumber: source.bankTransfer.bankNumber || '',
@@ -111,7 +105,6 @@ export default function FinancialSettingsForm({
     pixEnabled,
     pixKey,
     pixKeyType,
-    pixQrCodeUrl,
     bankEnabled,
     bankName,
     bankNumber,
@@ -125,7 +118,6 @@ export default function FinancialSettingsForm({
     'pixEnabled',
     'pixKey',
     'pixKeyType',
-    'pixQrCodeUrl',
     'bankEnabled',
     'bankName',
     'bankNumber',
@@ -154,7 +146,6 @@ export default function FinancialSettingsForm({
       enabled: pixEnabled,
       key: pixKey,
       keyType: pixKeyType as PixKeyType,
-      qrCodeUrl: pixQrCodeUrl || undefined,
     },
     bankTransfer: {
       enabled: bankEnabled,
@@ -166,18 +157,6 @@ export default function FinancialSettingsForm({
       holderName,
       holderDocument,
     },
-  };
-
-  const handleQrCodeFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setValue('pixQrCodeUrl', previewUrl, { shouldDirty: true, shouldValidate: true });
-    }
-  };
-
-  const handleRemoveQrCode = () => {
-    setValue('pixQrCodeUrl', '', { shouldDirty: true, shouldValidate: true });
   };
 
   const onSubmit = (data: FinancialSettingsFormData) => {
@@ -194,7 +173,6 @@ export default function FinancialSettingsForm({
         enabled: data.pixEnabled,
         key: data.pixKey,
         keyType: data.pixKeyType as PixKeyType,
-        qrCodeUrl: data.pixQrCodeUrl || undefined,
       },
       bankTransfer: {
         enabled: data.bankEnabled,
@@ -404,13 +382,13 @@ export default function FinancialSettingsForm({
                   }}
                 >
                   <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
-                    <QrCode2Icon sx={{ color: 'primary.main', fontSize: 28 }} />
+                    <PixIcon aria-hidden sx={{ color: 'primary.main', fontSize: 28 }} />
                     <Box>
                       <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
                         Doação via Pix Simples
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        Transferência instantânea via chave Pix e QR Code estático.
+                        Transferência instantânea pela chave Pix.
                       </Typography>
                     </Box>
                   </Stack>
@@ -495,116 +473,6 @@ export default function FinancialSettingsForm({
                         />
                       </Grid>
                     </Grid>
-
-                    {/* QR Code Estático */}
-                    <Box sx={{ pt: 1 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-                        QR Code Estático (Opcional)
-                      </Typography>
-
-                      <Stack
-                        direction={{ xs: 'column', sm: 'row' }}
-                        spacing={2}
-                        sx={{ alignItems: 'flex-start' }}
-                      >
-                        {pixQrCodeUrl ? (
-                          <Box
-                            sx={{
-                              position: 'relative',
-                              width: 120,
-                              height: 120,
-                              borderRadius: 2,
-                              overflow: 'hidden',
-                              border: '1px solid',
-                              // White in both themes so the code stays scannable.
-                              borderColor: 'rgba(0, 0, 0, 0.12)',
-                              bgcolor: 'common.white',
-                            }}
-                          >
-                            <Image
-                              src={pixQrCodeUrl}
-                              alt="Prévia do QR Code Pix"
-                              fill
-                              sizes="120px"
-                              style={{ objectFit: 'contain' }}
-                            />
-                          </Box>
-                        ) : (
-                          <Box
-                            sx={{
-                              width: 120,
-                              height: 120,
-                              borderRadius: 2,
-                              border: '2px dashed',
-                              borderColor: 'divider',
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              bgcolor: 'action.hover',
-                            }}
-                          >
-                            <QrCode2Icon sx={{ color: 'text.secondary', fontSize: 40 }} />
-                            <Typography variant="caption" color="text.secondary">
-                              Sem QR Code
-                            </Typography>
-                          </Box>
-                        )}
-
-                        <Box sx={{ flex: 1 }}>
-                          <Stack
-                            direction={{ xs: 'column', sm: 'row' }}
-                            spacing={1.5}
-                            sx={{ alignItems: { xs: 'stretch', sm: 'center' }, mb: 1 }}
-                          >
-                            <PillButton
-                              component="label"
-                              tone="primarySoftOutline"
-                              size="small"
-                              sx={{
-                                minHeight: 44,
-                                px: 2,
-                                cursor: 'pointer',
-                                justifyContent: 'center',
-                              }}
-                            >
-                              <CloudUploadOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
-                              {pixQrCodeUrl ? 'Substituir imagem' : 'Enviar imagem do QR Code'}
-                              <Box
-                                component="input"
-                                type="file"
-                                accept="image/*"
-                                aria-label="Upload de imagem do QR Code"
-                                hidden
-                                onChange={handleQrCodeFileChange}
-                              />
-                            </PillButton>
-
-                            {pixQrCodeUrl && (
-                              <PillButton
-                                type="button"
-                                tone="dangerOutline"
-                                size="small"
-                                onClick={handleRemoveQrCode}
-                                sx={{ minHeight: 44, px: 1.5, justifyContent: 'center' }}
-                              >
-                                <DeleteOutlinedIcon sx={{ fontSize: 18, mr: 0.5 }} />
-                                Remover
-                              </PillButton>
-                            )}
-                          </Stack>
-
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{ display: 'block' }}
-                          >
-                            Envie a imagem do QR Code Pix gerado no seu app bancário para facilitar
-                            o pagamento de apoiadores.
-                          </Typography>
-                        </Box>
-                      </Stack>
-                    </Box>
                   </Stack>
                 )}
               </Card>

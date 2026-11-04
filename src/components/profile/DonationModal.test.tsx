@@ -24,6 +24,38 @@ describe('DonationModal Component', () => {
     expect(screen.getByRole('button', { name: /copiar chave pix/i })).toBeInTheDocument();
   });
 
+  it('shows the PIX key only, without a QR Code (ADR-0008)', () => {
+    render(
+      <DonationModal
+        open={true}
+        onClose={vi.fn()}
+        missionaryName="Samuel Mendonça"
+        isOwnProfile={false}
+        financialConfig={{
+          supporterMessage: 'Obrigado!',
+          pix: { enabled: true, key: 'samuel@missao.org', keyType: 'email' },
+          bankTransfer: {
+            enabled: false,
+            bankName: '',
+            bankNumber: '',
+            agency: '',
+            account: '',
+            accountType: 'corrente',
+            holderName: '',
+            holderDocument: '',
+          },
+        }}
+      />
+    );
+
+    const dialog = screen.getByRole('dialog');
+    expect(screen.getByText('samuel@missao.org')).toBeInTheDocument();
+    expect(screen.getByText('Chave Pix (E-mail):')).toBeInTheDocument();
+    expect(screen.queryByText(/qr code/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/escaneie/i)).not.toBeInTheDocument();
+    expect(dialog.querySelector('img, svg[data-testid="QrCode2Icon"]')).toBeNull();
+  });
+
   it('switches to bank transfer tab and allows copying bank data', async () => {
     const user = userEvent.setup();
     const writeTextSpy = vi.fn().mockResolvedValue(undefined);

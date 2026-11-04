@@ -101,7 +101,6 @@ export type PixConfigData = {
   enabled: boolean;
   key: string;
   keyType: PixKeyType;
-  qrCodeUrl?: string;
 };
 
 export type BankTransferConfigData = {
