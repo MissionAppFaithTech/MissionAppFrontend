@@ -155,6 +155,7 @@ describe('getMediaAssetAction', () => {
     await expect(getMediaAssetAction('../account/profile')).resolves.toMatchObject({
       ok: false,
       status: 422,
+      message: 'Arquivo inválido',
     });
     expect(backendMock.backendFetch).not.toHaveBeenCalled();
   });
@@ -170,6 +171,23 @@ describe('getMediaAssetAction', () => {
       ok: false,
       status: 403,
     });
+  });
+
+  it('answers a pt-BR message and logs the tag when the call fails unexpectedly', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockBackend({
+      [`GET /media-assets/${ASSET_ID}`]: () => {
+        throw new TypeError('fetch failed');
+      },
+    });
+
+    await expect(getMediaAssetAction(ASSET_ID)).resolves.toEqual({
+      ok: false,
+      status: 502,
+      message: 'Não foi possível verificar o processamento da foto',
+    });
+    expect(consoleError).toHaveBeenCalledWith('[actions/media-asset]', expect.any(TypeError));
+    consoleError.mockRestore();
   });
 
   it('needs a session', async () => {

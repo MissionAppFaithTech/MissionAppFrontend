@@ -108,6 +108,11 @@ describe('uploadProfilePicture', () => {
     expect(order).toEqual([...order].sort((a, b) => a - b));
   });
 
+  it('waits for the worker without an onProcessing callback', async () => {
+    await expect(uploadProfilePicture(photo())).resolves.toEqual({ url: READY_URL });
+    expect(getMediaAssetAction).toHaveBeenCalledWith(ASSET_ID);
+  });
+
   it('returns the public URL when the image is already processed', async () => {
     vi.mocked(updateAccountProfileAction).mockResolvedValue({
       ok: true,
@@ -173,6 +178,36 @@ describe('waitForProcessedPicture', () => {
 
     await expect(waitForProcessedPicture(ASSET_ID, [0, 0, 0, 0])).resolves.toBe(READY_URL);
     expect(getMediaAssetAction).toHaveBeenCalledTimes(3);
+  });
+
+  it('only takes the URL of a READY asset', async () => {
+    vi.mocked(getMediaAssetAction)
+      .mockResolvedValueOnce(assetState('PROCESSING', 'https://cdn.test/original.png'))
+      .mockResolvedValueOnce(assetState('READY', null))
+      .mockResolvedValueOnce(assetState('READY', READY_URL));
+
+    await expect(waitForProcessedPicture(ASSET_ID, [0, 0, 0])).resolves.toBe(READY_URL);
+    expect(getMediaAssetAction).toHaveBeenCalledTimes(3);
+  });
+
+  it('waits each delay before checking again', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.mocked(getMediaAssetAction).mockResolvedValue(assetState('PROCESSING'));
+      const result = waitForProcessedPicture(ASSET_ID, [1000, 2000]);
+
+      await vi.advanceTimersByTimeAsync(999);
+      expect(getMediaAssetAction).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1);
+      expect(getMediaAssetAction).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(getMediaAssetAction).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await expect(result).resolves.toBeNull();
+      expect(getMediaAssetAction).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('gives up with null when the image is still processing after the last check', async () => {

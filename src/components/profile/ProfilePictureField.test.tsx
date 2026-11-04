@@ -156,4 +156,26 @@ describe('ProfilePictureField', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(/processar a imagem/i);
     expect(refresh).toHaveBeenCalledTimes(1);
   });
+
+  it('disables the picker while the file is being sent', async () => {
+    const user = userEvent.setup();
+    vi.mocked(uploadProfilePicture).mockReturnValue(new Promise(() => {}));
+    render(<ProfilePictureField displayName="Ana" />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Enviando foto de perfil...');
+    expect(screen.getByLabelText(/alterar foto de perfil/i).querySelector('input')).toBeDisabled();
+  });
+
+  it('disables the picker while the photo is being removed', async () => {
+    const user = userEvent.setup();
+    vi.mocked(removeProfilePicture).mockReturnValue(new Promise(() => {}));
+    render(<ProfilePictureField displayName="Ana" currentUrl="https://cdn.test/old.webp" />);
+
+    await user.click(screen.getByRole('button', { name: /remover foto/i }));
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Removendo foto de perfil...');
+    expect(screen.getByLabelText(/alterar foto de perfil/i).querySelector('input')).toBeDisabled();
+  });
 });
