@@ -2,7 +2,6 @@ import {
   updateAbout,
   updateHeader,
   updatePublicContacts,
-  upsertWorkAddress,
   type UpdateAboutPayload,
   type UpdateHeaderPayload,
   type UpdatePublicContactsPayload,
@@ -24,11 +23,17 @@ export async function saveProfileHeader(input: {
   if (hasFields(input.contacts)) await updatePublicContacts(input.contacts!);
 }
 
-/** Saves the "Sobre" fields, then the work address. Throws `ApiError`. */
+/**
+ * Saves the "Sobre" fields, catalog links and work address in a single
+ * `PATCH /missionaries/about`. Throws `ApiError`.
+ */
 export async function saveProfileAbout(input: {
   about?: UpdateAboutPayload;
   workAddress?: WorkAddressData;
 }): Promise<void> {
-  if (hasFields(input.about)) await updateAbout(input.about!);
-  if (input.workAddress) await upsertWorkAddress(input.workAddress);
+  const payload: UpdateAboutPayload = {
+    ...input.about,
+    ...(input.workAddress ? { workAddress: input.workAddress } : {}),
+  };
+  if (hasFields(payload)) await updateAbout(payload);
 }

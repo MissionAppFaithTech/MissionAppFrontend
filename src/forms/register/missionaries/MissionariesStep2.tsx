@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TextField, Typography } from '@mui/material';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
 import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
 import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
+import { toFormErrors } from '@/forms/register/shared/fieldErrors';
 import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
@@ -24,7 +26,10 @@ import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/r
 import { useCatalogItems } from '@/services/queries/catalog';
 
 export default function MissionariesStep2() {
-  const { formData, completeStep2, goBack } = useMissionaryRegisterWizard();
+  const { formData, completeStep2, goBack, stepErrors } = useMissionaryRegisterWizard();
+  // Read once: the form keeps them until the user fixes each field.
+  const [serverErrors] = useState(() => toFormErrors(stepErrors));
+  const [showServerErrors] = useState(() => Object.keys(stepErrors).length > 0);
   const agencies = useCatalogItems('missionaryAgencies');
   const communities = useCatalogItems('faithCommunities');
   const agencyEntry = useOtherCatalogEntry();
@@ -39,6 +44,8 @@ export default function MissionariesStep2() {
   } = useForm<MissionaryStep2FormData>({
     resolver: zodResolver(missionaryStep2Schema),
     ...validateOnLeave,
+    // Errors the API sent back for this step (e.g. an agency that no longer exists).
+    errors: serverErrors,
     defaultValues: {
       missionaryAgency: formData.missionaryAgency || '',
       agencyDetails: formData.agencyDetails || EMPTY_MISSIONARY_AGENCY,
@@ -65,6 +72,7 @@ export default function MissionariesStep2() {
       isSubmitting={isSubmitting}
       errors={errors}
       submitCount={submitCount}
+      showSummary={showServerErrors}
     >
       <Controller
         name="missionaryAgency"

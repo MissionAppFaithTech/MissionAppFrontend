@@ -1,8 +1,23 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProfileSummaryCard from './ProfileSummaryCard';
 import { mockProfile, mockSupporterProfile } from '@/mocks/profile';
+import { ApiError } from '@/lib/api/client';
+import { removeProfilePicture, uploadProfilePicture } from '@/services/profilePicture.service';
+import { useFeedbackStore } from '@/stores/feedbackStore';
+
+vi.mock('@/services/profilePicture.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/profilePicture.service')>()),
+  uploadProfilePicture: vi.fn(),
+  removeProfilePicture: vi.fn(),
+}));
+
+beforeEach(() => {
+  vi.mocked(uploadProfilePicture).mockReset();
+  vi.mocked(removeProfilePicture).mockReset();
+  useFeedbackStore.setState({ current: null });
+});
 
 describe('ProfileSummaryCard component', () => {
   it('renders the missionary owner header with navy edit', () => {
@@ -113,20 +128,98 @@ describe('ProfileSummaryCard component', () => {
     expect(screen.getByRole('heading', { name: /ofertar na missão/i })).toBeInTheDocument();
   });
 
-  it('shows the chosen image on the owner avatar', async () => {
+  it('uploads the chosen image and keeps the preview while the server processes it', async () => {
     const user = userEvent.setup();
     const previewUrl = 'blob:profile-photo';
     vi.spyOn(URL, 'createObjectURL').mockReturnValue(previewUrl);
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.mocked(uploadProfilePicture).mockResolvedValue({ url: null });
 
     render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
     const file = new File(['photo'], 'foto.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), file);
 
+    expect(uploadProfilePicture).toHaveBeenCalledWith(file);
     expect(screen.getByRole('img', { name: /foto de perfil de samuel mendonça/i })).toHaveAttribute(
       'src',
       previewUrl
     );
+    await waitFor(() =>
+      expect(useFeedbackStore.getState().current?.message).toMatch(/processamento/i)
+    );
+  });
+
+  it('shows the saved URL once the server has it', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:x');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.mocked(uploadProfilePicture).mockResolvedValue({ url: 'https://cdn.test/p.webp' });
+
+    render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
+    await user.upload(
+      screen.getByLabelText(/adicionar foto de perfil/i),
+      new File(['photo'], 'foto.webp', { type: 'image/webp' })
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole('img', { name: /foto de perfil/i })).toHaveAttribute(
+        'src',
+        'https://cdn.test/p.webp'
+      )
+    );
+    expect(screen.getByLabelText(/alterar foto de perfil/i)).toBeInTheDocument();
+  });
+
+  it('refuses a file that is not JPG, PNG or WebP without uploading it', async () => {
+    const user = userEvent.setup({ applyAccept: false });
+    render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
+
+    await user.upload(
+      screen.getByLabelText(/adicionar foto de perfil/i),
+      new File(['gif'], 'foto.gif', { type: 'image/gif' })
+    );
+
+    expect(uploadProfilePicture).not.toHaveBeenCalled();
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: expect.stringMatching(/jpg, png ou webp/i),
+      severity: 'error',
+    });
+  });
+
+  it('drops the preview and reports the error when the upload fails', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:x');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    vi.mocked(uploadProfilePicture).mockRejectedValue(new ApiError('Falha no envio', 0));
+
+    render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
+    await user.upload(
+      screen.getByLabelText(/adicionar foto de perfil/i),
+      new File(['photo'], 'foto.png', { type: 'image/png' })
+    );
+
+    await waitFor(() =>
+      expect(useFeedbackStore.getState().current).toMatchObject({
+        message: 'Falha no envio',
+        severity: 'error',
+      })
+    );
+    expect(screen.queryByRole('img', { name: /foto de perfil/i })).not.toBeInTheDocument();
+  });
+
+  it('shows the saved photo to visitors without an upload control', () => {
+    render(
+      <ProfileSummaryCard
+        profile={{ ...mockProfile, avatarUrl: 'https://cdn.test/p.webp' }}
+        isOwnProfile={false}
+      />
+    );
+
+    expect(screen.getByRole('img', { name: /foto de perfil de samuel mendonça/i })).toHaveAttribute(
+      'src',
+      'https://cdn.test/p.webp'
+    );
+    expect(screen.queryByLabelText(/foto de perfil$/i)).not.toBeInTheDocument();
   });
 
   it('opens ContactModal from the owner Contato action', async () => {
@@ -181,5 +274,54 @@ describe('ProfileSummaryCard component', () => {
     };
     rerender(<ProfileSummaryCard profile={profileNoLocation} isOwnProfile />);
     expect(screen.queryByText('Curitiba/PR')).not.toBeInTheDocument();
+  });
+
+  it('removes the photo after confirming in an accessible dialog', async () => {
+    const user = userEvent.setup();
+    vi.mocked(removeProfilePicture).mockResolvedValue();
+    const withPhoto = { ...mockProfile, avatarUrl: 'https://cdn.test/p.webp' };
+    render(<ProfileSummaryCard profile={withPhoto} isOwnProfile />);
+
+    expect(screen.getByLabelText(/alterar foto de perfil/i)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /remover foto de perfil/i }));
+
+    const dialog = await screen.findByRole('dialog', { name: /remover foto de perfil\?/i });
+    expect(dialog).toHaveAccessibleDescription(/ícone padrão/i);
+    await user.click(screen.getByRole('button', { name: /^cancelar$/i }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(removeProfilePicture).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: /remover foto de perfil/i }));
+    await user.click(await screen.findByRole('button', { name: /^remover foto$/i }));
+
+    await waitFor(() => expect(removeProfilePicture).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(screen.queryByRole('img', { name: /foto de perfil/i })).not.toBeInTheDocument()
+    );
+    expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /remover foto de perfil/i })
+    ).not.toBeInTheDocument();
+    expect(useFeedbackStore.getState().current).toMatchObject({ severity: 'success' });
+  });
+
+  it('offers no remove action without a photo or to visitors', () => {
+    const { unmount } = render(
+      <ProfileSummaryCard profile={{ ...mockProfile, avatarUrl: undefined }} isOwnProfile />
+    );
+    expect(
+      screen.queryByRole('button', { name: /remover foto de perfil/i })
+    ).not.toBeInTheDocument();
+    unmount();
+
+    render(
+      <ProfileSummaryCard
+        profile={{ ...mockProfile, avatarUrl: 'https://cdn.test/p.webp' }}
+        isOwnProfile={false}
+      />
+    );
+    expect(
+      screen.queryByRole('button', { name: /remover foto de perfil/i })
+    ).not.toBeInTheDocument();
   });
 });

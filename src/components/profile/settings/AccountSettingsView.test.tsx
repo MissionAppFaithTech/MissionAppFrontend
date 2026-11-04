@@ -1,12 +1,62 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import AccountSettingsView from './AccountSettingsView';
+import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
+import { ApiError } from '@/lib/api/client';
+import { emptyProfile, updateAbout } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
+
+vi.mock('@/services/catalog.service', () => ({
+  listFaithCommunities: vi.fn(async () => [
+    { id: 'fc-1', name: 'Igreja Batista Central' },
+    { id: 'fc-2', name: 'Igreja Presbiteriana' },
+  ]),
+  listMissionaryAgencies: vi.fn(async () => [
+    { id: 'ma-1', name: 'JOCUM' },
+    { id: 'ma-2', name: 'Missão do Interior' },
+  ]),
+  createFaithCommunity: vi.fn(),
+  createMissionaryAgency: vi.fn(),
+}));
+
+vi.mock('@/services/profile.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/profile.service')>()),
+  updateAbout: vi.fn(async () => ({})),
+}));
+
+/** The missionary area provides the owner's profile, with the saved catalog links. */
+function renderMissionary() {
+  const owner = {
+    ...emptyProfile,
+    about: {
+      ...emptyProfile.about,
+      faithCommunity: 'Igreja Batista Central',
+      faithCommunityId: 'fc-1',
+      missionaryAgency: 'JOCUM',
+      missionaryAgencyId: 'ma-1',
+    },
+  };
+  return renderWithQuery(
+    <OwnerProfileProvider profile={owner}>
+      <AccountSettingsView role="missionary" />
+    </OwnerProfileProvider>
+  );
+}
+
+async function choose(label: RegExp, option: string) {
+  const user = userEvent.setup();
+  const combobox = screen.getByRole('combobox', { name: label });
+  await waitFor(() => expect(combobox).not.toHaveAttribute('aria-disabled', 'true'));
+  await user.click(combobox);
+  await user.click(within(screen.getByRole('listbox')).getByRole('option', { name: option }));
+  return user;
+}
 
 describe('AccountSettingsView Component', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     useFeedbackStore.setState({ current: null });
   });
 
@@ -32,15 +82,14 @@ describe('AccountSettingsView Component', () => {
 
     // Section 2: Dados Eclesiásticos
     expect(screen.getByRole('heading', { name: /dados eclesiásticos/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/nome da comunidade de fé \(igreja\)/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/endereço 1 \(rua, avenida, número\)/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/website da igreja/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/nome do pastor responsável/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: /comunidade de fé \(igreja\)/i })
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /salvar dados eclesiásticos/i })).toBeInTheDocument();
 
     // Section 3: Agência Missionária (Only for missionary)
     expect(screen.getByRole('heading', { name: /agência missionária/i })).toBeInTheDocument();
-    expect(screen.getByLabelText(/nome da agência missionária/i)).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /^agência missionária/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /salvar agência missionária/i })).toBeInTheDocument();
 
     // Section 4: Zona de Perigo (Soft delete for missionary)
@@ -62,7 +111,7 @@ describe('AccountSettingsView Component', () => {
 
     // Section 2: Supporter has optional church indication
     expect(screen.getByRole('heading', { name: /dados eclesiásticos/i })).toBeInTheDocument();
-    expect(screen.getByText(/opcional/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/opcional/i).length).toBeGreaterThan(0);
 
     // Supporter does NOT have Agência Missionária card
     expect(screen.queryByRole('heading', { name: /agência missionária/i })).not.toBeInTheDocument();
@@ -123,32 +172,75 @@ describe('AccountSettingsView Component', () => {
     expect(useFeedbackStore.getState().current?.severity).toBe('info');
   });
 
-  it('allows saving ecclesiastical data and displays success notification', async () => {
-    const user = userEvent.setup();
-    renderWithQuery(<AccountSettingsView role="missionary" />);
+  it('links another faith community through the about endpoint', async () => {
+    renderMissionary();
 
-    const saveEcclesiasticalButton = screen.getByRole('button', {
-      name: /salvar dados eclesiásticos/i,
+    const user = await choose(/comunidade de fé/i, 'Igreja Presbiteriana');
+    await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
+
+    await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ faithCommunityId: 'fc-2' }));
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: expect.stringMatching(/dados eclesiásticos atualizados com sucesso/i),
+      severity: 'success',
     });
-    await user.click(saveEcclesiasticalButton);
-
-    expect(useFeedbackStore.getState().current?.message).toMatch(
-      /dados eclesiásticos atualizados com sucesso/i
-    );
-    expect(useFeedbackStore.getState().current?.severity).toBe('success');
+    expect(
+      screen.getByRole('button', { name: 'Cancelar alterações dos dados eclesiásticos' })
+    ).toBeDisabled();
   });
 
-  it('allows saving missionary agency data for missionary and displays success notification', async () => {
-    const user = userEvent.setup();
-    renderWithQuery(<AccountSettingsView role="missionary" />);
+  it('unlinks the faith community with null', async () => {
+    renderMissionary();
 
-    const saveAgencyButton = screen.getByRole('button', { name: /salvar agência missionária/i });
-    await user.click(saveAgencyButton);
+    const user = await choose(/comunidade de fé/i, 'Nenhuma comunidade de fé');
+    await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
 
+    await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ faithCommunityId: null }));
+  });
+
+  it('switches the missionary agency through the about endpoint', async () => {
+    renderMissionary();
+
+    const user = await choose(/^agência missionária/i, 'Missão do Interior');
+    await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
+
+    await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ missionaryAgencyId: 'ma-2' }));
     expect(useFeedbackStore.getState().current?.message).toMatch(
-      /dados da agência missionária atualizados com sucesso/i
+      /agência missionária atualizada com sucesso/i
     );
-    expect(useFeedbackStore.getState().current?.severity).toBe('success');
+  });
+
+  it('shows the API error in an alert and keeps the selection', async () => {
+    vi.mocked(updateAbout).mockRejectedValueOnce(new ApiError('Agência inexistente', 422));
+    renderMissionary();
+
+    const user = await choose(/^agência missionária/i, 'Missão do Interior');
+    await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.some((alert) => alert.textContent?.includes('Agência inexistente'))).toBe(true);
+    expect(
+      screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
+    ).toBeEnabled();
+  });
+
+  it('opens the sign-up modal to register a community that is not listed', async () => {
+    renderMissionary();
+
+    await choose(/comunidade de fé/i, 'Não encontrei na lista');
+
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('tells a supporter the link is not saved yet, without calling the API', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="supporter" />);
+
+    await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
+
+    await waitFor(() =>
+      expect(useFeedbackStore.getState().current).toMatchObject({ severity: 'info' })
+    );
+    expect(updateAbout).not.toHaveBeenCalled();
   });
 
   it('handles soft delete confirmation modal for missionary', async () => {
@@ -253,76 +345,21 @@ describe('AccountSettingsView Component', () => {
       expect(useFeedbackStore.getState().current).toBeNull();
     });
 
-    it('restores the last saved ecclesiastical data and stays on the page', async () => {
-      const user = userEvent.setup();
-      renderWithQuery(<AccountSettingsView role="missionary" />);
+    it('restores the last saved selection and stays on the page', async () => {
+      renderMissionary();
 
-      const pastor = screen.getByLabelText(/nome do pastor responsável/i);
-      const saved = (pastor as HTMLInputElement).value;
-      await user.clear(pastor);
-      await user.type(pastor, 'Pr. Outro Nome');
-
+      const user = await choose(/comunidade de fé/i, 'Igreja Presbiteriana');
       const cancel = screen.getByRole('button', {
         name: 'Cancelar alterações dos dados eclesiásticos',
       });
       expect(cancel).toBeEnabled();
       await user.click(cancel);
 
-      expect(pastor).toHaveValue(saved);
+      expect(screen.getByRole('combobox', { name: /comunidade de fé/i })).toHaveTextContent(
+        'Igreja Batista Central'
+      );
       expect(cancel).toBeDisabled();
-    });
-
-    it('after saving, "Cancelar" returns to the newly saved values', async () => {
-      const user = userEvent.setup();
-      renderWithQuery(<AccountSettingsView role="missionary" />);
-
-      const pastor = screen.getByLabelText(/nome do pastor responsável/i);
-      await user.clear(pastor);
-      await user.type(pastor, 'Pr. Salvo');
-      await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
-
-      const cancel = screen.getByRole('button', {
-        name: 'Cancelar alterações dos dados eclesiásticos',
-      });
-      expect(cancel).toBeDisabled();
-
-      await user.type(pastor, ' e mais');
-      await user.click(cancel);
-      expect(pastor).toHaveValue('Pr. Salvo');
-    });
-
-    it('restores the last saved agency data and clears its error', async () => {
-      const user = userEvent.setup();
-      renderWithQuery(<AccountSettingsView role="missionary" />);
-
-      const phone = screen.getByLabelText(/telefone de contato/i);
-      const saved = (phone as HTMLInputElement).value;
-      await user.clear(phone);
-      await user.type(phone, '+55 (11) 0000-0000');
-
-      await user.click(
-        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
-      );
-
-      expect(phone).toHaveValue(saved);
-      expect(
-        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
-      ).toBeDisabled();
-    });
-
-    it('treats removing the faith community link as saved (supporter)', async () => {
-      const user = userEvent.setup();
-      renderWithQuery(
-        <AccountSettingsView role="supporter" initialFaithCommunity={{ name: 'Igreja Local' }} />
-      );
-
-      await user.click(
-        screen.getByRole('button', { name: /remover vínculo com comunidade de fé/i })
-      );
-
-      expect(
-        screen.getByRole('button', { name: 'Cancelar alterações dos dados eclesiásticos' })
-      ).toBeDisabled();
+      expect(updateAbout).not.toHaveBeenCalled();
     });
   });
 });

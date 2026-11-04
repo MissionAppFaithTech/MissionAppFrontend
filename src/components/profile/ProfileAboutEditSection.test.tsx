@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProfileAboutEditSection, {
@@ -6,7 +6,19 @@ import ProfileAboutEditSection, {
 } from '@/components/profile/ProfileAboutEditSection';
 import { ApiError } from '@/lib/api/client';
 import type { ProfileAboutFormData } from '@/schemas/profile.schema';
+import { renderWithQuery } from '@/test/query';
 import type { ProfileAboutData } from '@/types/profile';
+
+vi.mock('@/services/catalog.service', () => ({
+  listMissionaryAgencies: vi.fn(async () => [
+    { id: 'ma-1', name: 'JOCUM' },
+    { id: 'ma-2', name: 'Missão do Interior' },
+  ]),
+  listFaithCommunities: vi.fn(async () => [
+    { id: 'fc-1', name: 'Igreja Batista Central' },
+    { id: 'fc-2', name: 'Igreja Presbiteriana' },
+  ]),
+}));
 
 const data: ProfileAboutData = {
   introduction: 'Sirvo no sertão há 10 anos.',
@@ -14,7 +26,9 @@ const data: ProfileAboutData = {
   originLocation: 'Recife - Brasil',
   currentLocation: 'Juazeiro - BA - Brasil',
   missionaryAgency: 'JOCUM',
+  missionaryAgencyId: 'ma-1',
   faithCommunity: 'Igreja Batista Central',
+  faithCommunityId: 'fc-1',
   prayerRequests: 'Saúde da família.',
   lifeVerse: 'Filipenses 4:13',
   workAddress: {
@@ -31,7 +45,7 @@ const onDone = vi.fn();
 const onCancel = vi.fn();
 
 function renderSection(about: ProfileAboutData = data) {
-  return render(
+  return renderWithQuery(
     <ProfileAboutEditSection data={about} onSave={onSave} onDone={onDone} onCancel={onCancel} />
   );
 }
@@ -57,9 +71,68 @@ describe('ProfileAboutEditSection', () => {
     expect(screen.getByLabelText(/^cidade$/i)).toHaveValue('Juazeiro');
     expect(screen.getByLabelText(/cep ou código postal/i)).toHaveValue('48900-000');
     expect(screen.getByRole('group', { name: /local de atuação atual/i })).toBeInTheDocument();
-    // Agency and faith community are not edited here (RF 10.7.2).
-    expect(screen.queryByLabelText(/agência missionária/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    expect(screen.getByRole('group', { name: /agência e comunidade de fé/i })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /agência missionária/i })).toHaveTextContent(
+      'JOCUM'
+    );
+    expect(screen.getByRole('combobox', { name: /comunidade de fé/i })).toHaveTextContent(
+      'Igreja Batista Central'
+    );
+  });
+
+  async function choose(label: RegExp, option: string) {
+    const user = userEvent.setup();
+    const combobox = screen.getByRole('combobox', { name: label });
+    await waitFor(() => expect(combobox).not.toHaveAttribute('aria-disabled', 'true'));
+    await user.click(combobox);
+    await user.click(within(screen.getByRole('listbox')).getByRole('option', { name: option }));
+    return user;
+  }
+
+  it('sends the new agency and an unlinked community in the same save', async () => {
+    onSave.mockResolvedValue(undefined);
+    renderSection();
+
+    await choose(/agência missionária/i, 'Missão do Interior');
+    const user = await choose(/comunidade de fé/i, 'Nenhuma comunidade de fé');
+    expect(
+      screen.queryByRole('option', { name: 'Não encontrei na lista' })
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /salvar/i }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave).toHaveBeenCalledWith({
+      about: { missionaryAgencyId: 'ma-2', faithCommunityId: null },
+      workAddress: undefined,
+    });
+  });
+
+  it('shows an agency the API rejected on its select', async () => {
+    onSave.mockRejectedValue(
+      new ApiError('Revise os campos', 422, { missionaryAgencyId: 'Agência inexistente.' })
+    );
+    renderSection();
+
+    const user = await choose(/agência missionária/i, 'Missão do Interior');
+    await user.click(screen.getByRole('button', { name: /salvar/i }));
+
+    expect(await screen.findByText('Agência inexistente.')).toBeInTheDocument();
+  });
+
+  it('maps nested work address errors of the about endpoint to the inputs', async () => {
+    const user = userEvent.setup();
+    onSave.mockRejectedValue(
+      new ApiError('Revise os campos', 422, { 'workAddress.zip': 'CEP inválido.' })
+    );
+    renderSection();
+
+    const zip = screen.getByLabelText(/cep ou código postal/i);
+    await user.clear(zip);
+    await user.type(zip, '1');
+    await user.click(screen.getByRole('button', { name: /salvar/i }));
+
+    expect(await screen.findByText('CEP inválido.')).toBeInTheDocument();
+    expect(zip).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('saves only the changed fields once and reports success', async () => {
@@ -213,6 +286,8 @@ describe('buildSaveAboutInput', () => {
     originLocation: 'Recife',
     prayerRequests: '',
     lifeVerse: 'Salmos 23',
+    missionaryAgencyId: 'ma-2',
+    faithCommunityId: '',
     workAddress: { country: 'Brasil', state: 'PE', city: 'Recife', district: '', zip: '' },
   };
 
@@ -223,6 +298,21 @@ describe('buildSaveAboutInput', () => {
       about: { aboutMe: 'Nova bio', missionStorySummary: null },
       workAddress: undefined,
     });
+  });
+
+  it('sends a changed agency and turns an emptied community into null', () => {
+    expect(
+      buildSaveAboutInput(values, { missionaryAgencyId: true, faithCommunityId: true })
+    ).toEqual({
+      about: { missionaryAgencyId: 'ma-2', faithCommunityId: null },
+      workAddress: undefined,
+    });
+  });
+
+  it('never sends an empty agency (it cannot be removed)', () => {
+    expect(
+      buildSaveAboutInput({ ...values, missionaryAgencyId: '' }, { missionaryAgencyId: true })
+    ).toEqual({ about: undefined, workAddress: undefined });
   });
 
   it('returns nothing to save when no field is dirty', () => {

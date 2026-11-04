@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProfileSobreEditContent from './ProfileSobreEditContent';
@@ -16,6 +17,10 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('@/services/profileSave.service', () => ({ saveProfileAbout: vi.fn() }));
+vi.mock('@/services/catalog.service', () => ({
+  listMissionaryAgencies: vi.fn(async () => []),
+  listFaithCommunities: vi.fn(async () => []),
+}));
 
 const saveAbout = vi.mocked(saveProfileAbout);
 const profile = {
@@ -24,7 +29,7 @@ const profile = {
   about: { ...emptyProfile.about, lifeVerse: 'João 3:16' },
 };
 const renderContent = () =>
-  render(
+  renderWithQuery(
     <OwnerProfileProvider profile={profile}>
       <ProfileSobreEditContent />
     </OwnerProfileProvider>

@@ -67,6 +67,8 @@ export function toCreateFaithCommunityPayload(input: FaithCommunityData) {
   return {
     name: input.name.trim(),
     phoneNumber: optionalPhone(input.churchPhone),
+    pastorName: optionalText(input.pastorName),
+    pastorPhone: optionalPhone(input.pastorPhone),
     addressLine1: optionalText(input.address1),
     addressLine2: optionalText(input.address2),
     city: optionalText(input.city),

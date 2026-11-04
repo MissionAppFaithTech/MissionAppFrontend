@@ -49,6 +49,40 @@ describe('catalog actions', () => {
     });
   });
 
+  it('sends the pastor of a new faith community', async () => {
+    mockBackend({
+      'POST /faith-communities': () => ({
+        data: { faithCommunity: { id: 'fc-2', name: 'Igreja' } },
+      }),
+    });
+
+    await createFaithCommunityAction({
+      name: 'Igreja',
+      pastorName: ' Pr. Ana ',
+      pastorPhone: '+5521912345678',
+    });
+
+    expect(backendMock.backendFetch).toHaveBeenCalledWith('/faith-communities', {
+      method: 'POST',
+      body: { name: 'Igreja', pastorName: 'Pr. Ana', pastorPhone: '+5521912345678' },
+      accessToken: ACCESS,
+    });
+  });
+
+  it('rejects a pastor phone without the name or outside E.164', async () => {
+    await expect(
+      createFaithCommunityAction({ name: 'Igreja', pastorPhone: '+5521912345678' })
+    ).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: { pastorName: 'Informe o nome do pastor junto com o telefone' },
+    });
+    await expect(
+      createFaithCommunityAction({ name: 'Igreja', pastorName: 'Pr. Ana', pastorPhone: '21 9123' })
+    ).resolves.toMatchObject({ ok: false, fieldErrors: { pastorPhone: expect.any(String) } });
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
+  });
+
   it('rejects a nameless entry', async () => {
     await expect(createFaithCommunityAction({ name: '  ' })).resolves.toMatchObject({
       ok: false,

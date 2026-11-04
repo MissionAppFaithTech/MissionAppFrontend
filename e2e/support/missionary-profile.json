@@ -7,7 +7,9 @@
     "phoneNumber": "+5521987654321",
     "biography": "Missionário na África do Sul",
     "profilePictureId": null,
-    "role": "MISSIONARY"
+    "role": "MISSIONARY",
+    "birthDate": "1990-05-17",
+    "profilePictureUrl": null
   },
   "missionary": {
     "id": "e2e-missionary",

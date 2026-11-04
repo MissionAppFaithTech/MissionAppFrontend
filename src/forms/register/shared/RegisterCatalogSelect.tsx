@@ -27,6 +27,8 @@ type RegisterCatalogSelectProps = {
   required?: boolean;
   /** Lets react-hook-form validate when the user leaves the field. */
   onBlur?: () => void;
+  /** Offers "Não encontrei na lista" to register a new item (sign-up only). */
+  allowOther?: boolean;
 };
 
 export default function RegisterCatalogSelect({
@@ -45,6 +47,7 @@ export default function RegisterCatalogSelect({
   onEditOther,
   required = false,
   onBlur,
+  allowOther = true,
 }: RegisterCatalogSelectProps) {
   const helperId = `${id}-helper`;
   const labelId = `${id}-label`;
@@ -85,7 +88,7 @@ export default function RegisterCatalogSelect({
               {option.name}
             </MenuItem>
           ))}
-          <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
+          {allowOther ? <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem> : null}
         </Select>
         {message ? <FormHelperText id={helperId}>{message}</FormHelperText> : null}
       </FormControl>

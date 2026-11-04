@@ -1,9 +1,18 @@
 import { describe, expect, it, vi } from 'vitest';
-import { registerAccountAction } from '@/app/actions/account';
+import { registerAccountAction, registerMissionaryAction } from '@/app/actions/account';
 import { ApiError } from '@/lib/api/client';
-import { registerAccount, toApiGender, toE164Phone } from './account.service';
+import {
+  registerAccount,
+  registerMissionary,
+  toApiBirthDate,
+  toApiGender,
+  toE164Phone,
+} from './account.service';
 
-vi.mock('@/app/actions/account', () => ({ registerAccountAction: vi.fn() }));
+vi.mock('@/app/actions/account', () => ({
+  registerAccountAction: vi.fn(),
+  registerMissionaryAction: vi.fn(),
+}));
 
 describe('account.service', () => {
   it('maps UI gender to API gender', () => {
@@ -14,6 +23,40 @@ describe('account.service', () => {
   it('normalizes phone to E.164', () => {
     expect(toE164Phone('+55 11 99999-8888')).toBe('+5511999998888');
     expect(toE164Phone('5511999998888')).toBe('+5511999998888');
+  });
+
+  it('turns the DD/MM/AAAA birth date into YYYY-MM-DD', () => {
+    expect(toApiBirthDate('25/12/1990')).toBe('1990-12-25');
+    expect(toApiBirthDate(' 01/02/2000 ')).toBe('2000-02-01');
+    expect(() => toApiBirthDate('1990-12-25')).toThrow('DD/MM/AAAA');
+  });
+
+  it('signs up a missionary through the single Server Action', async () => {
+    const user = { id: '2', fullName: 'João', email: 'joao@example.com', role: 'MISSIONARY' };
+    vi.mocked(registerMissionaryAction).mockResolvedValue({
+      ok: true,
+      data: {
+        user: user as never,
+        missionary: { id: 'mis-1' },
+        workAddress: null,
+        missionaryAgency: { id: 'a', name: 'JOCUM' },
+        faithCommunity: null,
+      },
+    });
+    const payload = {
+      fullName: 'João',
+      username: 'joao',
+      phoneNumber: '+5511999998888',
+      gender: 'MALE' as const,
+      email: 'joao@example.com',
+      password: 'Secret123!',
+      passwordConfirmation: 'Secret123!',
+      birthDate: '1990-12-25',
+      missionaryAgencyId: 'a',
+    };
+
+    await expect(registerMissionary(payload)).resolves.toEqual({ user });
+    expect(registerMissionaryAction).toHaveBeenCalledWith(payload);
   });
 
   it('registers an account through the Server Action', async () => {

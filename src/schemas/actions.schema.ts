@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PROFILE_PICTURE_MAX_BYTES, PROFILE_PICTURE_MIME_TYPES } from '@/lib/profilePicture';
 import { BIO_MAX_LENGTH } from '@/schemas/profile.schema';
 
 /**
@@ -43,7 +44,7 @@ export const resetPasswordInputSchema = z
     path: ['passwordConfirmation'],
   });
 
-export const signupInputSchema = z.object({
+const signupFields = {
   fullName: z.string().trim().min(1).max(255),
   username,
   phoneNumber: z.string().regex(E164),
@@ -51,7 +52,9 @@ export const signupInputSchema = z.object({
   email: z.email(),
   password: z.string().min(8).max(32),
   passwordConfirmation: z.string().min(8).max(32),
-});
+};
+
+export const signupInputSchema = z.object(signupFields);
 
 export const changePasswordInputSchema = z
   .object({
@@ -72,10 +75,8 @@ export const updateAccountProfileInputSchema = z.object({
   username: username.optional(),
   /** `null` clears the mini-bio. */
   biography: z.string().trim().max(BIO_MAX_LENGTH).nullable().optional(),
-});
-
-export const createMissionaryProfileInputSchema = z.object({
-  missionaryAgencyId: z.uuid(),
+  /** Confirmed `PROFILE_PICTURE` media asset; `null` removes the photo. */
+  profilePictureId: z.uuid().nullable().optional(),
 });
 
 export const updatePublicContactsInputSchema = z.object({
@@ -84,24 +85,6 @@ export const updatePublicContactsInputSchema = z.object({
   publicPhone: z.string().regex(E164).nullable().optional(),
   publicPhoneIsWhatsapp: z.boolean().optional(),
   donationMessage: z.string().trim().max(5000).nullable().optional(),
-});
-
-/** Optional text; `null` clears the field (backend `.nullable()`). */
-const longText = z.string().trim().max(5000).nullable().optional();
-const shortText = z.string().trim().min(1).max(255).nullable().optional();
-
-export const updateAboutInputSchema = z.object({
-  aboutMe: longText,
-  missionStorySummary: longText,
-  originLocation: shortText,
-  prayerRequest: longText,
-  lifeVerse: shortText,
-  faithCommunityId: z.uuid().optional(),
-});
-
-export const updateIdentityInputSchema = z.object({
-  identityType: z.enum(['CPF', 'PASSPORT']),
-  identityDocument: z.string().trim().min(1).max(50),
 });
 
 const required = (max: number) => z.string().trim().min(1).max(max);
@@ -115,7 +98,25 @@ export const updateWorkAddressInputSchema = z.object({
   country: required(255),
 });
 
-export const createCatalogItemInputSchema = z.object({
+/** Optional text; `null` clears the field (backend `.nullable()`). */
+const longText = z.string().trim().max(5000).nullable().optional();
+const shortText = z.string().trim().min(1).max(255).nullable().optional();
+
+export const updateAboutInputSchema = z.object({
+  aboutMe: longText,
+  missionStorySummary: longText,
+  originLocation: shortText,
+  prayerRequest: longText,
+  lifeVerse: shortText,
+  /** `null` unlinks the faith community. */
+  faithCommunityId: z.uuid().nullable().optional(),
+  /** Replaces the agency; it cannot be cleared (the column is NOT NULL). */
+  missionaryAgencyId: z.uuid().optional(),
+  /** Replaces the whole work address in the same request. */
+  workAddress: updateWorkAddressInputSchema.optional(),
+});
+
+const catalogItemFields = {
   name: z.string().trim().min(1).max(255),
   phoneNumber: z.string().trim().optional(),
   addressLine1: z.string().trim().optional(),
@@ -125,4 +126,65 @@ export const createCatalogItemInputSchema = z.object({
   country: z.string().trim().optional(),
   postalCode: z.string().trim().optional(),
   website: z.string().trim().optional(),
+};
+
+const pastorFields = {
+  pastorName: z.string().trim().min(1).max(255).optional(),
+  pastorPhone: z.string().regex(E164).optional(),
+};
+
+/** The backend stores the pastor by name: a phone alone is rejected (422 on `pastorName`). */
+const pastorNameWithPhone = (data: { pastorName?: string; pastorPhone?: string }) =>
+  !data.pastorPhone || Boolean(data.pastorName);
+const PASTOR_NAME_REQUIRED = {
+  message: 'Informe o nome do pastor junto com o telefone',
+  path: ['pastorName'],
+};
+
+/** Faith community (or any catalog item with a pastor). */
+export const createCatalogItemInputSchema = z
+  .object({ ...catalogItemFields, ...pastorFields })
+  .refine(pastorNameWithPhone, PASTOR_NAME_REQUIRED);
+
+/** Agencies have no pastor: zod strips those fields. */
+export const createMissionaryAgencyInputSchema = z.object(catalogItemFields);
+const missionaryAgencyInput = createMissionaryAgencyInputSchema;
+const faithCommunityInput = z
+  .object({ ...catalogItemFields, ...pastorFields })
+  .refine(pastorNameWithPhone, PASTOR_NAME_REQUIRED);
+
+/**
+ * `POST /accounts/missionaries`: account, missionary profile and, when missing
+ * from the catalog, the new agency and faith community, in one transaction.
+ */
+export const missionarySignupInputSchema = z
+  .object({
+    ...signupFields,
+    birthDate: z.iso.date(),
+    identityType: z.enum(['CPF', 'PASSPORT']).optional(),
+    identityDocument: z.string().trim().min(1).max(50).optional(),
+    aboutMe: z.string().trim().max(5000).optional(),
+    missionaryAgencyId: z.uuid().optional(),
+    missionaryAgency: missionaryAgencyInput.optional(),
+    faithCommunityId: z.uuid().optional(),
+    faithCommunity: faithCommunityInput.optional(),
+  })
+  .refine((data) => Boolean(data.identityType) === Boolean(data.identityDocument), {
+    message: 'Informe o tipo e o número do documento',
+    path: ['identityDocument'],
+  })
+  .refine((data) => Boolean(data.missionaryAgencyId) !== Boolean(data.missionaryAgency), {
+    message: 'Selecione uma agência missionária ou cadastre uma nova',
+    path: ['missionaryAgencyId'],
+  })
+  .refine((data) => !(data.faithCommunityId && data.faithCommunity), {
+    message: 'Selecione uma comunidade de fé ou cadastre uma nova, não as duas',
+    path: ['faithCommunityId'],
+  });
+
+export const profilePictureUploadInputSchema = z.object({
+  mimeType: z.enum(PROFILE_PICTURE_MIME_TYPES),
+  fileSizeBytes: z.number().int().min(1).max(PROFILE_PICTURE_MAX_BYTES),
 });
+
+export const mediaAssetIdSchema = z.uuid();

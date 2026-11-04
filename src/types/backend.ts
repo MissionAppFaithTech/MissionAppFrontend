@@ -10,6 +10,10 @@ export type BackendUser = {
   phoneNumber: string;
   biography: string | null;
   profilePictureId: string | null;
+  /** Public photo URL; `null` without a photo or while the upload is processed. */
+  profilePictureUrl?: string | null;
+  /** `YYYY-MM-DD`; `null` for accounts created before it was collected. */
+  birthDate?: string | null;
   role: BackendRole;
   createdAt?: string;
   updatedAt?: string;
@@ -47,6 +51,29 @@ export type BackendWorkAddress = {
 
 export type NamedRef = { id: string; name: string };
 
+/**
+ * Missionary part of `GET /account/profile`, also answered by
+ * `PATCH /missionaries/about` and `POST /accounts/missionaries`.
+ */
+export type MissionaryProfilePayload = {
+  missionary: BackendMissionary;
+  workAddress: BackendWorkAddress | null;
+  missionaryAgency: NamedRef | null;
+  faithCommunity: NamedRef | null;
+};
+
+/** `POST /media-assets/uploads`: the asset and where the browser sends the file. */
+export type MediaUploadTicket = {
+  mediaAsset: { id: string; status?: string; url?: string | null };
+  upload: {
+    url: string;
+    method: 'PUT';
+    /** Signed headers: the `PUT` must send them exactly. */
+    headers: Record<string, string>;
+    expiresAt?: string;
+  };
+};
+
 /** `GET /api/account/profile` (BFF) — backend payload plus resolved names. */
 export type AccountProfilePayload = {
   user: BackendUser;
@@ -72,6 +99,8 @@ export type PublicMissionaryProfile = {
   username: string;
   fullName: string;
   biography: string | null;
+  /** `null` without a photo or while the upload is processed. */
+  profilePictureUrl?: string | null;
   role: BackendRole;
   missionaryAgency: NamedRef | null;
   faithCommunity: NamedRef | null;

@@ -1,26 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearRefreshCache } from '@/lib/api/bff';
-import { AUTH_COOKIE } from '@/lib/auth/cookies';
 import {
   ACCESS,
-  NEW_TOKENS,
-  authCookiesCleared,
   backendError,
   backendMock,
   cacheMock,
-  cookieValue,
-  cookieWrites,
   mockBackend,
-  onlyNewToken,
   resetActionHarness,
 } from '@/test/actionHarness';
-import {
-  createMissionaryProfileAction,
-  updateAboutAction,
-  updateIdentityAction,
-  updatePublicContactsAction,
-  updateWorkAddressAction,
-} from './missionary';
+import { updateAboutAction, updatePublicContactsAction } from './missionary';
 
 vi.mock('next/headers', async () => (await import('@/test/actionHarness')).headersMock);
 vi.mock('next/cache', async () => (await import('@/test/actionHarness')).cacheMock);
@@ -33,49 +21,6 @@ const owner = () => ({ data: { user: { username: 'ana' } } });
 beforeEach(() => {
   clearRefreshCache();
   resetActionHarness();
-});
-
-describe('createMissionaryProfileAction', () => {
-  it('creates the profile and clears the cookies, since the backend ends every session', async () => {
-    mockBackend({ 'POST /missionaries/profile': () => ({ data: { missionary } }) });
-
-    await expect(createMissionaryProfileAction({ missionaryAgencyId: AGENCY_ID })).resolves.toEqual(
-      {
-        ok: true,
-        data: { missionary, reauthenticationRequired: true },
-      }
-    );
-    expect(backendMock.backendFetch).toHaveBeenCalledWith('/missionaries/profile', {
-      method: 'POST',
-      body: { missionaryAgencyId: AGENCY_ID },
-      accessToken: ACCESS,
-    });
-    expect(authCookiesCleared()).toBe(true);
-  });
-
-  it('never stores refreshed tokens over the cleared session', async () => {
-    mockBackend({
-      'POST /auth/refresh': () => ({ data: NEW_TOKENS }),
-      'POST /missionaries/profile': onlyNewToken({ data: { missionary } }),
-    });
-
-    await expect(
-      createMissionaryProfileAction({ missionaryAgencyId: AGENCY_ID })
-    ).resolves.toMatchObject({ ok: true });
-    expect(cookieValue(AUTH_COOKIE.accessToken)).toBeUndefined();
-    expect(cookieValue(AUTH_COOKIE.refreshToken)).toBeUndefined();
-  });
-
-  it('rejects an agency id that is not a UUID', async () => {
-    await expect(
-      createMissionaryProfileAction({ missionaryAgencyId: 'outra' })
-    ).resolves.toMatchObject({
-      ok: false,
-      status: 422,
-      message: 'Selecione uma agência missionária válida',
-    });
-    expect(backendMock.backendFetch).not.toHaveBeenCalled();
-  });
 });
 
 describe('public profile saves', () => {
@@ -131,7 +76,7 @@ describe('public profile saves', () => {
     });
   });
 
-  it('saves the work address as a full replace', async () => {
+  it('saves the agency, the community and the work address in the same request', async () => {
     const workAddress = {
       zip: '48900-000',
       district: 'Centro',
@@ -139,16 +84,48 @@ describe('public profile saves', () => {
       state: 'BA',
       country: 'Brasil',
     };
+    const payload = {
+      missionary,
+      workAddress,
+      missionaryAgency: { id: AGENCY_ID, name: 'JOCUM' },
+      faithCommunity: null,
+    };
     mockBackend({
-      'PATCH /missionaries/work-address': () => ({ data: { workAddress } }),
+      'PATCH /missionaries/about': () => ({ data: payload }),
       'GET /account/profile': owner,
     });
 
-    await expect(updateWorkAddressAction(workAddress)).resolves.toEqual({
-      ok: true,
-      data: { workAddress },
+    await expect(
+      updateAboutAction({ missionaryAgencyId: AGENCY_ID, faithCommunityId: null, workAddress })
+    ).resolves.toEqual({ ok: true, data: payload });
+    expect(backendMock.backendFetch).toHaveBeenCalledWith('/missionaries/about', {
+      method: 'PATCH',
+      body: { missionaryAgencyId: AGENCY_ID, faithCommunityId: null, workAddress },
+      accessToken: ACCESS,
     });
+    expect(backendMock.backendFetch).not.toHaveBeenCalledWith(
+      '/missionaries/work-address',
+      expect.anything()
+    );
     expect(cacheMock.updateTag).toHaveBeenCalledWith('profile:ana');
+  });
+
+  it('rejects an incomplete work address and an agency id that is not a UUID', async () => {
+    await expect(
+      updateAboutAction({
+        workAddress: { zip: '', district: 'Centro', city: 'Juazeiro', state: 'BA', country: 'BR' },
+      })
+    ).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: { workAddress: expect.any(String) },
+    });
+    await expect(updateAboutAction({ missionaryAgencyId: 'outra' })).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: { missionaryAgencyId: expect.any(String) },
+    });
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
   });
 
   it('still re-renders when the username lookup fails after saving', async () => {
@@ -181,28 +158,5 @@ describe('public profile saves', () => {
     });
     expect(cacheMock.updateTag).not.toHaveBeenCalled();
     expect(cacheMock.refresh).not.toHaveBeenCalled();
-  });
-});
-
-describe('updateIdentityAction', () => {
-  it('saves the private document without touching the public cache', async () => {
-    mockBackend({ 'PATCH /missionaries/identity': () => ({ data: { missionary } }) });
-
-    await expect(
-      updateIdentityAction({ identityType: 'CPF', identityDocument: ' 52998224725 ' })
-    ).resolves.toEqual({ ok: true, data: { missionary } });
-    expect(backendMock.backendFetch).toHaveBeenCalledWith('/missionaries/identity', {
-      method: 'PATCH',
-      body: { identityType: 'CPF', identityDocument: '52998224725' },
-      accessToken: ACCESS,
-    });
-    expect(cacheMock.updateTag).not.toHaveBeenCalled();
-    expect(cookieWrites).toEqual([]);
-  });
-
-  it('rejects an unknown document type', async () => {
-    await expect(
-      updateIdentityAction({ identityType: 'RG' as 'CPF', identityDocument: '1' })
-    ).resolves.toMatchObject({ ok: false, status: 422 });
   });
 });

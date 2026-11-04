@@ -63,7 +63,8 @@ describe('ProfileEditForm', () => {
     // The private login e-mail is never prefilled as a public contact.
     expect(screen.getByLabelText(/^e-mail:$/i)).toHaveValue('');
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
-    expect(screen.getByText(/envio de foto de perfil em breve/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
+    expect(screen.getByText(/jpg, png ou webp de até 5 mb/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /cancelar/i })).toHaveAttribute(
       'href',
       '/profile/sobre'

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, type SyntheticEvent } from 'react';
-import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -31,7 +30,12 @@ import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 import PillButton from '@/components/common/PillButton';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
-import { mockFaithCommunities, mockMissionaryAgencies } from '@/mocks/ecclesiastical';
+import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
+import CatalogLinkSection, {
+  type CatalogSelection,
+} from '@/components/profile/settings/CatalogLinkSection';
+import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
+import { updateAbout } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 import ActiveSessionsSection from '@/components/profile/settings/ActiveSessionsSection';
@@ -39,55 +43,7 @@ import ActiveSessionsSection from '@/components/profile/settings/ActiveSessionsS
 export type AccountSettingsViewProps = {
   role: 'missionary' | 'supporter';
   initialEmail?: string;
-  initialFaithCommunity?: Partial<FaithCommunityData>;
-  initialAgency?: Partial<MissionaryAgencyData>;
 };
-
-function initialFaithCommunityFor(
-  role: AccountSettingsViewProps['role'],
-  initialFaithCommunity?: Partial<FaithCommunityData>
-): FaithCommunityData {
-  return {
-    name: initialFaithCommunity?.name || (role === 'missionary' ? 'Igreja Batista Central' : ''),
-    address1: initialFaithCommunity?.address1 || (role === 'missionary' ? 'Av. Brasil, 1500' : ''),
-    address2: initialFaithCommunity?.address2 || (role === 'missionary' ? 'Bairro Centro' : ''),
-    country: initialFaithCommunity?.country || (role === 'missionary' ? 'Brasil' : ''),
-    state: initialFaithCommunity?.state || (role === 'missionary' ? 'RJ' : ''),
-    city: initialFaithCommunity?.city || (role === 'missionary' ? 'Rio de Janeiro' : ''),
-    zipCode: initialFaithCommunity?.zipCode || (role === 'missionary' ? '20040-002' : ''),
-    website:
-      initialFaithCommunity?.website || (role === 'missionary' ? 'https://ibcentral.org.br' : ''),
-    churchPhone:
-      initialFaithCommunity?.churchPhone || (role === 'missionary' ? '+55 (21) 3214-5500' : ''),
-    pastorName:
-      initialFaithCommunity?.pastorName ||
-      (role === 'missionary' ? 'Pr. Carlos Alberto Santos' : ''),
-    pastorPhone:
-      initialFaithCommunity?.pastorPhone || (role === 'missionary' ? '+55 (21) 99876-1234' : ''),
-  };
-}
-
-function initialAgencyFor(
-  role: AccountSettingsViewProps['role'],
-  initialAgency?: Partial<MissionaryAgencyData>
-): MissionaryAgencyData {
-  return {
-    name: initialAgency?.name || (role === 'missionary' ? 'JOCUM (Jovens com uma Missão)' : ''),
-    address1: initialAgency?.address1 || (role === 'missionary' ? 'Estrada da Missão, 100' : ''),
-    address2: initialAgency?.address2 || (role === 'missionary' ? 'Base Missionária' : ''),
-    country: initialAgency?.country || (role === 'missionary' ? 'Brasil' : ''),
-    state: initialAgency?.state || (role === 'missionary' ? 'PR' : ''),
-    city: initialAgency?.city || (role === 'missionary' ? 'Curitiba' : ''),
-    zipCode: initialAgency?.zipCode || (role === 'missionary' ? '80010-000' : ''),
-    website: initialAgency?.website || (role === 'missionary' ? 'https://jocum.org.br' : ''),
-    phone: initialAgency?.phone || (role === 'missionary' ? '+55 (41) 3657-2200' : ''),
-  };
-}
-
-/** True when a form still shows what was last saved. */
-function sameValues<T extends object>(a: T, b: T) {
-  return (Object.keys(a) as (keyof T)[]).every((key) => a[key] === b[key]);
-}
 
 /** Where "Voltar" leads: the user's own profile home. */
 const BACK_HREF: Record<AccountSettingsViewProps['role'], string> = {
@@ -95,15 +51,15 @@ const BACK_HREF: Record<AccountSettingsViewProps['role'], string> = {
   supporter: '/profile/supporter/missionarios',
 };
 
-export default function AccountSettingsView({
-  role,
-  initialEmail,
-  initialFaithCommunity,
-  initialAgency,
-}: AccountSettingsViewProps) {
+export default function AccountSettingsView({ role, initialEmail }: AccountSettingsViewProps) {
+  // The missionary area loads the owner's profile on the server; elsewhere it is empty.
+  const owner = useOwnerProfile();
+
   // Current user email
   const [currentEmail, setCurrentEmail] = useState(
-    initialEmail || (role === 'missionary' ? 'samuelhe@gmail.com' : 'soraia.santos@email.com')
+    initialEmail ||
+      owner.contact?.accountEmail ||
+      (role === 'missionary' ? 'samuelhe@gmail.com' : 'soraia.santos@email.com')
   );
 
   // Email update form state
@@ -112,28 +68,7 @@ export default function AccountSettingsView({
   const [showPassword, setShowPassword] = useState(false);
   const [emailErrors, setEmailErrors] = useState<{ newEmail?: string; password?: string }>({});
 
-  // Faith Community Form State (RF 15.3)
-  const [faithCommunity, setFaithCommunity] = useState<FaithCommunityData>(() =>
-    initialFaithCommunityFor(role, initialFaithCommunity)
-  );
-  // Last saved values: "Cancelar" goes back to them.
-  const [savedFaithCommunity, setSavedFaithCommunity] = useState<FaithCommunityData>(() =>
-    initialFaithCommunityFor(role, initialFaithCommunity)
-  );
-  const [ecclesiasticalError, setEcclesiasticalError] = useState<string | null>(null);
-
-  // Missionary Agency Form State (RF 3.1.2, only for missionaries)
-  const [agency, setAgency] = useState<MissionaryAgencyData>(() =>
-    initialAgencyFor(role, initialAgency)
-  );
-  const [savedAgency, setSavedAgency] = useState<MissionaryAgencyData>(() =>
-    initialAgencyFor(role, initialAgency)
-  );
-  const [agencyError, setAgencyError] = useState<string | null>(null);
-
   const emailDirty = newEmail !== '' || currentPasswordForEmail !== '';
-  const ecclesiasticalDirty = !sameValues(faithCommunity, savedFaithCommunity);
-  const agencyDirty = !sameValues(agency, savedAgency);
 
   // "Cancelar" discards the block's unsaved changes and stays on the page.
   const handleCancelEmail = () => {
@@ -141,16 +76,6 @@ export default function AccountSettingsView({
     setCurrentPasswordForEmail('');
     setShowPassword(false);
     setEmailErrors({});
-  };
-
-  const handleCancelEcclesiastical = () => {
-    setFaithCommunity(savedFaithCommunity);
-    setEcclesiasticalError(null);
-  };
-
-  const handleCancelAgency = () => {
-    setAgency(savedAgency);
-    setAgencyError(null);
   };
 
   // Danger Zone dialogs & state (RF 15.5)
@@ -211,72 +136,37 @@ export default function AccountSettingsView({
   };
 
   // Ecclesiastical data save handler (RF 15.3)
-  const handleSaveEcclesiastical = (e: SyntheticEvent) => {
-    e.preventDefault();
-
-    if (role === 'missionary' && !faithCommunity.name.trim()) {
-      setEcclesiasticalError('O nome da comunidade de fé é obrigatório para missionários.');
-      return;
+  const handleSaveEcclesiastical = async (selection: CatalogSelection): Promise<string> => {
+    const id =
+      selection.kind === 'new'
+        ? (await createFaithCommunity(selection.details as FaithCommunityData)).id
+        : selection.id;
+    if (role === 'supporter') {
+      // NOTE: the API has no faith community link for supporters yet; a new
+      // community is still registered in the catalog.
+      notify(
+        'O vínculo de apoiadores com a comunidade de fé ainda não é salvo na plataforma.',
+        'info'
+      );
+      return id;
     }
-
-    setEcclesiasticalError(null);
-    setSavedFaithCommunity(faithCommunity);
-    notify(
-      'Dados eclesiásticos atualizados com sucesso! Alterações salvas na plataforma.',
-      'success'
-    );
-  };
-
-  // Clear faith community data (for supporters)
-  const handleClearFaithCommunity = () => {
-    const cleared: FaithCommunityData = {
-      name: '',
-      address1: '',
-      address2: '',
-      country: '',
-      state: '',
-      city: '',
-      zipCode: '',
-      website: '',
-      churchPhone: '',
-      pastorName: '',
-      pastorPhone: '',
-    };
-    // NOTE: removing the link is applied at once (see the notice), so it is the new saved state.
-    setFaithCommunity(cleared);
-    setSavedFaithCommunity(cleared);
-    setEcclesiasticalError(null);
-    notify('Vínculo com comunidade de fé removido.', 'info');
-  };
-
-  // Select existing faith community from autocomplete
-  const handleSelectFaithCommunity = (selectedCommunity: FaithCommunityData | null) => {
-    if (selectedCommunity) {
-      setFaithCommunity({ ...selectedCommunity });
-      setEcclesiasticalError(null);
-    }
+    // NOTE: the pastor and address of an existing community are edited only by
+    // whoever registered it (PATCH /faith-communities/:id); here the user only
+    // switches the link, or registers a new community with its pastor.
+    await updateAbout({ faithCommunityId: id || null });
+    notify('Dados eclesiásticos atualizados com sucesso!', 'success');
+    return id;
   };
 
   // Missionary agency save handler (RF 3.1.2)
-  const handleSaveAgency = (e: SyntheticEvent) => {
-    e.preventDefault();
-
-    if (!agency.name.trim()) {
-      setAgencyError('O nome da agência missionária é obrigatório.');
-      return;
-    }
-
-    setAgencyError(null);
-    setSavedAgency(agency);
-    notify('Dados da agência missionária atualizados com sucesso!', 'success');
-  };
-
-  // Select existing agency from autocomplete
-  const handleSelectAgency = (selectedAgency: MissionaryAgencyData | null) => {
-    if (selectedAgency) {
-      setAgency({ ...selectedAgency });
-      setAgencyError(null);
-    }
+  const handleSaveAgency = async (selection: CatalogSelection): Promise<string> => {
+    const id =
+      selection.kind === 'new'
+        ? (await createMissionaryAgency(selection.details as MissionaryAgencyData)).id
+        : selection.id;
+    await updateAbout({ missionaryAgencyId: id });
+    notify('Agência missionária atualizada com sucesso!', 'success');
+    return id;
   };
 
   // Soft delete confirmation (RF 15.5 - Missionary)
@@ -577,462 +467,44 @@ export default function AccountSettingsView({
           </CardContent>
         </Card>
 
-        {/* ========================================================================= */}
-        {/* 2. DADOS ECLESIÁSTICOS (RF 15.3)                                          */}
-        {/* ========================================================================= */}
-        <Card
+        {/* 2. DADOS ECLESIÁSTICOS (RF 15.3) */}
+        <CatalogLinkSection
           id="ecclesiastical-section"
-          variant="outlined"
-          sx={{ borderRadius: 3, scrollMarginTop: 80 }}
-        >
-          <CardHeader
-            avatar={<ChurchOutlinedIcon color="primary" />}
-            title="Dados Eclesiásticos"
-            subheader="Atualize os dados da sua Comunidade de Fé (Igreja) e do Pastor responsável"
-            slotProps={{
-              title: {
-                component: 'h2',
-                sx: { fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.25rem' } },
-              },
-              subheader: { sx: { fontSize: '0.875rem' } },
-            }}
-          />
-          <Divider />
-          <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-            <Box component="form" onSubmit={handleSaveEcclesiastical} noValidate>
-              <Stack spacing={3.5}>
-                {/* 2.1 Identificação e Busca da Comunidade de Fé */}
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}
-                  >
-                    Comunidade de Fé (Igreja){' '}
-                    {role === 'supporter' && (
-                      <Typography component="span" variant="caption" color="text.secondary">
-                        (Opcional)
-                      </Typography>
-                    )}
-                  </Typography>
+          kind="faithCommunities"
+          icon={<ChurchOutlinedIcon color="primary" />}
+          title="Dados Eclesiásticos"
+          subheader="Escolha a sua Comunidade de Fé (Igreja) entre as cadastradas na plataforma"
+          selectLabel={
+            role === 'supporter'
+              ? 'Comunidade de Fé (Igreja) (opcional)'
+              : 'Comunidade de Fé (Igreja)'
+          }
+          emptyValueLabel="Nenhuma comunidade de fé"
+          hint="Não encontrou a sua? Escolha “Não encontrei na lista” para cadastrá-la com o pastor responsável."
+          saveLabel="Salvar Dados Eclesiásticos"
+          cancelLabel="Cancelar alterações dos dados eclesiásticos"
+          savedId={owner.about.faithCommunityId}
+          savedName={owner.about.faithCommunity}
+          onSave={handleSaveEcclesiastical}
+        />
 
-                  <Autocomplete
-                    freeSolo
-                    options={mockFaithCommunities}
-                    getOptionLabel={(option) => (typeof option === 'string' ? option : option.name)}
-                    value={faithCommunity.name}
-                    onChange={(_, newValue) => {
-                      if (typeof newValue === 'string') {
-                        setFaithCommunity((prev) => ({ ...prev, name: newValue }));
-                      } else if (newValue) {
-                        handleSelectFaithCommunity(newValue);
-                      }
-                    }}
-                    onInputChange={(_, newInputValue) => {
-                      setFaithCommunity((prev) => ({ ...prev, name: newInputValue }));
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        id="ecclesiastical-church-name"
-                        label="Nome da Comunidade de Fé (Igreja)"
-                        placeholder="Busque ou digite o nome da sua igreja..."
-                        size="small"
-                        fullWidth
-                        error={Boolean(ecclesiasticalError)}
-                        helperText={
-                          ecclesiasticalError ||
-                          'Digite para pesquisar comunidades cadastradas ou insira um novo nome.'
-                        }
-                      />
-                    )}
-                  />
-                </Box>
-
-                {/* 2.2 Endereço e Localização da Igreja */}
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}
-                  >
-                    Endereço da Comunidade de Fé
-                  </Typography>
-                  <Stack spacing={2}>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                      <TextField
-                        id="ecclesiastical-address1"
-                        label="Endereço 1 (Rua, Avenida, Número)"
-                        size="small"
-                        fullWidth
-                        value={faithCommunity.address1}
-                        onChange={(e) =>
-                          setFaithCommunity({ ...faithCommunity, address1: e.target.value })
-                        }
-                      />
-                      <TextField
-                        id="ecclesiastical-address2"
-                        label="Endereço 2 (Complemento, Bairro)"
-                        size="small"
-                        fullWidth
-                        value={faithCommunity.address2 || ''}
-                        onChange={(e) =>
-                          setFaithCommunity({ ...faithCommunity, address2: e.target.value })
-                        }
-                      />
-                    </Stack>
-
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                      <TextField
-                        id="ecclesiastical-country"
-                        label="País"
-                        size="small"
-                        fullWidth
-                        value={faithCommunity.country}
-                        onChange={(e) =>
-                          setFaithCommunity({ ...faithCommunity, country: e.target.value })
-                        }
-                      />
-                      <TextField
-                        id="ecclesiastical-state"
-                        label="Estado / Província"
-                        size="small"
-                        fullWidth
-                        value={faithCommunity.state}
-                        onChange={(e) =>
-                          setFaithCommunity({ ...faithCommunity, state: e.target.value })
-                        }
-                      />
-                    </Stack>
-
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                      <TextField
-                        id="ecclesiastical-city"
-                        label="Cidade"
-                        size="small"
-                        fullWidth
-                        value={faithCommunity.city}
-                        onChange={(e) =>
-                          setFaithCommunity({ ...faithCommunity, city: e.target.value })
-                        }
-                      />
-                      <TextField
-                        id="ecclesiastical-zipcode"
-                        label="CEP ou Código Postal"
-                        size="small"
-                        fullWidth
-                        value={faithCommunity.zipCode}
-                        onChange={(e) =>
-                          setFaithCommunity({ ...faithCommunity, zipCode: e.target.value })
-                        }
-                      />
-                    </Stack>
-                  </Stack>
-                </Box>
-
-                {/* 2.3 Contato e Website da Igreja */}
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}
-                  >
-                    Contato da Igreja
-                  </Typography>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                    <TextField
-                      id="ecclesiastical-website"
-                      label="Website da Igreja"
-                      placeholder="https://suaigreja.org.br"
-                      size="small"
-                      fullWidth
-                      value={faithCommunity.website || ''}
-                      onChange={(e) =>
-                        setFaithCommunity({ ...faithCommunity, website: e.target.value })
-                      }
-                    />
-                    <TextField
-                      id="ecclesiastical-church-phone"
-                      label="Telefone da Igreja"
-                      placeholder="+55 (11) 3456-7890"
-                      size="small"
-                      fullWidth
-                      value={faithCommunity.churchPhone}
-                      onChange={(e) =>
-                        setFaithCommunity({ ...faithCommunity, churchPhone: e.target.value })
-                      }
-                    />
-                  </Stack>
-                </Box>
-
-                {/* 2.4 Liderança Pastoral */}
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}
-                  >
-                    Liderança Pastoral Responsável
-                  </Typography>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                    <TextField
-                      id="ecclesiastical-pastor-name"
-                      label="Nome do Pastor Responsável"
-                      size="small"
-                      fullWidth
-                      value={faithCommunity.pastorName}
-                      onChange={(e) =>
-                        setFaithCommunity({ ...faithCommunity, pastorName: e.target.value })
-                      }
-                    />
-                    <TextField
-                      id="ecclesiastical-pastor-phone"
-                      label="Telefone do Pastor"
-                      placeholder="+55 (11) 98765-4321"
-                      size="small"
-                      fullWidth
-                      value={faithCommunity.pastorPhone}
-                      onChange={(e) =>
-                        setFaithCommunity({ ...faithCommunity, pastorPhone: e.target.value })
-                      }
-                    />
-                  </Stack>
-                </Box>
-
-                {/* Botões de Ação */}
-                <Stack
-                  direction={{ xs: 'column-reverse', sm: 'row' }}
-                  spacing={1.5}
-                  useFlexGap
-                  sx={{
-                    pt: 1,
-                    '& .MuiButton-root': {
-                      width: { xs: '100%', sm: 'auto' },
-                      minHeight: 44,
-                      justifyContent: 'center',
-                    },
-                  }}
-                >
-                  <PillButton
-                    type="button"
-                    tone="primarySoftOutline"
-                    size="small"
-                    onClick={handleCancelEcclesiastical}
-                    disabled={!ecclesiasticalDirty}
-                    aria-label="Cancelar alterações dos dados eclesiásticos"
-                  >
-                    Cancelar
-                  </PillButton>
-                  <PillButton type="submit" tone="primaryFilled" size="small">
-                    Salvar Dados Eclesiásticos
-                  </PillButton>
-
-                  {role === 'supporter' && faithCommunity.name && (
-                    <Button
-                      type="button"
-                      variant="text"
-                      color="inherit"
-                      size="small"
-                      onClick={handleClearFaithCommunity}
-                      sx={{ textTransform: 'none', color: 'text.secondary' }}
-                    >
-                      Remover vínculo com comunidade de fé
-                    </Button>
-                  )}
-                </Stack>
-              </Stack>
-            </Box>
-          </CardContent>
-        </Card>
-
-        {/* ========================================================================= */}
-        {/* 3. AGÊNCIA MISSIONÁRIA (Apenas para Missionários - RF 3.1.2)              */}
-        {/* ========================================================================= */}
+        {/* 3. AGÊNCIA MISSIONÁRIA (Apenas para Missionários - RF 3.1.2) */}
         {role === 'missionary' && (
-          <Card
+          <CatalogLinkSection
             id="agency-section"
-            variant="outlined"
-            sx={{ borderRadius: 3, scrollMarginTop: 80 }}
-          >
-            <CardHeader
-              avatar={<BusinessOutlinedIcon color="primary" />}
-              title="Agência Missionária"
-              subheader="Gerencie a organização missionária à qual seu ministério está vinculado"
-              slotProps={{
-                title: {
-                  component: 'h2',
-                  sx: { fontWeight: 700, fontSize: { xs: '1.125rem', sm: '1.25rem' } },
-                },
-                subheader: { sx: { fontSize: '0.875rem' } },
-              }}
-            />
-            <Divider />
-            <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
-              <Box component="form" onSubmit={handleSaveAgency} noValidate>
-                <Stack spacing={3}>
-                  <Box>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ fontWeight: 700, mb: 1, color: 'text.primary' }}
-                    >
-                      Identificação da Agência
-                    </Typography>
-                    <Autocomplete
-                      freeSolo
-                      options={mockMissionaryAgencies}
-                      getOptionLabel={(option) =>
-                        typeof option === 'string' ? option : option.name
-                      }
-                      value={agency.name}
-                      onChange={(_, newValue) => {
-                        if (typeof newValue === 'string') {
-                          setAgency((prev) => ({ ...prev, name: newValue }));
-                        } else if (newValue) {
-                          handleSelectAgency(newValue);
-                        }
-                      }}
-                      onInputChange={(_, newInputValue) => {
-                        setAgency((prev) => ({ ...prev, name: newInputValue }));
-                      }}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          id="agency-name"
-                          label="Nome da Agência Missionária"
-                          placeholder="Busque ou digite o nome da agência..."
-                          size="small"
-                          fullWidth
-                          error={Boolean(agencyError)}
-                          helperText={
-                            agencyError ||
-                            'Digite para buscar agências cadastradas ou insira um novo nome.'
-                          }
-                        />
-                      )}
-                    />
-                  </Box>
-
-                  <Box>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}
-                    >
-                      Endereço da Agência
-                    </Typography>
-                    <Stack spacing={2}>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          id="agency-address1"
-                          label="Endereço 1"
-                          size="small"
-                          fullWidth
-                          value={agency.address1}
-                          onChange={(e) => setAgency({ ...agency, address1: e.target.value })}
-                        />
-                        <TextField
-                          id="agency-address2"
-                          label="Endereço 2"
-                          size="small"
-                          fullWidth
-                          value={agency.address2 || ''}
-                          onChange={(e) => setAgency({ ...agency, address2: e.target.value })}
-                        />
-                      </Stack>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          id="agency-country"
-                          label="País"
-                          size="small"
-                          fullWidth
-                          value={agency.country}
-                          onChange={(e) => setAgency({ ...agency, country: e.target.value })}
-                        />
-                        <TextField
-                          id="agency-state"
-                          label="Estado / Província"
-                          size="small"
-                          fullWidth
-                          value={agency.state}
-                          onChange={(e) => setAgency({ ...agency, state: e.target.value })}
-                        />
-                      </Stack>
-                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                        <TextField
-                          id="agency-city"
-                          label="Cidade"
-                          size="small"
-                          fullWidth
-                          value={agency.city}
-                          onChange={(e) => setAgency({ ...agency, city: e.target.value })}
-                        />
-                        <TextField
-                          id="agency-zipcode"
-                          label="CEP ou Código Postal"
-                          size="small"
-                          fullWidth
-                          value={agency.zipCode}
-                          onChange={(e) => setAgency({ ...agency, zipCode: e.target.value })}
-                        />
-                      </Stack>
-                    </Stack>
-                  </Box>
-
-                  <Box>
-                    <Typography
-                      variant="subtitle2"
-                      sx={{ fontWeight: 700, mb: 1.5, color: 'text.primary' }}
-                    >
-                      Contato da Agência
-                    </Typography>
-                    <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                      <TextField
-                        id="agency-website"
-                        label="Website"
-                        placeholder="https://agencia.org"
-                        size="small"
-                        fullWidth
-                        value={agency.website || ''}
-                        onChange={(e) => setAgency({ ...agency, website: e.target.value })}
-                      />
-                      <TextField
-                        id="agency-phone"
-                        label="Telefone de Contato"
-                        placeholder="+55 (41) 3657-2200"
-                        size="small"
-                        fullWidth
-                        value={agency.phone}
-                        onChange={(e) => setAgency({ ...agency, phone: e.target.value })}
-                      />
-                    </Stack>
-                  </Box>
-
-                  <Stack
-                    direction={{ xs: 'column-reverse', sm: 'row' }}
-                    spacing={1.5}
-                    useFlexGap
-                    sx={{
-                      pt: 1,
-                      '& .MuiButton-root': {
-                        width: { xs: '100%', sm: 'auto' },
-                        minHeight: 44,
-                        justifyContent: 'center',
-                      },
-                    }}
-                  >
-                    <PillButton
-                      type="button"
-                      tone="primarySoftOutline"
-                      size="small"
-                      onClick={handleCancelAgency}
-                      disabled={!agencyDirty}
-                      aria-label="Cancelar alterações da agência missionária"
-                    >
-                      Cancelar
-                    </PillButton>
-                    <PillButton type="submit" tone="primaryFilled" size="small">
-                      Salvar Agência Missionária
-                    </PillButton>
-                  </Stack>
-                </Stack>
-              </Box>
-            </CardContent>
-          </Card>
+            kind="missionaryAgencies"
+            icon={<BusinessOutlinedIcon color="primary" />}
+            title="Agência Missionária"
+            subheader="Escolha a organização missionária à qual seu ministério está vinculado"
+            selectLabel="Agência Missionária"
+            required
+            hint="A agência pode ser trocada, mas não removida. Não encontrou a sua? Escolha “Não encontrei na lista” para cadastrá-la."
+            saveLabel="Salvar Agência Missionária"
+            cancelLabel="Cancelar alterações da agência missionária"
+            savedId={owner.about.missionaryAgencyId}
+            savedName={owner.about.missionaryAgency}
+            onSave={handleSaveAgency}
+          />
         )}
 
         <ActiveSessionsSection />

@@ -7,22 +7,31 @@ import type {
   MissionaryRegisterData,
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
-import { personalStepErrors, signupFieldErrors } from '@/forms/register/shared/fieldErrors';
-import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
-import { login } from '@/services/auth.service';
-import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
+import {
+  ministryStepErrors,
+  personalStepErrors,
+  signupFieldErrors,
+} from '@/forms/register/shared/fieldErrors';
+import {
+  registerMissionary,
+  toApiBirthDate,
+  toApiGender,
+  toE164Phone,
+} from '@/services/account.service';
+import {
+  toCreateFaithCommunityPayload,
+  toCreateMissionaryAgencyPayload,
+} from '@/services/catalog.service';
 import { toIdentityPayload } from '@/lib/masks';
-import { completeMissionaryAbout, createMissionaryProfile } from '@/services/missionary.service';
-import { updateMissionaryIdentity } from '@/services/profile.service';
+import type { MissionarySignupInput } from '@/app/actions/account';
 
-/** Remote steps already done for this sign-up (in memory only, never persisted). */
+/**
+ * In memory only, never persisted. The sign-up is one transactional request, so
+ * a failure leaves nothing behind and a retry simply sends it again; this only
+ * keeps a second click from sending it while the first is in flight.
+ */
 type RegisterSubmission = {
-  accountCreated?: boolean;
-  agencyId?: string;
-  communityId?: string;
-  missionaryCreated?: boolean;
-  identitySaved?: boolean;
-  aboutSaved?: boolean;
+  pending?: boolean;
 };
 
 export interface MissionaryRegisterState {
@@ -78,6 +87,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         set((state) => ({
           formData: { ...state.formData, ...values },
           step: 3,
+          stepErrors: {},
         }));
       },
 
@@ -86,79 +96,71 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         const merged: Partial<MissionaryRegisterData> = { ...currentData, ...values };
         const email = merged.email?.trim().toLowerCase();
 
-        if (!merged.fullName || !merged.phone || !merged.gender || !email) {
+        if (!merged.fullName || !merged.phone || !merged.gender || !email || !merged.birthDate) {
           throw new Error('Complete os dados pessoais antes de finalizar o cadastro');
         }
         if (!merged.missionaryAgency) {
           throw new Error('Selecione a agência missionária antes de finalizar o cadastro');
         }
 
-        // Each step runs once even if the user retries after a later failure.
-        const progress = get().submission;
-        const mark = (patch: Partial<RegisterSubmission>) =>
-          set((state) => ({ submission: { ...state.submission, ...patch } }));
-
-        if (!progress.accountCreated) {
-          try {
-            await registerAccount({
-              fullName: merged.fullName,
-              username: values.username,
-              phoneNumber: toE164Phone(merged.phone),
-              gender: toApiGender(merged.gender),
-              email,
-              password: values.password,
-              passwordConfirmation: values.confirmPassword,
-            });
-          } catch (error) {
-            // NOTE: a field of the first step (e-mail in use...) is fixed there, not here.
-            const personal = personalStepErrors(signupFieldErrors(error));
-            if (Object.keys(personal).length > 0) {
-              set({ step: 1, stepErrors: personal });
-              return;
-            }
-            throw error;
-          }
-          mark({ accountCreated: true });
-        }
-
-        let agencyId = get().submission.agencyId ?? merged.missionaryAgency;
-        if (agencyId === SELECT_OTHER) {
-          if (!merged.agencyDetails?.name) {
+        // The agency comes from the catalog or is registered with the account.
+        let agency: Pick<MissionarySignupInput, 'missionaryAgencyId' | 'missionaryAgency'>;
+        if (merged.missionaryAgency === SELECT_OTHER) {
+          if (!merged.agencyDetails?.name?.trim()) {
             throw new Error('Informe os dados da nova agência missionária');
           }
-          agencyId = (await createMissionaryAgency(merged.agencyDetails)).id;
-          mark({ agencyId });
+          agency = { missionaryAgency: toCreateMissionaryAgencyPayload(merged.agencyDetails) };
+        } else {
+          agency = { missionaryAgencyId: merged.missionaryAgency };
         }
 
-        let communityId = get().submission.communityId ?? merged.faithCommunity;
-        if (communityId === SELECT_OTHER) {
-          communityId = merged.communityDetails?.name
-            ? (await createFaithCommunity(merged.communityDetails)).id
-            : undefined;
-          mark({ communityId });
+        // The faith community is optional; "Não encontrei" without a name sends none.
+        let community: Pick<MissionarySignupInput, 'faithCommunityId' | 'faithCommunity'> = {};
+        if (merged.faithCommunity === SELECT_OTHER) {
+          if (merged.communityDetails?.name?.trim()) {
+            community = { faithCommunity: toCreateFaithCommunityPayload(merged.communityDetails) };
+          }
+        } else if (merged.faithCommunity) {
+          community = { faithCommunityId: merged.faithCommunity };
         }
 
-        if (!get().submission.missionaryCreated) {
-          await createMissionaryProfile(agencyId);
-          mark({ missionaryCreated: true });
-        }
-
-        // Creating the missionary profile revokes every session: log in again
-        // with the credentials still in memory, then send what only a missionary can save.
-        await login({ login: email, password: values.password });
-
-        if (!get().submission.identitySaved && merged.document?.trim()) {
-          await updateMissionaryIdentity(toIdentityPayload(merged.document));
-          mark({ identitySaved: true });
-        }
-
+        const document = merged.document?.trim();
         const aboutMe = merged.missionDescription?.trim();
-        if (!get().submission.aboutSaved && (communityId || aboutMe)) {
-          await completeMissionaryAbout({
-            ...(communityId ? { faithCommunityId: communityId } : {}),
-            ...(aboutMe ? { aboutMe } : {}),
-          });
-          mark({ aboutSaved: true });
+
+        const payload: MissionarySignupInput = {
+          fullName: merged.fullName,
+          username: values.username,
+          phoneNumber: toE164Phone(merged.phone),
+          gender: toApiGender(merged.gender),
+          email,
+          password: values.password,
+          passwordConfirmation: values.confirmPassword,
+          birthDate: toApiBirthDate(merged.birthDate),
+          ...(document ? toIdentityPayload(document) : {}),
+          ...(aboutMe ? { aboutMe } : {}),
+          ...agency,
+          ...community,
+        };
+
+        if (get().submission.pending) return;
+        set({ submission: { pending: true } });
+        try {
+          await registerMissionary(payload);
+        } catch (error) {
+          set({ submission: {} });
+          // NOTE: a field of the first step (e-mail in use...) is fixed there, not here.
+          const personal = personalStepErrors(signupFieldErrors(error));
+          if (Object.keys(personal).length > 0) {
+            set({ step: 1, stepErrors: personal });
+            return;
+          }
+          // NOTE: agency, faith community and mission description are fixed on step 2.
+          const ministry = ministryStepErrors(error);
+          if (Object.keys(ministry).length > 0) {
+            set({ step: 2, stepErrors: ministry });
+            return;
+          }
+          throw error;
         }
 
         const sanitizedAfterSuccess = { ...merged };
