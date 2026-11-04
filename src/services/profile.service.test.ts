@@ -1,11 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { changePasswordAction, updateAccountProfileAction } from '@/app/actions/account';
-import {
-  updateAboutAction,
-  updateIdentityAction,
-  updatePublicContactsAction,
-  updateWorkAddressAction,
-} from '@/app/actions/missionary';
+import { updateAboutAction, updatePublicContactsAction } from '@/app/actions/missionary';
 import { ApiError } from '@/lib/api/client';
 import type { AccountProfilePayload, BackendUser } from '@/types/backend';
 import {
@@ -16,9 +11,7 @@ import {
   mapPublicProfile,
   updateAbout,
   updateHeader,
-  updateMissionaryIdentity,
   updatePublicContacts,
-  upsertWorkAddress,
 } from './profile.service';
 
 vi.mock('@/app/actions/account', () => ({
@@ -27,9 +20,7 @@ vi.mock('@/app/actions/account', () => ({
 }));
 vi.mock('@/app/actions/missionary', () => ({
   updateAboutAction: vi.fn(),
-  updateIdentityAction: vi.fn(),
   updatePublicContactsAction: vi.fn(),
-  updateWorkAddressAction: vi.fn(),
 }));
 
 import { publicMissionaryPayload } from '@/test/publicProfile';
@@ -118,7 +109,9 @@ describe('mapAccountProfile', () => {
         originLocation: 'São Paulo',
         currentLocation: 'Manaus - AM - Brasil',
         missionaryAgency: 'JMN',
+        missionaryAgencyId: 'agency-1',
         faithCommunity: 'Igreja Batista Central',
+        faithCommunityId: 'community-1',
         prayerRequests: 'Orem pela equipe',
         lifeVerse: 'Isaías 6:8',
         workAddress: {
@@ -134,6 +127,17 @@ describe('mapAccountProfile', () => {
         publicPhone: '+5592988887777',
       },
     });
+  });
+
+  it('fills the avatar from the profile picture URL, and leaves it empty while processing', () => {
+    expect(
+      mapAccountProfile(
+        buildPayload({ user: { ...user, profilePictureUrl: 'https://cdn.test/p.webp' } })
+      ).avatarUrl
+    ).toBe('https://cdn.test/p.webp');
+    expect(
+      mapAccountProfile(buildPayload({ user: { ...user, profilePictureUrl: null } })).avatarUrl
+    ).toBeUndefined();
   });
 
   it('enables WhatsApp only when the backend confirms the public phone takes it', () => {
@@ -183,7 +187,9 @@ describe('mapAccountProfile', () => {
       originLocation: '',
       currentLocation: '',
       missionaryAgency: '',
+      missionaryAgencyId: '',
       faithCommunity: '',
+      faithCommunityId: '',
       prayerRequests: '',
       lifeVerse: '',
       workAddress: null,
@@ -288,58 +294,36 @@ describe('profile.service saves (Server Actions)', () => {
     expect(updatePublicContactsAction).toHaveBeenCalledWith({ publicEmail: 'contato@missao.org' });
   });
 
-  it('updateAbout returns the missionary', async () => {
-    const missionary = { id: 'm-1', lifeVerse: 'Fp 4:13' };
-    vi.mocked(updateAboutAction).mockResolvedValue({ ok: true, data: { missionary } });
-
-    await expect(updateAbout({ lifeVerse: 'Fp 4:13' })).resolves.toEqual(missionary);
-  });
-
-  it('upsertWorkAddress strips backend ids', async () => {
-    vi.mocked(updateWorkAddressAction).mockResolvedValue({
-      ok: true,
-      data: {
-        workAddress: {
-          id: 'wa-1',
-          missionaryId: 'm-1',
-          zip: '48900-000',
-          district: 'Centro',
-          city: 'Juazeiro',
-          state: 'BA',
-          country: 'Brasil',
-        } as never,
-      },
-    });
-
-    await expect(
-      upsertWorkAddress({
-        zip: '48900-000',
-        district: 'Centro',
-        city: 'Juazeiro',
-        state: 'BA',
-        country: 'Brasil',
-      })
-    ).resolves.toEqual({
+  it('updateAbout sends texts, catalog links and work address in one call', async () => {
+    const workAddress = {
       zip: '48900-000',
       district: 'Centro',
       city: 'Juazeiro',
       state: 'BA',
       country: 'Brasil',
-    });
-  });
-
-  it('updateMissionaryIdentity resolves to undefined', async () => {
-    vi.mocked(updateIdentityAction).mockResolvedValue({
-      ok: true,
-      data: { missionary: {} as never },
-    });
+    };
+    const data = {
+      missionary: { id: 'm-1', lifeVerse: 'Fp 4:13' },
+      workAddress,
+      missionaryAgency: { id: 'agency-2', name: 'JOCUM' },
+      faithCommunity: null,
+    };
+    vi.mocked(updateAboutAction).mockResolvedValue({ ok: true, data });
 
     await expect(
-      updateMissionaryIdentity({ identityType: 'CPF', identityDocument: '52998224725' })
-    ).resolves.toBeUndefined();
-    expect(updateIdentityAction).toHaveBeenCalledWith({
-      identityType: 'CPF',
-      identityDocument: '52998224725',
+      updateAbout({
+        lifeVerse: 'Fp 4:13',
+        missionaryAgencyId: 'agency-2',
+        faithCommunityId: null,
+        workAddress,
+      })
+    ).resolves.toEqual(data);
+    expect(updateAboutAction).toHaveBeenCalledTimes(1);
+    expect(updateAboutAction).toHaveBeenCalledWith({
+      lifeVerse: 'Fp 4:13',
+      missionaryAgencyId: 'agency-2',
+      faithCommunityId: null,
+      workAddress,
     });
   });
 
@@ -392,6 +376,16 @@ describe('mapPublicProfile', () => {
         allowWhatsappContact: true,
       },
     });
+  });
+
+  it('shows the public profile picture when there is one', () => {
+    expect(
+      mapPublicProfile({ ...publicMissionaryPayload, profilePictureUrl: 'https://cdn.test/p.webp' })
+        .avatarUrl
+    ).toBe('https://cdn.test/p.webp');
+    expect(
+      mapPublicProfile({ ...publicMissionaryPayload, profilePictureUrl: null }).avatarUrl
+    ).toBeUndefined();
   });
 
   it('turns missing fields into empty text and never invents private data', () => {

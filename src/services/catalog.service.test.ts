@@ -85,18 +85,20 @@ describe('catalog.service', () => {
     });
   });
 
-  it('does not send pastor fields on the church payload', () => {
+  it('sends the pastor with the church, the phone in E.164', () => {
     expect(
       toCreateFaithCommunityPayload({
         ...EMPTY_FAITH_COMMUNITY,
         name: 'Igreja Nova',
         churchPhone: '+5521987654321',
-        pastorName: 'Pr. Ana',
-        pastorPhone: '+5521912345678',
+        pastorName: ' Pr. Ana ',
+        pastorPhone: '+55 (21) 91234-5678',
       })
     ).toEqual({
       name: 'Igreja Nova',
       phoneNumber: '+5521987654321',
+      pastorName: 'Pr. Ana',
+      pastorPhone: '+5521912345678',
       addressLine1: undefined,
       addressLine2: undefined,
       city: undefined,
@@ -105,6 +107,17 @@ describe('catalog.service', () => {
       postalCode: undefined,
       website: undefined,
     });
+  });
+
+  it('leaves the pastor out when it was not informed', () => {
+    const payload = toCreateFaithCommunityPayload({
+      ...EMPTY_FAITH_COMMUNITY,
+      name: 'Igreja Nova',
+      pastorName: '  ',
+      pastorPhone: '+55',
+    });
+    expect(payload.pastorName).toBeUndefined();
+    expect(payload.pastorPhone).toBeUndefined();
   });
 
   it('creates an agency through the Server Action with the backend payload', async () => {

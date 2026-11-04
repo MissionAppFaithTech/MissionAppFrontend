@@ -1,16 +1,12 @@
 import { changePasswordAction, updateAccountProfileAction } from '@/app/actions/account';
-import {
-  updateAboutAction,
-  updateIdentityAction,
-  updatePublicContactsAction,
-  updateWorkAddressAction,
-} from '@/app/actions/missionary';
+import { updateAboutAction, updatePublicContactsAction } from '@/app/actions/missionary';
 import { callAction } from '@/lib/api/callAction';
 import type {
   AccountProfilePayload,
   BackendMissionary,
   BackendUser,
   BackendWorkAddress,
+  MissionaryProfilePayload,
   PublicMissionaryProfile,
 } from '@/types/backend';
 import type { ProfileData, WorkAddressData } from '@/types/profile';
@@ -87,6 +83,7 @@ export function mapAccountProfile(payload: AccountProfilePayload): ProfileData {
     displayName: user.fullName,
     roleDescription: user.biography ?? '',
     role: user.role === 'SUPPORTER' ? 'supporter' : 'missionary',
+    avatarUrl: user.profilePictureUrl ?? undefined,
     location: currentLocation,
     about: {
       introduction: missionary?.aboutMe ?? '',
@@ -94,7 +91,9 @@ export function mapAccountProfile(payload: AccountProfilePayload): ProfileData {
       originLocation: missionary?.originLocation ?? '',
       currentLocation,
       missionaryAgency: missionaryAgency?.name ?? '',
+      missionaryAgencyId: missionaryAgency?.id ?? missionary?.missionaryAgencyId ?? '',
       faithCommunity: faithCommunity?.name ?? '',
+      faithCommunityId: faithCommunity?.id ?? missionary?.faithCommunityId ?? '',
       prayerRequests: missionary?.prayerRequest ?? '',
       lifeVerse: missionary?.lifeVerse ?? '',
       workAddress: address,
@@ -127,6 +126,7 @@ export function mapPublicProfile(missionary: PublicMissionaryProfile): ProfileDa
     displayName: missionary.fullName,
     roleDescription: missionary.biography ?? '',
     role: 'missionary',
+    avatarUrl: missionary.profilePictureUrl ?? undefined,
     location: currentLocation,
     followersCount: missionary.followersCount,
     followingCount: missionary.followingCount,
@@ -154,6 +154,8 @@ export type UpdateHeaderPayload = {
   fullName?: string;
   username?: string;
   biography?: string | null;
+  /** Confirmed profile picture upload; `null` removes the photo. */
+  profilePictureId?: string | null;
 };
 
 export async function updateHeader(payload: UpdateHeaderPayload): Promise<Partial<BackendUser>> {
@@ -183,29 +185,17 @@ export type UpdateAboutPayload = {
   originLocation?: string | null;
   prayerRequest?: string | null;
   lifeVerse?: string | null;
+  /** `null` unlinks the faith community. */
+  faithCommunityId?: string | null;
+  /** The agency can be replaced, never removed. */
+  missionaryAgencyId?: string;
+  /** Replaces the whole work address. */
+  workAddress?: WorkAddressData;
 };
 
-export async function updateAbout(
-  payload: UpdateAboutPayload
-): Promise<Partial<BackendMissionary>> {
-  const { missionary } = await callAction(() => updateAboutAction(payload));
-  return missionary;
-}
-
-export async function upsertWorkAddress(payload: WorkAddressData): Promise<WorkAddressData> {
-  const { workAddress } = await callAction(() => updateWorkAddressAction(payload));
-  return toWorkAddressData(workAddress) as WorkAddressData;
-}
-
-export type UpdateMissionaryIdentityPayload = {
-  identityType: 'CPF' | 'PASSPORT';
-  identityDocument: string;
-};
-
-export async function updateMissionaryIdentity(
-  payload: UpdateMissionaryIdentityPayload
-): Promise<void> {
-  await callAction(() => updateIdentityAction(payload));
+/** Saves the "Sobre", catalog links and work address in one `PATCH /missionaries/about`. */
+export async function updateAbout(payload: UpdateAboutPayload): Promise<MissionaryProfilePayload> {
+  return callAction(() => updateAboutAction(payload));
 }
 
 export type ChangeAccountPasswordPayload = {

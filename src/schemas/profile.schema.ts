@@ -126,6 +126,9 @@ export const profileAboutSchema = z
     originLocation: shortAboutText,
     prayerRequests: longAboutText,
     lifeVerse: shortAboutText,
+    /** Catalog ids; the agency is required, the faith community optional. */
+    missionaryAgencyId: z.string(),
+    faithCommunityId: z.string(),
     workAddress: z.object({
       country: shortAboutText,
       state: shortAboutText,

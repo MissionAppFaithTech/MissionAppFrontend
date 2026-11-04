@@ -31,6 +31,20 @@ describe('registration field errors', () => {
     });
   });
 
+  it('maps the missionary sign-up fields of the first step (birth date, document)', () => {
+    const error = new ApiError('Validation failure', 422, {
+      birthDate: 'a',
+      identityDocument: 'b',
+      'missionaryAgency.name': 'c',
+    });
+
+    expect(signupFieldErrors(error)).toEqual({ birthDate: 'a', document: 'b' });
+    expect(personalStepErrors({ birthDate: 'a', document: 'b', username: 'c' })).toEqual({
+      birthDate: 'a',
+      document: 'b',
+    });
+  });
+
   it('has nothing to map for errors that are not from the API', () => {
     expect(signupFieldErrors(new Error('Rede'))).toEqual({});
     expect(signupFieldErrors('boom')).toEqual({});

@@ -21,18 +21,22 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   test('"Cancelar" restores the ecclesiastical data without leaving the page', async ({ page }) => {
     await page.goto('/profile/configuracoes');
 
-    const pastor = page.getByLabel('Nome do Pastor Responsável').filter({ visible: true });
-    const saved = await pastor.inputValue();
+    const community = page
+      .getByRole('combobox', { name: /Comunidade de Fé \(Igreja\)/ })
+      .filter({ visible: true });
+    const saved = await community.textContent();
     const cancel = page
       .getByRole('button', { name: 'Cancelar alterações dos dados eclesiásticos' })
       .filter({ visible: true });
     await expect(cancel).toBeDisabled();
 
-    await pastor.fill('Pr. Rascunho');
+    await community.click();
+    await page.getByRole('option', { name: 'Nenhuma comunidade de fé' }).click();
+    await expect(community).not.toHaveText(saved ?? '');
     await expect(cancel).toBeEnabled();
     await cancel.click();
 
-    await expect(pastor).toHaveValue(saved);
+    await expect(community).toHaveText(saved ?? '');
     await expect(cancel).toBeDisabled();
     await expect(page).toHaveURL(/\/profile\/configuracoes$/);
   });

@@ -16,19 +16,22 @@ export const REGISTER_FIELD_LABELS: Record<string, string> = {
   confirmPassword: 'Confirmar senha',
 };
 
-/** `POST /accounts` field → registration form field. */
+/** `POST /accounts` and `POST /accounts/missionaries` field → registration form field. */
 const SIGNUP_FIELDS: Record<string, string> = {
   fullName: 'fullName',
   email: 'email',
   phoneNumber: 'phone',
   gender: 'gender',
+  birthDate: 'birthDate',
+  identityType: 'document',
+  identityDocument: 'document',
   username: 'username',
   password: 'password',
   passwordConfirmation: 'confirmPassword',
 };
 
 /** Fields typed in the first step ("Dados pessoais") of both wizards. */
-const PERSONAL_FIELDS = new Set(['fullName', 'email', 'phone', 'gender']);
+const PERSONAL_FIELDS = new Set(['fullName', 'email', 'phone', 'gender', 'birthDate', 'document']);
 
 /** Field errors the API returned for the signup, keyed by form field. */
 export function signupFieldErrors(error: unknown): Record<string, string> {

@@ -38,6 +38,29 @@ function send(response, status, body) {
   response.end(body === undefined ? '' : JSON.stringify(body));
 }
 
+function emailTaken(response) {
+  return send(response, 422, {
+    message: 'Validation failure',
+    code: 'E_VALIDATION_ERROR',
+    errors: [
+      { field: 'email', rule: 'database.unique', message: 'The email has already been taken' },
+    ],
+  });
+}
+
+async function signUp(request, response) {
+  const body = await readBody(request);
+  if (body.email === TAKEN_EMAIL) return emailTaken(response);
+  const sub = `e2e-signup-${body.username}`;
+  return send(response, 200, {
+    data: {
+      user: { ...profileOf(sub).user, id: sub, email: body.email, username: body.username },
+      accessToken: accessTokenFor(sub),
+      refreshToken: `refresh-${sub}`,
+    },
+  });
+}
+
 const base64url = (value) => Buffer.from(JSON.stringify(value)).toString('base64url');
 
 function accessTokenFor(sub, fid) {
@@ -189,23 +212,34 @@ const routes = {
     });
   },
   'DELETE /api/v1/auth/logout': (_request, response) => send(response, 204),
-  // Sign-up (backend `POST /accounts`): this address is always taken, so the
-  // wizard has a field the API rejects at the end.
-  'POST /api/v1/accounts': async (request, response) => {
+  // Sign-up (backend `POST /accounts` and `POST /accounts/missionaries`): this
+  // address is always taken, so the wizard has a field the API rejects at the end.
+  'POST /api/v1/accounts': signUp,
+  'POST /api/v1/accounts/missionaries': async (request, response) => {
     const body = await readBody(request);
-    if (body.email === TAKEN_EMAIL) {
-      return send(response, 422, {
-        message: 'Validation failure',
-        code: 'E_VALIDATION_ERROR',
-        errors: [
-          { field: 'email', rule: 'database.unique', message: 'The email has already been taken' },
-        ],
-      });
-    }
+    if (body.email === TAKEN_EMAIL) return emailTaken(response);
     const sub = `e2e-signup-${body.username}`;
+    const profile = profileOf(sub);
+    profile.user = {
+      ...profile.user,
+      id: sub,
+      email: body.email,
+      username: body.username,
+      role: 'MISSIONARY',
+    };
     return send(response, 200, {
       data: {
-        user: { ...profileOf(sub).user, id: sub, email: body.email, username: body.username },
+        user: profile.user,
+        missionary: profile.missionary,
+        workAddress: null,
+        missionaryAgency: body.missionaryAgency
+          ? { id: 'ma-e2e-new', name: body.missionaryAgency.name }
+          : { id: body.missionaryAgencyId, name: 'JOCUM' },
+        faithCommunity: body.faithCommunity
+          ? { id: 'fc-e2e-new', name: body.faithCommunity.name }
+          : body.faithCommunityId
+            ? { id: body.faithCommunityId, name: 'Igreja Batista Central' }
+            : null,
         accessToken: accessTokenFor(sub),
         refreshToken: `refresh-${sub}`,
       },
@@ -238,8 +272,20 @@ const routes = {
     return send(response, 200, { data: { missionary: profile.missionary } });
   }),
   'PATCH /api/v1/missionaries/about': authenticated((profile, body, response) => {
-    Object.assign(profile.missionary, body);
-    return send(response, 200, { data: { missionary: profile.missionary } });
+    const { workAddress, ...about } = body;
+    Object.assign(profile.missionary, about);
+    if (workAddress) profile.workAddress = { ...workAddress };
+    if (about.missionaryAgencyId) {
+      profile.missionaryAgency = { id: about.missionaryAgencyId, name: 'JOCUM' };
+    }
+    return send(response, 200, {
+      data: {
+        missionary: profile.missionary,
+        workAddress: profile.workAddress,
+        missionaryAgency: profile.missionaryAgency,
+        faithCommunity: profile.faithCommunity,
+      },
+    });
   }),
   'PATCH /api/v1/missionaries/work-address': authenticated((profile, body, response) => {
     profile.workAddress = { ...body };

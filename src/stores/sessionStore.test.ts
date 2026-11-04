@@ -59,7 +59,7 @@ describe('clearUserStores', () => {
     useMissionaryRegisterStore.setState({
       step: 2,
       formData: { fullName: 'Ana', email: 'ana@example.com' },
-      submission: { accountCreated: true },
+      submission: { pending: true },
     });
     useSupporterRegisterStore.setState({ step: 2, formData: { fullName: 'Bia' } });
     seedLegacyCache();

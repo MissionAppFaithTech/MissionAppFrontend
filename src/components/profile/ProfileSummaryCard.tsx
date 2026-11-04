@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
@@ -16,6 +16,8 @@ import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
 import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
 import DonationModal from '@/components/profile/DonationModal';
+import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
+import { PROFILE_PICTURE_ACCEPT } from '@/services/profilePicture.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { ProfileData } from '@/types/profile';
 
@@ -55,7 +57,6 @@ export default function ProfileSummaryCard({
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(isFollowingInitial);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   const {
     username,
@@ -71,23 +72,13 @@ export default function ProfileSummaryCard({
     role = 'missionary',
   } = profile;
 
-  const photoSrc = photoPreview || profile.avatarUrl || undefined;
-
-  useEffect(() => {
-    if (!photoPreview) return;
-    return () => URL.revokeObjectURL(photoPreview);
-  }, [photoPreview]);
-
-  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      notify('Escolha uma imagem para a foto de perfil.', 'error');
-      return;
-    }
-    setPhotoPreview(URL.createObjectURL(file));
-  };
+  const photo = useProfilePictureUpload({
+    currentUrl: profile.avatarUrl,
+    onSuccess: (message) => notify(message, 'success'),
+    onError: (message) => notify(message, 'error'),
+  });
+  // Only the owner uploads; visitors always see the saved photo.
+  const photoSrc = (isOwnProfile ? photo.photoUrl : profile.avatarUrl) || undefined;
 
   const isSupporterProfile = role === 'supporter';
   const isOwnSupporter = isOwnProfile && isSupporterProfile;
@@ -152,7 +143,10 @@ export default function ProfileSummaryCard({
               spacing={{ xs: 1.75, sm: 2.5 }}
               sx={{ alignItems: 'flex-start', minWidth: 0, flex: 1 }}
             >
-              <Box sx={{ position: 'relative', flexShrink: 0 }}>
+              <Box
+                sx={{ position: 'relative', flexShrink: 0 }}
+                aria-busy={(isOwnProfile && photo.busy) || undefined}
+              >
                 <Avatar
                   src={photoSrc}
                   alt={photoSrc ? `Foto de perfil de ${displayName}` : ''}
@@ -163,18 +157,24 @@ export default function ProfileSummaryCard({
                     color: 'avatar.contrastText',
                     border: '1.5px solid',
                     borderColor: 'divider',
+                    opacity: isOwnProfile && photo.busy ? 0.6 : 1,
                   }}
                 >
                   <PersonIcon aria-hidden sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
                 </Avatar>
                 {isOwnProfile ? (
-                  <ProfilePhotoAddButton component="label">
+                  <ProfilePhotoAddButton
+                    component="label"
+                    aria-label={photoSrc ? 'Alterar foto de perfil' : 'Adicionar foto de perfil'}
+                    disabled={photo.busy}
+                  >
                     <Box
                       component="input"
                       type="file"
-                      accept="image/*"
+                      accept={PROFILE_PICTURE_ACCEPT}
                       hidden
-                      onChange={handlePhotoChange}
+                      disabled={photo.busy}
+                      onChange={photo.selectFile}
                     />
                   </ProfilePhotoAddButton>
                 ) : null}

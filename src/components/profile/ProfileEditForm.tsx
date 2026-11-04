@@ -4,9 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm, type FieldPath } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import PersonIcon from '@mui/icons-material/Person';
 import Alert from '@mui/material/Alert';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -16,6 +14,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import StyledTextArea from '@/components/common/StyledTextArea';
+import ProfilePictureField from '@/components/profile/ProfilePictureField';
 import PublicContactFields from '@/components/profile/PublicContactFields';
 import UsernameAvailabilityField from '@/components/profile/UsernameAvailabilityField';
 import type { UsernameAvailabilityStatus } from '@/hooks/useUsernameAvailability';
@@ -196,24 +195,7 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
               </Alert>
             ) : null}
 
-            <Stack spacing={1} sx={{ alignItems: 'center' }}>
-              <Avatar
-                sx={{
-                  width: { xs: 88, sm: 104 },
-                  height: { xs: 88, sm: 104 },
-                  bgcolor: 'avatar.main',
-                  color: 'avatar.contrastText',
-                  border: '1px solid',
-                  borderColor: 'primary.main',
-                  boxShadow: 2,
-                }}
-              >
-                <PersonIcon aria-hidden sx={{ fontSize: { xs: 48, sm: 56 } }} />
-              </Avatar>
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center' }}>
-                Envio de foto de perfil em breve.
-              </Typography>
-            </Stack>
+            <ProfilePictureField currentUrl={profile.avatarUrl} displayName={profile.displayName} />
 
             <Stack spacing={{ xs: 2.5, sm: 3 }}>
               <Typography

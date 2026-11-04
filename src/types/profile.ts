@@ -35,7 +35,11 @@ export type ProfileAboutData = {
   originLocation: string;
   currentLocation: string;
   missionaryAgency?: string;
+  /** Catalog id behind `missionaryAgency` (owner profile only). */
+  missionaryAgencyId?: string;
   faithCommunity: string;
+  /** Catalog id behind `faithCommunity` (owner profile only). */
+  faithCommunityId?: string;
   prayerRequests?: string;
   lifeVerse: string;
   /** Structured work address behind `currentLocation` (missionary only). */

@@ -15,7 +15,12 @@ import {
   onlyNewToken,
   resetActionHarness,
 } from '@/test/actionHarness';
-import { changePasswordAction, registerAccountAction, updateAccountProfileAction } from './account';
+import {
+  changePasswordAction,
+  registerAccountAction,
+  registerMissionaryAction,
+  updateAccountProfileAction,
+} from './account';
 
 vi.mock('next/headers', async () => (await import('@/test/actionHarness')).headersMock);
 vi.mock('next/cache', async () => (await import('@/test/actionHarness')).cacheMock);
@@ -83,6 +88,155 @@ describe('registerAccountAction', () => {
     expect(result).toMatchObject({ ok: false, status: 422 });
     expect(result.ok === false && result.fieldErrors).toHaveProperty('email');
     expect(cookieWrites).toEqual([]);
+  });
+});
+
+describe('registerMissionaryAction', () => {
+  const AGENCY_ID = '019a0000-0000-7000-8000-00000000a001';
+  const COMMUNITY_ID = '019a0000-0000-7000-8000-00000000c001';
+  const input = {
+    fullName: 'João Missionário',
+    username: 'joao_missao',
+    phoneNumber: '+5511999999999',
+    gender: 'MALE' as const,
+    email: 'joao@example.com',
+    password: 'Secret123!',
+    passwordConfirmation: 'Secret123!',
+    birthDate: '1990-12-25',
+    identityType: 'CPF' as const,
+    identityDocument: '52998224725',
+    aboutMe: 'Evangelismo no interior',
+    missionaryAgencyId: AGENCY_ID,
+    faithCommunityId: COMMUNITY_ID,
+  };
+  const user = { id: 'usr-7', fullName: 'João', email: 'joao@example.com', role: 'MISSIONARY' };
+  const profile = {
+    missionary: { id: 'mis-7', missionaryAgencyId: AGENCY_ID },
+    workAddress: null,
+    missionaryAgency: { id: AGENCY_ID, name: 'JOCUM' },
+    faithCommunity: { id: COMMUNITY_ID, name: 'Igreja Batista Central' },
+  };
+
+  it('signs up in one request and keeps the MISSIONARY session it returns', async () => {
+    mockBackend({
+      'POST /accounts/missionaries': () => ({
+        data: { user, ...profile, accessToken: 'acc-m', refreshToken: 'ref-m' },
+      }),
+    });
+
+    await expect(registerMissionaryAction(input)).resolves.toEqual({
+      ok: true,
+      data: { user, ...profile },
+    });
+    const deviceId = cookieValue(DEVICE_COOKIE);
+    expect(backendMock.backendFetch).toHaveBeenCalledTimes(1);
+    expect(backendMock.backendFetch).toHaveBeenCalledWith('/accounts/missionaries', {
+      method: 'POST',
+      body: input,
+      headers: { 'x-device-id': deviceId, 'x-device-kind': 'unknown' },
+    });
+    expect(cookieValue(AUTH_COOKIE.accessToken)).toBe('acc-m');
+    expect(cookieValue(AUTH_COOKIE.refreshToken)).toBe('ref-m');
+  });
+
+  it('sends a new agency and community (with the pastor) instead of ids', async () => {
+    mockBackend({
+      'POST /accounts/missionaries': () => ({
+        data: { user, ...profile, accessToken: 'a', refreshToken: 'r' },
+      }),
+    });
+    const { missionaryAgencyId: _a, faithCommunityId: _c, ...rest } = input;
+
+    await registerMissionaryAction({
+      ...rest,
+      missionaryAgency: { name: ' Nova Agência ', city: 'Recife' },
+      faithCommunity: { name: 'Nova Igreja', pastorName: 'Pr. Ana', pastorPhone: '+5521912345678' },
+    });
+
+    expect(backendMock.backendFetch.mock.calls[0][1].body).toMatchObject({
+      missionaryAgency: { name: 'Nova Agência', city: 'Recife' },
+      faithCommunity: { name: 'Nova Igreja', pastorName: 'Pr. Ana', pastorPhone: '+5521912345678' },
+    });
+  });
+
+  it.each([
+    ['no agency', { missionaryAgencyId: undefined }, 'missionaryAgencyId'],
+    [
+      'an agency id and a new agency',
+      { missionaryAgency: { name: 'Outra' } },
+      'missionaryAgencyId',
+    ],
+    [
+      'a community id and a new community',
+      { faithCommunity: { name: 'Outra' } },
+      'faithCommunityId',
+    ],
+    ['a document without its type', { identityType: undefined }, 'identityDocument'],
+    ['a birth date outside YYYY-MM-DD', { birthDate: '25/12/1990' }, 'birthDate'],
+    [
+      'a pastor phone without the name',
+      {
+        faithCommunityId: undefined,
+        faithCommunity: { name: 'Igreja', pastorPhone: '+5521912345678' },
+      },
+      'faithCommunity',
+    ],
+  ])('rejects %s before calling the API', async (_case, override, field) => {
+    const result = await registerMissionaryAction({ ...input, ...override });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 422,
+      message: 'Dados de cadastro inválidos',
+    });
+    expect(result.ok === false && result.fieldErrors).toHaveProperty(field);
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
+  });
+
+  it('rejects mismatched passwords', async () => {
+    await expect(
+      registerMissionaryAction({ ...input, passwordConfirmation: 'Outra123!' })
+    ).resolves.toEqual({ ok: false, status: 422, message: 'As senhas não coincidem' });
+  });
+
+  it('maps the field errors of the transaction and sets no cookie', async () => {
+    mockBackend({
+      'POST /accounts/missionaries': () => {
+        throw backendError(422, {
+          message: 'Validation failure',
+          code: 'E_VALIDATION_ERROR',
+          errors: [
+            { field: 'email', rule: 'database.unique', message: 'taken' },
+            { field: 'missionaryAgency.name', rule: 'required', message: 'required' },
+          ],
+        });
+      },
+    });
+
+    const result = await registerMissionaryAction(input);
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: {
+        email: 'Este e-mail já está em uso.',
+        'missionaryAgency.name': 'Campo obrigatório.',
+      },
+    });
+    expect(cookieWrites).toEqual([]);
+  });
+
+  it('explains the sign-up rate limit in Portuguese', async () => {
+    mockBackend({
+      'POST /accounts/missionaries': () => {
+        throw backendError(429, { message: 'Too many requests', code: 'E_TOO_MANY_REQUESTS' });
+      },
+    });
+
+    const result = await registerMissionaryAction(input);
+
+    expect(result).toMatchObject({ ok: false, status: 429 });
+    expect(result.ok === false && result.message).toMatch(/muitas tentativas/i);
   });
 });
 
@@ -167,6 +321,31 @@ describe('updateAccountProfileAction', () => {
     });
     expect(cacheMock.updateTag).toHaveBeenCalledWith('profile:ana');
     expect(cacheMock.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('links a confirmed profile picture, or removes it with null', async () => {
+    const PICTURE_ID = '019a0000-0000-7000-8000-0000000000f1';
+    mockBackend({ 'PATCH /account/profile': () => saved('ana') });
+
+    await expect(
+      updateAccountProfileAction({ profilePictureId: PICTURE_ID })
+    ).resolves.toMatchObject({ ok: true });
+    await updateAccountProfileAction({ profilePictureId: null });
+
+    expect(backendMock.backendFetch.mock.calls.map(([, options]) => options.body)).toEqual([
+      { profilePictureId: PICTURE_ID },
+      { profilePictureId: null },
+    ]);
+    expect(cacheMock.updateTag).toHaveBeenCalledWith('profile:ana');
+  });
+
+  it('rejects a profile picture id that is not a UUID', async () => {
+    await expect(updateAccountProfileAction({ profilePictureId: 'foto' })).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: { profilePictureId: expect.any(String) },
+    });
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
   });
 
   it('expires the old username too when the username changes', async () => {

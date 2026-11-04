@@ -13,6 +13,7 @@ import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import LimitedTextField from '@/components/common/LimitedTextField';
 import StyledTextArea from '@/components/common/StyledTextArea';
+import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
 import { ApiError } from '@/lib/api/client';
 import {
   ABOUT_LONG_MAX_LENGTH,
@@ -20,7 +21,9 @@ import {
   profileAboutSchema,
   type ProfileAboutFormData,
 } from '@/schemas/profile.schema';
+import type { CatalogItem } from '@/services/catalog.service';
 import type { UpdateAboutPayload } from '@/services/profile.service';
+import { useCatalogItems } from '@/services/queries/catalog';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileAboutData, WorkAddressData } from '@/types/profile';
 
@@ -38,9 +41,15 @@ type ProfileAboutEditSectionProps = {
   onCancel: () => void;
 };
 
-type TextFieldName = Exclude<keyof ProfileAboutFormData, 'workAddress'>;
+type TextFieldName = Exclude<
+  keyof ProfileAboutFormData,
+  'workAddress' | 'missionaryAgencyId' | 'faithCommunityId'
+>;
 
-const TEXT_FIELDS: Record<TextFieldName, keyof UpdateAboutPayload> = {
+type AboutTextField =
+  'aboutMe' | 'missionStorySummary' | 'originLocation' | 'prayerRequest' | 'lifeVerse';
+
+const TEXT_FIELDS: Record<TextFieldName, AboutTextField> = {
   introduction: 'aboutMe',
   missionHistory: 'missionStorySummary',
   originLocation: 'originLocation',
@@ -54,11 +63,19 @@ const API_FIELD_TO_FORM: Record<string, FieldPath<ProfileAboutFormData>> = {
   originLocation: 'originLocation',
   prayerRequest: 'prayerRequests',
   lifeVerse: 'lifeVerse',
+  missionaryAgencyId: 'missionaryAgencyId',
+  faithCommunityId: 'faithCommunityId',
   zip: 'workAddress.zip',
   district: 'workAddress.district',
   city: 'workAddress.city',
   state: 'workAddress.state',
   country: 'workAddress.country',
+  // The address is nested in `PATCH /missionaries/about`.
+  'workAddress.zip': 'workAddress.zip',
+  'workAddress.district': 'workAddress.district',
+  'workAddress.city': 'workAddress.city',
+  'workAddress.state': 'workAddress.state',
+  'workAddress.country': 'workAddress.country',
 };
 
 const WORK_ADDRESS_INPUTS: Array<{
@@ -83,6 +100,8 @@ const FIELD_DOM_IDS: Array<{ name: FieldPath<ProfileAboutFormData>; id: string }
     name: `workAddress.${key}` as const,
     id: `profile-about-work-${key}`,
   })),
+  { name: 'missionaryAgencyId', id: 'profile-about-missionaryAgency' },
+  { name: 'faithCommunityId', id: 'profile-about-faithCommunity' },
   { name: 'prayerRequests', id: 'profile-about-prayerRequests' },
   { name: 'lifeVerse', id: 'profile-about-lifeVerse' },
 ];
@@ -114,6 +133,8 @@ function toFormValues(data: ProfileAboutData): ProfileAboutFormData {
     originLocation: data.originLocation ?? '',
     prayerRequests: data.prayerRequests ?? '',
     lifeVerse: data.lifeVerse ?? '',
+    missionaryAgencyId: data.missionaryAgencyId ?? '',
+    faithCommunityId: data.faithCommunityId ?? '',
     workAddress: {
       country: address?.country ?? '',
       state: address?.state ?? '',
@@ -131,10 +152,15 @@ export function buildSaveAboutInput(
 ): SaveAboutInput {
   const about: UpdateAboutPayload = {};
   for (const [formField, apiField] of Object.entries(TEXT_FIELDS) as Array<
-    [TextFieldName, keyof UpdateAboutPayload]
+    [TextFieldName, AboutTextField]
   >) {
     if (dirty[formField]) about[apiField] = values[formField] || null;
   }
+  // The agency can only be replaced; an empty community unlinks it.
+  if (dirty.missionaryAgencyId && values.missionaryAgencyId) {
+    about.missionaryAgencyId = values.missionaryAgencyId;
+  }
+  if (dirty.faithCommunityId) about.faithCommunityId = values.faithCommunityId || null;
 
   const address = values.workAddress;
   const addressChanged = Boolean(dirty.workAddress);
@@ -144,6 +170,15 @@ export function buildSaveAboutInput(
     about: Object.keys(about).length > 0 ? about : undefined,
     workAddress: addressChanged && addressComplete ? address : undefined,
   };
+}
+
+/**
+ * Keeps the saved item selectable while the catalog loads (or if it left the
+ * list), so the select never holds a value it has no option for.
+ */
+function withSaved(items: CatalogItem[], id?: string, name?: string): CatalogItem[] {
+  if (!id || items.some((item) => item.id === id)) return items;
+  return [{ id, name: name || 'Atual' }, ...items];
 }
 
 function FormSection({
@@ -184,6 +219,8 @@ export default function ProfileAboutEditSection({
   onDone,
   onCancel,
 }: ProfileAboutEditSectionProps) {
+  const agencies = useCatalogItems('missionaryAgencies');
+  const communities = useCatalogItems('faithCommunities');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; tick: number } | null>(null);
@@ -402,6 +439,62 @@ export default function ProfileAboutEditSection({
                   );
                 })}
               </Grid>
+            </FormSection>
+
+            <FormSection
+              id="about-section-links"
+              title="Agência e comunidade de fé"
+              description="Escolha entre as cadastradas na plataforma."
+            >
+              <Controller
+                name="missionaryAgencyId"
+                control={control}
+                render={({ field }) => (
+                  <RegisterCatalogSelect
+                    id="profile-about-missionaryAgency"
+                    label="Agência missionária"
+                    required
+                    allowOther={false}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={withSaved(
+                      agencies.items,
+                      data.missionaryAgencyId,
+                      data.missionaryAgency
+                    )}
+                    isLoading={agencies.isLoading}
+                    loadError={agencies.error}
+                    error={Boolean(errors.missionaryAgencyId)}
+                    helperText={errors.missionaryAgencyId?.message}
+                  />
+                )}
+              />
+              <Controller
+                name="faithCommunityId"
+                control={control}
+                render={({ field }) => (
+                  <RegisterCatalogSelect
+                    id="profile-about-faithCommunity"
+                    label="Comunidade de fé"
+                    allowOther={false}
+                    allowEmpty
+                    emptyValueLabel="Nenhuma comunidade de fé"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    options={withSaved(
+                      communities.items,
+                      data.faithCommunityId,
+                      data.faithCommunity
+                    )}
+                    isLoading={communities.isLoading}
+                    loadError={communities.error}
+                    error={Boolean(errors.faithCommunityId)}
+                    helperText={errors.faithCommunityId?.message}
+                  />
+                )}
+              />
             </FormSection>
 
             <FormSection id="about-section-faith" title="Oração e fé">

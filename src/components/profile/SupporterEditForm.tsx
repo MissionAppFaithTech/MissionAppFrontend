@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import PersonIcon from '@mui/icons-material/Person';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -14,7 +12,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
-import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
+import ProfilePictureField from '@/components/profile/ProfilePictureField';
 import PublicContactFields from '@/components/profile/PublicContactFields';
 import UsernameAvailabilityField from '@/components/profile/UsernameAvailabilityField';
 import StyledTextArea from '@/components/common/StyledTextArea';
@@ -101,27 +99,7 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
               Editar perfil de apoiador
             </Typography>
 
-            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-              <Box sx={{ position: 'relative' }}>
-                <Avatar
-                  sx={{
-                    width: { xs: 88, sm: 104 },
-                    height: { xs: 88, sm: 104 },
-                    bgcolor: 'avatar.main',
-                    color: 'avatar.contrastText',
-                    border: '1px solid',
-                    borderColor: 'primary.main',
-                    boxShadow: 2,
-                  }}
-                >
-                  <PersonIcon sx={{ fontSize: { xs: 48, sm: 56 } }} />
-                </Avatar>
-
-                <ProfilePhotoAddButton component="label" aria-label="Alterar foto de perfil">
-                  <Box component="input" type="file" accept="image/*" hidden />
-                </ProfilePhotoAddButton>
-              </Box>
-            </Box>
+            <ProfilePictureField currentUrl={profile.avatarUrl} displayName={profile.displayName} />
 
             {/* Seção 1: Informações Gerais */}
             <Stack spacing={{ xs: 2.5, sm: 3 }}>

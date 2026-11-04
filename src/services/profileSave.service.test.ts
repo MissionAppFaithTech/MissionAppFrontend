@@ -1,17 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  updateAbout,
-  updateHeader,
-  updatePublicContacts,
-  upsertWorkAddress,
-} from '@/services/profile.service';
+import { updateAbout, updateHeader, updatePublicContacts } from '@/services/profile.service';
 import { saveProfileAbout, saveProfileHeader } from './profileSave.service';
 
 vi.mock('@/services/profile.service', () => ({
   updateHeader: vi.fn(async () => ({})),
   updatePublicContacts: vi.fn(async () => ({})),
   updateAbout: vi.fn(async () => ({})),
-  upsertWorkAddress: vi.fn(async () => ({})),
 }));
 
 const workAddress = {
@@ -67,17 +61,31 @@ describe('profileSave.service', () => {
     expect(updatePublicContacts).not.toHaveBeenCalled();
   });
 
-  it('saves the about fields, then the work address', async () => {
-    await saveProfileAbout({ about: { lifeVerse: 'João 3:16' }, workAddress });
+  it('saves the about fields, catalog links and work address in one request', async () => {
+    await saveProfileAbout({
+      about: { lifeVerse: 'João 3:16', missionaryAgencyId: 'agency-2', faithCommunityId: null },
+      workAddress,
+    });
 
-    expect(updateAbout).toHaveBeenCalledWith({ lifeVerse: 'João 3:16' });
-    expect(upsertWorkAddress).toHaveBeenCalledWith(workAddress);
+    expect(updateAbout).toHaveBeenCalledTimes(1);
+    expect(updateAbout).toHaveBeenCalledWith({
+      lifeVerse: 'João 3:16',
+      missionaryAgencyId: 'agency-2',
+      faithCommunityId: null,
+      workAddress,
+    });
   });
 
-  it('skips the parts of the about form that did not change', async () => {
+  it('sends only the work address when no text changed', async () => {
+    await saveProfileAbout({ workAddress });
+
+    expect(updateAbout).toHaveBeenCalledWith({ workAddress });
+  });
+
+  it('skips the request when nothing changed', async () => {
     await saveProfileAbout({ about: {} });
+    await saveProfileAbout({});
 
     expect(updateAbout).not.toHaveBeenCalled();
-    expect(upsertWorkAddress).not.toHaveBeenCalled();
   });
 });
