@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Alert, Box, Stack, TextField, Typography } from '@mui/material';
 import Link from 'next/link';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import SendIcon from '@mui/icons-material/Send';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -28,12 +29,29 @@ export default function ForgotPasswordForm() {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema),
     mode: 'onTouched',
     defaultValues: { login: '' },
   });
+
+  /** Back to an empty form, ready to ask for another link. */
+  const startOver = useCallback(() => {
+    setSubmitState({ status: 'idle' });
+    setFormError(null);
+    reset({ login: '' });
+  }, [reset]);
+
+  // Next.js keeps visited pages alive (Activity), so returning here after a
+  // request would show the stale result with no way back to the form. Reset it
+  // when the page is hidden. A half-typed e-mail is kept.
+  const showsResult = submitState.status !== 'idle';
+  useLayoutEffect(() => {
+    if (!showsResult) return;
+    return startOver;
+  }, [showsResult, startOver]);
 
   const onSubmit = async (values: ForgotPasswordFormData) => {
     setFormError(null);
@@ -89,6 +107,27 @@ export default function ForgotPasswordForm() {
             </Typography>
           </Box>
         ) : null}
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap>
+          <PillButton
+            href="/login"
+            tone="primarySoftOutline"
+            fullWidth
+            sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+            startIcon={<ArrowBackIcon />}
+          >
+            Voltar
+          </PillButton>
+          <PillButton
+            onClick={startOver}
+            tone="primaryOutline"
+            fullWidth
+            sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+            startIcon={<EmailOutlinedIcon />}
+          >
+            Enviar para outro e-mail
+          </PillButton>
+        </Stack>
       </Stack>
     );
   }
@@ -110,7 +149,7 @@ export default function ForgotPasswordForm() {
         </Typography>
 
         <PillButton
-          onClick={() => setSubmitState({ status: 'idle' })}
+          onClick={startOver}
           tone="primaryOutline"
           fullWidth
           sx={FORM_ACTION_BUTTON_SX}
@@ -127,6 +166,16 @@ export default function ForgotPasswordForm() {
           startIcon={<PersonAddIcon />}
         >
           Criar uma conta
+        </PillButton>
+
+        <PillButton
+          href="/login"
+          tone="primarySoftOutline"
+          fullWidth
+          sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+          startIcon={<ArrowBackIcon />}
+        >
+          Voltar
         </PillButton>
       </Stack>
     );
