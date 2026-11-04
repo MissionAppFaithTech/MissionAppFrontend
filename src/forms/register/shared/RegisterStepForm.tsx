@@ -90,7 +90,7 @@ export default function RegisterStepForm({
     const target =
       document.getElementById(field) ?? form?.querySelector<HTMLElement>(`[name="${field}"]`);
     target?.focus();
-    target?.scrollIntoView({ block: 'center' });
+    target?.scrollIntoView?.({ block: 'center' });
   };
 
   return (
