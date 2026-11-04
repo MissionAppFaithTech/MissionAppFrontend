@@ -19,7 +19,8 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import PasswordStrengthIndicator from '@/components/common/PasswordStrengthIndicator';
-import { validateOnSubmit } from '@/lib/formValidation';
+import { validateOnLeave } from '@/lib/formValidation';
+import { signupFieldErrors } from '@/forms/register/shared/fieldErrors';
 import { yieldToMain } from '@/lib/scheduler';
 import type { AccessCredentialsValues } from '@/forms/register/types';
 import { accessCredentialsSchema, type AccessCredentialsFormData } from '@/schemas/register.schema';
@@ -34,13 +35,18 @@ type AccessCredentialsStepProps = {
   onSubmit: (values: AccessCredentialsValues) => void | Promise<void>;
   onBack: () => void;
   submitLabel?: string;
+  /** Position of this step in its wizard, announced with the heading. */
+  progress?: { step: number; total: number };
 };
+
+const CREDENTIAL_FIELDS = ['username', 'password', 'confirmPassword'] as const;
 
 export default function AccessCredentialsStep({
   defaultValues,
   onSubmit,
   onBack,
   submitLabel = 'Continuar',
+  progress,
 }: AccessCredentialsStepProps) {
   const {
     register,
@@ -50,10 +56,10 @@ export default function AccessCredentialsStep({
     setValue,
     setError,
     clearErrors,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, submitCount },
   } = useForm<AccessCredentialsFormData>({
     resolver: zodResolver(accessCredentialsSchema),
-    ...validateOnSubmit,
+    ...validateOnLeave,
     defaultValues: {
       username: '',
       password: '',
@@ -62,11 +68,13 @@ export default function AccessCredentialsStep({
     },
   });
 
-  const [username, password, confirmPassword] = watch(['username', 'password', 'confirmPassword']);
-  const passwordsMismatch = Boolean(confirmPassword) && confirmPassword !== password;
+  // NOTE: "As senhas precisam ser iguais" comes from the schema when the user leaves
+  // the confirmation field, not on every key press.
+  const [username, password] = watch(['username', 'password']);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [serverErrorCount, setServerErrorCount] = useState(0);
   const { status: usernameStatus, suggestions } = useUsernameAvailability({
     username,
     onTaken: () =>
@@ -96,6 +104,16 @@ export default function AccessCredentialsStep({
     try {
       await onSubmit(values);
     } catch (error) {
+      // Fields of this step rejected by the API show on the field, like any other error.
+      const fieldErrors = signupFieldErrors(error);
+      const rejected = CREDENTIAL_FIELDS.filter((field) => fieldErrors[field]);
+      if (rejected.length > 0) {
+        rejected.forEach((field) =>
+          setError(field, { type: 'server', message: fieldErrors[field] })
+        );
+        setServerErrorCount((count) => count + 1);
+        return;
+      }
       setSubmitError(
         error instanceof Error ? error.message : 'Não foi possível concluir o cadastro'
       );
@@ -106,6 +124,10 @@ export default function AccessCredentialsStep({
     <RegisterStepForm
       onSubmit={handleSubmit(handleFormSubmit)}
       sectionTitle="Dados de acesso"
+      progress={progress}
+      errors={errors}
+      submitCount={submitCount}
+      serverErrorCount={serverErrorCount}
       onBack={onBack}
       submitLabel={submitLabel}
       submittingLabel="Finalizando..."
@@ -135,6 +157,7 @@ export default function AccessCredentialsStep({
           <TextField
             {...field}
             label="Nome de usuário"
+            required
             fullWidth
             placeholder="exemplo_usuario"
             error={Boolean(errors.username) || usernameStatus === 'taken'}
@@ -143,7 +166,9 @@ export default function AccessCredentialsStep({
               htmlInput: {
                 autoComplete: 'username',
                 autoCapitalize: 'none',
+                autoCorrect: 'off',
                 spellCheck: false,
+                enterKeyHint: 'next',
               },
               input: {
                 endAdornment:
@@ -196,6 +221,7 @@ export default function AccessCredentialsStep({
         {...register('password')}
         label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Senha</Box>}
         type={showPassword ? 'text' : 'password'}
+        required
         fullWidth
         placeholder="Ex: Senha@123"
         error={Boolean(errors.password)}
@@ -204,12 +230,14 @@ export default function AccessCredentialsStep({
           htmlInput: {
             autoComplete: 'new-password',
             spellCheck: false,
+            enterKeyHint: 'next',
           },
           input: {
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  aria-label="Mostrar senha"
+                  aria-pressed={showPassword}
                   onClick={() => setShowPassword((prev) => !prev)}
                   onMouseDown={(event) => event.preventDefault()}
                   edge="end"
@@ -229,27 +257,23 @@ export default function AccessCredentialsStep({
         {...register('confirmPassword')}
         label="Confirmar senha"
         type={showConfirmPassword ? 'text' : 'password'}
+        required
         fullWidth
         placeholder="Repita a senha"
-        error={Boolean(errors.confirmPassword) || passwordsMismatch}
-        helperText={
-          errors.confirmPassword?.message ??
-          (passwordsMismatch ? 'As senhas precisam ser iguais' : undefined)
-        }
+        error={Boolean(errors.confirmPassword)}
+        helperText={errors.confirmPassword?.message}
         slotProps={{
           htmlInput: {
             autoComplete: 'new-password',
             spellCheck: false,
+            enterKeyHint: 'done',
           },
           input: {
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton
-                  aria-label={
-                    showConfirmPassword
-                      ? 'Ocultar confirmação de senha'
-                      : 'Mostrar confirmação de senha'
-                  }
+                  aria-label="Mostrar confirmação de senha"
+                  aria-pressed={showConfirmPassword}
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   onMouseDown={(event) => event.preventDefault()}
                   edge="end"

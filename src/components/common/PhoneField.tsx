@@ -24,6 +24,10 @@ type PhoneFieldProps = {
   size?: 'small' | 'medium';
   /** Lets react-hook-form focus the input on validation errors. */
   inputRef?: Ref<HTMLInputElement>;
+  /** Form field name (autofill and the error summary find the input by it). */
+  name?: string;
+  /** Lets react-hook-form validate when the user leaves the field. */
+  onBlur?: () => void;
 };
 
 /**
@@ -96,6 +100,8 @@ function PhoneFieldPlaceholder({
 
 function PhoneFieldInput({
   inputRef,
+  name,
+  onBlur,
   id,
   value,
   onChange,
@@ -129,6 +135,8 @@ function PhoneFieldInput({
       <OutlinedInput
         id={inputId}
         inputRef={inputRef}
+        name={name}
+        onBlur={onBlur}
         label={hideLabel ? undefined : label}
         notched={hideLabel ? false : true}
         required={required}

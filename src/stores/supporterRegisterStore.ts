@@ -6,6 +6,7 @@ import type {
   SupportersStep1Values,
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
+import { personalStepErrors, signupFieldErrors } from '@/forms/register/shared/fieldErrors';
 import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
 import { createFaithCommunity } from '@/services/catalog.service';
 
@@ -13,6 +14,11 @@ export interface SupporterRegisterState {
   step: number;
   formData: Partial<SupporterRegisterData>;
   hasHydrated: boolean;
+  /**
+   * Errors the API returned for fields of the first step ("Dados pessoais"). The
+   * wizard goes back to that step and shows them on the fields. Memory only.
+   */
+  stepErrors: Record<string, string>;
   setStep: (step: number) => void;
   updateFormData: (data: Partial<SupporterRegisterData>) => void;
   completeStep1: (values: SupportersStep1Values) => void;
@@ -26,6 +32,7 @@ const initialState = {
   step: 1,
   formData: {} as Partial<SupporterRegisterData>,
   hasHydrated: false,
+  stepErrors: {} as Record<string, string>,
 };
 
 export const useSupporterRegisterStore = create<SupporterRegisterState>()(
@@ -43,6 +50,7 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
         set((state) => ({
           formData: { ...state.formData, ...values },
           step: 2,
+          stepErrors: {},
         }));
       },
 
@@ -55,15 +63,25 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
           throw new Error('Complete os dados pessoais antes de finalizar o cadastro');
         }
 
-        await registerAccount({
-          fullName: merged.fullName,
-          username: values.username,
-          phoneNumber: toE164Phone(merged.phone),
-          gender: toApiGender(merged.gender),
-          email,
-          password: values.password,
-          passwordConfirmation: values.confirmPassword,
-        });
+        try {
+          await registerAccount({
+            fullName: merged.fullName,
+            username: values.username,
+            phoneNumber: toE164Phone(merged.phone),
+            gender: toApiGender(merged.gender),
+            email,
+            password: values.password,
+            passwordConfirmation: values.confirmPassword,
+          });
+        } catch (error) {
+          // NOTE: a field of the first step (e-mail in use...) is fixed there, not here.
+          const personal = personalStepErrors(signupFieldErrors(error));
+          if (Object.keys(personal).length > 0) {
+            set({ step: 1, stepErrors: personal });
+            return;
+          }
+          throw error;
+        }
 
         if (merged.faithCommunity === SELECT_OTHER && merged.communityDetails?.name) {
           await createFaithCommunity(merged.communityDetails);
@@ -85,7 +103,7 @@ export const useSupporterRegisterStore = create<SupporterRegisterState>()(
       },
 
       reset: () => {
-        set({ step: 1, formData: {} });
+        set({ step: 1, formData: {}, stepErrors: {} });
         useSupporterRegisterStore.persist.clearStorage();
       },
 

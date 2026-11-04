@@ -7,6 +7,7 @@ import type {
   MissionaryRegisterData,
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
+import { personalStepErrors, signupFieldErrors } from '@/forms/register/shared/fieldErrors';
 import { registerAccount, toApiGender, toE164Phone } from '@/services/account.service';
 import { login } from '@/services/auth.service';
 import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
@@ -29,6 +30,11 @@ export interface MissionaryRegisterState {
   formData: Partial<MissionaryRegisterData>;
   submission: RegisterSubmission;
   hasHydrated: boolean;
+  /**
+   * Errors the API returned for fields of the first step ("Dados pessoais"). The
+   * wizard goes back to that step and shows them on the fields. Memory only.
+   */
+  stepErrors: Record<string, string>;
   setStep: (step: number) => void;
   updateFormData: (data: Partial<MissionaryRegisterData>) => void;
   completeStep1: (values: MissionariesStep1Values) => void;
@@ -46,6 +52,7 @@ const initialState = {
   formData: {} as Partial<MissionaryRegisterData>,
   submission: {} as RegisterSubmission,
   hasHydrated: false,
+  stepErrors: {} as Record<string, string>,
 };
 
 export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
@@ -63,6 +70,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         set((state) => ({
           formData: { ...state.formData, ...values },
           step: 2,
+          stepErrors: {},
         }));
       },
 
@@ -91,15 +99,25 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
           set((state) => ({ submission: { ...state.submission, ...patch } }));
 
         if (!progress.accountCreated) {
-          await registerAccount({
-            fullName: merged.fullName,
-            username: values.username,
-            phoneNumber: toE164Phone(merged.phone),
-            gender: toApiGender(merged.gender),
-            email,
-            password: values.password,
-            passwordConfirmation: values.confirmPassword,
-          });
+          try {
+            await registerAccount({
+              fullName: merged.fullName,
+              username: values.username,
+              phoneNumber: toE164Phone(merged.phone),
+              gender: toApiGender(merged.gender),
+              email,
+              password: values.password,
+              passwordConfirmation: values.confirmPassword,
+            });
+          } catch (error) {
+            // NOTE: a field of the first step (e-mail in use...) is fixed there, not here.
+            const personal = personalStepErrors(signupFieldErrors(error));
+            if (Object.keys(personal).length > 0) {
+              set({ step: 1, stepErrors: personal });
+              return;
+            }
+            throw error;
+          }
           mark({ accountCreated: true });
         }
 
@@ -159,7 +177,7 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
       },
 
       reset: () => {
-        set({ step: 1, formData: {}, submission: {} });
+        set({ step: 1, formData: {}, submission: {}, stepErrors: {} });
         useMissionaryRegisterStore.persist.clearStorage();
       },
 

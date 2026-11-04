@@ -23,6 +23,9 @@ const REVOKED_USER = 'e2e-revoked';
 const LOGIN = { email: /^samuel(?:\+([\w-]+))?@privado\.test$/, password: 'Senha@123' };
 const isLoginUser = (sub) => sub.startsWith('e2e-login');
 
+/** `POST /accounts` answers "e-mail em uso" for this address. */
+const TAKEN_EMAIL = 'usado@missionapp.test';
+
 const profiles = new Map();
 
 function profileOf(sub) {
@@ -186,6 +189,36 @@ const routes = {
     });
   },
   'DELETE /api/v1/auth/logout': (_request, response) => send(response, 204),
+  // Sign-up (backend `POST /accounts`): this address is always taken, so the
+  // wizard has a field the API rejects at the end.
+  'POST /api/v1/accounts': async (request, response) => {
+    const body = await readBody(request);
+    if (body.email === TAKEN_EMAIL) {
+      return send(response, 422, {
+        message: 'Validation failure',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          { field: 'email', rule: 'database.unique', message: 'The email has already been taken' },
+        ],
+      });
+    }
+    const sub = `e2e-signup-${body.username}`;
+    return send(response, 200, {
+      data: {
+        user: { ...profileOf(sub).user, id: sub, email: body.email, username: body.username },
+        accessToken: accessTokenFor(sub),
+        refreshToken: `refresh-${sub}`,
+      },
+    });
+  },
+  'GET /api/v1/accounts/username-availability': (request, response) => {
+    const username = new URL(request.url ?? '/', 'http://localhost').searchParams.get('username');
+    return send(response, 200, { data: { available: true, username, suggestions: [] } });
+  },
+  'GET /api/v1/faith-communities': (_request, response) =>
+    send(response, 200, { data: [{ id: 'fc-e2e-1', name: 'Igreja Batista Central' }] }),
+  'GET /api/v1/missionary-agencies': (_request, response) =>
+    send(response, 200, { data: [{ id: 'ma-e2e-1', name: 'JOCUM' }] }),
   'GET /api/v1/auth/sessions': listSessions,
   'DELETE /api/v1/auth/sessions': (request, response) => {
     const sub = userOf(request);

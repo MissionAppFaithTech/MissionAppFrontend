@@ -4,6 +4,7 @@ import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import AuthLayout from '@/components/common/AuthLayout';
 import RegistrationStepper from '@/components/register/RegistrationStepper';
+import { useStepHeadingFocus } from '@/components/register/useStepHeadingFocus';
 import MissionariesStep1 from '@/forms/register/missionaries/MissionariesStep1';
 import MissionariesStep2 from '@/forms/register/missionaries/MissionariesStep2';
 import MissionariesStep3 from '@/forms/register/missionaries/MissionariesStep3';
@@ -18,6 +19,7 @@ const stepLabels = ['Dados pessoais', 'Dados ministeriais', 'Dados de acesso'];
 function RegisterMissionariesWizardContent() {
   const { step } = useMissionaryRegisterWizard();
   const isConfirmation = step === 4;
+  useStepHeadingFocus(step);
 
   return (
     <AuthLayout

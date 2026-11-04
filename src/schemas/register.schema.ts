@@ -10,7 +10,11 @@ import {
 import { requiredEmailSchema } from '@/schemas/email';
 
 export const missionaryStep1Schema = z.object({
-  fullName: z.string().trim().min(1, 'Informe seu nome completo'),
+  fullName: z
+    .string()
+    .trim()
+    .min(1, 'Informe seu nome completo')
+    .max(255, 'Use no máximo 255 caracteres'),
   birthDate: z
     .string()
     .min(1, 'Informe sua data de nascimento')
@@ -87,7 +91,11 @@ export type MissionaryStep2FormData = z.infer<typeof missionaryStep2Schema>;
 
 export const supporterStep1Schema = z
   .object({
-    fullName: z.string().trim().min(1, 'Informe seu nome completo'),
+    fullName: z
+      .string()
+      .trim()
+      .min(1, 'Informe seu nome completo')
+      .max(255, 'Use no máximo 255 caracteres'),
     birthDate: z
       .string()
       .min(1, 'Informe sua data de nascimento')
@@ -141,6 +149,8 @@ export const accessCredentialsSchema = z
     password: z
       .string()
       .min(1, 'Informe sua senha')
+      // Same limit as the API (password field, 8 to 32 characters).
+      .max(32, 'Use no máximo 32 caracteres')
       .refine((val) => validateStrongPassword(val) === true, {
         message: 'Use maiúscula, minúscula, número e caractere especial (mín. 8)',
       }),

@@ -3,6 +3,7 @@ import { useSupporterRegisterStore } from './supporterRegisterStore';
 import * as accountService from '@/services/account.service';
 import * as catalogService from '@/services/catalog.service';
 import { EMPTY_FAITH_COMMUNITY, SELECT_OTHER } from '@/forms/register/options';
+import { ApiError } from '@/lib/api/client';
 
 vi.mock('@/services/account.service', () => ({
   registerAccount: vi.fn().mockResolvedValue({ id: 'acc-2' }),
@@ -82,6 +83,64 @@ describe('supporterRegisterStore', () => {
       })
     );
     expect(useSupporterRegisterStore.getState().step).toBe(3);
+  });
+
+  describe('API rejections on completeStep2', () => {
+    const personalData = {
+      fullName: 'Maria Apoiadora',
+      birthDate: '10/05/1995',
+      gender: 'feminino' as const,
+      phone: '11988888888',
+      email: 'maria@example.com',
+      faithCommunity: '',
+      communityDetails: EMPTY_FAITH_COMMUNITY,
+    };
+    const credentials = {
+      username: 'mariaapoiadora',
+      password: 'StrongPassword123!',
+      confirmPassword: 'StrongPassword123!',
+    };
+
+    it('goes back to step 1 with the error of a personal field', async () => {
+      useSupporterRegisterStore.setState({ formData: personalData, step: 2 });
+      vi.mocked(accountService.registerAccount).mockRejectedValueOnce(
+        new ApiError('Validation failure', 422, {
+          email: 'Este e-mail já está em uso',
+          fullName: 'Nome inválido',
+        })
+      );
+
+      await expect(
+        useSupporterRegisterStore.getState().completeStep2(credentials)
+      ).resolves.toBeUndefined();
+
+      expect(useSupporterRegisterStore.getState()).toMatchObject({
+        step: 1,
+        stepErrors: { email: 'Este e-mail já está em uso', fullName: 'Nome inválido' },
+      });
+      expect(catalogService.createFaithCommunity).not.toHaveBeenCalled();
+    });
+
+    it('rethrows credential errors and stays on step 2', async () => {
+      useSupporterRegisterStore.setState({ formData: personalData, step: 2 });
+      const error = new ApiError('Validation failure', 422, { password: 'Senha fraca' });
+      vi.mocked(accountService.registerAccount).mockRejectedValueOnce(error);
+
+      await expect(useSupporterRegisterStore.getState().completeStep2(credentials)).rejects.toBe(
+        error
+      );
+      expect(useSupporterRegisterStore.getState().step).toBe(2);
+    });
+
+    it('rethrows errors that are not about a field', async () => {
+      useSupporterRegisterStore.setState({ formData: personalData, step: 2 });
+      vi.mocked(accountService.registerAccount).mockRejectedValueOnce(new Error('Rede'));
+
+      await expect(useSupporterRegisterStore.getState().completeStep2(credentials)).rejects.toThrow(
+        'Rede'
+      );
+      expect(useSupporterRegisterStore.getState().step).toBe(2);
+    });
   });
 
   it('creates custom community when SELECT_OTHER is chosen', async () => {

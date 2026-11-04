@@ -13,6 +13,17 @@ export const validateOnSubmit = {
   reValidateMode: 'onChange',
 } as const;
 
+/**
+ * Registration steps: a field is checked when the user leaves it, then on every
+ * change until it is valid, so nobody is warned while still typing. On submit
+ * the step's error summary takes focus instead of the first field.
+ */
+export const validateOnLeave = {
+  mode: 'onTouched',
+  reValidateMode: 'onChange',
+  shouldFocusError: false,
+} as const;
+
 type LiveEmailHandlers<TFieldValues extends FieldValues> = {
   trigger: UseFormTrigger<TFieldValues>;
   clearErrors: UseFormClearErrors<TFieldValues>;

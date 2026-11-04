@@ -3,6 +3,7 @@ import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
 import AccessCredentialsStep from './AccessCredentialsStep';
+import { ApiError } from '@/lib/api/client';
 import { checkUsernameAvailability } from '@/services/username.service';
 
 vi.mock('@/services/username.service', () => ({
@@ -50,26 +51,31 @@ describe('AccessCredentialsStep component', () => {
     expect(submitBtn).not.toBeDisabled();
   });
 
-  it('displays validation errors when submitting empty credentials', async () => {
+  it('lists the empty credentials in a focused summary', async () => {
     const user = userEvent.setup();
     const handleSubmit = vi.fn();
-    const handleBack = vi.fn();
 
     renderWithQuery(
       <AccessCredentialsStep
         onSubmit={handleSubmit}
-        onBack={handleBack}
+        onBack={vi.fn()}
         submitLabel="Finalizar cadastro"
+        progress={{ step: 3, total: 3 }}
       />
     );
 
-    const submitBtn = screen.getByRole('button', { name: /finalizar cadastro/i });
-    await user.click(submitBtn);
+    await user.click(screen.getByRole('button', { name: /finalizar cadastro/i }));
 
-    expect(await screen.findByText(/informe seu nome de usuário/i)).toBeInTheDocument();
-    expect(await screen.findByText(/informe sua senha/i)).toBeInTheDocument();
-    expect(await screen.findByText(/confirme sua senha/i)).toBeInTheDocument();
+    const summary = await screen.findByRole('alert');
+    expect(summary).toHaveFocus();
+    expect(summary).toHaveTextContent('Corrija 3 campos para continuar');
+    expect(summary).toHaveTextContent('Nome de usuário: Informe seu nome de usuário');
+    expect(summary).toHaveTextContent('Senha: Informe sua senha');
+    expect(summary).toHaveTextContent('Confirmar senha: Confirme sua senha');
     expect(handleSubmit).not.toHaveBeenCalled();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
+      'Etapa 3 de 3: Dados de acesso'
+    );
   });
 
   it('submits valid credentials and triggers onSubmit', async () => {
@@ -154,13 +160,75 @@ describe('AccessCredentialsStep component', () => {
     ).toBeInTheDocument();
   });
 
-  it('warns while the confirmation password differs', async () => {
+  it('checks that the passwords match when the user leaves the confirmation', async () => {
     const user = userEvent.setup();
 
     renderWithQuery(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
     await user.type(screen.getByLabelText(/^senha/i), 'SenhaForte@123');
     await user.type(screen.getByLabelText(/confirmar senha/i), 'SenhaDiferente@1');
+    expect(screen.queryByText(/as senhas precisam ser iguais/i)).not.toBeInTheDocument();
 
+    await user.tab();
     expect(await screen.findByText(/as senhas precisam ser iguais/i)).toBeInTheDocument();
+  });
+
+  it('rejects a password longer than the API accepts (32)', async () => {
+    const user = userEvent.setup();
+
+    renderWithQuery(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
+    await user.type(screen.getByLabelText(/^senha/i), `Aa1@${'x'.repeat(29)}`);
+    await user.tab();
+
+    expect(await screen.findByText(/use no máximo 32 caracteres/i)).toBeInTheDocument();
+  });
+
+  it('shows the API rejection of a credential on its field', async () => {
+    const user = userEvent.setup();
+    const handleSubmit = vi
+      .fn()
+      .mockRejectedValue(
+        new ApiError('Validation failure', 422, { username: 'Este nome de usuário já está em uso' })
+      );
+
+    renderWithQuery(<AccessCredentialsStep onSubmit={handleSubmit} onBack={vi.fn()} />);
+    await user.type(screen.getByLabelText(/nome de usuário/i), 'ana_souza');
+    await user.type(screen.getByLabelText(/^senha/i), 'SenhaForte@123');
+    await user.type(screen.getByLabelText(/confirmar senha/i), 'SenhaForte@123');
+    await user.click(screen.getByRole('button', { name: /continuar/i }));
+
+    const summary = await screen.findByRole('alert');
+    await waitFor(() => expect(summary).toHaveFocus());
+    expect(summary).toHaveTextContent('Nome de usuário: Este nome de usuário já está em uso');
+    expect(screen.getByRole('textbox', { name: /nome de usuário/i })).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
+  });
+
+  it('keeps the generic message for errors that are not about a field', async () => {
+    const user = userEvent.setup();
+    const handleSubmit = vi.fn().mockRejectedValue(new Error('Servidor indisponível'));
+
+    renderWithQuery(<AccessCredentialsStep onSubmit={handleSubmit} onBack={vi.fn()} />);
+    await user.type(screen.getByLabelText(/nome de usuário/i), 'ana_souza');
+    await user.type(screen.getByLabelText(/^senha/i), 'SenhaForte@123');
+    await user.type(screen.getByLabelText(/confirmar senha/i), 'SenhaForte@123');
+    await user.click(screen.getByRole('button', { name: /continuar/i }));
+
+    expect(await screen.findByText('Servidor indisponível')).toBeInTheDocument();
+  });
+
+  it('offers the browser password manager and show-password toggles', () => {
+    renderWithQuery(<AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} />);
+
+    expect(screen.getByLabelText(/^senha/i)).toHaveAttribute('autocomplete', 'new-password');
+    expect(screen.getByLabelText(/confirmar senha/i)).toHaveAttribute(
+      'autocomplete',
+      'new-password'
+    );
+    expect(screen.getByRole('button', { name: 'Mostrar senha' })).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
   });
 });

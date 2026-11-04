@@ -24,6 +24,9 @@ type RegisterCatalogSelectProps = {
   allowEmpty?: boolean;
   otherSummary?: string;
   onEditOther?: () => void;
+  required?: boolean;
+  /** Lets react-hook-form validate when the user leaves the field. */
+  onBlur?: () => void;
 };
 
 export default function RegisterCatalogSelect({
@@ -40,7 +43,10 @@ export default function RegisterCatalogSelect({
   allowEmpty = false,
   otherSummary,
   onEditOther,
+  required = false,
+  onBlur,
 }: RegisterCatalogSelectProps) {
+  const helperId = `${id}-helper`;
   const labelId = `${id}-label`;
   const showError = Boolean(error || loadError);
   const message = helperText || loadError || undefined;
@@ -48,7 +54,7 @@ export default function RegisterCatalogSelect({
 
   return (
     <Stack spacing={1} sx={{ width: '100%', minWidth: 0 }}>
-      <FormControl fullWidth error={showError} disabled={isLoading}>
+      <FormControl fullWidth error={showError} disabled={isLoading} required={required}>
         <InputLabel id={labelId} shrink>
           {label}
         </InputLabel>
@@ -56,8 +62,14 @@ export default function RegisterCatalogSelect({
           labelId={labelId}
           id={id}
           label={label}
+          name={id}
           value={value}
           onChange={(event) => onChange(event.target.value)}
+          onBlur={onBlur}
+          SelectDisplayProps={{
+            'aria-describedby': message ? helperId : undefined,
+            'aria-required': required || undefined,
+          }}
           displayEmpty
           renderValue={(selected) => {
             if (!selected) return isLoading ? 'Carregando...' : emptyValueLabel;
@@ -75,7 +87,7 @@ export default function RegisterCatalogSelect({
           ))}
           <MenuItem value={SELECT_OTHER}>Não encontrei na lista</MenuItem>
         </Select>
-        {message ? <FormHelperText>{message}</FormHelperText> : null}
+        {message ? <FormHelperText id={helperId}>{message}</FormHelperText> : null}
       </FormControl>
       {showEditOther ? (
         <PillButton
