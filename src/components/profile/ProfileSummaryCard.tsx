@@ -7,15 +7,18 @@ import PersonIcon from '@mui/icons-material/Person';
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
+import ButtonBase from '@mui/material/ButtonBase';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import PhotoLightbox from '@/components/common/PhotoLightbox';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
 import DonationModal from '@/components/profile/DonationModal';
 import { useFeedbackStore } from '@/stores/feedbackStore';
+import { focusVisibleSx } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
 
 type ProfileSummaryCardProps = {
@@ -54,6 +57,7 @@ export default function ProfileSummaryCard({
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [isFollowing, setIsFollowing] = useState(isFollowingInitial);
+  const [photoOpen, setPhotoOpen] = useState(false);
 
   const {
     username,
@@ -104,6 +108,23 @@ export default function ProfileSummaryCard({
 
   const editHref = isSupporterProfile ? '/profile/supporter/edit-profile' : '/profile/edit-profile';
 
+  const avatar = (
+    <Avatar
+      src={photoSrc}
+      alt={photoSrc ? `Foto de perfil de ${displayName}` : ''}
+      sx={{
+        width: { xs: 72, sm: 88, md: 96 },
+        height: { xs: 72, sm: 88, md: 96 },
+        bgcolor: 'avatar.main',
+        color: 'avatar.contrastText',
+        border: '1.5px solid',
+        borderColor: 'divider',
+      }}
+    >
+      <PersonIcon aria-hidden sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
+    </Avatar>
+  );
+
   return (
     <Card
       elevation={0}
@@ -136,20 +157,22 @@ export default function ProfileSummaryCard({
               sx={{ alignItems: 'flex-start', minWidth: 0, flex: 1 }}
             >
               <Box sx={{ flexShrink: 0 }}>
-                <Avatar
-                  src={photoSrc}
-                  alt={photoSrc ? `Foto de perfil de ${displayName}` : ''}
-                  sx={{
-                    width: { xs: 72, sm: 88, md: 96 },
-                    height: { xs: 72, sm: 88, md: 96 },
-                    bgcolor: 'avatar.main',
-                    color: 'avatar.contrastText',
-                    border: '1.5px solid',
-                    borderColor: 'divider',
-                  }}
-                >
-                  <PersonIcon aria-hidden sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
-                </Avatar>
+                {photoSrc ? (
+                  <ButtonBase
+                    aria-label={`Ampliar foto de perfil de ${displayName}`}
+                    aria-haspopup="dialog"
+                    onClick={() => setPhotoOpen(true)}
+                    sx={(theme) => ({
+                      borderRadius: '50%',
+                      cursor: 'zoom-in',
+                      ...focusVisibleSx(theme),
+                    })}
+                  >
+                    {avatar}
+                  </ButtonBase>
+                ) : (
+                  avatar
+                )}
               </Box>
 
               <Stack spacing={0.5} sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
@@ -404,6 +427,13 @@ export default function ProfileSummaryCard({
         isOwnProfile={isOwnProfile}
         financialConfig={profile.financial}
       />
+      {photoSrc ? (
+        <PhotoLightbox
+          slides={[{ src: photoSrc, alt: `Foto de perfil de ${displayName}` }]}
+          index={photoOpen ? 0 : null}
+          onClose={() => setPhotoOpen(false)}
+        />
+      ) : null}
     </Card>
   );
 }

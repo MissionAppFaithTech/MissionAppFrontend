@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ProfileSummaryCard from './ProfileSummaryCard';
@@ -120,6 +120,40 @@ describe('ProfileSummaryCard component', () => {
 
     await user.click(screen.getByRole('button', { name: /ofertar/i }));
     expect(screen.getByRole('heading', { name: /ofertar na missão/i })).toBeInTheDocument();
+  });
+
+  it('opens the photo in the full-screen viewer from the avatar', async () => {
+    const user = userEvent.setup();
+    render(
+      <ProfileSummaryCard
+        profile={{ ...mockProfile, avatarUrl: 'https://cdn.test/p.webp' }}
+        isOwnProfile={false}
+      />
+    );
+
+    const trigger = screen.getByRole('button', {
+      name: 'Ampliar foto de perfil de Samuel Mendonça',
+    });
+    expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+    expect(document.querySelector('.yarl__container')).not.toBeInTheDocument();
+
+    await user.click(trigger);
+
+    expect(document.querySelector('.yarl__container')).toBeInTheDocument();
+    expect(
+      document.querySelector('.yarl__container img[src="https://cdn.test/p.webp"]')
+    ).not.toBeNull();
+
+    await user.click(screen.getByRole('button', { name: 'Fechar' }));
+    await waitFor(() => expect(document.querySelector('.yarl__container')).not.toBeInTheDocument());
+  });
+
+  it('has nothing to enlarge without a photo', () => {
+    render(<ProfileSummaryCard profile={mockProfile} isOwnProfile />);
+
+    expect(
+      screen.queryByRole('button', { name: /ampliar foto de perfil/i })
+    ).not.toBeInTheDocument();
   });
 
   it('shows the saved photo to its owner without photo controls', () => {
