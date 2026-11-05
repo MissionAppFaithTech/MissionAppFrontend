@@ -99,7 +99,11 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
               Editar perfil de apoiador
             </Typography>
 
-            <ProfilePictureField currentUrl={profile.avatarUrl} displayName={profile.displayName} />
+            <ProfilePictureField
+              ownerId={profile.userId ?? profile.username}
+              currentUrl={profile.avatarUrl}
+              displayName={profile.displayName}
+            />
 
             {/* Seção 1: Informações Gerais */}
             <Stack spacing={{ xs: 2.5, sm: 3 }}>

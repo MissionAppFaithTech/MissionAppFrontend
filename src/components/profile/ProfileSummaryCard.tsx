@@ -74,6 +74,7 @@ export default function ProfileSummaryCard({
   } = profile;
 
   const photo = useProfilePictureUpload({
+    ownerId: profile.userId ?? profile.username,
     currentUrl: profile.avatarUrl,
     onSuccess: (message) => notify(message, 'success'),
     onError: (message) => notify(message, 'error'),

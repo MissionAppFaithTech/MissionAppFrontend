@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   profilePictureError,
@@ -26,6 +26,12 @@ const isBusy = (status: ProfilePictureStatus) =>
   status === 'uploading' || status === 'processing' || status === 'removing';
 
 type Options = {
+  /**
+   * Account the photo belongs to. Next.js keeps a route's client state across
+   * navigations, so after logging in as someone else the local photo of the
+   * previous account must not survive.
+   */
+  ownerId?: string;
   /** URL of the photo already saved (from the profile). */
   currentUrl?: string;
   /** Called with the pt-BR message after a successful upload or removal. */
@@ -40,13 +46,35 @@ type Options = {
  * the local preview stays on screen. After saving or removing, the server data
  * is refreshed (ADR-0005) so every page of the profile shows the new photo.
  */
-export function useProfilePictureUpload({ currentUrl, onSuccess, onError }: Options = {}) {
+export function useProfilePictureUpload({ ownerId, currentUrl, onSuccess, onError }: Options = {}) {
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [removed, setRemoved] = useState(false);
   const [status, setStatus] = useState<ProfilePictureStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // The local photo (preview, upload, removal) only overrides the server's while
+  // it describes the same account and the same saved photo: a new `currentUrl`
+  // (after `router.refresh()`) or another account wins.
+  const [source, setSource] = useState({ ownerId, currentUrl });
+  if (source.ownerId !== ownerId || source.currentUrl !== currentUrl) {
+    const ownerChanged = source.ownerId !== ownerId;
+    setSource({ ownerId, currentUrl });
+    setPreview(null);
+    setUploadedUrl(null);
+    setRemoved(false);
+    if (ownerChanged) {
+      setStatus('idle');
+      setError(null);
+    }
+  }
+
+  // A request that ends after switching accounts must not touch the new one.
+  const ownerRef = useRef(ownerId);
+  useEffect(() => {
+    ownerRef.current = ownerId;
+  }, [ownerId]);
 
   useEffect(() => {
     if (!preview) return;
@@ -68,6 +96,8 @@ export function useProfilePictureUpload({ currentUrl, onSuccess, onError }: Opti
     const invalid = profilePictureError(file);
     if (invalid) return fail(invalid);
 
+    const owner = ownerId;
+    const isCurrentOwner = () => ownerRef.current === owner;
     setError(null);
     setStatus('uploading');
     setPreview(URL.createObjectURL(file));
@@ -77,9 +107,10 @@ export function useProfilePictureUpload({ currentUrl, onSuccess, onError }: Opti
       const { url } = await uploadProfilePicture(file, {
         onProcessing: () => {
           linked = true;
-          setStatus('processing');
+          if (isCurrentOwner()) setStatus('processing');
         },
       });
+      if (!isCurrentOwner()) return;
       setRemoved(false);
       if (url) {
         setUploadedUrl(url);
@@ -90,6 +121,7 @@ export function useProfilePictureUpload({ currentUrl, onSuccess, onError }: Opti
       onSuccess?.(PROFILE_PICTURE_STATUS_MESSAGES[done]);
       router.refresh();
     } catch (uploadError) {
+      if (!isCurrentOwner()) return;
       setPreview(null);
       fail(uploadError instanceof Error ? uploadError.message : 'Não foi possível enviar a foto.');
       // The image failed processing after it replaced the old one: show what the server has.
@@ -99,10 +131,12 @@ export function useProfilePictureUpload({ currentUrl, onSuccess, onError }: Opti
 
   const remove = async () => {
     if (isBusy(status)) return;
+    const owner = ownerId;
     setError(null);
     setStatus('removing');
     try {
       await removeProfilePicture();
+      if (ownerRef.current !== owner) return;
       setPreview(null);
       setUploadedUrl(null);
       setRemoved(true);
@@ -110,6 +144,7 @@ export function useProfilePictureUpload({ currentUrl, onSuccess, onError }: Opti
       onSuccess?.('Foto de perfil removida.');
       router.refresh();
     } catch (removeError) {
+      if (ownerRef.current !== owner) return;
       fail(removeError instanceof Error ? removeError.message : 'Não foi possível remover a foto.');
     }
   };

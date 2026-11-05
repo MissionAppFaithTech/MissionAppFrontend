@@ -25,7 +25,10 @@ async function OwnerProfile({ children }: { children: ReactNode }) {
   if (result.kind === 'expired') redirect('/login?reason=expired&next=/profile');
 
   return (
+    // Keyed by account: login/logout are soft navigations and Next.js keeps the
+    // client state of this area, so another account must start from scratch.
     <MissionaryProfileLayout
+      key={result.kind === 'ok' ? (result.profile.userId ?? result.profile.username) : result.kind}
       profile={result.kind === 'ok' ? result.profile : undefined}
       error={result.kind === 'error' ? result.message : undefined}
     >

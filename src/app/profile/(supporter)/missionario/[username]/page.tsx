@@ -13,6 +13,7 @@ import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
 import { getPublicProfile } from '@/lib/server/publicProfile';
 import { mockSupporterProfile } from '@/mocks/profile';
 import { MissionaryProfileBody } from './MissionaryProfileContent';
+import AccountScope from '@/components/auth/AccountScope';
 
 type PageProps = {
   params: Promise<{ username: string }>;
@@ -90,7 +91,10 @@ export default function SupporterMissionaryPage({ params }: PageProps) {
       >
         <Stack spacing={2}>
           <Suspense fallback={<MissionaryProfileFallback />}>
-            <MissionaryProfileBody params={params} />
+            {/* Viewer state (follow, prayers) belongs to the logged-in account. */}
+            <AccountScope>
+              <MissionaryProfileBody params={params} />
+            </AccountScope>
           </Suspense>
         </Stack>
       </Container>

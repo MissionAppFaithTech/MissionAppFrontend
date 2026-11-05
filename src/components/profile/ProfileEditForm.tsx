@@ -195,7 +195,11 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
               </Alert>
             ) : null}
 
-            <ProfilePictureField currentUrl={profile.avatarUrl} displayName={profile.displayName} />
+            <ProfilePictureField
+              ownerId={profile.userId ?? profile.username}
+              currentUrl={profile.avatarUrl}
+              displayName={profile.displayName}
+            />
 
             <Stack spacing={{ xs: 2.5, sm: 3 }}>
               <Typography

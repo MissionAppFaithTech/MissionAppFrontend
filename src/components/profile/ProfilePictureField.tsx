@@ -12,6 +12,8 @@ import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
 import { PROFILE_PICTURE_ACCEPT } from '@/services/profilePicture.service';
 
 type ProfilePictureFieldProps = {
+  /** Account the photo belongs to (resets the local photo on another account). */
+  ownerId?: string;
   /** Photo already saved on the account. */
   currentUrl?: string;
   /** Name for the image's alt text. */
@@ -22,9 +24,13 @@ type ProfilePictureFieldProps = {
  * Avatar of the edit forms with upload and removal. The photo is saved as soon
  * as it is picked, independently of the form's "Salvar".
  */
-export default function ProfilePictureField({ currentUrl, displayName }: ProfilePictureFieldProps) {
+export default function ProfilePictureField({
+  ownerId,
+  currentUrl,
+  displayName,
+}: ProfilePictureFieldProps) {
   const { photoUrl, error, busy, status, statusMessage, selectFile, remove } =
-    useProfilePictureUpload({ currentUrl });
+    useProfilePictureUpload({ ownerId, currentUrl });
   const hintId = 'profile-picture-hint';
 
   return (

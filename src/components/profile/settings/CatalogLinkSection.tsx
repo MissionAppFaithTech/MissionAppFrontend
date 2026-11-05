@@ -83,6 +83,13 @@ export default function CatalogLinkSection({
 
   const [saved, setSaved] = useState({ id: savedId, name: savedName });
   const [value, setValue] = useState(savedId);
+  // The server's link wins when it changes (edited in "Sobre", another account).
+  const [synced, setSynced] = useState({ id: savedId, name: savedName });
+  if (synced.id !== savedId || synced.name !== savedName) {
+    setSynced({ id: savedId, name: savedName });
+    setSaved({ id: savedId, name: savedName });
+    setValue(savedId);
+  }
   const [details, setDetails] = useState<FaithCommunityData | MissionaryAgencyData>(emptyDetails);
   const [error, setError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);

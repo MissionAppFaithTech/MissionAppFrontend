@@ -362,4 +362,89 @@ describe('AccountSettingsView Component', () => {
       expect(updateAbout).not.toHaveBeenCalled();
     });
   });
+
+  describe('server data changes', () => {
+    const ownerWith = (email: string, agencyId: string, agency: string) => ({
+      ...emptyProfile,
+      contact: { publicEmail: '', publicPhone: '', accountEmail: email },
+      about: {
+        ...emptyProfile.about,
+        faithCommunity: 'Igreja Batista Central',
+        faithCommunityId: 'fc-1',
+        missionaryAgency: agency,
+        missionaryAgencyId: agencyId,
+      },
+    });
+
+    it('shows the e-mail and agency the server sends now, not the previous ones', async () => {
+      const { rerender } = renderWithQuery(
+        <OwnerProfileProvider profile={ownerWith('ana@example.com', 'ma-1', 'JOCUM')}>
+          <AccountSettingsView role="missionary" />
+        </OwnerProfileProvider>
+      );
+      expect(screen.getAllByText('ana@example.com').length).toBeGreaterThan(0);
+
+      // e.g. the agency was changed in "Sobre" and the page refreshed.
+      rerender(
+        <OwnerProfileProvider
+          profile={ownerWith('ana.nova@example.com', 'ma-2', 'Missão do Interior')}
+        >
+          <AccountSettingsView role="missionary" />
+        </OwnerProfileProvider>
+      );
+
+      expect(screen.getAllByText('ana.nova@example.com').length).toBeGreaterThan(0);
+      expect(screen.queryByText('ana@example.com')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(screen.getByRole('combobox', { name: /^agência missionária/i })).toHaveTextContent(
+          'Missão do Interior'
+        )
+      );
+      expect(
+        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
+      ).toBeDisabled();
+    });
+
+    const renderOwner = (profile: ReturnType<typeof ownerWith>) => (
+      <OwnerProfileProvider profile={profile}>
+        <AccountSettingsView role="missionary" />
+      </OwnerProfileProvider>
+    );
+    const agencyCombobox = () => screen.getByRole('combobox', { name: /^agência missionária/i });
+
+    it('follows a new agency id even when the name is the same', async () => {
+      const { rerender } = renderWithQuery(renderOwner(ownerWith('a@x.com', 'ma-1', 'JOCUM')));
+      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('JOCUM'));
+
+      rerender(renderOwner(ownerWith('a@x.com', 'ma-2', 'JOCUM')));
+
+      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('Missão do Interior'));
+    });
+
+    it('follows a new name of an agency that is not in the catalog yet', async () => {
+      const { rerender } = renderWithQuery(
+        renderOwner(ownerWith('a@x.com', 'ma-9', 'Agência Nova'))
+      );
+      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('Agência Nova'));
+
+      rerender(renderOwner(ownerWith('a@x.com', 'ma-9', 'Agência Renomeada')));
+
+      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('Agência Renomeada'));
+    });
+  });
+
+  describe('e-mail without a saved account e-mail', () => {
+    it('falls back per role when the profile has no contact', () => {
+      const { unmount } = renderWithQuery(
+        <OwnerProfileProvider profile={{ ...emptyProfile, contact: undefined }}>
+          <AccountSettingsView role="missionary" />
+        </OwnerProfileProvider>
+      );
+      expect(screen.getAllByText('samuelhe@gmail.com').length).toBeGreaterThan(0);
+      unmount();
+
+      renderWithQuery(<AccountSettingsView role="supporter" />);
+      expect(screen.getAllByText('soraia.santos@email.com').length).toBeGreaterThan(0);
+    });
+  });
 });
