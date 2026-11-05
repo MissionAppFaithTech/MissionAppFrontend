@@ -168,7 +168,7 @@ describe('ProfileSummaryCard component', () => {
       'src',
       'https://cdn.test/p.webp'
     );
-    expect(screen.queryByLabelText(/alterar foto de perfil/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/editar foto de perfil/i)).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: /remover foto de perfil/i })
     ).not.toBeInTheDocument();

@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import ProfileAboutSection from './ProfileAboutSection';
+import ProfileAboutSection, { ABOUT_EMPTY_VALUE } from './ProfileAboutSection';
 import type { ProfileAboutData } from '@/types/profile';
 
 const emptyAbout: ProfileAboutData = {
@@ -27,21 +27,35 @@ const populatedAbout: ProfileAboutData = {
 };
 
 describe('ProfileAboutSection', () => {
-  it('shows an empty state with a call to action when nothing editable is filled', async () => {
-    const onEdit = vi.fn();
-    const user = userEvent.setup();
-    render(<ProfileAboutSection data={emptyAbout} onEditAction={onEdit} />);
+  it('lists every field the owner can fill, each with "A definir" while empty', () => {
+    const { container } = render(<ProfileAboutSection data={emptyAbout} onEditAction={vi.fn()} />);
 
     expect(screen.getByRole('region', { name: 'Sobre' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: 'Biografia' })).toBeInTheDocument();
     expect(
-      screen.getByRole('heading', { level: 3, name: /compartilhe sua história em missões/i })
+      screen.getByRole('heading', { level: 3, name: 'Resumo da minha história em missões' })
     ).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /preencher o sobre/i }));
-    expect(onEdit).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Pedidos de oração' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 3, name: 'Versículo para a vida' })
+    ).toBeInTheDocument();
+    const terms = within(container.querySelector('dl') as HTMLElement)
+      .getAllByRole('term')
+      .map((term) => term.textContent);
+    expect(terms).toEqual([
+      'Local de origem',
+      'Local de atuação atual',
+      'Agência missionária',
+      'Comunidade de fé',
+    ]);
+    // 8 fields, none filled.
+    expect(screen.getAllByText(ABOUT_EMPTY_VALUE)).toHaveLength(8);
+    expect(container.querySelectorAll('blockquote')).toHaveLength(0);
   });
 
-  it('keeps showing the agency and the faith community next to the empty state', () => {
+  it('marks only the missing fields with "A definir"', () => {
     render(
       <ProfileAboutSection
         data={{ ...emptyAbout, missionaryAgency: 'JOCUM', faithCommunity: 'Igreja Central' }}
@@ -49,10 +63,9 @@ describe('ProfileAboutSection', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: /preencher o sobre/i })).toBeInTheDocument();
     expect(screen.getByText('JOCUM')).toBeInTheDocument();
     expect(screen.getByText('Igreja Central')).toBeInTheDocument();
-    expect(screen.getByText('Comunidade de fé')).toBeInTheDocument();
+    expect(screen.getAllByText(ABOUT_EMPTY_VALUE)).toHaveLength(6);
   });
 
   it('opens the editor from the header edit button', async () => {
@@ -69,7 +82,7 @@ describe('ProfileAboutSection', () => {
       <ProfileAboutSection data={populatedAbout} onEditAction={vi.fn()} />
     );
 
-    expect(screen.queryByRole('button', { name: /preencher o sobre/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(ABOUT_EMPTY_VALUE)).not.toBeInTheDocument();
     expect(screen.getByText(populatedAbout.introduction)).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /resumo da minha história em missões/i })
@@ -94,8 +107,8 @@ describe('ProfileAboutSection', () => {
     expect(quotes[1]).toHaveTextContent('Romanos 8:28');
   });
 
-  it('omits rows for empty fields', () => {
-    render(
+  it('shows a filled quote as a blockquote and the empty one as "A definir"', () => {
+    const { container } = render(
       <ProfileAboutSection
         data={{ ...emptyAbout, introduction: 'Apenas introdução.', lifeVerse: 'João 3:16' }}
         onEditAction={vi.fn()}
@@ -103,8 +116,37 @@ describe('ProfileAboutSection', () => {
     );
 
     expect(screen.getByText('Apenas introdução.')).toBeInTheDocument();
-    expect(screen.getByText('João 3:16')).toBeInTheDocument();
-    expect(screen.queryByText(/local de origem/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/pedidos de oração/i)).not.toBeInTheDocument();
+    const quotes = container.querySelectorAll('blockquote');
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0]).toHaveTextContent('João 3:16');
+    expect(screen.getAllByText(ABOUT_EMPTY_VALUE)).toHaveLength(6);
+  });
+
+  it('opens the editor from any "A definir"', async () => {
+    const onEdit = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <ProfileAboutSection data={{ ...emptyAbout, lifeVerse: 'João 3:16' }} onEditAction={onEdit} />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Definir Biografia' }));
+    await user.click(screen.getByRole('button', { name: 'Definir Comunidade de fé' }));
+    await user.click(screen.getByRole('button', { name: 'Definir Pedidos de oração' }));
+    expect(onEdit).toHaveBeenCalledTimes(3);
+    // A filled field is plain text, not a button.
+    expect(
+      screen.queryByRole('button', { name: 'Definir Versículo para a vida' })
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^Definir / })).toHaveLength(7);
+  });
+
+  it('reaches "A definir" with the keyboard', async () => {
+    const onEdit = vi.fn();
+    const user = userEvent.setup();
+    render(<ProfileAboutSection data={emptyAbout} onEditAction={onEdit} />);
+
+    screen.getByRole('button', { name: 'Definir Local de origem' }).focus();
+    await user.keyboard('{Enter}');
+    expect(onEdit).toHaveBeenCalledTimes(1);
   });
 });

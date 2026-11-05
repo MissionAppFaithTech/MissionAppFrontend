@@ -334,7 +334,7 @@ describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
     renderWithQuery(<ProfileEditForm profile={withPhoto} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
-    await user.upload(screen.getByLabelText(/alterar foto de perfil/i), png());
+    await user.upload(screen.getByLabelText(/editar foto de perfil/i), png());
     await user.click(screen.getByRole('button', { name: 'Salvar' }));
 
     await waitFor(() =>

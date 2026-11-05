@@ -1,14 +1,15 @@
 'use client';
 
-import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import Box from '@mui/material/Box';
+import ButtonBase from '@mui/material/ButtonBase';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import { focusVisibleSx } from '@/theme/theme';
 import type { ProfileAboutData } from '@/types/profile';
 
 type ProfileAboutSectionProps = {
@@ -18,25 +19,80 @@ type ProfileAboutSectionProps = {
 
 const textSx = { whiteSpace: 'pre-line', overflowWrap: 'anywhere' } as const;
 
+/** What the owner sees for a field they have not filled yet. */
+export const ABOUT_EMPTY_VALUE = 'A definir';
+
 function hasText(value: string | undefined): value is string {
   return Boolean(value?.trim());
 }
 
-function LabeledText({ label, value }: { label: string; value: string }) {
+type FieldValueProps = {
+  label: string;
+  value?: string;
+  quote?: boolean;
+  /** Opens the "Sobre" editor. */
+  onEdit: () => void;
+};
+
+/**
+ * The value, or a "A definir" button that opens the editor (muted italics; the
+ * text itself says it is empty, so color is not the only cue).
+ */
+function FieldValue({ label, value, quote = false, onEdit }: FieldValueProps) {
+  if (!hasText(value)) {
+    return (
+      <ButtonBase
+        onClick={onEdit}
+        aria-label={`Definir ${label}`}
+        sx={(theme) => ({
+          minHeight: 44,
+          px: 0.5,
+          ml: -0.5,
+          borderRadius: 1,
+          justifyContent: 'flex-start',
+          color: 'text.secondary',
+          fontStyle: 'italic',
+          textDecoration: 'underline',
+          textUnderlineOffset: '3px',
+          // Clear in both themes: the text takes the main text color over a 14% tint
+          // of that same color (navy on light, white on dark).
+          '&:hover, &:active': {
+            color: 'text.primary',
+            bgcolor: 'color-mix(in srgb, var(--mui-palette-text-primary) 14%, transparent)',
+            textDecorationThickness: '2px',
+          },
+          ...focusVisibleSx(theme),
+        })}
+      >
+        <Typography component="span" variant="body2" sx={{ fontStyle: 'inherit' }}>
+          {ABOUT_EMPTY_VALUE}
+        </Typography>
+      </ButtonBase>
+    );
+  }
+  return (
+    <Typography variant="body2" sx={{ ...textSx, fontStyle: quote ? 'italic' : undefined }}>
+      {value}
+    </Typography>
+  );
+}
+
+type FieldProps = { label: string; value?: string; onEdit: () => void };
+
+function LabeledText({ label, value, onEdit }: FieldProps) {
   return (
     <Box>
       <Typography component="h3" variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>
         {label}
       </Typography>
-      <Typography variant="body2" sx={textSx}>
-        {value}
-      </Typography>
+      <FieldValue label={label} value={value} onEdit={onEdit} />
     </Box>
   );
 }
 
 /** Prayer requests and life verse are shown as quotes (RF 10.7.1). */
-function QuoteBlock({ label, value }: { label: string; value: string }) {
+function QuoteBlock({ label, value, onEdit }: FieldProps) {
+  if (!hasText(value)) return <LabeledText label={label} value={value} onEdit={onEdit} />;
   return (
     <Box component="figure" sx={{ m: 0 }}>
       <Typography component="figcaption" variant="body2" sx={{ fontWeight: 700, mb: 0.75 }}>
@@ -52,80 +108,60 @@ function QuoteBlock({ label, value }: { label: string; value: string }) {
           borderColor: 'secondary.main',
         }}
       >
-        <Typography variant="body2" sx={{ ...textSx, fontStyle: 'italic' }}>
-          {value}
-        </Typography>
+        <FieldValue label={label} value={value} quote onEdit={onEdit} />
       </Box>
     </Box>
   );
 }
 
+/**
+ * The owner's "Sobre": every field they can fill is listed, with "A definir"
+ * where nothing was filled yet, so it is clear what is still missing.
+ */
 export default function ProfileAboutSection({ data, onEditAction }: ProfileAboutSectionProps) {
   const details = [
     { label: 'Local de origem', value: data.originLocation },
     { label: 'Local de atuação atual', value: data.currentLocation },
     { label: 'Agência missionária', value: data.missionaryAgency },
     { label: 'Comunidade de fé', value: data.faithCommunity },
-  ].filter((row): row is { label: string; value: string } => hasText(row.value));
-
-  const quotes = [
-    { label: 'Pedidos de oração', value: data.prayerRequests },
-    { label: 'Versículo para a vida', value: data.lifeVerse },
-  ].filter((row): row is { label: string; value: string } => hasText(row.value));
-
-  const hasStory = hasText(data.introduction) || hasText(data.missionHistory);
-  const hasEditableContent =
-    hasStory || quotes.length > 0 || hasText(data.originLocation) || hasText(data.currentLocation);
+  ];
 
   const blocks = [
-    hasStory ? (
-      <Stack key="story" spacing={2}>
-        {hasText(data.introduction) ? (
-          <Typography variant="body1" sx={textSx}>
-            {data.introduction}
+    <Stack key="story" spacing={2}>
+      <LabeledText label="Biografia" value={data.introduction} onEdit={onEditAction} />
+      <LabeledText
+        label="Resumo da minha história em missões"
+        value={data.missionHistory}
+        onEdit={onEditAction}
+      />
+    </Stack>,
+    <Box
+      key="details"
+      component="dl"
+      sx={{
+        m: 0,
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'max-content 1fr' },
+        columnGap: 2,
+        rowGap: { xs: 0.25, sm: 1.25 },
+      }}
+    >
+      {details.map(({ label, value }) => (
+        <Box key={label} sx={{ display: 'contents' }}>
+          <Typography component="dt" variant="body2" sx={{ fontWeight: 700, mt: { xs: 1, sm: 0 } }}>
+            {label}
           </Typography>
-        ) : null}
-        {hasText(data.missionHistory) ? (
-          <LabeledText label="Resumo da minha história em missões" value={data.missionHistory} />
-        ) : null}
-      </Stack>
-    ) : null,
-    details.length > 0 ? (
-      <Box
-        key="details"
-        component="dl"
-        sx={{
-          m: 0,
-          display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: 'max-content 1fr' },
-          columnGap: 2,
-          rowGap: { xs: 0.25, sm: 1.25 },
-        }}
-      >
-        {details.map(({ label, value }) => (
-          <Box key={label} sx={{ display: 'contents' }}>
-            <Typography
-              component="dt"
-              variant="body2"
-              sx={{ fontWeight: 700, mt: { xs: 1, sm: 0 } }}
-            >
-              {label}
-            </Typography>
-            <Typography component="dd" variant="body2" sx={{ ...textSx, m: 0 }}>
-              {value}
-            </Typography>
+          <Box component="dd" sx={{ m: 0, minWidth: 0 }}>
+            <FieldValue label={label} value={value} onEdit={onEditAction} />
           </Box>
-        ))}
-      </Box>
-    ) : null,
-    quotes.length > 0 ? (
-      <Stack key="quotes" spacing={2.5}>
-        {quotes.map((quote) => (
-          <QuoteBlock key={quote.label} {...quote} />
-        ))}
-      </Stack>
-    ) : null,
-  ].filter(Boolean);
+        </Box>
+      ))}
+    </Box>,
+    <Stack key="quotes" spacing={2.5}>
+      <QuoteBlock label="Pedidos de oração" value={data.prayerRequests} onEdit={onEditAction} />
+      <QuoteBlock label="Versículo para a vida" value={data.lifeVerse} onEdit={onEditAction} />
+    </Stack>,
+  ];
 
   return (
     <Card
@@ -176,51 +212,6 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
               </Box>
             </PillButton>
           </Stack>
-
-          {!hasEditableContent ? (
-            <Box
-              sx={{
-                py: { xs: 3.5, sm: 5 },
-                px: { xs: 2, sm: 3 },
-                textAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                borderRadius: 2,
-                border: '1.5px dashed',
-                borderColor: 'divider',
-                bgcolor: 'action.hover',
-              }}
-            >
-              <AutoStoriesOutlinedIcon
-                aria-hidden
-                sx={{ fontSize: 32, color: 'primary.main', mb: 1.5 }}
-              />
-              <Typography
-                component="h3"
-                variant="h6"
-                sx={{ fontWeight: 700, mb: 1, fontSize: { xs: '1rem', sm: '1.125rem' } }}
-              >
-                Compartilhe sua história em missões
-              </Typography>
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{ maxWidth: 460, mb: 3, lineHeight: 1.6 }}
-              >
-                Conte sua trajetória, onde você atua, pedidos de oração e seu versículo. Assim
-                apoiadores conhecem melhor o seu chamado.
-              </Typography>
-              <PillButton
-                tone="mission"
-                size="medium"
-                onClick={onEditAction}
-                sx={{ px: 3, width: { xs: '100%', sm: 'auto' }, justifyContent: 'center' }}
-              >
-                Preencher o Sobre
-              </PillButton>
-            </Box>
-          ) : null}
 
           {blocks.map((block, index) => (
             <Stack key={index} spacing={{ xs: 2, sm: 2.5 }}>

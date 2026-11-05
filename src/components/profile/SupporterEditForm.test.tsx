@@ -102,7 +102,7 @@ describe('SupporterEditForm Component', () => {
     );
 
     const file = new File(['photo'], 'foto.png', { type: 'image/png' });
-    await user.upload(screen.getByLabelText(/alterar foto de perfil/i), file);
+    await user.upload(screen.getByLabelText(/editar foto de perfil/i), file);
     expect(saveProfileEdits).not.toHaveBeenCalled();
 
     await user.click(screen.getByRole('button', { name: /salvar/i }));
@@ -169,7 +169,7 @@ describe('SupporterEditForm Component', () => {
     renderWithQuery(<SupporterEditForm profile={mockProfile} />);
 
     await user.upload(
-      screen.getByLabelText(/(adicionar|alterar) foto de perfil/i),
+      screen.getByLabelText(/(adicionar|editar) foto de perfil/i),
       new File(['photo'], 'foto.png', { type: 'image/png' })
     );
     await user.click(screen.getByRole('button', { name: /salvar/i }));

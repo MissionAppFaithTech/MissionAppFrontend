@@ -20,15 +20,13 @@ vi.mock('next/navigation', async () => {
 });
 
 describe('Missionary Profile routes', () => {
-  it('renders missionary sobre page with inviting empty state on initial load', () => {
+  it('renders the missionary sobre page with every field to fill marked "A definir"', () => {
     render(<ProfileAboutPage />);
 
     expect(screen.getByRole('heading', { name: /^sobre$/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { level: 3, name: /compartilhe sua história em missões/i })
-    ).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /preencher o sobre/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: 'Biografia' })).toBeInTheDocument();
+    expect(screen.getAllByText('A definir').length).toBeGreaterThan(0);
   });
 
   it('renders missionary impact projects page with impact project card', () => {
