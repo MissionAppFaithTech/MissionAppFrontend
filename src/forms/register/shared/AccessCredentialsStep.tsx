@@ -219,7 +219,7 @@ export default function AccessCredentialsStep({
 
       <TextField
         {...register('password')}
-        label={<Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>Senha</Box>}
+        label="Senha"
         type={showPassword ? 'text' : 'password'}
         required
         fullWidth

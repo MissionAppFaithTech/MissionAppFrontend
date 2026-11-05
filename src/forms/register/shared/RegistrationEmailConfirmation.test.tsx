@@ -51,20 +51,23 @@ describe('RegistrationEmailConfirmation', () => {
     expect(links[1]).toHaveAttribute('href', '/login');
   });
 
-  it('resets missionary and supporter registration stores on navigation or unmount', () => {
+  it('resets missionary and supporter registration stores when leaving through its actions', () => {
     const missionaryResetSpy = vi.spyOn(useMissionaryRegisterStore.getState(), 'reset');
     const supporterResetSpy = vi.spyOn(useSupporterRegisterStore.getState(), 'reset');
 
-    const { unmount } = render(<RegistrationEmailConfirmation />);
-
-    const homeLink = screen.getByRole('link', { name: /ir para início/i });
-    fireEvent.click(homeLink);
+    render(<RegistrationEmailConfirmation />);
+    fireEvent.click(screen.getByRole('link', { name: /ir para início/i }));
 
     expect(missionaryResetSpy).toHaveBeenCalled();
     expect(supporterResetSpy).toHaveBeenCalled();
+  });
 
-    const callsBeforeUnmount = missionaryResetSpy.mock.calls.length;
+  it('does not reset the wizard on unmount (a StrictMode remount wiped this screen)', () => {
+    useMissionaryRegisterStore.setState({ step: 4 });
+
+    const { unmount } = render(<RegistrationEmailConfirmation requiresReview />);
     unmount();
-    expect(missionaryResetSpy.mock.calls.length).toBeGreaterThan(callsBeforeUnmount);
+
+    expect(useMissionaryRegisterStore.getState().step).toBe(4);
   });
 });

@@ -51,6 +51,18 @@ describe('AccessCredentialsStep component', () => {
     expect(submitBtn).not.toBeDisabled();
   });
 
+  it('keeps the required asterisk inside the password label, like the other fields', () => {
+    renderWithQuery(
+      <AccessCredentialsStep onSubmit={vi.fn()} onBack={vi.fn()} submitLabel="Finalizar cadastro" />
+    );
+
+    // A block label pushed MUI's asterisk out of the label, over the typed text.
+    const label = screen.getByText('Senha', { selector: 'label' });
+    expect(label.querySelector('.MuiFormLabel-asterisk')).not.toBeNull();
+    expect(label.querySelector('div')).toBeNull();
+    expect(screen.getByLabelText(/^senha/i)).toBeRequired();
+  });
+
   it('lists the empty credentials in a focused summary', async () => {
     const user = userEvent.setup();
     const handleSubmit = vi.fn();

@@ -118,6 +118,39 @@ test.describe('Busca de agências e comunidades de fé', () => {
     await expect(document).toHaveAccessibleDescription(/Este CPF já está cadastrado\./);
   });
 
+  test('a successful sign-up shows the pending review screen with its actions', async ({
+    page,
+  }) => {
+    await page.goto('/register/missionaries');
+    await fillPersonalData(page, '52998224725');
+
+    await combobox(page, /agência missionária/i).fill('jocum');
+    await visible(page.getByRole('option', { name: 'JOCUM' })).click();
+    await field(page, /projeto ou atuação missionária/i).fill('Evangelismo no sertão');
+    await combobox(page, /comunidade de fé/i).fill('igreja batista');
+    await visible(page.getByRole('option', { name: 'Igreja Batista Central' })).click();
+    await visible(page.getByRole('button', { name: 'Continuar' })).click();
+
+    await field(page, /nome de usuário/i).fill(`joao_ok_${Date.now() % 100000}`);
+    await visible(page.getByLabel(/^senha/i)).fill('SenhaForte@123');
+    await visible(page.getByLabel(/confirmar senha/i)).fill('SenhaForte@123');
+    await visible(page.getByRole('button', { name: 'Finalizar cadastro' })).click();
+
+    await expect(visible(page.getByRole('heading', { name: 'Cadastro realizado!' }))).toBeVisible();
+    await expect(visible(page.getByText('Seu cadastro será analisado'))).toBeVisible();
+    // It stays (it used to vanish right after a remount).
+    await page.waitForTimeout(1000);
+    await expect(visible(page.getByRole('heading', { name: 'Cadastro realizado!' }))).toBeVisible();
+    await expect(visible(page.getByRole('link', { name: /ir para início/i }))).toHaveAttribute(
+      'href',
+      '/'
+    );
+    await expect(visible(page.getByRole('link', { name: /ir para login/i }))).toHaveAttribute(
+      'href',
+      '/login'
+    );
+  });
+
   test('fits a 360 px phone with the list open, without accessibility violations', async ({
     page,
   }) => {
