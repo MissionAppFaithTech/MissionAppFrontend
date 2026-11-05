@@ -18,9 +18,12 @@ export const BACKEND_DIR = path.resolve(
 export const BACKEND_PORT = process.env.E2E_REAL_API_PORT ?? '3334';
 export const FRONTEND_PORT = process.env.E2E_REAL_WEB_PORT ?? '3100';
 export const E2E_DATABASE = 'app_e2e';
-// NOTE: the queues live in this Redis db and no worker consumes them, so the
-// suite sends no real e-mail (Resend) and never writes to the dev search index.
-export const E2E_REDIS_DB = '1';
+// NOTE: the queues live in this Redis db (dev uses 0, the backend tests 1) and
+// no worker consumes them, so the suite sends no real e-mail (Resend).
+export const E2E_REDIS_DB = '2';
+// NOTE: the suite's own catalog search indexes (backend ADR-0042), so the dev
+// indexes on the same Elasticsearch are never touched.
+export const E2E_INDEX_PREFIX = 'e2e_';
 const PG_CONTAINER = 'missionapp-pg';
 const REDIS_CONTAINER = 'missionapp-dragonfly';
 
@@ -41,6 +44,7 @@ export function backendEnv() {
     PORT: BACKEND_PORT,
     DB_DATABASE: E2E_DATABASE,
     REDIS_DB: E2E_REDIS_DB,
+    ELASTIC_INDEX_PREFIX: E2E_INDEX_PREFIX,
   };
 }
 
@@ -79,7 +83,25 @@ export function dropDatabase() {
   psql(`DROP DATABASE IF EXISTS ${E2E_DATABASE} WITH (FORCE)`);
 }
 
-/** Recreates the suite's database from the backend migrations and seeds. */
+/** Deletes the suite's Elasticsearch indexes (`e2e_*`, behind their aliases). */
+export async function dropSearchIndexes() {
+  const values = backendEnvFile();
+  // NOTE: expands the `${VAR}` references of the backend `.env` (ES_HOST, ES_PORT)
+  const base = (values.ELASTIC_NODE ?? 'http://localhost:9200')
+    .replace(/\$\{(\w+)\}/g, (_, key) => values[key] ?? '')
+    .replace(/\/$/, '');
+  const response = await fetch(`${base}/_cat/indices/${E2E_INDEX_PREFIX}*?h=index&format=json`);
+  if (!response.ok) return;
+  // NOTE: one by one; wildcard deletes are refused by default (destructive_requires_name)
+  for (const { index } of await response.json()) {
+    await fetch(`${base}/${index}`, { method: 'DELETE' });
+  }
+}
+
+/**
+ * Recreates the suite's database from the backend migrations and seeds, and
+ * its catalog search indexes from that database.
+ */
 export function resetDatabase() {
   dropDatabase();
   psql(`CREATE DATABASE ${E2E_DATABASE}`);
@@ -91,5 +113,6 @@ export function resetDatabase() {
     });
   ace('migration:run', '--force');
   ace('db:seed');
+  ace('search:reindex-catalogs');
   flushRedis();
 }

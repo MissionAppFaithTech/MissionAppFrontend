@@ -93,7 +93,7 @@ MissionApp Frontend is the **Next.js** web client for Mission App (missionaries 
 | E2E / a11y                       | `pnpm test:e2e` / `pnpm test:a11y`; owner pages use `e2e/support/session.ts` + fake API `e2e/support/mock-api.mjs`. Without Google Chrome: `PW_BUNDLED_CHROMIUM=1` |
 | Auth (BFF)                       | httpOnly cookies; `src/proxy.ts` renews the session and guards `/profile/**`; mutations are Server Actions in `src/app/actions/` (`runWithSession`)                |
 
-**E2E against the real backend:** `pnpm test:e2e:real` (`e2e-real/`, `playwright.real.config.ts`) runs an isolated backend from `../MissionAppBackend` on :3334 with the database `app_e2e` (recreated per run, dropped after; Redis db 1, no queue workers) and `next start` on :3100. It needs `pnpm build` and the backend infra up (`just up`). New specs that depend on the API go there; the fake-API suite stays the CI gate.
+**E2E against the real backend:** `pnpm test:e2e:real` (`e2e-real/`, `playwright.real.config.ts`) runs an isolated backend from `../MissionAppBackend` on :3334 with the database `app_e2e` (recreated per run, dropped after; Redis db 2, search indexes `e2e_*`, no queue workers) and `next start` on :3100. It needs `pnpm build` and the backend infra up (`just up`). New specs that depend on the API go there; the fake-API suite stays the CI gate.
 
 See `README.md` for setup. Env template: `.env.example`. PR/issue templates live under `.github/`.
 

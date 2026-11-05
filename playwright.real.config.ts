@@ -3,8 +3,8 @@ import { BACKEND_PORT, FRONTEND_PORT, backendEnvFile } from './e2e-real/support/
 
 /**
  * E2E against the REAL backend and database (`pnpm test:e2e:real`): an isolated
- * backend (port 3334, database `app_e2e` recreated per run, Redis db 1, no
- * queue workers) and `next start` on 3100 pointing at it. Run `pnpm build`
+ * backend (port 3334, database `app_e2e` recreated per run, Redis db 2,
+ * search indexes `e2e_*`, no queue workers) and `next start` on 3100 pointing at it. Run `pnpm build`
  * first and keep the backend infra up (`just up`). The fake-API suite
  * (`playwright.config.ts`) stays the CI gate.
  */
