@@ -9,8 +9,8 @@ test.describe('Landing Page E2E', () => {
     await expect(page).toHaveTitle(/Mission App/i);
     await expect(page.locator('h1')).toContainText(/campanhas\s*missionárias/i);
     await expect(
-      page.locator('#inicio').getByRole('link', { name: 'Explorar missionários', exact: true })
-    ).toHaveAttribute('href', '/navegacao');
+      page.locator('#inicio').getByRole('link', { name: 'Explorar Campanha Missionária' })
+    ).toHaveAttribute('href', /^\/campanha\//);
 
     const startCta = page.getByRole('link', { name: /comece agora/i }).first();
     await startCta.scrollIntoViewIfNeeded();

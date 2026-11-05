@@ -20,12 +20,11 @@ describe('Home page (Landing Page route /)', () => {
     expect(
       within(heroSection).getByRole('link', { name: 'Leve o Mission App para sua igreja' })
     ).toHaveAttribute('href', BRING_PATH);
+    // Only the two essential actions in the hero.
+    expect(within(heroSection).getAllByRole('link')).toHaveLength(2);
     expect(
-      within(heroSection).getByRole('link', { name: 'Conheça a campanha vigente' })
+      within(heroSection).getByRole('link', { name: 'Explorar Campanha Missionária' })
     ).toHaveAttribute('href', `/campanha/${featuredCampaign.id}`);
-    expect(
-      within(heroSection).getByRole('link', { name: 'Explorar missionários' })
-    ).toHaveAttribute('href', '/navegacao');
     expect(screen.getByRole('link', { name: 'Explorar missionários e projetos' })).toHaveAttribute(
       'href',
       '/navegacao'

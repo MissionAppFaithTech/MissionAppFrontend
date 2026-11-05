@@ -164,28 +164,10 @@ const landingContainerSx = {
 const heroCtaButtonSx = {
   flexShrink: 0,
   py: { xs: 0.75, md: 0.875 },
-  px: { xs: 2.5, md: 3 },
-  fontSize: { xs: '0.9375rem', md: '1rem' },
+  px: { xs: 2.5, md: 2.25 },
+  fontSize: { xs: '0.9375rem', md: '0.96875rem' },
   fontWeight: 600,
   minHeight: 44,
-} as const;
-
-/** Outline hero actions: white label on the dark hero, navy on the light one. */
-const heroSecondaryCtaSx = {
-  ...heroCtaButtonSx,
-  borderWidth: '2px',
-  borderColor: (theme: Theme) =>
-    theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
-  bgcolor: (theme: Theme) =>
-    theme.palette.mode === 'dark' ? 'var(--mui-palette-action2-secondaryHoverWash)' : 'transparent',
-  color: (theme: Theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
-  boxShadow: (theme: Theme) => (theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none'),
-  '&:hover': {
-    borderColor: (theme: Theme) =>
-      theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
-    bgcolor: 'primary.main',
-    color: 'primary.contrastText',
-  },
 } as const;
 
 /** Navbar height — content centers in the hero area below this on desktop */
@@ -206,7 +188,8 @@ function HeroHeadline() {
       spacing={0}
       sx={{
         width: '100%',
-        maxWidth: { xs: '36rem', md: 'min(48vw, 52rem)' },
+        // NOTE: wide enough for the two hero actions on one line from md up
+        maxWidth: { xs: '36rem', md: 'min(52vw, 52rem)' },
         mx: { xs: 'auto', md: 0 },
         alignItems: { xs: 'center', md: 'flex-start' },
         textAlign: { xs: 'center', md: 'left' },
@@ -295,15 +278,15 @@ function HeroHeadline() {
             }}
           >
             <BringMissionAppButton sx={heroCtaButtonSx} />
+            {/* NOTE: two essential actions; the campaign in effect has its own section below */}
+            {/* NOTE: filled navy (light blue in dark): as prominent as the orange, its own color */}
             <PillButton
               href={campaignPath(featuredCampaign)}
-              tone="primaryOutline"
-              sx={heroSecondaryCtaSx}
+              tone="cta"
+              startIcon={<CampaignIcon aria-hidden />}
+              sx={{ ...heroCtaButtonSx, minHeight: 48, fontWeight: 700 }}
             >
-              Conheça a campanha vigente
-            </PillButton>
-            <PillButton href="/navegacao" tone="primaryOutline" sx={heroSecondaryCtaSx}>
-              Explorar missionários
+              Explorar Campanha Missionária
             </PillButton>
           </Stack>
         </Stack>
