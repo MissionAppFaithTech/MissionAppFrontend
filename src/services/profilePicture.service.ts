@@ -40,18 +40,14 @@ export function profilePictureError(file: File): string | null {
 }
 
 /**
- * Uploads a new profile picture: reserves the upload, `PUT`s the file straight
- * to the storage from the browser, confirms it and links it to the account.
+ * Sends the file to the storage without linking it to the account: reserves
+ * the upload, `PUT`s the file straight from the browser and confirms it. The
+ * caller links it with `PATCH /account/profile { profilePictureId }`.
  *
- * Then waits for the backend to compress it (see {@link waitForProcessedPicture}).
- *
- * @returns The public URL, or `null` if the image is still being processed.
+ * @returns The id of the confirmed media asset.
  * @throws ApiError with a pt-BR message.
  */
-export async function uploadProfilePicture(
-  file: File,
-  { onProcessing }: UploadProfilePictureOptions = {}
-): Promise<{ url: string | null }> {
+export async function uploadPictureFile(file: File): Promise<string> {
   const invalid = profilePictureError(file);
   if (invalid) throw new ApiError(invalid, 422);
 
@@ -79,6 +75,23 @@ export async function uploadProfilePicture(
   if (!response.ok) throw new ApiError(UPLOAD_FAILED, response.status);
 
   const { id } = await callAction(() => completeMediaUploadAction(ticket.mediaAsset.id));
+  return id;
+}
+
+/**
+ * Uploads a new profile picture: reserves the upload, `PUT`s the file straight
+ * to the storage from the browser, confirms it and links it to the account.
+ *
+ * Then waits for the backend to compress it (see {@link waitForProcessedPicture}).
+ *
+ * @returns The public URL, or `null` if the image is still being processed.
+ * @throws ApiError with a pt-BR message.
+ */
+export async function uploadProfilePicture(
+  file: File,
+  { onProcessing }: UploadProfilePictureOptions = {}
+): Promise<{ url: string | null }> {
+  const id = await uploadPictureFile(file);
   const { user } = await callAction(() => updateAccountProfileAction({ profilePictureId: id }));
   if (user.profilePictureUrl) return { url: user.profilePictureUrl };
 

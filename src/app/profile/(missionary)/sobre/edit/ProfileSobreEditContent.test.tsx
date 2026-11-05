@@ -71,4 +71,24 @@ describe('ProfileSobreEditContent', () => {
     expect(saveAbout).not.toHaveBeenCalled();
     expect(refresh).not.toHaveBeenCalled();
   });
+
+  it('"Voltar" leads to Sobre and, after discarding changes, says so in a blue toast', async () => {
+    const user = userEvent.setup();
+    renderContent();
+
+    for (const link of screen.getAllByRole('link', { name: 'Voltar para o perfil' })) {
+      expect(link).toHaveAttribute('href', '/profile/sobre');
+    }
+
+    await user.type(screen.getByLabelText(/versículo para a vida/i), '!');
+    await user.click(screen.getAllByRole('button', { name: 'Voltar para o perfil' })[0]);
+    await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
+
+    expect(push).toHaveBeenCalledWith('/profile/sobre');
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: 'Alterações descartadas.',
+      severity: 'info',
+    });
+    expect(saveAbout).not.toHaveBeenCalled();
+  });
 });

@@ -9,6 +9,7 @@ import {
   PROFILE_PICTURE_ACCEPT,
   profilePictureError,
   removeProfilePicture,
+  uploadPictureFile,
   uploadProfilePicture,
   PROCESSING_POLL_DELAYS_MS,
   waitForProcessedPicture,
@@ -111,6 +112,41 @@ describe('uploadProfilePicture', () => {
   it('waits for the worker without an onProcessing callback', async () => {
     await expect(uploadProfilePicture(photo())).resolves.toEqual({ url: READY_URL });
     expect(getMediaAssetAction).toHaveBeenCalledWith(ASSET_ID);
+  });
+
+  it('sends the signed headers except Content-Length, and PUTs by default', async () => {
+    vi.mocked(requestProfilePictureUploadAction).mockResolvedValueOnce({
+      ok: true,
+      data: {
+        mediaAsset: { id: ASSET_ID },
+        upload: {
+          url: UPLOAD_URL,
+          headers: { 'Content-Length': '2048', 'x-amz-acl': 'public-read' },
+        } as never,
+      },
+    });
+    const file = photo();
+
+    await uploadPictureFile(file);
+
+    expect(fetchMock).toHaveBeenCalledWith(UPLOAD_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'image/png', 'x-amz-acl': 'public-read' },
+      body: file,
+    });
+  });
+
+  it('PUTs without signed headers when the ticket has none', async () => {
+    vi.mocked(requestProfilePictureUploadAction).mockResolvedValueOnce({
+      ok: true,
+      data: { mediaAsset: { id: ASSET_ID }, upload: { url: UPLOAD_URL } as never },
+    });
+
+    await expect(uploadPictureFile(photo())).resolves.toBe(ASSET_ID);
+    expect(fetchMock.mock.calls[0][1]).toMatchObject({
+      method: 'PUT',
+      headers: { 'Content-Type': 'image/png' },
+    });
   });
 
   it('returns the public URL when the image is already processed', async () => {

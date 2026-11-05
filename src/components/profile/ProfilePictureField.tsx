@@ -8,34 +8,44 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
-import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
+import type { ProfilePictureDraftState } from '@/hooks/useProfilePictureDraft';
 import { PROFILE_PICTURE_ACCEPT } from '@/services/profilePicture.service';
 
 type ProfilePictureFieldProps = {
-  /** Account the photo belongs to (resets the local photo on another account). */
-  ownerId?: string;
-  /** Photo already saved on the account. */
-  currentUrl?: string;
+  /** Staged photo of the form (`useProfilePictureDraft`). */
+  picture: ProfilePictureDraftState;
   /** Name for the image's alt text. */
   displayName: string;
+  /** The form is being saved. */
+  disabled?: boolean;
+  /** The saved photo is being compressed by the backend. */
+  processing?: boolean;
 };
 
+function statusMessage({ draft }: ProfilePictureDraftState, processing: boolean) {
+  if (processing) return 'Processando a foto de perfil...';
+  if (draft.kind === 'replace')
+    return 'Nova foto selecionada. Ela será salva quando você clicar em Salvar.';
+  if (draft.kind === 'remove') return 'A foto será removida quando você clicar em Salvar.';
+  return '';
+}
+
 /**
- * Avatar of the edit forms with upload and removal. The photo is saved as soon
- * as it is picked, independently of the form's "Salvar".
+ * Avatar of the edit forms. Choosing or removing a photo only stages the
+ * change: it is applied with the form's "Salvar" and undone by "Cancelar".
  */
 export default function ProfilePictureField({
-  ownerId,
-  currentUrl,
+  picture,
   displayName,
+  disabled = false,
+  processing = false,
 }: ProfilePictureFieldProps) {
-  const { photoUrl, error, busy, status, statusMessage, selectFile, remove } =
-    useProfilePictureUpload({ ownerId, currentUrl });
+  const { photoUrl, error } = picture;
   const hintId = 'profile-picture-hint';
 
   return (
     <Stack spacing={1.5} sx={{ alignItems: 'center', textAlign: 'center', minWidth: 0 }}>
-      <Box sx={{ position: 'relative' }} aria-busy={busy || undefined}>
+      <Box sx={{ position: 'relative' }} aria-busy={processing || undefined}>
         <Avatar
           src={photoUrl}
           alt={photoUrl ? `Foto de perfil de ${displayName}` : ''}
@@ -47,12 +57,12 @@ export default function ProfilePictureField({
             border: '1px solid',
             borderColor: 'primary.main',
             boxShadow: 2,
-            opacity: busy ? 0.6 : 1,
+            opacity: processing ? 0.6 : 1,
           }}
         >
           <PersonIcon aria-hidden sx={{ fontSize: { xs: 48, sm: 56 } }} />
         </Avatar>
-        {busy ? (
+        {processing ? (
           <CircularProgress
             size={32}
             aria-hidden
@@ -63,25 +73,25 @@ export default function ProfilePictureField({
           component="label"
           aria-label={photoUrl ? 'Alterar foto de perfil' : 'Adicionar foto de perfil'}
           aria-describedby={hintId}
-          disabled={busy}
+          disabled={disabled}
         >
           <Box
             component="input"
             type="file"
             accept={PROFILE_PICTURE_ACCEPT}
             hidden
-            disabled={busy}
-            onChange={selectFile}
+            disabled={disabled}
+            onChange={picture.select}
           />
         </ProfilePhotoAddButton>
       </Box>
 
       <Typography id={hintId} variant="body2" color="text.secondary">
-        JPG, PNG ou WebP de até 5 MB. A foto é salva assim que você a escolhe.
+        JPG, PNG ou WebP de até 5 MB. A foto é salva quando você clica em Salvar.
       </Typography>
 
       <Typography role="status" aria-live="polite" variant="body2" color="text.secondary">
-        {statusMessage}
+        {statusMessage(picture, processing)}
       </Typography>
 
       {error ? (
@@ -90,13 +100,13 @@ export default function ProfilePictureField({
         </Typography>
       ) : null}
 
-      {photoUrl && status !== 'uploading' && status !== 'processing' ? (
+      {photoUrl ? (
         <PillButton
           type="button"
           tone="primarySoftOutline"
           size="small"
-          onClick={remove}
-          loading={status === 'removing'}
+          onClick={picture.remove}
+          disabled={disabled}
           sx={{ minHeight: 44, width: { xs: '100%', sm: 'auto' }, justifyContent: 'center' }}
         >
           Remover foto

@@ -31,6 +31,14 @@ test.describe('Mutations through Server Actions', () => {
     await name.fill('Samuel Mendonça Jr.');
     await page.getByRole('button', { name: 'Salvar' }).click();
 
+    // Saving keeps the user on the edit page with a green confirmation.
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Perfil atualizado com sucesso.' })
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/profile\/edit-profile$/);
+
+    // Nothing pending: "Voltar" goes straight to the profile, already updated.
+    await page.getByRole('link', { name: 'Voltar para o perfil' }).first().click();
     await expect(page).toHaveURL(/\/profile\/sobre$/);
     await expect(
       page.getByText('Samuel Mendonça Jr.', { exact: true }).filter({ visible: true }).first()

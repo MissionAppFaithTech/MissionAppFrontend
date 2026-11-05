@@ -51,6 +51,15 @@ export function phoneDigits(value: string): string {
   return value.replace(/\D/g, '');
 }
 
+/** Whether two phone inputs hold the same number, ignoring formatting and a bare country code. */
+export function samePhone(a = '', b = ''): boolean {
+  const digits = (value: string) => {
+    const only = phoneDigits(value);
+    return only.length <= 3 ? '' : only;
+  };
+  return digits(a) === digits(b);
+}
+
 export const BIO_MAX_LENGTH = 70;
 export const ABOUT_LONG_MAX_LENGTH = 5000;
 export const ABOUT_SHORT_MAX_LENGTH = 255;
