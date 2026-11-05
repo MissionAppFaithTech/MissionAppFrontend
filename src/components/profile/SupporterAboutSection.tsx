@@ -4,11 +4,11 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import type { ProfileAboutData } from '@/types/profile';
+import AboutDivider from '@/components/profile/AboutDivider';
 
 type SupporterAboutSectionProps = {
   data: ProfileAboutData;
@@ -119,7 +119,7 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
 
           <Typography variant="body2">{data.introduction}</Typography>
 
-          <Divider />
+          <AboutDivider />
 
           <Stack spacing={1.25}>
             <DetailRow label="Local de origem" value={data.originLocation} />
@@ -127,7 +127,7 @@ export default function SupporterAboutSection({ data, onEditAction }: SupporterA
             <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
           </Stack>
 
-          <Divider />
+          <AboutDivider />
 
           <Box>
             <DetailRow label="Versículo para a vida" value={data.lifeVerse} />

@@ -5,12 +5,12 @@ import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import { focusVisibleSx } from '@/theme/theme';
 import type { ProfileAboutData } from '@/types/profile';
+import AboutDivider from '@/components/profile/AboutDivider';
 
 type ProfileAboutSectionProps = {
   data: ProfileAboutData;
@@ -223,7 +223,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
           {/* NOTE: a divider between every part (bio, story, details, prayer, verse) */}
           {blocks.map((block, index) => (
             <Stack key={index} spacing={{ xs: 2, sm: 2.5 }}>
-              {index > 0 ? <Divider /> : null}
+              {index > 0 ? <AboutDivider /> : null}
               {block}
             </Stack>
           ))}

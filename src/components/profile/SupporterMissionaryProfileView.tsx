@@ -13,7 +13,6 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
@@ -31,6 +30,7 @@ import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { CampaignData } from '@/types/campaign';
 import type { ProfileAboutData, ProfileData, SavedPost } from '@/types/profile';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
+import AboutDivider from '@/components/profile/AboutDivider';
 
 type SupporterTabKey = 'sobre' | 'projetos' | 'postagens' | 'campanha';
 
@@ -155,7 +155,7 @@ export function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
           {/* NOTE: a divider between every part that has content, never a stray one */}
           {parts.map((part, index) => (
             <Stack key={part.key} spacing={{ xs: 2, sm: 2.5 }}>
-              {index > 0 ? <Divider /> : null}
+              {index > 0 ? <AboutDivider /> : null}
               {part.node}
             </Stack>
           ))}
