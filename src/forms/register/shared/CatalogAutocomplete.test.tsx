@@ -1,5 +1,8 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import TextField from '@mui/material/TextField';
 import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SELECT_OTHER } from '@/forms/register/options';
@@ -153,6 +156,48 @@ describe('CatalogAutocomplete', () => {
     expect(screen.getByRole('combobox', { name: /Agência missionária/ })).toHaveValue(
       '  Missão Nova  '
     );
+  });
+
+  it('closes the list while the "+ Adicionar" modal is open and keeps it closed after', async () => {
+    function WithModal() {
+      const [modalOpen, setModalOpen] = useState(false);
+      return (
+        <>
+          <Harness onAddNew={() => setModalOpen(true)} />
+          <Dialog open={modalOpen}>
+            <TextField autoFocus label="Nome" />
+            <Button onClick={() => setModalOpen(false)}>Cancelar</Button>
+          </Dialog>
+        </>
+      );
+    }
+    const user = userEvent.setup();
+    renderWithQuery(<WithModal />);
+    const input = screen.getByRole('combobox', { name: /Agência missionária/ });
+
+    await user.click(input);
+    await user.click(screen.getByRole('option', { name: /Adicionar Agência Missionária/ }));
+
+    const dialog = await screen.findByRole('dialog');
+    await waitFor(() =>
+      expect(within(dialog).getByRole('textbox', { name: 'Nome' })).toHaveFocus()
+    );
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    expect(input).toHaveAttribute('aria-expanded', 'false');
+
+    // Typing in the modal never reaches the list.
+    await user.type(within(dialog).getByRole('textbox', { name: 'Nome' }), 'Missão Nova');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+
+    // Closing the modal gives the focus back without reopening the list…
+    await user.click(within(dialog).getByRole('button', { name: 'Cancelar' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+
+    // …until the user asks for it again.
+    input.focus();
+    await user.keyboard('{ArrowDown}');
+    expect(await screen.findByRole('listbox')).toBeVisible();
   });
 
   it('hides "+ Adicionar" without onAddNew', async () => {

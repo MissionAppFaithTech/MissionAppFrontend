@@ -60,6 +60,24 @@ describe('CreateFaithCommunityModal', () => {
     );
   });
 
+  it('saving never submits the step form around it', async () => {
+    const user = userEvent.setup();
+    const handleSave = vi.fn();
+    const stepSubmit = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+
+    // NOTE: the modal lives inside the sign-up step's <form> (React tree), as in MissionariesStep2
+    render(
+      <form onSubmit={stepSubmit}>
+        <CreateFaithCommunityModal open onClose={vi.fn()} onSave={handleSave} />
+      </form>
+    );
+    await fillValid(user);
+    await user.click(screen.getByRole('button', { name: /^salvar$/i }));
+
+    expect(handleSave).toHaveBeenCalledTimes(1);
+    expect(stepSubmit).not.toHaveBeenCalled();
+  });
+
   async function fillValid(user: ReturnType<typeof userEvent.setup>) {
     await user.type(screen.getByRole('textbox', { name: /^nome(\s*\*)?$/i }), 'Igreja Nova');
     await user.type(screen.getByRole('textbox', { name: /^país/i }), 'Brasil');

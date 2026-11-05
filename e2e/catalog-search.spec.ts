@@ -89,6 +89,24 @@ test.describe('Busca de agências e comunidades de fé', () => {
     await expect(dialog.getByRole('textbox', { name: /^nome$/i })).toHaveValue(
       'Comunidade Inexistente'
     );
+    // The suggestions list must not cover the modal while the user types in it.
+    await expect(page.getByRole('listbox')).toBeHidden();
+    await dialog.getByRole('textbox', { name: /cidade/i }).fill('Niterói');
+    await expect(page.getByRole('listbox')).toBeHidden();
+    await expect(dialog.getByRole('textbox', { name: /cidade/i })).toHaveValue('Niterói');
+
+    // Saving closes only the modal: the sign-up stays on this step.
+    await dialog.getByRole('textbox', { name: /^país/i }).fill('Brasil');
+    await dialog.getByRole('textbox', { name: /^estado/i }).fill('RJ');
+    await dialog.getByRole('textbox', { name: /nome do pastor/i }).fill('Pr. Ana');
+    await dialog.getByRole('textbox', { name: /telefone da igreja/i }).fill('2134567890');
+    await dialog.getByRole('textbox', { name: /telefone do pastor/i }).fill('21987654321');
+    await dialog.getByRole('button', { name: /^salvar$/i }).click();
+    await expect(dialog).toBeHidden();
+    await expect(visible(page.getByRole('heading', { level: 2 }))).toContainText(
+      'Dados ministeriais'
+    );
+    await expect(community).toHaveValue('Comunidade Inexistente');
   });
 
   test('a CPF already in use brings the user back to the CPF field', async ({ page }) => {

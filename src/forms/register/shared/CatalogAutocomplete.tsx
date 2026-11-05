@@ -112,6 +112,14 @@ export default function CatalogAutocomplete({
   const [open, setOpen] = useState(false);
   // NOTE: "Tentar novamente" is not a value; the list stays open for the new results.
   const keepOpen = useRef(false);
+  // NOTE: "+ Adicionar" opens a modal. MUI puts the focus back on this input
+  // before the modal takes it, and openOnFocus would reopen the list on top of
+  // the modal (and again when the modal gives the focus back). The list stays
+  // shut until the user presses a key or a pointer in this field.
+  const addingNew = useRef(false);
+  const resumeAfterAdd = () => {
+    addingNew.current = false;
+  };
   // NOTE: MUI compares the value by reference and resets the text on every change
   const selected = useMemo(
     () => selectedOption(value, selectedName, otherSummary),
@@ -146,7 +154,7 @@ export default function CatalogAutocomplete({
   if (onAddNew) options.push({ type: 'add', name: input.trim() });
 
   return (
-    <Stack spacing={1} sx={{ width: '100%', minWidth: 0 }}>
+    <Stack spacing={1} sx={{ width: '100%', minWidth: 0 }} onPointerDownCapture={resumeAfterAdd}>
       <Autocomplete<Option, false, false, false>
         id={id}
         options={options}
@@ -158,7 +166,10 @@ export default function CatalogAutocomplete({
           if (reason !== 'selectOption') setInput(next);
         }}
         open={open}
-        onOpen={() => setOpen(true)}
+        onOpen={() => {
+          if (!addingNew.current) setOpen(true);
+        }}
+        onKeyDown={resumeAfterAdd}
         onClose={() => {
           if (keepOpen.current) {
             keepOpen.current = false;
@@ -172,7 +183,11 @@ export default function CatalogAutocomplete({
             setInput(option.name);
             return onChange(option.id, option);
           }
-          if (option.type === 'add') return onAddNew?.(input.trim());
+          if (option.type === 'add') {
+            addingNew.current = true;
+            setOpen(false);
+            return onAddNew?.(input.trim());
+          }
           if (option.retry) {
             keepOpen.current = true;
             search.retry();
