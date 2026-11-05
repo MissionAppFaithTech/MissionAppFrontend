@@ -9,7 +9,7 @@ test.describe('Landing Page E2E', () => {
     await expect(page).toHaveTitle(/Mission App/i);
     await expect(page.locator('h1')).toContainText(/campanhas\s*missionárias/i);
     await expect(
-      page.getByRole('link', { name: 'Explorar missionários', exact: true })
+      page.locator('#inicio').getByRole('link', { name: 'Explorar missionários', exact: true })
     ).toHaveAttribute('href', '/navegacao');
 
     const startCta = page.getByRole('link', { name: /comece agora/i }).first();
@@ -31,8 +31,8 @@ test.describe('Landing Page E2E', () => {
       /^\/campanha\//
     );
     await Promise.all([
-      page.waitForURL('**/conselho-missionario#campanha-recorrente'),
-      campaign.getByRole('link', { name: 'Levar para minha igreja' }).click(),
+      page.waitForURL('**/leve-o-mission-app-para-sua-igreja'),
+      campaign.getByRole('link', { name: 'Leve o Mission App para sua igreja' }).click(),
     ]);
 
     const adoption = page.getByRole('region', {
@@ -49,5 +49,16 @@ test.describe('Landing Page E2E', () => {
     expect((await download).suggestedFilename()).toMatch(/^qr-code-.+\.png$/);
 
     await expect(page.getByRole('region', { name: 'O que é o Mission App' })).toBeAttached();
+
+    // Then the mobilizers call leads to the council guide, which keeps the rest.
+    const callout = page.getByRole('region', {
+      name: 'Forme um grupo de mobilizadores na sua igreja',
+    });
+    await callout.scrollIntoViewIfNeeded();
+    await Promise.all([
+      page.waitForURL('**/conselho-missionario'),
+      callout.getByRole('link', { name: 'Aprenda como fundar um conselho missionário' }).click(),
+    ]);
+    await expect(page.getByRole('tab', { name: /passo a passo/i })).toBeVisible();
   });
 });

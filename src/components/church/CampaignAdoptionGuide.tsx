@@ -15,6 +15,7 @@ import QrCode2Icon from '@mui/icons-material/QrCode2';
 import SlideshowIcon from '@mui/icons-material/Slideshow';
 import CampaignQrCode from '@/components/campaign/CampaignQrCode';
 import PillButton from '@/components/common/PillButton';
+import BringMissionAppButton from '@/components/church/BringMissionAppButton';
 import { campaignPath } from '@/lib/campaigns/featured';
 import type { CampaignData } from '@/types/campaign';
 
@@ -56,8 +57,9 @@ const STEPS: Step[] = [
     icon: <CoPresentIcon aria-hidden />,
   },
   {
-    title: 'Defina a data do Dia Oficial na igreja',
-    description: 'Por exemplo, o 3º domingo do mês ou o mês de missões da sua igreja.',
+    title: 'Adote o Dia Oficial da campanha',
+    description:
+      'O Mission App define o Dia Oficial de cada campanha. A igreja reserva essa data no calendário e realiza o culto de missões nesse dia, junto com as outras igrejas.',
     icon: <EventIcon aria-hidden />,
   },
   {
@@ -229,7 +231,7 @@ export default function CampaignAdoptionGuide({
               </Typography>
               {index === 1 ? (
                 <Typography variant="body2" sx={{ mt: 1, fontWeight: 600 }}>
-                  Dia oficial sugerido para a campanha vigente: {campaign.churchDay}
+                  Dia Oficial da campanha vigente: {campaign.churchDay}
                 </Typography>
               ) : null}
               {full && index === 0 ? <MediaKit /> : null}
@@ -250,13 +252,7 @@ export default function CampaignAdoptionGuide({
           useFlexGap
           sx={{ mt: 3.5, '& > *': { width: { xs: '100%', sm: 'auto' } } }}
         >
-          <PillButton
-            href="/conselho-missionario#campanha-recorrente"
-            tone="missionFilled"
-            sx={{ minHeight: 44, px: 3, fontWeight: 700, justifyContent: 'center' }}
-          >
-            Ver o kit e o QR Code da campanha
-          </PillButton>
+          <BringMissionAppButton />
           <PillButton
             href={campaignPath(campaign)}
             tone="primaryOutline"

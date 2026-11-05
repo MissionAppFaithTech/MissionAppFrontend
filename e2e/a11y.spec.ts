@@ -75,6 +75,7 @@ async function settleForScan(page: Page) {
 test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () => {
   const publicRoutes = [
     { name: 'Landing Page', path: '/' },
+    { name: 'Bring the Mission App to your church', path: '/leve-o-mission-app-para-sua-igreja' },
     { name: 'Church Guide (Para Igrejas)', path: '/conselho-missionario' },
     { name: 'Login Page', path: '/login' },
     { name: 'Forgot Password Page', path: '/forgot-password' },

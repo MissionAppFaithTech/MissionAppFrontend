@@ -6,7 +6,7 @@
 Mission App é uma solução desenvolvida pela FaithTech para unir o ecossistema missionário transcultural e comunitário. A plataforma permite que missionários compartilhem suas histórias, pedidos de oração, atualizações de campo, vídeos e projetos de impacto social, ao mesmo tempo em que permite que apoiadores acompanhem a jornada, ofertem financeiramente e orem com direcionamento específico.
 
 ## Campanhas Missionárias Recorrentes
-A cada ciclo, uma campanha missionária reúne igrejas, missionários e apoiadores em torno de projetos sociais no campo. A igreja adota a campanha vigente em três passos: baixa o Kit de Mídia do Culto de Missões (slides 16:9, vídeo de 2 minutos, folheto para o boletim), define o Dia Oficial na igreja e exibe o QR Code da página da campanha, onde os membros conhecem o projeto de impacto e ofertam com transparência.
+A cada ciclo, uma campanha missionária reúne igrejas, missionários e apoiadores em torno de projetos sociais no campo. A igreja adota a campanha vigente em três passos: baixa o Kit de Mídia do Culto de Missões (slides 16:9, vídeo de 2 minutos, folheto para o boletim), reserva o Dia Oficial definido pelo Mission App e exibe o QR Code da página da campanha, onde os membros conhecem o projeto de impacto e ofertam com transparência.
 
 ## Público-Alvo
 - **Missionários**: Trabalhadores no campo missionário nacional e transcultural que necessitam de suporte, comunicação centralizada com seus mantenedores e divulgação de seus projetos de impacto.
@@ -15,7 +15,8 @@ A cada ciclo, uma campanha missionária reúne igrejas, missionários e apoiador
 
 ## Rotas Principais e Recursos Públicos
 - [Início / Landing Page](/): Apresentação institucional da plataforma, proposta de valor, badges para aplicativo e visão de impacto.
-- [Para Igrejas](/conselho-missionario): O que é o Mission App, como a igreja adota a campanha recorrente (kit de mídia, Dia Oficial, QR Code) e o guia do Conselho Missionário (passo a passo, funções, curso em vídeo, mobilização anual, materiais e modelos).
+- [Leve o Mission App para sua igreja](/leve-o-mission-app-para-sua-igreja): O que é o Mission App, visão e propósito, e como a igreja adota a campanha recorrente: kit de mídia, Dia Oficial definido pelo Mission App e QR Code da campanha. Termina com o convite para formar um grupo de mobilizadores.
+- [Conselho Missionário](/conselho-missionario): Guia para fundar o conselho missionário da igreja (passo a passo, funções, curso em vídeo, mobilização anual, materiais das agências e modelos).
 - [Campanhas](/campanha/{id}): Página pública da campanha missionária, com o projeto de impacto, o Dia Oficial e o QR Code para ofertar.
 - [Explorar](/navegacao): Missionários e projetos sociais para conhecer, orar e apoiar.
 - [Seleção de Perfil](/select-role): Escolha inicial de cadastro entre "Sou Missionário" e "Quero Apoiar".

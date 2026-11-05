@@ -33,9 +33,8 @@ describe('AboutMissionAppSection', () => {
       'href',
       '/select-role'
     );
-    expect(screen.getByRole('link', { name: 'Ir para o passo a passo' })).toHaveAttribute(
-      'href',
-      '#checklist'
-    );
+    expect(
+      screen.getByRole('link', { name: 'Aprender a fundar o conselho missionário' })
+    ).toHaveAttribute('href', '/conselho-missionario#checklist');
   });
 });

@@ -14,7 +14,7 @@ const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
   { label: 'Visão', href: '/#objetivo', sectionId: 'objetivo' },
   { label: 'Campanha', href: '/#campanha', sectionId: 'campanha' },
-  { label: 'Para Igrejas', href: '/conselho-missionario', sectionId: 'para-igrejas' },
+  { label: 'Para Igrejas', href: '/leve-o-mission-app-para-sua-igreja', sectionId: 'para-igrejas' },
   { label: 'Explorar', href: '/#explorar', sectionId: 'explorar' },
   { label: 'Perguntas frequentes', href: '/#faq', sectionId: 'faq' },
 ];
