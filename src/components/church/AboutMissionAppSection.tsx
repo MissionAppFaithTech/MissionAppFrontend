@@ -40,7 +40,7 @@ const HOW_STEPS: HowStep[] = [
   },
   {
     title: 'Adote a campanha vigente',
-    text: 'Baixe o kit de mídia, marque o Dia Oficial e exiba o QR Code no culto.',
+    text: 'Baixe o kit de mídia, reserve o Dia Oficial definido pelo Mission App e exiba o QR Code no culto.',
     href: '#campanha-recorrente',
     linkLabel: 'Ver a campanha recorrente',
   },
@@ -52,9 +52,9 @@ const HOW_STEPS: HowStep[] = [
   },
   {
     title: 'Fortaleça o conselho missionário',
-    text: 'Use o passo a passo, as funções, o curso em vídeo e os modelos desta página para estruturar o conselho missionário.',
-    href: '#checklist',
-    linkLabel: 'Ir para o passo a passo',
+    text: 'Siga o guia com o passo a passo, as funções, o curso em vídeo e os modelos para estruturar o conselho missionário.',
+    href: '/conselho-missionario#checklist',
+    linkLabel: 'Aprender a fundar o conselho missionário',
   },
 ];
 

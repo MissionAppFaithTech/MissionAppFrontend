@@ -5,7 +5,7 @@ import CampaignAdoptionGuide, { MEDIA_KIT_ITEMS } from './CampaignAdoptionGuide'
 
 const STEP_TITLES = [
   'Baixe o Kit de Mídia do Culto de Missões',
-  'Defina a data do Dia Oficial na igreja',
+  'Adote o Dia Oficial da campanha',
   'Exiba o QR Code da campanha',
 ];
 
@@ -20,13 +20,13 @@ describe('CampaignAdoptionGuide', () => {
     const steps = within(region).getAllByRole('listitem');
     expect(steps.map((step) => within(step).getByRole('heading').textContent)).toEqual(STEP_TITLES);
     expect(
-      within(region).getByText(
-        `Dia oficial sugerido para a campanha vigente: ${mockCampaign.churchDay}`
-      )
+      within(region).getByText(`Dia Oficial da campanha vigente: ${mockCampaign.churchDay}`)
     ).toBeVisible();
+    // The Mission App sets the official day; the church only adopts it.
+    expect(within(region).getByText(/o mission app define o dia oficial/i)).toBeVisible();
     expect(
-      within(region).getByRole('link', { name: 'Ver o kit e o QR Code da campanha' })
-    ).toHaveAttribute('href', '/conselho-missionario#campanha-recorrente');
+      within(region).getByRole('link', { name: 'Leve o Mission App para sua igreja' })
+    ).toHaveAttribute('href', '/leve-o-mission-app-para-sua-igreja');
     expect(
       within(region).getByRole('link', { name: 'Conhecer a campanha vigente' })
     ).toHaveAttribute('href', `/campanha/${mockCampaign.id}`);
@@ -50,7 +50,7 @@ describe('CampaignAdoptionGuide', () => {
         name: `QR Code que abre a página da campanha ${mockCampaign.title}`,
       })
     ).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Ver o kit e o QR Code da campanha' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Leve o Mission App para sua igreja' })).toBeNull();
     vi.restoreAllMocks();
   });
 });

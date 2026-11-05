@@ -28,8 +28,11 @@ describe('ChurchGuideView Component', () => {
 
     expect(screen.getByText(/guia prático para igrejas locais/i)).toBeInTheDocument();
 
-    expect(screen.getByRole('tab', { name: /o mission app/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /campanha recorrente/i })).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /o mission app/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: /campanha recorrente/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'Leve o Mission App para sua igreja' })
+    ).toHaveAttribute('href', '/leve-o-mission-app-para-sua-igreja');
     expect(screen.getByRole('tab', { name: /passo a passo/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /funções do conselho/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /curso em vídeo/i })).toBeInTheDocument();

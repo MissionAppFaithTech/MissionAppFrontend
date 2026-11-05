@@ -22,12 +22,15 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import Chip from '@mui/material/Chip';
 import Image from 'next/image';
+import Link from 'next/link';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PillButton from '@/components/common/PillButton';
 import SectionHeader from '@/components/common/SectionHeader';
 import AudienceCard from '@/components/landing/AudienceCard';
 import Logo from '@/components/common/Logo';
+import BringMissionAppButton from '@/components/church/BringMissionAppButton';
 import CampaignAdoptionGuide from '@/components/church/CampaignAdoptionGuide';
+import { BRING_MISSION_APP_PATH, CHURCH_COUNCIL_PATH } from '@/lib/church/paths';
 import { campaignPath, featuredCampaign } from '@/lib/campaigns/featured';
 
 const LANDING_ICONS = {
@@ -55,12 +58,12 @@ const audienceCards = [
       'Divulgue seu ministério e seus projetos sociais, compartilhe atualizações, receba apoio em oração e fortaleça sua rede de mantenedores em um só lugar.',
   },
   {
-    label: 'Para Apoiadores',
+    label: 'Para Apoiadores & Mobilizadores',
     title: 'Se você apoia alguém no campo',
     accentColor: 'supporter.main' as const,
     icon: LANDING_ICONS.supporter,
     benefit:
-      'Conheça missionários e projetos sociais, acompanhe a jornada, ore com direcionamento e, se quiser, oferte com transparência.',
+      'Conheça missionários e projetos sociais, ore com direcionamento, mobilize sua igreja para as campanhas e, se quiser, oferte com transparência.',
   },
 ];
 
@@ -83,6 +86,15 @@ const visionPillars = [
   },
 ];
 
+const footerLinks = [
+  { label: 'Leve o Mission App para sua igreja', href: BRING_MISSION_APP_PATH },
+  { label: 'Conselho missionário', href: CHURCH_COUNCIL_PATH },
+  { label: 'Campanha vigente', href: campaignPath(featuredCampaign) },
+  { label: 'Explorar missionários', href: '/navegacao' },
+  { label: 'Perguntas frequentes', href: '/#faq' },
+  { label: 'Entrar', href: '/login' },
+];
+
 const faqItems = [
   {
     question: 'O que são as campanhas missionárias recorrentes?',
@@ -92,7 +104,7 @@ const faqItems = [
   {
     question: 'Como minha igreja adota uma campanha?',
     answer:
-      'A liderança baixa o kit de mídia, define o Dia Oficial na igreja e exibe o QR Code da campanha no culto. O guia "Para Igrejas" mostra o passo a passo e os materiais para o conselho missionário.',
+      'A liderança baixa o kit de mídia, reserva o Dia Oficial definido pelo Mission App e exibe o QR Code da campanha no culto. A página "Leve o Mission App para sua igreja" mostra o passo a passo, e o guia do conselho missionário ajuda a mobilizar a igreja o ano inteiro.',
   },
   {
     question: 'Como funciona o cadastro de missionários?',
@@ -152,8 +164,8 @@ const landingContainerSx = {
 const heroCtaButtonSx = {
   flexShrink: 0,
   py: { xs: 0.75, md: 0.875 },
-  px: { xs: 2.5, md: 3 },
-  fontSize: { xs: '0.9375rem', md: '1rem' },
+  px: { xs: 2.5, md: 2.25 },
+  fontSize: { xs: '0.9375rem', md: '0.96875rem' },
   fontWeight: 600,
   minHeight: 44,
 } as const;
@@ -176,7 +188,8 @@ function HeroHeadline() {
       spacing={0}
       sx={{
         width: '100%',
-        maxWidth: { xs: '36rem', md: 'min(48vw, 52rem)' },
+        // NOTE: wide enough for the two hero actions on one line from md up
+        maxWidth: { xs: '36rem', md: 'min(52vw, 52rem)' },
         mx: { xs: 'auto', md: 0 },
         alignItems: { xs: 'center', md: 'flex-start' },
         textAlign: { xs: 'center', md: 'left' },
@@ -251,8 +264,7 @@ function HeroHeadline() {
               fontSize: { xs: '1rem', md: 'clamp(1rem, 0.6rem + 0.8vw, 1.3rem)' },
             }}
           >
-            Plataforma de mobilização e conscientização missionária que divulga missionários e
-            projetos sociais e fortalece os conselhos missionários com campanhas recorrentes.
+            Plataforma de mobilização e conscientização missionária.
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
@@ -265,37 +277,16 @@ function HeroHeadline() {
               '& > *': { width: { xs: '100%', sm: 'auto' }, justifyContent: 'center' },
             }}
           >
+            <BringMissionAppButton sx={heroCtaButtonSx} />
+            {/* NOTE: two essential actions; the campaign in effect has its own section below */}
+            {/* NOTE: filled navy (light blue in dark): as prominent as the orange, its own color */}
             <PillButton
               href={campaignPath(featuredCampaign)}
-              tone="missionFilled"
-              sx={heroCtaButtonSx}
+              tone="cta"
+              startIcon={<CampaignIcon aria-hidden />}
+              sx={{ ...heroCtaButtonSx, minHeight: 48, fontWeight: 700 }}
             >
-              Conheça a campanha vigente
-            </PillButton>
-            <PillButton
-              href="/navegacao"
-              tone="primaryOutline"
-              sx={{
-                ...heroCtaButtonSx,
-                borderWidth: '2px',
-                borderColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                    : 'transparent',
-                color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
-                boxShadow: (theme) =>
-                  theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
-                '&:hover': {
-                  borderColor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
-                },
-              }}
-            >
-              Explorar missionários
+              Explorar Campanha Missionária
             </PillButton>
           </Stack>
         </Stack>
@@ -521,18 +512,12 @@ function FeaturedCampaignCard() {
         >
           <PillButton
             href={campaignPath(campaign)}
-            tone="missionFilled"
-            sx={{ minHeight: 44, px: 3, fontWeight: 700, justifyContent: 'center' }}
+            tone="primaryOutline"
+            sx={{ minHeight: 48, px: 3, fontWeight: 600, justifyContent: 'center' }}
           >
             Ver a campanha
           </PillButton>
-          <PillButton
-            href="/conselho-missionario#campanha-recorrente"
-            tone="primaryOutline"
-            sx={{ minHeight: 44, px: 3, fontWeight: 600, justifyContent: 'center' }}
-          >
-            Levar para minha igreja
-          </PillButton>
+          <BringMissionAppButton />
         </Stack>
       </Stack>
     </Card>
@@ -882,6 +867,53 @@ export default function LandingPage() {
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
         <Box
+          id="leve-para-sua-igreja"
+          component="section"
+          aria-labelledby="bring-cta-heading"
+          sx={{ py: { xs: 6, md: 8 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Card
+              elevation={0}
+              sx={{
+                p: { xs: 3.5, sm: 5, md: 6 },
+                borderRadius: 4,
+                bgcolor: 'var(--app-footer-bg)',
+                color: 'common.white',
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: { xs: 'stretch', md: 'center' },
+                justifyContent: 'space-between',
+                gap: 3,
+              }}
+            >
+              <Box sx={{ maxWidth: 720 }}>
+                <Typography
+                  id="bring-cta-heading"
+                  component="h2"
+                  sx={{
+                    fontSize: { xs: '1.5rem', sm: '1.85rem', md: '2.1rem' },
+                    fontWeight: 800,
+                    lineHeight: 1.25,
+                    mb: 1.5,
+                    color: 'common.white',
+                  }}
+                >
+                  Sua igreja pode participar da próxima campanha
+                </Typography>
+                <Typography sx={{ lineHeight: 1.6, color: 'common.white' }}>
+                  Kit de mídia, Dia Oficial e QR Code prontos: o conselho missionário só precisa
+                  adotar a campanha e mobilizar a congregação.
+                </Typography>
+              </Box>
+              <BringMissionAppButton sx={{ flexShrink: 0 }} />
+            </Card>
+          </Container>
+        </Box>
+
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box
           id="faq"
           component="section"
           sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
@@ -970,9 +1002,41 @@ export default function LandingPage() {
             >
               &ldquo;Ide por todo o mundo e pregai o Evangelho a toda criatura.&rdquo; — Mc 16:15
             </Typography>
+            <Box component="nav" aria-label="Links do rodapé" sx={{ width: '100%' }}>
+              <Stack
+                component="ul"
+                direction={{ xs: 'column', sm: 'row' }}
+                useFlexGap
+                spacing={{ xs: 0, sm: 3 }}
+                sx={{ listStyle: 'none', p: 0, m: 0, flexWrap: 'wrap' }}
+              >
+                {footerLinks.map((link) => (
+                  <Box component="li" key={link.href}>
+                    <Box
+                      component={Link}
+                      href={link.href}
+                      sx={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        minHeight: 44,
+                        color: 'common.white',
+                        fontWeight: 600,
+                        fontSize: '0.9375rem',
+                        textDecoration: 'underline',
+                        textUnderlineOffset: '4px',
+                        textDecorationColor: 'rgba(255, 255, 255, 0.5)',
+                        '&:hover': { textDecorationColor: 'currentColor' },
+                      }}
+                    >
+                      {link.label}
+                    </Box>
+                  </Box>
+                ))}
+              </Stack>
+            </Box>
             <Divider sx={{ width: '100%', borderColor: 'rgba(255,255,255,0.2)' }} />
-            <Typography variant="caption" sx={{ opacity: 0.75, textAlign: 'center' }}>
-              © 2026 MissionApp
+            <Typography variant="caption" sx={{ textAlign: 'center', color: 'common.white' }}>
+              © 2026 Mission App — plataforma de mobilização e conscientização missionária
             </Typography>
           </Stack>
         </Container>
