@@ -116,7 +116,13 @@ export default function CatalogCreateDialog({
           component="form"
           id={`${titleId}-form`}
           spacing={2.5}
-          onSubmit={onSubmit}
+          onSubmit={(event) => {
+            // NOTE: the dialog is portaled out of the DOM, but React still bubbles
+            // its submit to the sign-up step's <form> around it, which would
+            // advance the wizard. Saving here only saves the catalog item.
+            event.stopPropagation();
+            onSubmit(event);
+          }}
           noValidate
           sx={{
             '& .MuiInputLabel-root': {

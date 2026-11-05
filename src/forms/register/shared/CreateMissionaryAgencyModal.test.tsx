@@ -37,6 +37,28 @@ describe('CreateMissionaryAgencyModal', () => {
     expect(handleSave).not.toHaveBeenCalled();
   });
 
+  it('saving never submits the step form around it', async () => {
+    const user = userEvent.setup();
+    const handleSave = vi.fn();
+    const stepSubmit = vi.fn((event: { preventDefault: () => void }) => event.preventDefault());
+
+    // NOTE: the modal lives inside the sign-up step's <form> (React tree), as in MissionariesStep2
+    render(
+      <form onSubmit={stepSubmit}>
+        <CreateMissionaryAgencyModal open onClose={vi.fn()} onSave={handleSave} />
+      </form>
+    );
+    await user.type(screen.getByRole('textbox', { name: /^nome/i }), 'Nova Agência');
+    await user.type(screen.getByRole('textbox', { name: /^país/i }), 'Brasil');
+    await user.type(screen.getByRole('textbox', { name: /^estado/i }), 'SP');
+    await user.type(screen.getByRole('textbox', { name: /^cidade/i }), 'Campinas');
+    await user.type(screen.getByRole('textbox', { name: /^telefone$/i }), '11987654321');
+    await user.click(screen.getByRole('button', { name: /^salvar$/i }));
+
+    expect(handleSave).toHaveBeenCalledTimes(1);
+    expect(stepSubmit).not.toHaveBeenCalled();
+  });
+
   it('saves when required fields are valid', async () => {
     const user = userEvent.setup();
     const handleSave = vi.fn();
