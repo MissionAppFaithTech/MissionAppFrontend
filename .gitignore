@@ -22,6 +22,7 @@ yarn.lock
 /.stryker-tmp/
 /reports/
 /playwright-report/
+/playwright-report-real/
 /test-results/
 scripts/ci-local.mjs
 scripts/responsive-report.json

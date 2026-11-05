@@ -100,6 +100,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 | `src/theme/`              | Tema MUI, tokens de cor e `AppThemeProvider`.                                               |
 | `src/types/`              | Tipos TypeScript compartilhados.                                                            |
 | `e2e/`                    | Testes Playwright (com axe) e a API falsa usada por eles (`e2e/support/mock-api.mjs`).      |
+| `e2e-real/`               | Testes Playwright contra o backend e o banco reais (`pnpm test:e2e:real`).                  |
 | `docs/architecture/`      | ADRs do frontend (`decisions/`) e o template.                                               |
 | `AGENTS.md` / `CLAUDE.md` | Orientação para IAs no repositório.                                                         |
 | `CONTRIBUTING.md`         | Como contribuir (único lugar para branches/commits/PRs).                                    |
@@ -142,6 +143,7 @@ Pastas **raiz** e **`src/`** (o que cada uma faz):
 │   ├── types/
 │   └── proxy.ts            # Renovação de sessão e guarda de rotas
 ├── e2e/                    # Playwright + API falsa
+├── e2e-real/               # Playwright + backend e banco reais
 ├── docs/architecture/      # ADRs
 ├── AGENTS.md
 ├── CODE_OF_CONDUCT.md
@@ -270,6 +272,7 @@ corepack enable   # passa a usar o pnpm fixado em packageManager
 | `pnpm typecheck`     | Verifica tipos TypeScript (`tsc --noEmit`) |
 | `pnpm test`          | Testes unitários (Vitest)                  |
 | `pnpm test:e2e`      | Testes e2e (Playwright, com axe)           |
+| `pnpm test:e2e:real` | E2e com o backend e o banco reais          |
 | `pnpm test:a11y`     | Só a verificação de acessibilidade (axe)   |
 | `pnpm test:mutation` | Testes de mutação (Stryker)                |
 
@@ -281,9 +284,10 @@ corepack enable   # passa a usar o pnpm fixado em packageManager
 
 - **Unitários:** `pnpm test` (Vitest + Testing Library). Server Actions são testadas com o harness de `src/test/actionHarness.ts`.
 - **E2e:** `pnpm build && pnpm test:e2e`. O Playwright sobe o app e uma API falsa (`e2e/support/mock-api.mjs`, porta 3335), então a suíte nunca toca uma API real. Roda em desktop e Pixel 5, com axe. Sem Google Chrome, use `PW_BUNDLED_CHROMIUM=1`.
+- **E2e com backend real:** `pnpm build && pnpm test:e2e:real`. Precisa do repositório do backend ao lado (`../MissionAppBackend`, ou `MISSIONAPP_BACKEND_DIR`), com o `.env` configurado e a infraestrutura de pé (`just up`). A suíte sobe uma instância isolada do backend na porta 3334, com o banco `app_e2e` recriado por migrations e seeds a cada execução e apagado no fim, e o Next na porta 3100. Ela usa o Redis db 2 e índices de busca próprios (`e2e_*`, recriados a cada execução e apagados no fim), e não sobe os workers das filas, então não manda e-mail. Os seus servidores de dev (3000/3333) e o banco `app` não são tocados. As specs novas que dependem da API ficam em `e2e-real/`; a suíte com a API falsa continua sendo a do CI.
 - **Mutação:** `pnpm test:mutation` (escopo em `stryker.config.json`).
 
-Antes de abrir PR: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm test`, `pnpm build` e os e2e do fluxo alterado (ver [`CONTRIBUTING.md`](./CONTRIBUTING.md)).
+Antes de abrir PR: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm test`, `pnpm build`, os e2e do fluxo alterado e `pnpm test:e2e:real` (ver [`CONTRIBUTING.md`](./CONTRIBUTING.md)).
 
 ---
 
