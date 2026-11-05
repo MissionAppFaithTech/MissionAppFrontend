@@ -18,8 +18,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/services/profileSave.service', () => ({ saveProfileAbout: vi.fn() }));
 vi.mock('@/services/catalog.service', () => ({
-  listMissionaryAgencies: vi.fn(async () => []),
-  listFaithCommunities: vi.fn(async () => []),
+  searchCatalog: vi.fn(async () => ({ items: [], hasMore: false })),
 }));
 
 const saveAbout = vi.mocked(saveProfileAbout);

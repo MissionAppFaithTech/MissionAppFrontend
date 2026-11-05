@@ -7,7 +7,9 @@ import SupportersStep1 from './SupportersStep1';
 import { SupporterRegisterWizardProvider } from '@/components/register/supporters/SupporterRegisterWizardContext';
 
 vi.mock('@/services/catalog.service', () => ({
-  listFaithCommunities: vi.fn().mockResolvedValue([{ id: 'church-1', name: 'Igreja Batista' }]),
+  searchCatalog: vi
+    .fn()
+    .mockResolvedValue({ items: [{ id: 'church-1', name: 'Igreja Batista' }], hasMore: false }),
 }));
 
 function renderStep() {
@@ -135,7 +137,18 @@ describe('SupportersStep1 component', () => {
     );
   });
 
-  it('opens the church modal from Não encontrei na lista', async () => {
+  it('searches the faith community on the server and picks it', async () => {
+    const user = userEvent.setup();
+    renderStep();
+
+    const field = screen.getByRole('combobox', { name: /comunidade de fé/i });
+    await user.type(field, 'igreja');
+    await user.click(await screen.findByRole('option', { name: 'Igreja Batista' }));
+
+    expect(field).toHaveValue('Igreja Batista');
+  });
+
+  it('opens the church modal from "+ Adicionar" with the typed name', async () => {
     const user = userEvent.setup();
     renderWithQuery(
       <SupporterRegisterWizardProvider>
@@ -143,12 +156,13 @@ describe('SupportersStep1 component', () => {
       </SupporterRegisterWizardProvider>
     );
 
-    await user.click(screen.getByLabelText(/comunidade de fé/i));
-    await user.click(await screen.findByRole('option', { name: /não encontrei na lista/i }));
+    await user.type(screen.getByRole('combobox', { name: /comunidade de fé/i }), 'Igreja Nova');
+    await user.click(await screen.findByRole('option', { name: /adicionar comunidade de fé/i }));
 
     expect(
       await screen.findByRole('heading', { name: /cadastrar comunidade de fé/i })
     ).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /^nome$/i })).toHaveValue('Igreja Nova');
     expect(screen.getByRole('textbox', { name: /nome do pastor/i })).toBeInTheDocument();
   });
 });

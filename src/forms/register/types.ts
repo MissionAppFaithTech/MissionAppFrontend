@@ -19,15 +19,21 @@ export type SupportersStep1Values = {
   email: string;
   /** Opcional — use SELECT_OTHER se não encontrar na lista */
   faithCommunity: string;
+  /** Nome do item escolhido (a busca não carrega o catálogo inteiro). */
+  faithCommunityName?: string;
   communityDetails: FaithCommunityData;
 };
 
 export type MissionariesStep2Values = {
   missionaryAgency: string;
+  /** Nome da agência escolhida (a busca não carrega o catálogo inteiro). */
+  missionaryAgencyName?: string;
   /** Preenchido quando missionaryAgency === SELECT_OTHER */
   agencyDetails: MissionaryAgencyData;
   missionDescription: string;
   faithCommunity: string;
+  /** Nome da comunidade escolhida. */
+  faithCommunityName?: string;
   communityDetails: FaithCommunityData;
 };
 

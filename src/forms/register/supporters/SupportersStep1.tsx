@@ -8,7 +8,7 @@ import PhoneField from '@/components/common/PhoneField';
 import { useSupporterRegisterWizard } from '@/components/register/supporters/SupporterRegisterWizardContext';
 import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
 import GenderField from '@/forms/register/shared/GenderField';
-import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
+import CatalogAutocomplete from '@/forms/register/shared/CatalogAutocomplete';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
 import { EMPTY_FAITH_COMMUNITY, SELECT_OTHER } from '@/forms/register/options';
@@ -18,14 +18,12 @@ import { toFormErrors } from '@/forms/register/shared/fieldErrors';
 import { yieldToMain } from '@/lib/scheduler';
 import { createFaithCommunitySchema } from '@/schemas/catalog-create.schema';
 import { supporterStep1Schema, type SupporterStep1FormData } from '@/schemas/register.schema';
-import { useCatalogItems } from '@/services/queries/catalog';
 
 export default function SupportersStep1() {
   const { formData, completeStep1, stepErrors } = useSupporterRegisterWizard();
   // Read once: the form keeps them until the user fixes each field.
   const [serverErrors] = useState(() => toFormErrors(stepErrors));
   const [showServerErrors] = useState(() => Object.keys(stepErrors).length > 0);
-  const communities = useCatalogItems('faithCommunities');
   const communityEntry = useOtherCatalogEntry();
   const {
     register,
@@ -46,11 +44,13 @@ export default function SupportersStep1() {
       gender: (formData.gender as 'feminino' | 'masculino') || undefined,
       phone: formData.phone || '',
       faithCommunity: formData.faithCommunity || '',
+      faithCommunityName: formData.faithCommunityName || '',
       communityDetails: formData.communityDetails || EMPTY_FAITH_COMMUNITY,
     },
   });
 
   const communityDetails = watch('communityDetails');
+  const communityName = watch('faithCommunityName');
 
   const handleStepSubmit = async (data: SupporterStep1FormData) => {
     await yieldToMain();
@@ -160,19 +160,26 @@ export default function SupportersStep1() {
         name="faithCommunity"
         control={control}
         render={({ field }) => (
-          <RegisterCatalogSelect
+          <CatalogAutocomplete
             id="faithCommunity"
+            kind="faithCommunities"
             label="Comunidade de fé (opcional)"
-            onBlur={field.onBlur}
+            // NOTE: focus moving into the sign-up modal is not leaving the field
+            onBlur={() => {
+              if (!communityEntry.open) field.onBlur();
+            }}
             value={field.value}
-            onChange={(value) => communityEntry.selectValue(value, field.value, field.onChange)}
-            options={communities.items}
-            isLoading={communities.isLoading}
-            loadError={communities.error}
+            selectedName={communityName}
+            onChange={(value, item) => {
+              field.onChange(value);
+              setValue('faithCommunityName', item?.name ?? '');
+            }}
+            onAddNew={(typedName) => {
+              if (typedName) setValue('communityDetails', { ...communityDetails, name: typedName });
+              communityEntry.selectValue(SELECT_OTHER, field.value, field.onChange);
+            }}
             error={Boolean(errors.faithCommunity)}
             helperText={errors.faithCommunity?.message}
-            emptyValueLabel="Nenhuma"
-            allowEmpty
             otherSummary={field.value === SELECT_OTHER ? communityDetails.name : undefined}
             onEditOther={communityEntry.openEditor}
           />
@@ -185,7 +192,9 @@ export default function SupportersStep1() {
         onClose={() =>
           communityEntry.cancel(
             createFaithCommunitySchema.safeParse(communityDetails).success,
-            (value) => setValue('faithCommunity', value)
+            // NOTE: a field already in error is checked again, never left red without text
+            (value) =>
+              setValue('faithCommunity', value, { shouldValidate: Boolean(errors.faithCommunity) })
           )
         }
         onSave={(details) => {

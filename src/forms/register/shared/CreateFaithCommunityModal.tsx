@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Stack from '@mui/material/Stack';
@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import PhoneField from '@/components/common/PhoneField';
 import CatalogCreateDialog from '@/forms/register/shared/CatalogCreateDialog';
 import CatalogZipField from '@/forms/register/shared/CatalogZipField';
+import { applyCatalogFieldErrors } from '@/forms/register/shared/catalogFormErrors';
 import { EMPTY_FAITH_COMMUNITY } from '@/forms/register/options';
 import { applyCepAddress, useCepAutofill } from '@/hooks/useCepAutofill';
 import { maskCep } from '@/lib/masks';
@@ -22,7 +23,11 @@ type CreateFaithCommunityModalProps = {
   open: boolean;
   initialValues?: Partial<FaithCommunityData>;
   onClose: () => void;
-  onSave: (data: CreateFaithCommunityFormData) => void;
+  /**
+   * Called with valid data. May create the item right away (Server Action):
+   * a rejection keeps the modal open with the API's errors on the fields.
+   */
+  onSave: (data: CreateFaithCommunityFormData) => void | Promise<void>;
 };
 
 export default function CreateFaithCommunityModal({
@@ -38,6 +43,7 @@ export default function CreateFaithCommunityModal({
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<CreateFaithCommunityFormData>({
     resolver: zodResolver(createFaithCommunitySchema),
@@ -45,6 +51,7 @@ export default function CreateFaithCommunityModal({
     defaultValues: { ...EMPTY_FAITH_COMMUNITY, ...initialValues },
   });
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const zipCode = watch('zipCode');
   const { status, message, search } = useCepAutofill({
     zipCode,
@@ -54,6 +61,7 @@ export default function CreateFaithCommunityModal({
 
   useEffect(() => {
     if (open) {
+      setSubmitError(null);
       reset({ ...EMPTY_FAITH_COMMUNITY, ...initialValues });
     }
     // NOTE: só reidrata ao abrir — senão o reset apaga o que a pessoa está digitando
@@ -68,7 +76,15 @@ export default function CreateFaithCommunityModal({
       titleId="create-church-title"
       descriptionId="create-church-description"
       onClose={onClose}
-      onSubmit={handleSubmit((values) => onSave(values))}
+      onSubmit={handleSubmit(async (values) => {
+        setSubmitError(null);
+        try {
+          await onSave(values);
+        } catch (error) {
+          setSubmitError(applyCatalogFieldErrors(error, setError, 'churchPhone'));
+        }
+      })}
+      errorMessage={submitError}
       isSubmitting={isSubmitting}
     >
       <TextField

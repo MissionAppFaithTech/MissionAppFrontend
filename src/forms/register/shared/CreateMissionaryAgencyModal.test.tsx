@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
+import { ApiError } from '@/lib/api/client';
 import { lookupCep } from '@/services/cep.service';
 import CreateMissionaryAgencyModal from './CreateMissionaryAgencyModal';
 
@@ -89,5 +90,45 @@ describe('CreateMissionaryAgencyModal', () => {
     expect(screen.getByRole('textbox', { name: /^estado/i })).toHaveValue('SP');
     expect(screen.getByRole('textbox', { name: /^endereço/i })).toHaveValue('Avenida Paulista');
     expect(screen.getByRole('textbox', { name: /^país/i })).toHaveValue('Brasil');
+  });
+
+  it('puts the API errors on the fields (phoneNumber on the phone) and clears them on reopen', async () => {
+    const user = userEvent.setup();
+    const handleSave = vi.fn().mockRejectedValue(
+      new ApiError('Revise os campos destacados e tente novamente.', 422, {
+        phoneNumber: 'Telefone inválido.',
+        website: 'Informe um site válido.',
+      })
+    );
+
+    const { rerender } = render(
+      <CreateMissionaryAgencyModal open onClose={vi.fn()} onSave={handleSave} />
+    );
+    await user.type(screen.getByRole('textbox', { name: /^nome/i }), 'Nova Agência');
+    await user.type(screen.getByRole('textbox', { name: /^país/i }), 'Brasil');
+    await user.type(screen.getByRole('textbox', { name: /^estado/i }), 'SP');
+    await user.type(screen.getByRole('textbox', { name: /^cidade/i }), 'Campinas');
+    await user.type(screen.getByRole('textbox', { name: /^telefone$/i }), '11987654321');
+    await user.click(screen.getByRole('button', { name: /^salvar$/i }));
+
+    const phone = screen.getByRole('textbox', { name: /^telefone$/i });
+    await waitFor(() => expect(phone).toHaveAttribute('aria-invalid', 'true'));
+    expect(phone).toHaveAccessibleDescription(/Telefone inválido\./);
+    expect(screen.getByText('Informe um site válido.')).toBeVisible();
+
+    rerender(<CreateMissionaryAgencyModal open={false} onClose={vi.fn()} onSave={handleSave} />);
+    rerender(
+      <CreateMissionaryAgencyModal
+        open
+        initialValues={{ name: 'Outra' }}
+        onClose={vi.fn()}
+        onSave={handleSave}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: /^nome/i })).toHaveValue('Outra')
+    );
+    expect(screen.queryByText('Telefone inválido.')).not.toBeInTheDocument();
   });
 });

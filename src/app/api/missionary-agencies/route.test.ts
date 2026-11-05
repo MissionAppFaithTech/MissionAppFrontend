@@ -1,86 +1,24 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-const cookiesGet = vi.fn();
-
-vi.mock('next/headers', () => ({
-  cookies: vi.fn(async () => ({ get: cookiesGet })),
+vi.mock('@/lib/server/catalogSearch', () => ({
+  searchCatalogCached: vi.fn(async () => ({
+    items: [{ id: 'x-1', name: 'Item' }],
+    hasMore: false,
+  })),
 }));
 
-vi.mock('@/lib/api/backend', () => ({
-  BackendApiError: class BackendApiError extends Error {
-    constructor(
-      message: string,
-      public status: number,
-      public body?: unknown
-    ) {
-      super(message);
-    }
-  },
-  backendFetch: vi.fn(),
-}));
-
-import { backendFetch } from '@/lib/api/backend';
-import { AUTH_COOKIE } from '@/lib/auth/cookies';
+import { searchCatalogCached } from '@/lib/server/catalogSearch';
 import { GET } from './route';
-import { clearRefreshCache } from '@/lib/api/bff';
 
 describe('/api/missionary-agencies', () => {
-  beforeEach(() => {
-    clearRefreshCache();
-    vi.mocked(backendFetch).mockReset();
-    cookiesGet.mockReset();
-    cookiesGet.mockImplementation((name: string) =>
-      name === AUTH_COOKIE.accessToken ? { value: 'access-token' } : undefined
-    );
-  });
+  it('searches the missionaryAgencies catalog without a session', async () => {
+    const response = await GET(new Request('http://localhost/api/missionary-agencies?search=it'));
 
-  it('lists agencies without an access token', async () => {
-    cookiesGet.mockReturnValue(undefined);
-    vi.mocked(backendFetch).mockResolvedValue({
-      data: { missionaryAgencies: [{ id: 'agency-1', name: 'JOCUM' }] },
-    });
-
-    const response = await GET();
-    expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith('/missionary-agencies');
-  });
-
-  it('normalizes the backend list for the select', async () => {
-    vi.mocked(backendFetch).mockResolvedValue({
-      data: { missionaryAgencies: [{ id: 'agency-1', name: 'JOCUM' }] },
-    });
-
-    const response = await GET();
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      data: [{ id: 'agency-1', name: 'JOCUM' }],
+      data: [{ id: 'x-1', name: 'Item' }],
+      meta: { hasMore: false },
     });
-  });
-
-  it('lists without a session (public catalog) and sends no token', async () => {
-    cookiesGet.mockReturnValue(undefined);
-    vi.mocked(backendFetch).mockResolvedValue({
-      data: { missionaryAgencies: [{ id: 'x-1', name: 'JOCUM' }] },
-    });
-
-    const response = await GET();
-
-    expect(response.status).toBe(200);
-    expect(backendFetch).toHaveBeenCalledWith(expect.stringMatching(/^\//));
-    expect(vi.mocked(backendFetch).mock.calls[0]).toHaveLength(1);
-  });
-
-  it('maps the public listing rate limit (429) to a pt-BR message', async () => {
-    const { BackendApiError } = await import('@/lib/api/backend');
-    vi.mocked(backendFetch).mockRejectedValue(
-      new BackendApiError('Too many requests', 429, { message: 'Too many requests' })
-    );
-
-    const response = await GET();
-
-    expect(response.status).toBe(429);
-    await expect(response.json()).resolves.toEqual({
-      message: 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.',
-    });
+    expect(searchCatalogCached).toHaveBeenCalledWith('missionaryAgencies', 'it', 10);
   });
 });

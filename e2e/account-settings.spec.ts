@@ -24,19 +24,21 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
     const community = page
       .getByRole('combobox', { name: /Comunidade de Fé \(Igreja\)/ })
       .filter({ visible: true });
-    const saved = await community.textContent();
+    const saved = await community.inputValue();
+    expect(saved).not.toBe('');
     const cancel = page
       .getByRole('button', { name: 'Cancelar alterações dos dados eclesiásticos' })
       .filter({ visible: true });
     await expect(cancel).toBeDisabled();
 
+    // Clearing the field unlinks the community (not saved yet).
     await community.click();
-    await page.getByRole('option', { name: 'Nenhuma comunidade de fé' }).click();
-    await expect(community).not.toHaveText(saved ?? '');
+    await page.getByRole('button', { name: 'Limpar' }).filter({ visible: true }).click();
+    await expect(community).toHaveValue('');
     await expect(cancel).toBeEnabled();
     await cancel.click();
 
-    await expect(community).toHaveText(saved ?? '');
+    await expect(community).toHaveValue(saved);
     await expect(cancel).toBeDisabled();
     await expect(page).toHaveURL(/\/profile\/configuracoes$/);
   });

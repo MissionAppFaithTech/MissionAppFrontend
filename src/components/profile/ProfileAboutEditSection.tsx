@@ -14,7 +14,10 @@ import PillButton from '@/components/common/PillButton';
 import EditBackButton from '@/components/profile/EditBackButton';
 import LimitedTextField from '@/components/common/LimitedTextField';
 import StyledTextArea from '@/components/common/StyledTextArea';
-import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
+import CatalogAutocomplete from '@/forms/register/shared/CatalogAutocomplete';
+import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
+import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
+import { EMPTY_FAITH_COMMUNITY, EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
 import { ApiError } from '@/lib/api/client';
 import {
   ABOUT_LONG_MAX_LENGTH,
@@ -22,9 +25,8 @@ import {
   profileAboutSchema,
   type ProfileAboutFormData,
 } from '@/schemas/profile.schema';
-import type { CatalogItem } from '@/services/catalog.service';
+import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
 import type { UpdateAboutPayload } from '@/services/profile.service';
-import { useCatalogItems } from '@/services/queries/catalog';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileAboutData, WorkAddressData } from '@/types/profile';
 
@@ -177,15 +179,6 @@ export function buildSaveAboutInput(
   };
 }
 
-/**
- * Keeps the saved item selectable while the catalog loads (or if it left the
- * list), so the select never holds a value it has no option for.
- */
-function withSaved(items: CatalogItem[], id?: string, name?: string): CatalogItem[] {
-  if (!id || items.some((item) => item.id === id)) return items;
-  return [{ id, name: name || 'Atual' }, ...items];
-}
-
 function FormSection({
   id,
   title,
@@ -226,8 +219,14 @@ export default function ProfileAboutEditSection({
   backHref,
   onDiscard,
 }: ProfileAboutEditSectionProps) {
-  const agencies = useCatalogItems('missionaryAgencies');
-  const communities = useCatalogItems('faithCommunities');
+  // NOTE: a busca não carrega o catálogo inteiro; o nome exibido vem do perfil
+  // e passa a ser o do item escolhido ou cadastrado aqui
+  const [agencyName, setAgencyName] = useState(data.missionaryAgency ?? '');
+  const [communityName, setCommunityName] = useState(data.faithCommunity ?? '');
+  const [creating, setCreating] = useState<{
+    kind: 'agency' | 'community';
+    name: string;
+  } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ id: string; tick: number } | null>(null);
@@ -239,6 +238,7 @@ export default function ProfileAboutEditSection({
     handleSubmit,
     control,
     setError,
+    setValue,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<ProfileAboutFormData>({
     resolver: zodResolver(profileAboutSchema),
@@ -466,21 +466,19 @@ export default function ProfileAboutEditSection({
                   name="missionaryAgencyId"
                   control={control}
                   render={({ field }) => (
-                    <RegisterCatalogSelect
+                    <CatalogAutocomplete
                       id="profile-about-missionaryAgency"
+                      kind="missionaryAgencies"
                       label="Agência missionária"
                       required
-                      allowOther={false}
                       value={field.value}
-                      onChange={field.onChange}
+                      selectedName={agencyName}
+                      onChange={(value, item) => {
+                        field.onChange(value);
+                        setAgencyName(item?.name ?? '');
+                      }}
+                      onAddNew={(name) => setCreating({ kind: 'agency', name })}
                       onBlur={field.onBlur}
-                      options={withSaved(
-                        agencies.items,
-                        data.missionaryAgencyId,
-                        data.missionaryAgency
-                      )}
-                      isLoading={agencies.isLoading}
-                      loadError={agencies.error}
                       error={Boolean(errors.missionaryAgencyId)}
                       helperText={errors.missionaryAgencyId?.message}
                     />
@@ -490,24 +488,23 @@ export default function ProfileAboutEditSection({
                   name="faithCommunityId"
                   control={control}
                   render={({ field }) => (
-                    <RegisterCatalogSelect
+                    <CatalogAutocomplete
                       id="profile-about-faithCommunity"
+                      kind="faithCommunities"
                       label="Comunidade de fé"
-                      allowOther={false}
-                      allowEmpty
-                      emptyValueLabel="Nenhuma comunidade de fé"
                       value={field.value}
-                      onChange={field.onChange}
+                      selectedName={communityName}
+                      onChange={(value, item) => {
+                        field.onChange(value);
+                        setCommunityName(item?.name ?? '');
+                      }}
+                      onAddNew={(name) => setCreating({ kind: 'community', name })}
                       onBlur={field.onBlur}
-                      options={withSaved(
-                        communities.items,
-                        data.faithCommunityId,
-                        data.faithCommunity
-                      )}
-                      isLoading={communities.isLoading}
-                      loadError={communities.error}
                       error={Boolean(errors.faithCommunityId)}
-                      helperText={errors.faithCommunityId?.message}
+                      helperText={
+                        errors.faithCommunityId?.message ??
+                        'Deixe em branco se não estiver ligado a uma comunidade de fé.'
+                      }
                     />
                   )}
                 />
@@ -574,6 +571,29 @@ export default function ProfileAboutEditSection({
             </Stack>
           </Box>
         </CardContent>
+        {/* "+ Adicionar …": cadastra na hora (Server Action) e já seleciona o item */}
+        <CreateMissionaryAgencyModal
+          open={creating?.kind === 'agency'}
+          initialValues={{ ...EMPTY_MISSIONARY_AGENCY, name: creating?.name ?? '' }}
+          onClose={() => setCreating(null)}
+          onSave={async (details) => {
+            const item = await createMissionaryAgency(details);
+            setValue('missionaryAgencyId', item.id, { shouldDirty: true, shouldValidate: true });
+            setAgencyName(item.name);
+            setCreating(null);
+          }}
+        />
+        <CreateFaithCommunityModal
+          open={creating?.kind === 'community'}
+          initialValues={{ ...EMPTY_FAITH_COMMUNITY, name: creating?.name ?? '' }}
+          onClose={() => setCreating(null)}
+          onSave={async (details) => {
+            const item = await createFaithCommunity(details);
+            setValue('faithCommunityId', item.id, { shouldDirty: true, shouldValidate: true });
+            setCommunityName(item.name);
+            setCreating(null);
+          }}
+        />
       </Card>
     </Stack>
   );

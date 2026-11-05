@@ -1,7 +1,9 @@
 import { createFaithCommunityAction, createMissionaryAgencyAction } from '@/app/actions/catalog';
 import { callAction } from '@/lib/api/callAction';
 import { ApiError } from '@/lib/api/client';
-import { addCatalogItem } from '@/services/queries/catalog';
+import { CATALOG_SEARCH_LIMIT } from '@/lib/catalog/search';
+import type { CatalogKind } from '@/lib/query/keys';
+import { invalidateCatalogSearches } from '@/services/queries/catalog';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 
 export type CatalogItem = {
@@ -9,8 +11,10 @@ export type CatalogItem = {
   name: string;
 };
 
-export type CatalogListResponse = {
-  data: CatalogItem[];
+/** One page of a catalog search (BFF `GET /api/<catalog>?search=`). */
+export type CatalogSearchPage = {
+  items: CatalogItem[];
+  hasMore: boolean;
 };
 
 function optionalText(value?: string) {
@@ -31,22 +35,46 @@ function optionalWebsite(value?: string) {
   return trimmed.includes('://') ? trimmed : `https://${trimmed}`;
 }
 
-async function fetchCatalog(path: string, fallbackMessage: string): Promise<CatalogItem[]> {
-  const response = await fetch(path, {
-    method: 'GET',
-    headers: { Accept: 'application/json' },
-    cache: 'no-store',
-  });
+const SEARCH_PATHS: Record<CatalogKind, { path: string; fallback: string }> = {
+  missionaryAgencies: {
+    path: '/api/missionary-agencies',
+    fallback: 'Não foi possível buscar as agências missionárias',
+  },
+  faithCommunities: {
+    path: '/api/faith-communities',
+    fallback: 'Não foi possível buscar as comunidades de fé',
+  },
+};
 
+/**
+ * Searches a catalog through the BFF (accent and case insensitive, backend
+ * ADR-0041). `signal` lets the query cache abort a search the user has
+ * already typed past.
+ *
+ * @throws ApiError with the pt-BR message and the status (no retry on 4xx).
+ */
+export async function searchCatalog(
+  kind: CatalogKind,
+  term: string,
+  { signal }: { signal?: AbortSignal } = {}
+): Promise<CatalogSearchPage> {
+  const { path, fallback } = SEARCH_PATHS[kind];
+  const query = new URLSearchParams({ search: term, limit: String(CATALOG_SEARCH_LIMIT) });
+  const response = await fetch(`${path}?${query}`, {
+    headers: { Accept: 'application/json' },
+    signal,
+  });
   const payload = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message = typeof payload?.message === 'string' ? payload.message : fallbackMessage;
+    const message = typeof payload?.message === 'string' ? payload.message : fallback;
     // ApiError carries the status, so the query cache never retries a 4xx (ADR-0002).
     throw new ApiError(message, response.status);
   }
-
-  return Array.isArray(payload?.data) ? payload.data : [];
+  return {
+    items: Array.isArray(payload?.data) ? payload.data : [],
+    hasMore: payload?.meta?.hasMore === true,
+  };
 }
 
 export function toCreateMissionaryAgencyPayload(input: MissionaryAgencyData) {
@@ -79,22 +107,11 @@ export function toCreateFaithCommunityPayload(input: FaithCommunityData) {
   };
 }
 
-export function listMissionaryAgencies(): Promise<CatalogItem[]> {
-  return fetchCatalog(
-    '/api/missionary-agencies',
-    'Não foi possível carregar as agências missionárias'
-  );
-}
-
-export function listFaithCommunities(): Promise<CatalogItem[]> {
-  return fetchCatalog('/api/faith-communities', 'Não foi possível carregar as comunidades de fé');
-}
-
 export async function createMissionaryAgency(input: MissionaryAgencyData): Promise<CatalogItem> {
   const item = await callAction(() =>
     createMissionaryAgencyAction(toCreateMissionaryAgencyPayload(input))
   );
-  addCatalogItem('missionaryAgencies', item);
+  invalidateCatalogSearches('missionaryAgencies');
   return item;
 }
 
@@ -102,6 +119,6 @@ export async function createFaithCommunity(input: FaithCommunityData): Promise<C
   const item = await callAction(() =>
     createFaithCommunityAction(toCreateFaithCommunityPayload(input))
   );
-  addCatalogItem('faithCommunities', item);
+  invalidateCatalogSearches('faithCommunities');
   return item;
 }

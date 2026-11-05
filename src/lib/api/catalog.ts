@@ -1,11 +1,12 @@
-import type { CatalogItem, CatalogListResponse } from '@/services/catalog.service';
+import type { CatalogItem } from '@/services/catalog.service';
 
 /**
  * Parses the backend catalog payloads (agencies, faith communities). Plain
- * functions, shared by the BFF routes, the Server Actions and the browser.
+ * functions, shared by the cached search and the Server Actions.
  */
 
-function catalogItemsFrom(payload: unknown, collectionKey: string): CatalogItem[] {
+/** `{ id, name }` of each item of a list payload, skipping malformed ones. */
+export function catalogItemsFrom(payload: unknown, collectionKey: string): CatalogItem[] {
   const root =
     payload && typeof payload === 'object' && 'data' in payload
       ? (payload as { data: unknown }).data
@@ -54,8 +55,4 @@ export function createdItemFrom(payload: unknown, resourceKey: string): CatalogI
   }
 
   return { id, name };
-}
-
-export function normalizeCatalogList(payload: unknown, collectionKey: string): CatalogListResponse {
-  return { data: catalogItemsFrom(payload, collectionKey) };
 }

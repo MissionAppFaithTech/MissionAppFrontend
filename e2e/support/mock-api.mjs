@@ -25,6 +25,94 @@ const isLoginUser = (sub) => sub.startsWith('e2e-login');
 
 /** `POST /accounts` answers "e-mail em uso" for this address. */
 const TAKEN_EMAIL = 'usado@missionapp.test';
+/** `POST /accounts/missionaries` answers "CPF já cadastrado" for this document. */
+const TAKEN_CPF = '11144477735';
+
+/**
+ * Catalogs searched like the backend (ADR-0041): accent and case insensitive,
+ * 2 letters by prefix and 3+ by "contains", `limit` (default 10) and
+ * `meta.hasMore`. Items created by the specs join the list.
+ */
+const catalogs = {
+  faithCommunities: [
+    { id: '019a0000-0000-7000-9000-00000000c001', name: 'Igreja Batista Central', city: 'Niterói' },
+    {
+      id: '019a0000-0000-7000-9000-00000000c002',
+      name: 'Igreja Presbiteriana da Paz',
+      city: 'Recife',
+    },
+  ],
+  missionaryAgencies: [
+    { id: '019a0000-0000-7000-9000-00000000a001', name: 'JOCUM', city: 'Contagem' },
+    { id: '019a0000-0000-7000-9000-00000000a002', name: 'Missão Ágape', city: 'São Paulo' },
+    ...Array.from({ length: 11 }, (_, index) => ({
+      id: `019a0000-0000-7000-9000-00000000b${String(index + 1).padStart(3, '0')}`,
+      name: `Missões Unidas ${String(index + 1).padStart(2, '0')}`,
+      city: 'Recife',
+    })),
+  ],
+};
+let catalogSequence = 0;
+
+const normalizeCatalog = (value = '') =>
+  value
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ');
+
+const searchCatalog = (kind) => (request, response) => {
+  const params = new URL(request.url ?? '/', 'http://localhost').searchParams;
+  const term = normalizeCatalog(params.get('search') ?? '');
+  if (params.has('search') && term.length < 2) {
+    return send(response, 422, {
+      message: 'Validation failure',
+      code: 'E_VALIDATION_ERROR',
+      errors: [{ field: 'search', rule: 'minLength', message: 'Too short', meta: { min: 2 } }],
+    });
+  }
+  const limit = Math.min(Number(params.get('limit')) || 10, 20);
+  const matches = catalogs[kind]
+    .filter(({ name }) => {
+      const key = normalizeCatalog(name);
+      return !term || (term.length < 3 ? key.startsWith(term) : key.includes(term));
+    })
+    .sort((a, b) => normalizeCatalog(a.name).localeCompare(normalizeCatalog(b.name)));
+  return send(response, 200, {
+    data: { [kind]: matches.slice(0, limit) },
+    meta: { hasMore: matches.length > limit },
+  });
+};
+
+/** `POST /<catalog>` refuses this name with a field error (any 422 the API may send). */
+const REFUSED_CATALOG_NAME = 'Cadastro Recusado';
+
+/**
+ * `POST /<catalog>`: the same name in the same city (accents and case aside)
+ * reuses the existing item instead of duplicating it, like the backend.
+ */
+const createCatalogItem = (kind, singular) =>
+  authenticated((_profile, body, response) => {
+    if (body.name === REFUSED_CATALOG_NAME) {
+      return send(response, 422, {
+        message: 'Validation failure',
+        code: 'E_VALIDATION_ERROR',
+        errors: [{ field: 'name', rule: 'catalogName', message: 'Este nome não é aceito.' }],
+      });
+    }
+    const key = (item) => `${normalizeCatalog(item.name)}|${normalizeCatalog(item.city)}`;
+    const existing = catalogs[kind].find((item) => key(item) === key(body));
+    if (existing) return send(response, 201, { data: { [singular]: existing } });
+    catalogSequence += 1;
+    const item = {
+      id: `019a0000-0000-7000-9000-${String(catalogSequence).padStart(12, 'f')}`,
+      name: body.name,
+      city: body.city,
+    };
+    catalogs[kind].push(item);
+    return send(response, 201, { data: { [singular]: item } });
+  });
 
 const profiles = new Map();
 
@@ -272,6 +360,19 @@ const routes = {
   'POST /api/v1/accounts/missionaries': async (request, response) => {
     const body = await readBody(request);
     if (body.email === TAKEN_EMAIL) return emailTaken(response);
+    if (body.identityType === 'CPF' && body.identityDocument === TAKEN_CPF) {
+      return send(response, 422, {
+        message: 'Validation failure',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          {
+            field: 'identityDocument',
+            rule: 'database.unique',
+            message: 'Este CPF já está cadastrado.',
+          },
+        ],
+      });
+    }
     const sub = `e2e-signup-${body.username}`;
     const profile = profileOf(sub);
     profile.user = {
@@ -303,10 +404,10 @@ const routes = {
     const username = new URL(request.url ?? '/', 'http://localhost').searchParams.get('username');
     return send(response, 200, { data: { available: true, username, suggestions: [] } });
   },
-  'GET /api/v1/faith-communities': (_request, response) =>
-    send(response, 200, { data: [{ id: 'fc-e2e-1', name: 'Igreja Batista Central' }] }),
-  'GET /api/v1/missionary-agencies': (_request, response) =>
-    send(response, 200, { data: [{ id: 'ma-e2e-1', name: 'JOCUM' }] }),
+  'GET /api/v1/faith-communities': searchCatalog('faithCommunities'),
+  'GET /api/v1/missionary-agencies': searchCatalog('missionaryAgencies'),
+  'POST /api/v1/faith-communities': createCatalogItem('faithCommunities', 'faithCommunity'),
+  'POST /api/v1/missionary-agencies': createCatalogItem('missionaryAgencies', 'missionaryAgency'),
   'GET /api/v1/auth/sessions': listSessions,
   'DELETE /api/v1/auth/sessions': (request, response) => {
     const sub = userOf(request);
@@ -351,8 +452,22 @@ const routes = {
     const { workAddress, ...about } = body;
     Object.assign(profile.missionary, about);
     if (workAddress) profile.workAddress = { ...workAddress };
+    // The link carries the catalog item's name, like the backend (JOCUM if unknown).
+    const linked = (kind, id, fallback) => {
+      const item = catalogs[kind].find((entry) => entry.id === id);
+      return { id, name: item?.name ?? fallback };
+    };
     if (about.missionaryAgencyId) {
-      profile.missionaryAgency = { id: about.missionaryAgencyId, name: 'JOCUM' };
+      profile.missionaryAgency = linked('missionaryAgencies', about.missionaryAgencyId, 'JOCUM');
+    }
+    if (about.faithCommunityId) {
+      profile.faithCommunity = linked(
+        'faithCommunities',
+        about.faithCommunityId,
+        'Igreja Batista Central'
+      );
+    } else if (about.faithCommunityId === null) {
+      profile.faithCommunity = null;
     }
     return send(response, 200, {
       data: {

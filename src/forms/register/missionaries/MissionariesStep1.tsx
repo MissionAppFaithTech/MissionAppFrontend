@@ -9,7 +9,7 @@ import GenderField from '@/forms/register/shared/GenderField';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import { maskBirthDate, maskCpfOrPassport } from '@/lib/masks';
 import { validateOnLeave } from '@/lib/formValidation';
-import { toFormErrors } from '@/forms/register/shared/fieldErrors';
+import { personalStepErrors, toFormErrors } from '@/forms/register/shared/fieldErrors';
 import { missionaryStep1Schema, type MissionaryStep1FormData } from '@/schemas/register.schema';
 import { useMissionaryRegisterWizard } from '@/components/register/missionaries/MissionaryRegisterWizardContext';
 import { yieldToMain } from '@/lib/scheduler';
@@ -17,8 +17,9 @@ import { yieldToMain } from '@/lib/scheduler';
 export default function MissionariesStep1() {
   const { formData, completeStep1, stepErrors } = useMissionaryRegisterWizard();
   // Read once: the form keeps them until the user fixes each field.
-  const [serverErrors] = useState(() => toFormErrors(stepErrors));
-  const [showServerErrors] = useState(() => Object.keys(stepErrors).length > 0);
+  // NOTE: errors of step 2 wait in the store until the user gets there.
+  const [serverErrors] = useState(() => toFormErrors(personalStepErrors(stepErrors)));
+  const [showServerErrors] = useState(() => Object.keys(serverErrors).length > 0);
   const {
     register,
     handleSubmit,

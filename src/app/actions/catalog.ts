@@ -1,7 +1,10 @@
 'use server';
 
+import { updateTag } from 'next/cache';
 import { backendFetch } from '@/lib/api/backend';
 import { createdItemFrom } from '@/lib/api/catalog';
+import { catalogTag } from '@/lib/cache/tags';
+import type { CatalogKind } from '@/lib/query/keys';
 import { parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
 import {
   createCatalogItemInputSchema,
@@ -27,6 +30,7 @@ type CatalogInput = {
 type FaithCommunityInput = CatalogInput & { pastorName?: string; pastorPhone?: string };
 
 function createCatalogItem(
+  kind: CatalogKind,
   path: string,
   resourceKey: string,
   schema: typeof createCatalogItemInputSchema | typeof createMissionaryAgencyInputSchema,
@@ -39,7 +43,10 @@ function createCatalogItem(
 
   return runWithSession(`actions${path}`, fallbackMessage, async (accessToken) => {
     const result = await backendFetch(path, { method: 'POST', body: parsed.data, accessToken });
-    return createdItemFrom(result, resourceKey);
+    const item = createdItemFrom(result, resourceKey);
+    // NOTE: the next search must find it (cached search, backend ADR-0041)
+    updateTag(catalogTag(kind));
+    return item;
   });
 }
 
@@ -47,6 +54,7 @@ export async function createMissionaryAgencyAction(
   input: CatalogInput
 ): Promise<ActionResult<CatalogItem>> {
   return createCatalogItem(
+    'missionaryAgencies',
     '/missionary-agencies',
     'missionaryAgency',
     createMissionaryAgencyInputSchema,
@@ -60,6 +68,7 @@ export async function createFaithCommunityAction(
   input: FaithCommunityInput
 ): Promise<ActionResult<CatalogItem>> {
   return createCatalogItem(
+    'faithCommunities',
     '/faith-communities',
     'faithCommunity',
     createCatalogItemInputSchema,

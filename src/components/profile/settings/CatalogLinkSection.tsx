@@ -12,22 +12,21 @@ import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
 import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
-import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
-import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
-import {
-  EMPTY_FAITH_COMMUNITY,
-  EMPTY_MISSIONARY_AGENCY,
-  SELECT_OTHER,
-} from '@/forms/register/options';
+import CatalogAutocomplete from '@/forms/register/shared/CatalogAutocomplete';
+import { EMPTY_FAITH_COMMUNITY, EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
+import { ApiError } from '@/lib/api/client';
 import type { CatalogKind } from '@/lib/query/keys';
-import type { CatalogItem } from '@/services/catalog.service';
-import { useCatalogItems } from '@/services/queries/catalog';
-import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
+import {
+  createFaithCommunity,
+  createMissionaryAgency,
+  type CatalogItem,
+} from '@/services/catalog.service';
 
-/** What the user picked: a catalog item (`''` = none) or a new one to register. */
-export type CatalogSelection =
-  | { kind: 'existing'; id: string }
-  | { kind: 'new'; details: FaithCommunityData | MissionaryAgencyData };
+/** `PATCH /me/about` field that holds each link. */
+const LINK_API_FIELD: Record<CatalogKind, string> = {
+  missionaryAgencies: 'missionaryAgencyId',
+  faithCommunities: 'faithCommunityId',
+};
 
 type CatalogLinkSectionProps = {
   /** Section anchor (quick navigation). */
@@ -42,23 +41,18 @@ type CatalogLinkSectionProps = {
   /** Saved catalog item. */
   savedId?: string;
   savedName?: string;
-  /** Without it, "nenhuma" is offered to unlink the item. */
+  /** Without it, clearing the field unlinks the item. */
   required?: boolean;
-  emptyValueLabel?: string;
   hint?: string;
-  /** Persists the selection and resolves with the saved catalog id. */
-  onSave: (selection: CatalogSelection) => Promise<string>;
+  /** Persists the link (`''` = none) and resolves with the saved catalog id. */
+  onSave: (id: string) => Promise<string>;
 };
-
-/** Keeps the saved item selectable while the catalog loads. */
-function withSaved(items: CatalogItem[], id?: string, name?: string): CatalogItem[] {
-  if (!id || items.some((item) => item.id === id)) return items;
-  return [{ id, name: name || 'Atual' }, ...items];
-}
 
 /**
  * Account settings block that links the missionary to a catalog item (faith
- * community or agency), or registers a new one through the sign-up modals.
+ * community or agency). The field searches the catalog on the server (backend
+ * ADR-0041); "+ Adicionar …" registers a missing item in the sign-up modal,
+ * which shows the API's field errors on its own fields, and selects it.
  */
 export default function CatalogLinkSection({
   id,
@@ -72,50 +66,51 @@ export default function CatalogLinkSection({
   savedId = '',
   savedName,
   required = false,
-  emptyValueLabel,
   hint,
   onSave,
 }: CatalogLinkSectionProps) {
-  const catalog = useCatalogItems(kind);
-  const entry = useOtherCatalogEntry();
   const isCommunity = kind === 'faithCommunities';
-  const emptyDetails = isCommunity ? EMPTY_FAITH_COMMUNITY : EMPTY_MISSIONARY_AGENCY;
 
-  const [saved, setSaved] = useState({ id: savedId, name: savedName });
-  const [value, setValue] = useState(savedId);
+  const [saved, setSaved] = useState({ id: savedId, name: savedName ?? '' });
+  const [value, setValue] = useState({ id: savedId, name: savedName ?? '' });
   // The server's link wins when it changes (edited in "Sobre", another account).
+  // Remounts the field so its text follows a reset, a new item or the server.
+  const [fieldKey, setFieldKey] = useState(0);
   const [synced, setSynced] = useState({ id: savedId, name: savedName });
   if (synced.id !== savedId || synced.name !== savedName) {
     setSynced({ id: savedId, name: savedName });
-    setSaved({ id: savedId, name: savedName });
-    setValue(savedId);
+    // NOTE: the refresh after our own "Salvar" brings what this form saved; only
+    // a link changed elsewhere replaces the field (and what the user is typing).
+    if (saved.id !== savedId || saved.name !== (savedName ?? '')) {
+      setSaved({ id: savedId, name: savedName ?? '' });
+      setValue({ id: savedId, name: savedName ?? '' });
+      setFieldKey((key) => key + 1);
+    }
   }
-  const [details, setDetails] = useState<FaithCommunityData | MissionaryAgencyData>(emptyDetails);
+  const [creating, setCreating] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
   const selectId = `${id}-select`;
-  const dirty = value !== saved.id;
-  const isOther = value === SELECT_OTHER;
+  const dirty = value.id !== saved.id;
+
+  const pick = (next: { id: string; name: string }, remount = false) => {
+    setValue(next);
+    setError(null);
+    if (remount) setFieldKey((key) => key + 1);
+  };
 
   const handleCancel = () => {
-    setValue(saved.id);
-    setDetails(emptyDetails);
-    setError(null);
+    pick(saved, true);
     setSubmitError(null);
   };
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (required && !value) {
+    if (required && !value.id) {
       setError(isCommunity ? 'Selecione a comunidade de fé.' : 'Selecione a agência missionária.');
       document.getElementById(selectId)?.focus();
-      return;
-    }
-    if (isOther && !details.name.trim()) {
-      setError('Informe os dados do novo cadastro.');
-      entry.openEditor();
       return;
     }
 
@@ -123,25 +118,27 @@ export default function CatalogLinkSection({
     setSubmitError(null);
     setSaving(true);
     try {
-      const savedIdNow = await onSave(
-        isOther ? { kind: 'new', details } : { kind: 'existing', id: value }
-      );
-      setSaved({ id: savedIdNow, name: isOther ? details.name : savedName });
-      setValue(savedIdNow);
-      setDetails(emptyDetails);
+      const savedIdNow = await onSave(value.id);
+      setSaved({ id: savedIdNow, name: value.name });
+      setValue({ id: savedIdNow, name: value.name });
     } catch (saveError) {
-      setSubmitError(saveError instanceof Error ? saveError.message : 'Não foi possível salvar.');
+      // The link field's own error (item removed meanwhile...) goes on the field.
+      const fieldError =
+        saveError instanceof ApiError ? saveError.fieldErrors[LINK_API_FIELD[kind]] : undefined;
+      if (fieldError) {
+        setError(fieldError);
+        document.getElementById(selectId)?.focus();
+      } else {
+        setSubmitError(saveError instanceof Error ? saveError.message : 'Não foi possível salvar.');
+      }
     } finally {
       setSaving(false);
     }
   };
 
-  const closeModal = (complete: boolean) => entry.cancel(complete, setValue);
-  const saveDetails = (next: FaithCommunityData | MissionaryAgencyData) => {
-    setDetails(next);
-    setValue(SELECT_OTHER);
-    setError(null);
-    entry.close();
+  const registered = (item: CatalogItem) => {
+    pick({ id: item.id, name: item.name }, true);
+    setCreating(null);
   };
 
   return (
@@ -168,24 +165,18 @@ export default function CatalogLinkSection({
               </Typography>
             ) : null}
 
-            <RegisterCatalogSelect
+            <CatalogAutocomplete
+              key={fieldKey}
               id={selectId}
               label={selectLabel}
+              kind={kind}
               required={required}
-              allowEmpty={!required}
-              emptyValueLabel={emptyValueLabel}
-              value={value}
-              onChange={(next) => {
-                setError(null);
-                entry.selectValue(next, value, setValue);
-              }}
-              options={withSaved(catalog.items, saved.id, saved.name)}
-              isLoading={catalog.isLoading}
-              loadError={catalog.error}
+              value={value.id}
+              selectedName={value.name}
+              onChange={(next, item) => pick({ id: next, name: item?.name ?? '' })}
+              onAddNew={(typed) => setCreating(typed)}
               error={Boolean(error)}
               helperText={error ?? undefined}
-              otherSummary={isOther ? details.name : undefined}
-              onEditOther={entry.openEditor}
             />
 
             {submitError ? (
@@ -226,17 +217,17 @@ export default function CatalogLinkSection({
 
         {isCommunity ? (
           <CreateFaithCommunityModal
-            open={entry.open}
-            initialValues={details as FaithCommunityData}
-            onClose={() => closeModal(Boolean(details.name.trim()))}
-            onSave={saveDetails}
+            open={creating !== null}
+            initialValues={{ ...EMPTY_FAITH_COMMUNITY, name: creating ?? '' }}
+            onClose={() => setCreating(null)}
+            onSave={async (details) => registered(await createFaithCommunity(details))}
           />
         ) : (
           <CreateMissionaryAgencyModal
-            open={entry.open}
-            initialValues={details as MissionaryAgencyData}
-            onClose={() => closeModal(Boolean(details.name.trim()))}
-            onSave={saveDetails}
+            open={creating !== null}
+            initialValues={{ ...EMPTY_MISSIONARY_AGENCY, name: creating ?? '' }}
+            onClose={() => setCreating(null)}
+            onSave={async (details) => registered(await createMissionaryAgency(details))}
           />
         )}
       </CardContent>
