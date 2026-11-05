@@ -132,7 +132,7 @@ export default function CopyableTemplatesSection() {
                     size="small"
                     onClick={() => handleCopy(template)}
                     startIcon={isCopied ? <CheckIcon /> : <ContentCopyIcon fontSize="small" />}
-                    aria-label={`Copiar ${template.title}`}
+                    aria-label={`${isCopied ? 'Copiado!' : 'Copiar Modelo'}: ${template.title}`}
                     sx={{
                       minHeight: 44,
                       fontSize: '0.875rem',

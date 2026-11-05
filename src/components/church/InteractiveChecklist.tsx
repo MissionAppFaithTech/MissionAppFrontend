@@ -93,7 +93,8 @@ export default function InteractiveChecklist() {
                 fontSize: '0.875rem',
                 height: 32,
                 bgcolor: progressPercentage === 100 ? 'success.main' : 'primary.main',
-                color: 'common.white',
+                // NOTE: contrastText follows the fill (navy text on the light blue of dark mode)
+                color: progressPercentage === 100 ? 'success.contrastText' : 'primary.contrastText',
               }}
             />
             {isClient && completedPhases.length > 0 && (

@@ -219,7 +219,7 @@ describe('ChurchGuideView Component', () => {
 
       // Find copy button for Template 1 (Regimento Interno)
       const copyBtn = screen.getByRole('button', {
-        name: /copiar template 1: modelo simplificado de regimento interno/i,
+        name: /copiar modelo: template 1: modelo simplificado de regimento interno/i,
       });
       expect(copyBtn).toBeInTheDocument();
 

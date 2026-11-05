@@ -127,14 +127,13 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
   ];
 
   const blocks = [
-    <Stack key="story" spacing={2}>
-      <LabeledText label="Biografia" value={data.introduction} onEdit={onEditAction} />
-      <LabeledText
-        label="Resumo da minha história em missões"
-        value={data.missionHistory}
-        onEdit={onEditAction}
-      />
-    </Stack>,
+    <LabeledText key="bio" label="Biografia" value={data.introduction} onEdit={onEditAction} />,
+    <LabeledText
+      key="story"
+      label="Resumo da minha história em missões"
+      value={data.missionHistory}
+      onEdit={onEditAction}
+    />,
     <Box
       key="details"
       component="dl"
@@ -157,10 +156,18 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
         </Box>
       ))}
     </Box>,
-    <Stack key="quotes" spacing={2.5}>
-      <QuoteBlock label="Pedidos de oração" value={data.prayerRequests} onEdit={onEditAction} />
-      <QuoteBlock label="Versículo para a vida" value={data.lifeVerse} onEdit={onEditAction} />
-    </Stack>,
+    <QuoteBlock
+      key="prayer"
+      label="Pedidos de oração"
+      value={data.prayerRequests}
+      onEdit={onEditAction}
+    />,
+    <QuoteBlock
+      key="verse"
+      label="Versículo para a vida"
+      value={data.lifeVerse}
+      onEdit={onEditAction}
+    />,
   ];
 
   return (
@@ -213,6 +220,7 @@ export default function ProfileAboutSection({ data, onEditAction }: ProfileAbout
             </PillButton>
           </Stack>
 
+          {/* NOTE: a divider between every part (bio, story, details, prayer, verse) */}
           {blocks.map((block, index) => (
             <Stack key={index} spacing={{ xs: 2, sm: 2.5 }}>
               {index > 0 ? <Divider /> : null}

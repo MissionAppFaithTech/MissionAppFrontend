@@ -66,7 +66,69 @@ function DetailRow({ label, value }: DetailRowProps) {
   );
 }
 
-function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
+/** The missionary's "Sobre" as a supporter sees it. */
+export function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
+  const hasDetails = Boolean(
+    data.originLocation || data.currentLocation || data.missionaryAgency || data.faithCommunity
+  );
+  const parts = [
+    data.introduction && {
+      key: 'bio',
+      node: (
+        <Typography variant="body2" sx={{ lineHeight: 1.6, color: 'text.primary' }}>
+          {data.introduction}
+        </Typography>
+      ),
+    },
+    data.missionHistory && {
+      key: 'story',
+      node: (
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
+            Resumo da história em missões:
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+            {data.missionHistory}
+          </Typography>
+        </Box>
+      ),
+    },
+    hasDetails && {
+      key: 'details',
+      node: (
+        <Stack spacing={1.25}>
+          {data.originLocation && <DetailRow label="Local de origem" value={data.originLocation} />}
+          {data.currentLocation && (
+            <DetailRow label="Local de atuação atual" value={data.currentLocation} />
+          )}
+          {data.missionaryAgency && (
+            <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
+          )}
+          {data.faithCommunity ? (
+            <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
+          ) : null}
+        </Stack>
+      ),
+    },
+    data.prayerRequests && {
+      key: 'prayer',
+      node: (
+        <Box>
+          <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
+            Pedidos de oração:
+          </Typography>
+          <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+            {data.prayerRequests}
+          </Typography>
+        </Box>
+      ),
+    },
+    data.lifeVerse && {
+      key: 'verse',
+      node: <DetailRow label="Versículo para a vida" value={data.lifeVerse} />,
+    },
+  ].filter((part): part is { key: string; node: React.JSX.Element } => Boolean(part));
+
   return (
     <Card
       component="section"
@@ -90,61 +152,13 @@ function MissionaryAboutSection({ data }: { data: ProfileAboutData }) {
             Sobre
           </Typography>
 
-          {data.introduction && (
-            <Typography variant="body2" sx={{ lineHeight: 1.6, color: 'text.primary' }}>
-              {data.introduction}
-            </Typography>
-          )}
-
-          <Divider />
-
-          {data.missionHistory && (
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                Resumo da história em missões:
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                {data.missionHistory}
-              </Typography>
-            </Box>
-          )}
-
-          <Divider />
-
-          <Stack spacing={1.25}>
-            {data.originLocation && (
-              <DetailRow label="Local de origem" value={data.originLocation} />
-            )}
-            {data.currentLocation && (
-              <DetailRow label="Local de atuação atual" value={data.currentLocation} />
-            )}
-            {data.missionaryAgency && (
-              <DetailRow label="Agência Missionária" value={data.missionaryAgency} />
-            )}
-            {data.faithCommunity ? (
-              <DetailRow label="Comunidade de fé" value={data.faithCommunity} />
-            ) : null}
-          </Stack>
-
-          {data.prayerRequests && (
-            <>
-              <Divider />
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'primary.main' }}>
-                  Pedidos de oração:
-                </Typography>
-                <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
-                  {data.prayerRequests}
-                </Typography>
-              </Box>
-            </>
-          )}
-
-          {data.lifeVerse && (
-            <Box sx={{ pt: 1 }}>
-              <DetailRow label="Versículo para a vida" value={data.lifeVerse} />
-            </Box>
-          )}
+          {/* NOTE: a divider between every part that has content, never a stray one */}
+          {parts.map((part, index) => (
+            <Stack key={part.key} spacing={{ xs: 2, sm: 2.5 }}>
+              {index > 0 ? <Divider /> : null}
+              {part.node}
+            </Stack>
+          ))}
         </Stack>
       </CardContent>
     </Card>

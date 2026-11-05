@@ -80,16 +80,12 @@ export default function MaterialsHub() {
                       theme.palette.mode === 'dark'
                         ? 'rgba(255, 255, 255, 0.06)'
                         : 'rgba(13, 43, 92, 0.05)',
-                color: isSelected
-                  ? 'common.white'
-                  : (t) => (t.palette.mode === 'dark' ? 'common.white' : 'text.primary'),
-                border: '1px solid',
+                // NOTE: contrastText follows the fill (navy on the light blue of dark mode)
+                color: isSelected ? 'primary.contrastText' : 'text.primary',
+                border: '2px solid',
                 borderColor: isSelected
                   ? 'primary.main'
-                  : (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--mui-palette-action2-borderSubtle)'
-                        : 'var(--mui-palette-divider)',
+                  : 'var(--mui-palette-action2-controlBorder)',
                 transition: 'all 0.2s ease',
                 '&:hover': {
                   bgcolor: isSelected
@@ -240,7 +236,9 @@ export default function MaterialsHub() {
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         letterSpacing: '0.05em',
-                        color: 'accent.main',
+                        // NOTE: soft orange in dark: 12px caption on the tinted card stays ≥4.5:1
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? 'accent.light' : 'accent.main',
                         display: 'block',
                         mb: 0.25,
                       }}

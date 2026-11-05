@@ -149,4 +149,10 @@ describe('ProfileAboutSection', () => {
     await user.keyboard('{Enter}');
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
+
+  it('separates every part (bio, story, details, prayer, verse) with a line', () => {
+    render(<ProfileAboutSection data={populatedAbout} onEditAction={vi.fn()} />);
+
+    expect(screen.getAllByRole('separator')).toHaveLength(4);
+  });
 });

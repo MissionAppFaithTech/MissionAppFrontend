@@ -69,6 +69,8 @@ export type ModeTokens = {
   surface2: string;
   borderSubtle: string;
   borderStrong: string;
+  /** Outline of buttons and clickable chips — ≥3:1 on canvas and paper (WCAG 1.4.11). */
+  controlBorder: string;
   textPrimary: string;
   textSecondary: string;
   textDisabled: string;
@@ -112,6 +114,8 @@ export const lightTokens: ModeTokens = {
   surface2: shades.surfaceMuted,
   borderSubtle: `${colors.border}33`,
   borderStrong: colors.border,
+  /* Navy: 14:1 on white */
+  controlBorder: colors.primary,
   textPrimary: colors.textPrimary,
   textSecondary: colors.textSecondary,
   textDisabled: 'rgba(8, 28, 58, 0.38)',
@@ -127,8 +131,10 @@ export const lightTokens: ModeTokens = {
   secondaryHoverWash: 'rgba(13, 43, 92, 0.04)',
   focusRing: colors.primary,
   disabledFill: 'rgba(13, 43, 92, 0.10)',
-  disabledText: 'rgba(8, 28, 58, 0.38)',
-  disabledBorder: 'rgba(13, 43, 92, 0.16)',
+  /* 4.9:1 on the disabled fill: off, but still readable */
+  disabledText: '#5B6576',
+  /* Dashed edge, 3.2:1 on white: still visible, clearly off */
+  disabledBorder: 'rgba(13, 43, 92, 0.55)',
   danger: colors.error,
   dangerFill: colors.error,
   fieldBg: shades.surfaceMuted,
@@ -148,6 +154,8 @@ export const darkTokens: ModeTokens = {
   surface2: '#204878',
   borderSubtle: 'rgba(147, 197, 253, 0.18)',
   borderStrong: 'rgba(147, 197, 253, 0.35)',
+  /* 3.8:1 on paper (#1A3D6E), 5.2:1 on the canvas */
+  controlBorder: 'rgba(147, 197, 253, 0.7)',
   textPrimary: colors.surface,
   /* Slate-300 — ≥4.5:1 on paper (#1A3D6E) and field wash (#284977) */
   textSecondary: '#CBD5E1',
@@ -164,8 +172,10 @@ export const darkTokens: ModeTokens = {
   secondaryHoverWash: 'rgba(147, 197, 253, 0.12)',
   focusRing: '#60A5FA',
   disabledFill: 'rgba(255, 255, 255, 0.08)',
-  disabledText: 'rgba(255, 255, 255, 0.55)',
-  disabledBorder: 'rgba(147, 197, 253, 0.22)',
+  /* ≥4.5:1 on the disabled fill over paper */
+  disabledText: 'rgba(255, 255, 255, 0.78)',
+  /* Dashed edge, ≥3:1 on paper */
+  disabledBorder: 'rgba(147, 197, 253, 0.7)',
   /* Soft red — readable as text/icons on navy paper (WCAG AA) */
   danger: '#FCA5A5',
   dangerFill: colors.error,
@@ -204,6 +214,7 @@ declare module '@mui/material/styles' {
       secondaryHoverWash: string;
       borderSubtle: string;
       borderStrong: string;
+      controlBorder: string;
       focusRing: string;
       linkHover: string;
       disabledFill: string;
@@ -489,6 +500,7 @@ function buildPalette(mode: 'light' | 'dark') {
       secondaryHoverWash: t.secondaryHoverWash,
       borderSubtle: t.borderSubtle,
       borderStrong: t.borderStrong,
+      controlBorder: t.controlBorder,
       focusRing: t.focusRing,
       linkHover: t.linkHover,
       disabledFill: t.disabledFill,

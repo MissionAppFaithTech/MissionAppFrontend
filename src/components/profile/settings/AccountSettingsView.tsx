@@ -17,7 +17,6 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import Visibility from '@mui/icons-material/Visibility';
@@ -46,6 +45,16 @@ const BACK_HREF: Record<AccountSettingsViewProps['role'], string> = {
   missionary: '/profile/sobre',
   supporter: '/profile/supporter/missionarios',
 };
+
+/** Quick-nav chips: a control edge of ≥3:1 in both themes (WCAG 1.4.11). */
+const quickNavChipSx = {
+  minHeight: 44,
+  fontWeight: 600,
+  borderWidth: '2px',
+  borderColor: 'var(--mui-palette-action2-controlBorder)',
+  color: 'text.primary',
+  '& .MuiChip-icon': { color: 'inherit' },
+} as const;
 
 export default function AccountSettingsView({ role, initialEmail }: AccountSettingsViewProps) {
   // The missionary area loads the owner's profile on the server; elsewhere it is empty.
@@ -260,21 +269,24 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
             label="Aparência"
             clickable
             onClick={() => handleScrollTo('appearance-section')}
-            sx={{ minHeight: 44, fontWeight: 600 }}
+            variant="outlined"
+            sx={quickNavChipSx}
           />
           <Chip
             icon={<LockOutlinedIcon fontSize="small" />}
             label="Credenciais"
             clickable
             onClick={() => handleScrollTo('credentials-section')}
-            sx={{ minHeight: 44, fontWeight: 600 }}
+            variant="outlined"
+            sx={quickNavChipSx}
           />
           <Chip
             icon={<ChurchOutlinedIcon fontSize="small" />}
             label="Dados Eclesiásticos"
             clickable
             onClick={() => handleScrollTo('ecclesiastical-section')}
-            sx={{ minHeight: 44, fontWeight: 600 }}
+            variant="outlined"
+            sx={quickNavChipSx}
           />
           {role === 'missionary' && (
             <Chip
@@ -282,7 +294,8 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
               label="Agência Missionária"
               clickable
               onClick={() => handleScrollTo('agency-section')}
-              sx={{ minHeight: 44, fontWeight: 600 }}
+              variant="outlined"
+              sx={quickNavChipSx}
             />
           )}
           <Chip
@@ -291,7 +304,8 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
             clickable
             onClick={() => handleScrollTo('danger-section')}
             // Red icon + text label; red text on the chip fill was 3.86:1.
-            sx={{ minHeight: 44, fontWeight: 600 }}
+            variant="outlined"
+            sx={quickNavChipSx}
           />
         </Stack>
       </Card>
@@ -551,14 +565,13 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
                   conta poderá ser reativada futuramente por administradores ou avaliadores.
                 </Typography>
                 <Box sx={{ pt: 1 }}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    sx={{ minHeight: 44, textTransform: 'none', fontWeight: 600 }}
+                  <PillButton
+                    tone="dangerOutline"
+                    sx={{ minHeight: 44, px: 2.5 }}
                     onClick={() => setIsDeactivateDialogOpen(true)}
                   >
                     Desativar Conta de Missionário
-                  </Button>
+                  </PillButton>
                 </Box>
               </Stack>
             ) : (
@@ -578,14 +591,13 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
                   servidores.
                 </Typography>
                 <Box sx={{ pt: 1 }}>
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    sx={{ minHeight: 44, textTransform: 'none', fontWeight: 600 }}
+                  <PillButton
+                    tone="dangerOutline"
+                    sx={{ minHeight: 44, px: 2.5 }}
                     onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     Excluir Conta Definitivamente
-                  </Button>
+                  </PillButton>
                 </Box>
               </Stack>
             )}
@@ -635,23 +647,31 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
             preservados internamente para integridade do sistema.
           </DialogContentText>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 2,
+            gap: 1.5,
+            // NOTE: stacked full width on phones (AGENTS.md), side by side from sm up
+            flexDirection: { xs: 'column-reverse', sm: 'row' },
+            '& > *': { width: { xs: '100%', sm: 'auto' }, m: '0 !important' },
+          }}
+        >
+          <PillButton
             onClick={() => setIsDeactivateDialogOpen(false)}
-            color="inherit"
-            sx={{ minHeight: 44, textTransform: 'none' }}
+            tone="primaryOutline"
+            sx={{ minHeight: 44, px: 2.5 }}
           >
             Cancelar
-          </Button>
-          <Button
+          </PillButton>
+          <PillButton
             onClick={handleConfirmDeactivateAccount}
-            variant="contained"
-            color="error"
+            tone="danger"
             autoFocus
-            sx={{ minHeight: 44, textTransform: 'none', fontWeight: 700 }}
+            sx={{ minHeight: 44, px: 2.5, fontWeight: 700 }}
           >
             Confirmar Desativação (Soft Delete)
-          </Button>
+          </PillButton>
         </DialogActions>
       </Dialog>
 
@@ -687,26 +707,34 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
             autoFocus
           />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 2,
+            gap: 1.5,
+            // NOTE: stacked full width on phones (AGENTS.md), side by side from sm up
+            flexDirection: { xs: 'column-reverse', sm: 'row' },
+            '& > *': { width: { xs: '100%', sm: 'auto' }, m: '0 !important' },
+          }}
+        >
+          <PillButton
             onClick={() => {
               setIsDeleteDialogOpen(false);
               setDeleteConfirmationText('');
             }}
-            color="inherit"
-            sx={{ minHeight: 44, textTransform: 'none' }}
+            tone="primaryOutline"
+            sx={{ minHeight: 44, px: 2.5 }}
           >
             Cancelar
-          </Button>
-          <Button
+          </PillButton>
+          <PillButton
             onClick={handleConfirmDeleteAccount}
-            variant="contained"
-            color="error"
+            tone="danger"
             disabled={deleteConfirmationText.trim() !== 'EXCLUIR'}
-            sx={{ minHeight: 44, textTransform: 'none', fontWeight: 700 }}
+            sx={{ minHeight: 44, px: 2.5, fontWeight: 700 }}
           >
             Excluir Conta Definitivamente
-          </Button>
+          </PillButton>
         </DialogActions>
       </Dialog>
     </Box>
