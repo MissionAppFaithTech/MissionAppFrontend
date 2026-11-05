@@ -8,6 +8,8 @@ import { UserProfileBody, UserProfileContent } from './UserProfileContent';
 vi.mock('@/lib/server/publicProfile', () => ({ getPublicProfile: vi.fn() }));
 vi.mock('next/navigation', async () => ({
   ...(await vi.importActual('next/navigation')),
+  // The header's photo hook asks for the router even on a visitor's view.
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn(), refresh: vi.fn() }),
   notFound: vi.fn(() => {
     throw new Error('NEXT_NOT_FOUND');
   }),

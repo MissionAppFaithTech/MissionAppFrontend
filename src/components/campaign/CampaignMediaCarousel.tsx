@@ -10,14 +10,9 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
-import Lightbox from 'yet-another-react-lightbox';
-import Counter from 'yet-another-react-lightbox/plugins/counter';
-import Zoom from 'yet-another-react-lightbox/plugins/zoom';
-
-import 'yet-another-react-lightbox/styles.css';
-import 'yet-another-react-lightbox/plugins/counter.css';
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PhotoLightbox from '@/components/common/PhotoLightbox';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 type CampaignMediaCarouselProps = {
@@ -285,28 +280,10 @@ export default function CampaignMediaCarousel({
       )}
 
       {/* Lightbox */}
-      <Lightbox
-        open={lightboxIndex !== null && lightboxIndex >= 0}
-        close={() => setLightboxIndex(null)}
-        index={lightboxIndex !== null ? lightboxIndex : 0}
+      <PhotoLightbox
         slides={images.map((src) => ({ src, alt: title }))}
-        plugins={[Zoom, Counter]}
-        animation={{ fade: 250, swipe: 250 }}
-        carousel={{ finite: false, padding: '24px', spacing: '24px' }}
-        controller={{ closeOnBackdropClick: true }}
-        styles={{
-          container: { backgroundColor: 'rgba(10, 18, 38, 0.96)' },
-        }}
-        zoom={{
-          maxZoomPixelRatio: 3,
-          zoomInMultiplier: 2,
-          doubleTapDelay: 300,
-          doubleClickDelay: 300,
-        }}
-        render={{
-          buttonPrev: total <= 1 ? () => null : undefined,
-          buttonNext: total <= 1 ? () => null : undefined,
-        }}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
       />
     </Box>
   );

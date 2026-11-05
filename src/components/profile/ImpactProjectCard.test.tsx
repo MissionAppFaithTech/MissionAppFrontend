@@ -93,7 +93,7 @@ describe('ImpactProjectCard Component', () => {
     expect(lightboxDialog).toBeInTheDocument();
 
     // Close lightbox
-    const closeBtn = screen.getByRole('button', { name: /close/i });
+    const closeBtn = screen.getByRole('button', { name: 'Fechar' });
     await user.click(closeBtn);
     await waitFor(() => {
       expect(document.querySelector('.yarl__container')).not.toBeInTheDocument();

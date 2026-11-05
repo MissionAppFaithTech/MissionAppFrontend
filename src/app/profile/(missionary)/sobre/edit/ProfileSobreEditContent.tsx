@@ -26,6 +26,8 @@ export default function ProfileSobreEditContent() {
         router.push(ABOUT_HREF);
       }}
       onCancel={() => router.push(ABOUT_HREF)}
+      backHref={ABOUT_HREF}
+      onDiscard={() => notify('Alterações descartadas.', 'info')}
     />
   );
 }

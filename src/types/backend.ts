@@ -63,6 +63,16 @@ export type MissionaryProfilePayload = {
 };
 
 /** `POST /media-assets/uploads`: the asset and where the browser sends the file. */
+/** Lifecycle of an uploaded file in the backend (`media_assets.status`). */
+export type MediaAssetStatus = 'PENDING_UPLOAD' | 'PROCESSING' | 'READY' | 'FAILED';
+
+/** `GET /media-assets/:id` — `url` is `null` until the asset is `READY`. */
+export type MediaAssetState = {
+  id: string;
+  status: MediaAssetStatus;
+  url: string | null;
+};
+
 export type MediaUploadTicket = {
   mediaAsset: { id: string; status?: string; url?: string | null };
   upload: {

@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getQueryClient } from '@/lib/query/client';
+import { useChurchChecklistStore } from './churchChecklistStore';
+import { useFeedbackStore } from './feedbackStore';
 import { useMissionaryRegisterStore } from './missionaryRegisterStore';
-import { clearUserStores, purgeLegacyProfileCache } from './sessionStore';
+import { clearUserStores, purgeDrafts, purgeLegacyProfileCache } from './sessionStore';
 import { useSupporterRegisterStore } from './supporterRegisterStore';
 
 const MISSIONARY_REGISTER_KEY = 'missionapp_missionary_register_v1';
@@ -79,5 +81,56 @@ describe('clearUserStores', () => {
     expect(window.sessionStorage.getItem(SUPPORTER_REGISTER_KEY)).toBeNull();
     expect(window.localStorage.getItem(LEGACY_LOCAL_KEY)).toBeNull();
     expect(window.sessionStorage.getItem(LEGACY_SESSION_KEY)).toBeNull();
+  });
+});
+
+describe('purgeDrafts', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+
+  it("removes the editors' drafts from both storages and keeps other keys", () => {
+    window.localStorage.setItem('draft_missionary_new_post', '<p>Post da Ana</p>');
+    window.localStorage.setItem('draft_other', 'x');
+    window.sessionStorage.setItem('draft_session', 'y');
+    window.localStorage.setItem('missionapp_theme', 'dark');
+
+    purgeDrafts();
+
+    expect(window.localStorage.getItem('draft_missionary_new_post')).toBeNull();
+    expect(window.localStorage.getItem('draft_other')).toBeNull();
+    expect(window.sessionStorage.getItem('draft_session')).toBeNull();
+    expect(window.localStorage.getItem('missionapp_theme')).toBe('dark');
+  });
+
+  it('keeps going when a storage is blocked', () => {
+    window.sessionStorage.setItem('draft_session', 'y');
+    vi.spyOn(window, 'localStorage', 'get').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+
+    expect(() => purgeDrafts()).not.toThrow();
+    expect(window.sessionStorage.getItem('draft_session')).toBeNull();
+  });
+});
+
+describe('clearUserStores and the previous account', () => {
+  afterEach(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+  });
+
+  it("drops the previous account's draft, checklist progress and toast", () => {
+    window.localStorage.setItem('draft_missionary_new_post', '<p>Post da Ana</p>');
+    useChurchChecklistStore.setState({ completedPhases: ['fase-1'] });
+    useFeedbackStore.getState().notify('E-mail alterado para ana@example.com');
+
+    clearUserStores();
+
+    expect(window.localStorage.getItem('draft_missionary_new_post')).toBeNull();
+    expect(useChurchChecklistStore.getState().completedPhases).toEqual([]);
+    expect(useFeedbackStore.getState().current).toBeNull();
   });
 });

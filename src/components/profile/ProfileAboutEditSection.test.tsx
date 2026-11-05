@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useRouter } from 'next/navigation';
 import ProfileAboutEditSection, {
   buildSaveAboutInput,
 } from '@/components/profile/ProfileAboutEditSection';
@@ -43,10 +44,18 @@ const data: ProfileAboutData = {
 const onSave = vi.fn();
 const onDone = vi.fn();
 const onCancel = vi.fn();
+const onDiscard = vi.fn();
 
 function renderSection(about: ProfileAboutData = data) {
   return renderWithQuery(
-    <ProfileAboutEditSection data={about} onSave={onSave} onDone={onDone} onCancel={onCancel} />
+    <ProfileAboutEditSection
+      data={about}
+      onSave={onSave}
+      onDone={onDone}
+      onCancel={onCancel}
+      backHref="/profile/sobre"
+      onDiscard={onDiscard}
+    />
   );
 }
 
@@ -55,6 +64,46 @@ describe('ProfileAboutEditSection', () => {
     onSave.mockReset();
     onDone.mockReset();
     onCancel.mockReset();
+    onDiscard.mockReset();
+    vi.mocked(useRouter().push).mockClear();
+  });
+
+  it('offers "Voltar" at the top and next to the actions, as plain links when nothing changed', () => {
+    renderSection();
+
+    const back = screen.getAllByRole('link', { name: 'Voltar para o perfil' });
+    expect(back).toHaveLength(2);
+    for (const link of back) expect(link).toHaveAttribute('href', '/profile/sobre');
+  });
+
+  it('"Voltar" with unsaved changes asks first; "Continuar editando" keeps the text', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    await user.type(screen.getByLabelText(/versículo para a vida/i), ' extra');
+    await user.click(screen.getAllByRole('button', { name: 'Voltar para o perfil' })[0]);
+
+    const dialog = screen.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
+    await user.click(within(dialog).getByRole('button', { name: 'Continuar editando' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByLabelText(/versículo para a vida/i)).toHaveValue(`${data.lifeVerse} extra`);
+    expect(onDiscard).not.toHaveBeenCalled();
+    expect(useRouter().push).not.toHaveBeenCalled();
+  });
+
+  it('"Descartar e voltar" announces the discard and goes to the profile without saving', async () => {
+    const user = userEvent.setup();
+    renderSection();
+
+    await user.type(screen.getByLabelText(/versículo para a vida/i), ' extra');
+    const back = screen.getAllByRole('button', { name: 'Voltar para o perfil' });
+    await user.click(back[back.length - 1]);
+    await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
+
+    expect(onDiscard).toHaveBeenCalledTimes(1);
+    expect(useRouter().push).toHaveBeenCalledWith('/profile/sobre');
+    expect(onSave).not.toHaveBeenCalled();
   });
 
   it('renders every editable field of RF 10.7.2 grouped in labelled fieldsets', () => {

@@ -11,6 +11,7 @@ import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
+import EditBackButton from '@/components/profile/EditBackButton';
 import LimitedTextField from '@/components/common/LimitedTextField';
 import StyledTextArea from '@/components/common/StyledTextArea';
 import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
@@ -39,6 +40,10 @@ type ProfileAboutEditSectionProps = {
   /** Called after a successful save, or with `saved: false` when nothing changed. */
   onDone: (saved: boolean) => void;
   onCancel: () => void;
+  /** Where "Voltar" leads (the profile's "Sobre"). */
+  backHref: string;
+  /** "Voltar" with unsaved changes, after the user confirms discarding them. */
+  onDiscard: () => void;
 };
 
 type TextFieldName = Exclude<
@@ -218,6 +223,8 @@ export default function ProfileAboutEditSection({
   onSave,
   onDone,
   onCancel,
+  backHref,
+  onDiscard,
 }: ProfileAboutEditSectionProps) {
   const agencies = useCatalogItems('missionaryAgencies');
   const communities = useCatalogItems('faithCommunities');
@@ -240,6 +247,8 @@ export default function ProfileAboutEditSection({
     values: toFormValues(data),
     resetOptions: { keepDirtyValues: true },
   });
+
+  const dirty = Object.keys(dirtyFields).length > 0;
 
   useLayoutEffect(() => {
     if (isSubmitting || saving || !focusRequest) return;
@@ -325,230 +334,247 @@ export default function ProfileAboutEditSection({
   );
 
   return (
-    <Card
-      component="section"
-      aria-labelledby="profile-about-edit-title"
-      elevation={0}
-      sx={{
-        borderRadius: { xs: 2, sm: 3 },
-        border: '1px solid',
-        borderColor: 'divider',
-        boxShadow: 'var(--app-shadow-md)',
-      }}
-    >
-      <CardContent
+    <Stack spacing={2}>
+      <Box sx={{ display: 'flex' }}>
+        <EditBackButton href={backHref} dirty={dirty} onDiscard={onDiscard} disabled={saving} />
+      </Box>
+      <Card
+        component="section"
+        aria-labelledby="profile-about-edit-title"
+        elevation={0}
         sx={{
-          p: { xs: 2, sm: 3, md: 4 },
-          '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
+          borderRadius: { xs: 2, sm: 3 },
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: 'var(--app-shadow-md)',
         }}
       >
-        <Box
-          component="form"
-          onSubmit={handleSubmit(onSubmit, (formErrors) => {
-            requestFocus(firstInvalidFieldId(formErrors));
-          })}
-          noValidate
-          aria-busy={isSubmitting || undefined}
+        <CardContent
+          sx={{
+            p: { xs: 2, sm: 3, md: 4 },
+            '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
+          }}
         >
-          <Stack spacing={{ xs: 3, sm: 4 }}>
-            <Stack spacing={1}>
-              <Typography
-                id="profile-about-edit-title"
-                component="h1"
-                variant="h6"
-                color="primary.main"
-              >
-                Editar Sobre
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Todos os campos são opcionais. Para remover uma informação, apague o texto e salve.
-              </Typography>
-            </Stack>
+          <Box
+            component="form"
+            onSubmit={handleSubmit(onSubmit, (formErrors) => {
+              requestFocus(firstInvalidFieldId(formErrors));
+            })}
+            noValidate
+            aria-busy={isSubmitting || undefined}
+          >
+            <Stack spacing={{ xs: 3, sm: 4 }}>
+              <Stack spacing={1}>
+                <Typography
+                  id="profile-about-edit-title"
+                  component="h1"
+                  variant="h6"
+                  color="primary.main"
+                >
+                  Editar Sobre
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Todos os campos são opcionais. Para remover uma informação, apague o texto e
+                  salve.
+                </Typography>
+              </Stack>
 
-            {submitError ? (
-              <Alert severity="error" role="alert">
-                {submitError}
-              </Alert>
-            ) : null}
+              {submitError ? (
+                <Alert severity="error" role="alert">
+                  {submitError}
+                </Alert>
+              ) : null}
 
-            <FormSection id="about-section-story" title="Minha história">
-              {textArea('introduction', 'Biografia', {
-                maxLength: ABOUT_LONG_MAX_LENGTH,
-                minRows: 4,
-                placeholder: 'Compartilhe sua trajetória, testemunho e chamado',
-              })}
-              {textArea('missionHistory', 'Resumo da minha história em missões', {
-                maxLength: ABOUT_LONG_MAX_LENGTH,
-                minRows: 4,
-                placeholder: 'Conte sobre os lugares e comunidades onde você serviu',
-              })}
-            </FormSection>
-
-            <FormSection id="about-section-origin" title="Local de origem">
-              <Controller
-                name="originLocation"
-                control={control}
-                render={({ field: { ref, ...field } }) => (
-                  <LimitedTextField
-                    {...field}
-                    inputRef={ref}
-                    id="profile-about-originLocation"
-                    label="Cidade e país de origem"
-                    placeholder="Ex.: Rio de Janeiro - Brasil"
-                    size="small"
-                    fullWidth
-                    maxLength={ABOUT_SHORT_MAX_LENGTH}
-                    error={Boolean(errors.originLocation)}
-                    helperText={errors.originLocation?.message}
-                    htmlInputProps={{ 'aria-invalid': Boolean(errors.originLocation) || undefined }}
-                  />
-                )}
-              />
-            </FormSection>
-
-            <FormSection
-              id="about-section-work"
-              title="Local de atuação atual"
-              description="Preencha todos os campos para atualizar onde você atua hoje."
-            >
-              <Grid container spacing={2}>
-                {WORK_ADDRESS_INPUTS.map(({ key, label, autoComplete, maxLength }) => {
-                  const error = errors.workAddress?.[key]?.message;
-                  return (
-                    <Grid key={key} size={{ xs: 12, sm: 6 }}>
-                      <Controller
-                        name={`workAddress.${key}`}
-                        control={control}
-                        render={({ field: { ref, ...field } }) => (
-                          <LimitedTextField
-                            {...field}
-                            inputRef={ref}
-                            id={`profile-about-work-${key}`}
-                            label={label}
-                            size="small"
-                            fullWidth
-                            autoComplete={autoComplete}
-                            maxLength={maxLength}
-                            error={Boolean(error)}
-                            helperText={error}
-                            htmlInputProps={{ 'aria-invalid': Boolean(error) || undefined }}
-                          />
-                        )}
-                      />
-                    </Grid>
-                  );
+              <FormSection id="about-section-story" title="Minha história">
+                {textArea('introduction', 'Biografia', {
+                  maxLength: ABOUT_LONG_MAX_LENGTH,
+                  minRows: 4,
+                  placeholder: 'Compartilhe sua trajetória, testemunho e chamado',
                 })}
-              </Grid>
-            </FormSection>
+                {textArea('missionHistory', 'Resumo da minha história em missões', {
+                  maxLength: ABOUT_LONG_MAX_LENGTH,
+                  minRows: 4,
+                  placeholder: 'Conte sobre os lugares e comunidades onde você serviu',
+                })}
+              </FormSection>
 
-            <FormSection
-              id="about-section-links"
-              title="Agência e comunidade de fé"
-              description="Escolha entre as cadastradas na plataforma."
-            >
-              <Controller
-                name="missionaryAgencyId"
-                control={control}
-                render={({ field }) => (
-                  <RegisterCatalogSelect
-                    id="profile-about-missionaryAgency"
-                    label="Agência missionária"
-                    required
-                    allowOther={false}
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    options={withSaved(
-                      agencies.items,
-                      data.missionaryAgencyId,
-                      data.missionaryAgency
-                    )}
-                    isLoading={agencies.isLoading}
-                    loadError={agencies.error}
-                    error={Boolean(errors.missionaryAgencyId)}
-                    helperText={errors.missionaryAgencyId?.message}
-                  />
-                )}
-              />
-              <Controller
-                name="faithCommunityId"
-                control={control}
-                render={({ field }) => (
-                  <RegisterCatalogSelect
-                    id="profile-about-faithCommunity"
-                    label="Comunidade de fé"
-                    allowOther={false}
-                    allowEmpty
-                    emptyValueLabel="Nenhuma comunidade de fé"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                    options={withSaved(
-                      communities.items,
-                      data.faithCommunityId,
-                      data.faithCommunity
-                    )}
-                    isLoading={communities.isLoading}
-                    loadError={communities.error}
-                    error={Boolean(errors.faithCommunityId)}
-                    helperText={errors.faithCommunityId?.message}
-                  />
-                )}
-              />
-            </FormSection>
+              <FormSection id="about-section-origin" title="Local de origem">
+                <Controller
+                  name="originLocation"
+                  control={control}
+                  render={({ field: { ref, ...field } }) => (
+                    <LimitedTextField
+                      {...field}
+                      inputRef={ref}
+                      id="profile-about-originLocation"
+                      label="Cidade e país de origem"
+                      placeholder="Ex.: Rio de Janeiro - Brasil"
+                      size="small"
+                      fullWidth
+                      maxLength={ABOUT_SHORT_MAX_LENGTH}
+                      error={Boolean(errors.originLocation)}
+                      helperText={errors.originLocation?.message}
+                      htmlInputProps={{
+                        'aria-invalid': Boolean(errors.originLocation) || undefined,
+                      }}
+                    />
+                  )}
+                />
+              </FormSection>
 
-            <FormSection id="about-section-faith" title="Oração e fé">
-              {textArea('prayerRequests', 'Pedidos de oração', {
-                maxLength: ABOUT_LONG_MAX_LENGTH,
-                minRows: 3,
-                placeholder: 'Pelo que as pessoas podem orar por você e pelo seu ministério',
-              })}
-              {textArea('lifeVerse', 'Versículo para a vida', {
-                maxLength: ABOUT_SHORT_MAX_LENGTH,
-                minRows: 2,
-                placeholder: 'Ex.: Tudo posso naquele que me fortalece. (Filipenses 4:13)',
-              })}
-            </FormSection>
-
-            <Stack
-              direction={{ xs: 'column-reverse', sm: 'row' }}
-              spacing={1.5}
-              sx={{
-                pt: 1,
-                justifyContent: 'flex-end',
-                '& .MuiButton-root': {
-                  ...FORM_ACTION_BUTTON_SX,
-                  width: { xs: '100%', sm: 'auto' },
-                  justifyContent: 'center',
-                },
-              }}
-            >
-              <PillButton
-                type="button"
-                tone="primarySoftOutline"
-                size="medium"
-                onClick={onCancel}
-                disabled={saving}
+              <FormSection
+                id="about-section-work"
+                title="Local de atuação atual"
+                description="Preencha todos os campos para atualizar onde você atua hoje."
               >
-                Cancelar
-              </PillButton>
-              <PillButton
-                type="submit"
-                tone="primaryFilled"
-                size="medium"
-                loading={saving}
-                onMouseDown={(event) => {
-                  // NOTE: sem isto o mousedown foca Salvar e o Chrome devolve o
-                  // foco para o botão depois da validação.
-                  event.preventDefault();
+                <Grid container spacing={2}>
+                  {WORK_ADDRESS_INPUTS.map(({ key, label, autoComplete, maxLength }) => {
+                    const error = errors.workAddress?.[key]?.message;
+                    return (
+                      <Grid key={key} size={{ xs: 12, sm: 6 }}>
+                        <Controller
+                          name={`workAddress.${key}`}
+                          control={control}
+                          render={({ field: { ref, ...field } }) => (
+                            <LimitedTextField
+                              {...field}
+                              inputRef={ref}
+                              id={`profile-about-work-${key}`}
+                              label={label}
+                              size="small"
+                              fullWidth
+                              autoComplete={autoComplete}
+                              maxLength={maxLength}
+                              error={Boolean(error)}
+                              helperText={error}
+                              htmlInputProps={{ 'aria-invalid': Boolean(error) || undefined }}
+                            />
+                          )}
+                        />
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              </FormSection>
+
+              <FormSection
+                id="about-section-links"
+                title="Agência e comunidade de fé"
+                description="Escolha entre as cadastradas na plataforma."
+              >
+                <Controller
+                  name="missionaryAgencyId"
+                  control={control}
+                  render={({ field }) => (
+                    <RegisterCatalogSelect
+                      id="profile-about-missionaryAgency"
+                      label="Agência missionária"
+                      required
+                      allowOther={false}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      options={withSaved(
+                        agencies.items,
+                        data.missionaryAgencyId,
+                        data.missionaryAgency
+                      )}
+                      isLoading={agencies.isLoading}
+                      loadError={agencies.error}
+                      error={Boolean(errors.missionaryAgencyId)}
+                      helperText={errors.missionaryAgencyId?.message}
+                    />
+                  )}
+                />
+                <Controller
+                  name="faithCommunityId"
+                  control={control}
+                  render={({ field }) => (
+                    <RegisterCatalogSelect
+                      id="profile-about-faithCommunity"
+                      label="Comunidade de fé"
+                      allowOther={false}
+                      allowEmpty
+                      emptyValueLabel="Nenhuma comunidade de fé"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      options={withSaved(
+                        communities.items,
+                        data.faithCommunityId,
+                        data.faithCommunity
+                      )}
+                      isLoading={communities.isLoading}
+                      loadError={communities.error}
+                      error={Boolean(errors.faithCommunityId)}
+                      helperText={errors.faithCommunityId?.message}
+                    />
+                  )}
+                />
+              </FormSection>
+
+              <FormSection id="about-section-faith" title="Oração e fé">
+                {textArea('prayerRequests', 'Pedidos de oração', {
+                  maxLength: ABOUT_LONG_MAX_LENGTH,
+                  minRows: 3,
+                  placeholder: 'Pelo que as pessoas podem orar por você e pelo seu ministério',
+                })}
+                {textArea('lifeVerse', 'Versículo para a vida', {
+                  maxLength: ABOUT_SHORT_MAX_LENGTH,
+                  minRows: 2,
+                  placeholder: 'Ex.: Tudo posso naquele que me fortalece. (Filipenses 4:13)',
+                })}
+              </FormSection>
+
+              <Stack
+                direction={{ xs: 'column-reverse', sm: 'row' }}
+                spacing={1.5}
+                useFlexGap
+                sx={{
+                  pt: 1,
+                  justifyContent: 'flex-end',
+                  '& .MuiButton-root': {
+                    ...FORM_ACTION_BUTTON_SX,
+                    width: { xs: '100%', sm: 'auto' },
+                    justifyContent: 'center',
+                  },
                 }}
               >
-                Salvar
-              </PillButton>
+                <Box sx={{ mr: { sm: 'auto' }, display: 'flex' }}>
+                  <EditBackButton
+                    href={backHref}
+                    dirty={dirty}
+                    onDiscard={onDiscard}
+                    disabled={saving}
+                  />
+                </Box>
+                <PillButton
+                  type="button"
+                  tone="primarySoftOutline"
+                  size="medium"
+                  onClick={onCancel}
+                  disabled={saving}
+                >
+                  Cancelar
+                </PillButton>
+                <PillButton
+                  type="submit"
+                  tone="primaryFilled"
+                  size="medium"
+                  loading={saving}
+                  onMouseDown={(event) => {
+                    // NOTE: sem isto o mousedown foca Salvar e o Chrome devolve o
+                    // foco para o botão depois da validação.
+                    event.preventDefault();
+                  }}
+                >
+                  Salvar
+                </PillButton>
+              </Stack>
             </Stack>
-          </Stack>
-        </Box>
-      </CardContent>
-    </Card>
+          </Box>
+        </CardContent>
+      </Card>
+    </Stack>
   );
 }

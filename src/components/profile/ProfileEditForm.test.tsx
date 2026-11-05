@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { renderWithQuery } from '@/test/query';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect, vi } from 'vitest';
@@ -6,7 +6,7 @@ import ProfileEditForm, { buildPayloads } from '@/components/profile/ProfileEdit
 import { ApiError } from '@/lib/api/client';
 import { emptyProfile } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { saveProfileHeader } from '@/services/profileSave.service';
+import { saveProfileEdits } from '@/services/profileSave.service';
 import type { ProfileData } from '@/types/profile';
 
 const push = vi.fn();
@@ -40,9 +40,15 @@ const profile: ProfileData = {
   },
 };
 
-vi.mock('@/services/profileSave.service', () => ({ saveProfileHeader: vi.fn() }));
+vi.mock('@/services/profileSave.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/profileSave.service')>()),
+  saveProfileEdits: vi.fn(),
+}));
 
-const saveHeader = vi.mocked(saveProfileHeader);
+const saveHeader = vi.mocked(saveProfileEdits);
+const SAVED = { picture: 'unchanged' as const };
+const png = () => new File(['photo'], 'foto.png', { type: 'image/png' });
+const toast = () => useFeedbackStore.getState().current;
 
 describe('ProfileEditForm', () => {
   beforeEach(() => {
@@ -50,6 +56,8 @@ describe('ProfileEditForm', () => {
     refresh.mockClear();
     saveHeader.mockReset();
     useFeedbackStore.setState({ current: null });
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
   });
 
   it('renders the header fields with the current values and no private contact data', () => {
@@ -65,10 +73,11 @@ describe('ProfileEditForm', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
     expect(screen.getByText(/jpg, png ou webp de até 5 mb/i)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /cancelar/i })).toHaveAttribute(
-      'href',
-      '/profile/sobre'
-    );
+    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
+    // "Voltar" at the top and next to the actions.
+    const back = screen.getAllByRole('link', { name: 'Voltar para o perfil' });
+    expect(back).toHaveLength(2);
+    for (const link of back) expect(link).toHaveAttribute('href', '/profile/sobre');
   });
 
   it('limits the mini-bio to 70 characters', async () => {
@@ -92,9 +101,9 @@ describe('ProfileEditForm', () => {
     expect(screen.getByLabelText(/^e-mail:$/i)).toHaveValue('samuel@privado.com');
   });
 
-  it('sends only changed fields, clears an emptied bio with null and navigates after success', async () => {
+  it('sends only changed fields, clears an emptied bio with null and stays after success', async () => {
     const user = userEvent.setup();
-    saveHeader.mockResolvedValue(undefined);
+    saveHeader.mockResolvedValue(SAVED);
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.clear(screen.getByLabelText(/nome completo/i));
@@ -103,31 +112,42 @@ describe('ProfileEditForm', () => {
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
     await waitFor(() => expect(saveHeader).toHaveBeenCalledTimes(1));
-    expect(saveHeader).toHaveBeenCalledWith({
-      header: { fullName: 'Samuel M.', biography: null },
-      contacts: {},
-    });
-    expect(useFeedbackStore.getState().current?.message).toBe('Perfil atualizado com sucesso.');
-    expect(push).toHaveBeenCalledWith('/profile/sobre');
-    // The save action re-renders the page itself (ADR-0006): no second request.
-    expect(refresh).not.toHaveBeenCalled();
+    expect(saveHeader).toHaveBeenCalledWith(
+      expect.objectContaining({
+        header: { fullName: 'Samuel M.', biography: null },
+        contacts: {},
+        picture: undefined,
+      })
+    );
+    await waitFor(() =>
+      expect(toast()).toMatchObject({
+        message: 'Perfil atualizado com sucesso.',
+        severity: 'success',
+      })
+    );
+    // Stays on the page, with the saved values and no pending changes.
+    expect(push).not.toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel M.');
+    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
   });
 
   it('does not report success before the save resolves', async () => {
     const user = userEvent.setup();
     let resolveSave: () => void = () => {};
-    saveHeader.mockReturnValue(new Promise<void>((resolve) => (resolveSave = resolve)));
+    saveHeader.mockReturnValue(new Promise((resolve) => (resolveSave = () => resolve(SAVED))));
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
     await waitFor(() => expect(saveHeader).toHaveBeenCalled());
-    expect(useFeedbackStore.getState().current).toBeNull();
-    expect(push).not.toHaveBeenCalled();
+    expect(toast()).toBeNull();
+    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled();
 
     resolveSave();
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/profile/sobre'));
+    await waitFor(() => expect(toast()?.severity).toBe('success'));
+    expect(push).not.toHaveBeenCalled();
   });
 
   it('shows a backend field error on the matching input and stays on the page', async () => {
@@ -158,19 +178,23 @@ describe('ProfileEditForm', () => {
 
     const message = await screen.findByText('Não foi possível salvar o perfil');
     expect(message.closest('[role="alert"]')).not.toBeNull();
+    expect(toast()).toMatchObject({
+      message: 'Não foi possível salvar o perfil',
+      severity: 'error',
+    });
     expect(push).not.toHaveBeenCalled();
   });
 
   it('does not touch an unchanged phone even though the phone input emits the country code', async () => {
     const user = userEvent.setup();
-    saveHeader.mockResolvedValue(undefined);
+    saveHeader.mockResolvedValue(SAVED);
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
     await waitFor(() => expect(saveHeader).toHaveBeenCalled());
-    expect(saveHeader.mock.calls[0][0].contacts).toEqual({});
+    expect(saveHeader.mock.calls[0][0]!.contacts).toEqual({});
   });
 
   it('validates the username format like the backend', async () => {
@@ -212,7 +236,7 @@ describe('ProfileEditForm', () => {
 
   it('asks whether the public phone is WhatsApp only after a phone is typed', async () => {
     const user = userEvent.setup();
-    saveHeader.mockResolvedValue(undefined);
+    saveHeader.mockResolvedValue(SAVED);
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
     const whatsappName = /este número é um número de whatsapp/i;
@@ -227,10 +251,218 @@ describe('ProfileEditForm', () => {
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
     await waitFor(() => expect(saveHeader).toHaveBeenCalledTimes(1));
-    expect(saveHeader).toHaveBeenCalledWith({
-      header: {},
-      contacts: { publicPhone: '+5521987654321', publicPhoneIsWhatsapp: true },
+    expect(saveHeader).toHaveBeenCalledWith(
+      expect.objectContaining({
+        header: {},
+        contacts: { publicPhone: '+5521987654321', publicPhoneIsWhatsapp: true },
+      })
+    );
+  });
+});
+
+describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
+  beforeEach(() => {
+    push.mockClear();
+    refresh.mockClear();
+    saveHeader.mockReset();
+    useFeedbackStore.setState({ current: null });
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  });
+
+  const withPhoto = { ...profile, avatarUrl: 'https://cdn.test/old.webp' };
+  const avatar = () => screen.queryByRole('img', { name: /foto de perfil de/i });
+
+  it('only saves a chosen photo on "Salvar", with a green toast, and stays', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockResolvedValue({ picture: 'added' });
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    const file = png();
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), file);
+    expect(saveHeader).not.toHaveBeenCalled();
+    expect(avatar()).toHaveAttribute('src', 'blob:preview');
+
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() => expect(saveHeader).toHaveBeenCalledTimes(1));
+    expect(saveHeader).toHaveBeenCalledWith(
+      expect.objectContaining({
+        header: {},
+        contacts: {},
+        picture: { kind: 'replace', file },
+        hadPicture: false,
+      })
+    );
+    await waitFor(() =>
+      expect(toast()).toMatchObject({
+        message: 'Foto de perfil adicionada com sucesso.',
+        severity: 'success',
+      })
+    );
+    expect(push).not.toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('removes the photo only on "Salvar"', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockResolvedValue({ picture: 'removed' });
+    renderWithQuery(<ProfileEditForm profile={withPhoto} />);
+
+    await user.click(screen.getByRole('button', { name: 'Remover foto' }));
+    expect(saveHeader).not.toHaveBeenCalled();
+    expect(avatar()).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() =>
+      expect(saveHeader).toHaveBeenCalledWith(
+        expect.objectContaining({ picture: { kind: 'remove' }, hadPicture: true })
+      )
+    );
+    await waitFor(() =>
+      expect(toast()).toMatchObject({
+        message: 'Foto de perfil removida com sucesso.',
+        severity: 'success',
+      })
+    );
+  });
+
+  it('tells the fields and the photo were saved together', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockResolvedValue({ picture: 'replaced' });
+    renderWithQuery(<ProfileEditForm profile={withPhoto} />);
+
+    await user.type(screen.getByLabelText(/nome completo/i), '!');
+    await user.upload(screen.getByLabelText(/editar foto de perfil/i), png());
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() =>
+      expect(toast()).toMatchObject({
+        message: 'Perfil atualizado com sucesso. Foto de perfil atualizada.',
+        severity: 'success',
+      })
+    );
+  });
+
+  it('announces the processing of the new photo while saving', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockImplementation(async (input) => {
+      input.onProcessing?.();
+      return new Promise(() => {});
     });
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    expect(
+      await screen.findByText('Processando a foto de perfil...', { selector: '[role="status"]' })
+    ).toBeInTheDocument();
+  });
+
+  it('reports a photo the backend could not process in a red toast', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockResolvedValue({ picture: 'failed' });
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() =>
+      expect(toast()).toMatchObject({
+        message: 'Não foi possível processar a imagem. Tente enviar outra foto.',
+        severity: 'error',
+      })
+    );
+  });
+
+  it('keeps the chosen photo to try again when the save fails', async () => {
+    const user = userEvent.setup();
+    saveHeader.mockRejectedValue(new ApiError('Não foi possível enviar a foto.', 0));
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() => expect(toast()?.severity).toBe('error'));
+    expect(avatar()).toHaveAttribute('src', 'blob:preview');
+  });
+
+  it('"Salvar" without changes says so in a blue toast and stays', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.click(screen.getByRole('button', { name: 'Salvar' }));
+
+    await waitFor(() =>
+      expect(toast()).toMatchObject({ message: 'Nenhuma alteração para salvar.', severity: 'info' })
+    );
+    expect(saveHeader).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('"Cancelar" undoes the fields and the photo, with a blue toast, and stays', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileEditForm profile={withPhoto} />);
+
+    await user.type(screen.getByLabelText(/nome completo/i), ' Jr.');
+    await user.click(screen.getByRole('button', { name: 'Remover foto' }));
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+    expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel Mendonça');
+    expect(avatar()).toHaveAttribute('src', 'https://cdn.test/old.webp');
+    expect(toast()).toMatchObject({ message: 'Alterações descartadas.', severity: 'info' });
+    expect(saveHeader).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    // Nothing pending: "Voltar" is a plain link again.
+    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
+  });
+
+  it('"Cancelar" without changes says there is nothing to discard', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+
+    expect(toast()).toMatchObject({
+      message: 'Nenhuma alteração para descartar.',
+      severity: 'info',
+    });
+  });
+
+  it('"Voltar" with unsaved changes asks first and keeps editing on request', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.type(screen.getByLabelText(/nome completo/i), '!');
+    const [topBack] = screen.getAllByRole('button', { name: 'Voltar para o perfil' });
+    await user.click(topBack);
+
+    const dialog = screen.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
+    expect(dialog).toHaveAccessibleDescription(/se voltar agora, elas serão perdidas/i);
+    expect(within(dialog).getByRole('button', { name: 'Continuar editando' })).toHaveFocus();
+
+    await user.click(within(dialog).getByRole('button', { name: 'Continuar editando' }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel Mendonça!');
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it('"Descartar e voltar" drops the changes and goes to the profile', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<ProfileEditForm profile={profile} />);
+
+    await user.upload(screen.getByLabelText(/adicionar foto de perfil/i), png());
+    const backButtons = screen.getAllByRole('button', { name: 'Voltar para o perfil' });
+    await user.click(backButtons[backButtons.length - 1]);
+    await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
+
+    expect(push).toHaveBeenCalledWith('/profile/sobre');
+    expect(toast()).toMatchObject({ message: 'Alterações descartadas.', severity: 'info' });
+    expect(saveHeader).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });
 

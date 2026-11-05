@@ -56,11 +56,17 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
   const owner = useOwnerProfile();
 
   // Current user email
-  const [currentEmail, setCurrentEmail] = useState(
+  const serverEmail =
     initialEmail ||
-      owner.contact?.accountEmail ||
-      (role === 'missionary' ? 'samuelhe@gmail.com' : 'soraia.santos@email.com')
-  );
+    owner.contact?.accountEmail ||
+    (role === 'missionary' ? 'samuelhe@gmail.com' : 'soraia.santos@email.com');
+  const [currentEmail, setCurrentEmail] = useState(serverEmail);
+  // The server's e-mail wins when it changes (refresh, another account).
+  const [syncedEmail, setSyncedEmail] = useState(serverEmail);
+  if (syncedEmail !== serverEmail) {
+    setSyncedEmail(serverEmail);
+    setCurrentEmail(serverEmail);
+  }
 
   // Email update form state
   const [newEmail, setNewEmail] = useState('');

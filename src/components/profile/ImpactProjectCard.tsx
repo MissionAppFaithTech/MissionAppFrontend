@@ -19,16 +19,11 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import Lightbox from 'yet-another-react-lightbox';
-import Counter from 'yet-another-react-lightbox/plugins/counter';
-import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import PhotoLightbox from '@/components/common/PhotoLightbox';
 import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import type { ImpactProjectData } from '@/types/profile';
-
-import 'yet-another-react-lightbox/styles.css';
-import 'yet-another-react-lightbox/plugins/counter.css';
 
 type ImpactProjectCardProps = {
   project?: ImpactProjectData;
@@ -524,28 +519,10 @@ export default function ImpactProjectCard({
       </Card>
 
       {/* Visualizador de Fotos em Tela Cheia estilo Instagram / Facebook */}
-      <Lightbox
-        open={lightboxIndex !== null && lightboxIndex >= 0}
-        close={() => setLightboxIndex(null)}
-        index={lightboxIndex !== null ? lightboxIndex : 0}
+      <PhotoLightbox
         slides={galleryPhotos.map((src) => ({ src, alt: project.title }))}
-        plugins={[Zoom, Counter]}
-        animation={{ fade: 250, swipe: 250 }}
-        carousel={{ finite: false, padding: '24px', spacing: '24px' }}
-        controller={{ closeOnBackdropClick: true }}
-        styles={{
-          container: { backgroundColor: 'rgba(10, 18, 38, 0.96)' },
-        }}
-        zoom={{
-          maxZoomPixelRatio: 3,
-          zoomInMultiplier: 2,
-          doubleTapDelay: 300,
-          doubleClickDelay: 300,
-        }}
-        render={{
-          buttonPrev: galleryPhotos.length <= 1 ? () => null : undefined,
-          buttonNext: galleryPhotos.length <= 1 ? () => null : undefined,
-        }}
+        index={lightboxIndex}
+        onClose={() => setLightboxIndex(null)}
       />
 
       {/* Modal de Oferta / Doação */}
