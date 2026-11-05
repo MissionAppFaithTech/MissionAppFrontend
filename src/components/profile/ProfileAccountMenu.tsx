@@ -36,7 +36,7 @@ const menuItemSx = (theme: Theme) => ({
 });
 
 type ProfileAccountMenuProps = {
-  profile: Pick<ProfileData, 'username' | 'displayName'>;
+  profile: Pick<ProfileData, 'username' | 'displayName' | 'avatarUrl'>;
   role?: 'missionary' | 'supporter' | 'visitor';
 };
 
@@ -84,7 +84,10 @@ export default function ProfileAccountMenu({
         onClick={handleOpen}
         sx={{ p: 0.5, minWidth: 44, minHeight: 44 }}
       >
+        {/* The button is named by its aria-label: the photo is decorative here. */}
         <Avatar
+          src={profile.avatarUrl || undefined}
+          alt=""
           sx={{
             width: { xs: 32, sm: 40 },
             height: { xs: 32, sm: 40 },
@@ -92,7 +95,7 @@ export default function ProfileAccountMenu({
             color: 'avatar.contrastText',
           }}
         >
-          <PersonIcon sx={{ fontSize: { xs: 20, sm: 24 } }} />
+          <PersonIcon aria-hidden sx={{ fontSize: { xs: 20, sm: 24 } }} />
         </Avatar>
       </IconButton>
 
@@ -120,6 +123,8 @@ export default function ProfileAccountMenu({
         <Stack sx={{ p: 2.5, alignItems: 'center', textAlign: 'center' }}>
           <Box sx={{ position: 'relative', mb: 1.25 }}>
             <Avatar
+              src={profile.avatarUrl || undefined}
+              alt={profile.avatarUrl ? `Foto de perfil de ${profile.displayName}` : ''}
               sx={{
                 width: 76,
                 height: 76,
@@ -129,7 +134,7 @@ export default function ProfileAccountMenu({
                 borderColor: 'primary.main',
               }}
             >
-              <PersonIcon sx={{ fontSize: 42 }} />
+              <PersonIcon aria-hidden sx={{ fontSize: 42 }} />
             </Avatar>
           </Box>
           <Typography variant="caption" color="text.secondary">

@@ -102,4 +102,34 @@ describe('ProfileAccountMenu', () => {
     await waitFor(() => expect(useFeedbackStore.getState().current?.severity).toBe('error'));
     expect(replace).not.toHaveBeenCalled();
   });
+
+  it('shows the profile photo in the navbar avatar and in the menu', async () => {
+    const user = userEvent.setup();
+    render(
+      <ProfileAccountMenu profile={{ ...profile, avatarUrl: 'https://cdn.test/samuel.webp' }} />
+    );
+
+    const trigger = screen.getByRole('button', { name: /abrir menu do perfil/i });
+    // The trigger is named by its label; its photo is decorative.
+    expect(trigger.querySelector('img')).toHaveAttribute('src', 'https://cdn.test/samuel.webp');
+    expect(trigger.querySelector('img')).toHaveAttribute('alt', '');
+
+    await user.click(trigger);
+
+    expect(screen.getByRole('img', { name: 'Foto de perfil de Samuel' })).toHaveAttribute(
+      'src',
+      'https://cdn.test/samuel.webp'
+    );
+  });
+
+  it('falls back to the person icon without a photo', async () => {
+    const user = userEvent.setup();
+    render(<ProfileAccountMenu profile={profile} />);
+    const trigger = screen.getByRole('button', { name: /abrir menu do perfil/i });
+    expect(trigger.querySelector('img')).toBeNull();
+
+    await user.click(trigger);
+
+    expect(screen.queryByRole('img', { name: /foto de perfil/i })).not.toBeInTheDocument();
+  });
 });

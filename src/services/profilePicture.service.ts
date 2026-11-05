@@ -1,4 +1,3 @@
-import { updateAccountProfileAction } from '@/app/actions/account';
 import {
   completeMediaUploadAction,
   getMediaAssetAction,
@@ -21,11 +20,6 @@ const PROCESSING_FAILED = 'Não foi possível processar a imagem. Tente enviar o
 export const PROCESSING_POLL_DELAYS_MS = [500, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000];
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
-
-export type UploadProfilePictureOptions = {
-  /** Called once the file is stored and linked, while the backend still compresses it. */
-  onProcessing?: () => void;
-};
 
 /** pt-BR reason the file cannot be a profile picture, or `null` when it can. */
 export function profilePictureError(file: File): string | null {
@@ -79,27 +73,6 @@ export async function uploadPictureFile(file: File): Promise<string> {
 }
 
 /**
- * Uploads a new profile picture: reserves the upload, `PUT`s the file straight
- * to the storage from the browser, confirms it and links it to the account.
- *
- * Then waits for the backend to compress it (see {@link waitForProcessedPicture}).
- *
- * @returns The public URL, or `null` if the image is still being processed.
- * @throws ApiError with a pt-BR message.
- */
-export async function uploadProfilePicture(
-  file: File,
-  { onProcessing }: UploadProfilePictureOptions = {}
-): Promise<{ url: string | null }> {
-  const id = await uploadPictureFile(file);
-  const { user } = await callAction(() => updateAccountProfileAction({ profilePictureId: id }));
-  if (user.profilePictureUrl) return { url: user.profilePictureUrl };
-
-  onProcessing?.();
-  return { url: await waitForProcessedPicture(id) };
-}
-
-/**
  * Polls `GET /media-assets/:id` until the backend worker finishes (`READY`).
  *
  * @returns The public URL, or `null` when it is still processing after the last
@@ -122,9 +95,4 @@ export async function waitForProcessedPicture(
     if (asset.status === 'FAILED') throw new ApiError(PROCESSING_FAILED, 422);
   }
   return null;
-}
-
-/** Removes the profile picture (`profilePictureId: null`). */
-export async function removeProfilePicture(): Promise<void> {
-  await callAction(() => updateAccountProfileAction({ profilePictureId: null }));
 }

@@ -32,6 +32,10 @@ test.describe('Sessões ativas', () => {
     await expect(dialog).toContainText('Mobile Safari no iOS (celular) será desconectado');
     await expect(dialog.getByRole('button', { name: 'Cancelar' })).toBeFocused();
 
+    // Audit the settled dialog: mid fade-in, axe measures blended colors.
+    await page.waitForFunction(() =>
+      document.getAnimations().every((animation) => animation.playState !== 'running')
+    );
     const axe = await new AxeBuilder({ page }).include('[role="dialog"]').analyze();
     expect(axe.violations).toEqual([]);
 

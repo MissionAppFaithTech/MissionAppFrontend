@@ -28,20 +28,25 @@ test.describe('Switching accounts in the same tab', () => {
     await page.goto('/login');
     await fillLogin(`samuel+switch-a-${tag}@privado.test`);
     await page
-      .getByLabel('Adicionar foto de perfil')
-      .filter(visible)
-      .locator('input[type="file"]')
-      .setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: PNG });
-    await expect(photo(page)).toHaveAttribute('src', /\/storage\//, { timeout: 15000 });
-
-    await page
       .getByRole('link', { name: /editar perfil/i })
       .filter(visible)
       .click();
+    await page.waitForLoadState('networkidle');
+    await page
+      .getByLabel('Adicionar foto de perfil')
+      .locator('input[type="file"]')
+      .setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: PNG });
+    await page.getByRole('button', { name: 'Salvar' }).click();
+    await expect(
+      page.getByRole('status').filter({ hasText: 'Foto de perfil adicionada com sucesso.' })
+    ).toBeVisible({ timeout: 15000 });
+
     const bio = page.getByRole('textbox', { name: 'Minibiografia' });
     await bio.fill('Texto que a conta A não salvou');
+    // Browser back: the edit page keeps its client state in Next.js.
     await page.goBack();
     await expect(page).toHaveURL(/\/profile\/sobre$/);
+    await expect(photo(page)).toHaveAttribute('src', /\/storage\//);
 
     // Log out and in as account B, without reloading the tab.
     await page.getByRole('button', { name: 'Abrir menu do perfil' }).filter(visible).click();
@@ -49,7 +54,7 @@ test.describe('Switching accounts in the same tab', () => {
     await expect(page).toHaveURL(/\/login/);
     await fillLogin(`samuel+switch-b-${tag}@privado.test`);
 
-    await expect(page.getByLabel('Adicionar foto de perfil').filter(visible)).toBeVisible();
+    await expect(page.getByRole('heading', { level: 1 }).filter(visible)).toBeVisible();
     await expect(photo(page)).toHaveCount(0);
 
     await page

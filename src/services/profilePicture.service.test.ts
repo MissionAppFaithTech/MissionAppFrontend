@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { updateAccountProfileAction } from '@/app/actions/account';
 import {
   completeMediaUploadAction,
   getMediaAssetAction,
@@ -8,14 +7,11 @@ import {
 import {
   PROFILE_PICTURE_ACCEPT,
   profilePictureError,
-  removeProfilePicture,
   uploadPictureFile,
-  uploadProfilePicture,
   PROCESSING_POLL_DELAYS_MS,
   waitForProcessedPicture,
 } from './profilePicture.service';
 
-vi.mock('@/app/actions/account', () => ({ updateAccountProfileAction: vi.fn() }));
 vi.mock('@/app/actions/media', () => ({
   requestProfilePictureUploadAction: vi.fn(),
   completeMediaUploadAction: vi.fn(),
@@ -50,10 +46,6 @@ beforeEach(() => {
     },
   });
   vi.mocked(completeMediaUploadAction).mockResolvedValue({ ok: true, data: { id: ASSET_ID } });
-  vi.mocked(updateAccountProfileAction).mockResolvedValue({
-    ok: true,
-    data: { user: { profilePictureUrl: null } as never },
-  });
   vi.mocked(getMediaAssetAction).mockResolvedValue(assetState('READY', READY_URL));
 });
 
@@ -75,14 +67,11 @@ describe('profilePictureError', () => {
   });
 });
 
-describe('uploadProfilePicture', () => {
-  it('reserves the upload, PUTs the file, confirms it and links it to the account', async () => {
+describe('uploadPictureFile', () => {
+  it('reserves the upload, PUTs the file and confirms it, without linking it', async () => {
     const file = photo();
-    const onProcessing = vi.fn();
 
-    await expect(uploadProfilePicture(file, { onProcessing })).resolves.toEqual({
-      url: READY_URL,
-    });
+    await expect(uploadPictureFile(file)).resolves.toBe(ASSET_ID);
 
     expect(requestProfilePictureUploadAction).toHaveBeenCalledWith({
       mimeType: 'image/png',
@@ -95,23 +84,13 @@ describe('uploadProfilePicture', () => {
       body: file,
     });
     expect(completeMediaUploadAction).toHaveBeenCalledWith(ASSET_ID);
-    expect(updateAccountProfileAction).toHaveBeenCalledWith({ profilePictureId: ASSET_ID });
-    // The backend still compresses the image: wait for the worker to finish.
-    expect(onProcessing).toHaveBeenCalledTimes(1);
-    expect(getMediaAssetAction).toHaveBeenCalledWith(ASSET_ID);
     const order = [
       vi.mocked(requestProfilePictureUploadAction),
       fetchMock,
       vi.mocked(completeMediaUploadAction),
-      vi.mocked(updateAccountProfileAction),
-      vi.mocked(getMediaAssetAction),
     ].map((fn) => fn.mock.invocationCallOrder[0]);
     expect(order).toEqual([...order].sort((a, b) => a - b));
-  });
-
-  it('waits for the worker without an onProcessing callback', async () => {
-    await expect(uploadProfilePicture(photo())).resolves.toEqual({ url: READY_URL });
-    expect(getMediaAssetAction).toHaveBeenCalledWith(ASSET_ID);
+    expect(getMediaAssetAction).not.toHaveBeenCalled();
   });
 
   it('sends the signed headers except Content-Length, and PUTs by default', async () => {
@@ -149,23 +128,8 @@ describe('uploadProfilePicture', () => {
     });
   });
 
-  it('returns the public URL when the image is already processed', async () => {
-    vi.mocked(updateAccountProfileAction).mockResolvedValue({
-      ok: true,
-      data: { user: { profilePictureUrl: 'https://cdn.test/p.webp' } as never },
-    });
-
-    const onProcessing = vi.fn();
-
-    await expect(uploadProfilePicture(photo(), { onProcessing })).resolves.toEqual({
-      url: 'https://cdn.test/p.webp',
-    });
-    expect(onProcessing).not.toHaveBeenCalled();
-    expect(getMediaAssetAction).not.toHaveBeenCalled();
-  });
-
   it('refuses an invalid file without reserving an upload', async () => {
-    await expect(uploadProfilePicture(photo('application/pdf'))).rejects.toMatchObject({
+    await expect(uploadPictureFile(photo('application/pdf'))).rejects.toMatchObject({
       status: 422,
     });
     expect(requestProfilePictureUploadAction).not.toHaveBeenCalled();
@@ -174,15 +138,14 @@ describe('uploadProfilePicture', () => {
   it('stops before confirming when the storage rejects the PUT', async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 403 }));
 
-    await expect(uploadProfilePicture(photo())).rejects.toThrow(/não foi possível enviar a foto/i);
+    await expect(uploadPictureFile(photo())).rejects.toThrow(/não foi possível enviar a foto/i);
     expect(completeMediaUploadAction).not.toHaveBeenCalled();
-    expect(updateAccountProfileAction).not.toHaveBeenCalled();
   });
 
   it('reports a network failure of the PUT in Portuguese', async () => {
     fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
 
-    await expect(uploadProfilePicture(photo())).rejects.toMatchObject({ status: 0 });
+    await expect(uploadPictureFile(photo())).rejects.toMatchObject({ status: 0 });
   });
 
   it('surfaces the action error (e.g. expired session) as ApiError', async () => {
@@ -192,16 +155,8 @@ describe('uploadProfilePicture', () => {
       message: 'Envie uma imagem JPG, PNG ou WebP de até 5 MB',
     });
 
-    await expect(uploadProfilePicture(photo())).rejects.toThrow('JPG, PNG ou WebP');
+    await expect(uploadPictureFile(photo())).rejects.toThrow('JPG, PNG ou WebP');
     expect(fetchMock).not.toHaveBeenCalled();
-  });
-});
-
-describe('removeProfilePicture', () => {
-  it('clears the photo with profilePictureId null', async () => {
-    await removeProfilePicture();
-
-    expect(updateAccountProfileAction).toHaveBeenCalledWith({ profilePictureId: null });
   });
 });
 

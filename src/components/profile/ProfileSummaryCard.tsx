@@ -14,11 +14,7 @@ import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
-import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
-import ProfilePhotoRemoveButton from '@/components/profile/ProfilePhotoRemoveButton';
 import DonationModal from '@/components/profile/DonationModal';
-import { useProfilePictureUpload } from '@/hooks/useProfilePictureUpload';
-import { PROFILE_PICTURE_ACCEPT } from '@/services/profilePicture.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { ProfileData } from '@/types/profile';
 
@@ -73,14 +69,8 @@ export default function ProfileSummaryCard({
     role = 'missionary',
   } = profile;
 
-  const photo = useProfilePictureUpload({
-    ownerId: profile.userId ?? profile.username,
-    currentUrl: profile.avatarUrl,
-    onSuccess: (message) => notify(message, 'success'),
-    onError: (message) => notify(message, 'error'),
-  });
-  // Only the owner uploads; visitors always see the saved photo.
-  const photoSrc = (isOwnProfile ? photo.photoUrl : profile.avatarUrl) || undefined;
+  // The photo is changed only in "Editar perfil"; the header just shows it.
+  const photoSrc = profile.avatarUrl || undefined;
 
   const isSupporterProfile = role === 'supporter';
   const isOwnSupporter = isOwnProfile && isSupporterProfile;
@@ -145,10 +135,7 @@ export default function ProfileSummaryCard({
               spacing={{ xs: 1.75, sm: 2.5 }}
               sx={{ alignItems: 'flex-start', minWidth: 0, flex: 1 }}
             >
-              <Box
-                sx={{ position: 'relative', flexShrink: 0 }}
-                aria-busy={(isOwnProfile && photo.busy) || undefined}
-              >
+              <Box sx={{ flexShrink: 0 }}>
                 <Avatar
                   src={photoSrc}
                   alt={photoSrc ? `Foto de perfil de ${displayName}` : ''}
@@ -159,34 +146,10 @@ export default function ProfileSummaryCard({
                     color: 'avatar.contrastText',
                     border: '1.5px solid',
                     borderColor: 'divider',
-                    opacity: isOwnProfile && photo.busy ? 0.6 : 1,
                   }}
                 >
                   <PersonIcon aria-hidden sx={{ fontSize: { xs: 44, sm: 54, md: 60 } }} />
                 </Avatar>
-                {isOwnProfile ? (
-                  <ProfilePhotoAddButton
-                    component="label"
-                    aria-label={photoSrc ? 'Alterar foto de perfil' : 'Adicionar foto de perfil'}
-                    disabled={photo.busy}
-                  >
-                    <Box
-                      component="input"
-                      type="file"
-                      accept={PROFILE_PICTURE_ACCEPT}
-                      hidden
-                      disabled={photo.busy}
-                      onChange={photo.selectFile}
-                    />
-                  </ProfilePhotoAddButton>
-                ) : null}
-                {isOwnProfile && photoSrc ? (
-                  <ProfilePhotoRemoveButton
-                    onConfirm={photo.remove}
-                    disabled={photo.busy}
-                    loading={photo.status === 'removing'}
-                  />
-                ) : null}
               </Box>
 
               <Stack spacing={0.5} sx={{ minWidth: 0, flex: 1, textAlign: 'left' }}>
