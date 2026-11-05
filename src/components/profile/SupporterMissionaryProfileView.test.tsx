@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, it, expect } from 'vitest';
-import SupporterMissionaryProfileView from './SupporterMissionaryProfileView';
+import SupporterMissionaryProfileView, {
+  MissionaryAboutSection,
+} from './SupporterMissionaryProfileView';
 import { mockCampaign } from '@/mocks/campaign';
 import { mockProfile, mockSavedPosts } from '@/mocks/profile';
 import { useFeedbackStore } from '@/stores/feedbackStore';
@@ -126,5 +128,23 @@ describe('SupporterMissionaryProfileView Component', () => {
     await user.click(campanhaTab);
     expect(screen.getByRole('heading', { name: mockCampaign.title })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ofertar na campanha/i })).toBeInTheDocument();
+  });
+
+  it('separates every filled part of the "Sobre" with a line, never a stray one', () => {
+    const about = {
+      introduction: 'Bio',
+      missionHistory: 'História',
+      originLocation: 'Rio de Janeiro - Brasil',
+      currentLocation: '',
+      missionaryAgency: 'JOCUM',
+      faithCommunity: '',
+      prayerRequests: 'Pela equipe',
+      lifeVerse: 'Salmos 23:1',
+    };
+    const { rerender } = render(<MissionaryAboutSection data={about} />);
+    expect(screen.getAllByRole('separator')).toHaveLength(4);
+
+    rerender(<MissionaryAboutSection data={{ ...about, prayerRequests: '' }} />);
+    expect(screen.getAllByRole('separator')).toHaveLength(3);
   });
 });

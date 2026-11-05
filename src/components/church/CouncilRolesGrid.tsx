@@ -113,7 +113,9 @@ export default function CouncilRolesGrid() {
                           theme.palette.mode === 'dark'
                             ? 'rgba(255, 255, 255, 0.08)'
                             : 'rgba(194, 65, 12, 0.08)',
-                        color: 'accent.main',
+                        // NOTE: the soft orange in dark keeps the badge label above 4.5:1
+                        color: (theme) =>
+                          theme.palette.mode === 'dark' ? 'accent.light' : 'accent.main',
                         border: '1px solid',
                         borderColor: (theme) =>
                           theme.palette.mode === 'dark'

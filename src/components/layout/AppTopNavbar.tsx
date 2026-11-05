@@ -5,6 +5,7 @@ import Logo from '@/components/common/Logo';
 import PillButton from '@/components/common/PillButton';
 import ThemeToggle from '@/components/ThemeToggle';
 import PageNavbar, { PageNavbarActions } from '@/components/layout/PageNavbar';
+import LoginIcon from '@mui/icons-material/Login';
 import ProfileSearchField from '@/components/profile/ProfileSearchField';
 import ProfileAccountMenu from '@/components/profile/ProfileAccountMenu';
 import { mockProfile, mockSupporterProfile } from '@/mocks/profile';
@@ -71,16 +72,23 @@ export default function AppTopNavbar({
               href="/login"
               tone="ghost"
               size="small"
+              startIcon={<LoginIcon aria-hidden />}
               sx={{
                 px: { xs: 1.5, sm: 2 },
                 py: { xs: 0.4, sm: 0.6 },
                 fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                fontWeight: 600,
-                border: '1px solid rgba(255, 255, 255, 0.35)',
-                bgcolor: 'rgba(255, 255, 255, 0.12)',
-                color: 'common.white',
-                '&:hover': {
+                fontWeight: 700,
+                // NOTE: solid white on the navy bar (≥12:1 label, clear edge) instead of a faint wash
+                // `&&` beats the dark-scheme color of MUI text buttons (light blue on white)
+                '&&': {
+                  border: '2px solid',
+                  borderColor: 'common.white',
                   bgcolor: 'common.white',
+                  color: 'common.black',
+                },
+                '& .MuiButton-startIcon': { mr: 0.5 },
+                '&&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.85)',
                   color: 'common.black',
                   borderColor: 'common.white',
                 },
@@ -99,7 +107,6 @@ export default function AppTopNavbar({
                 py: 0.6,
                 fontSize: '0.875rem',
                 fontWeight: 600,
-                borderRadius: '14px',
               }}
             >
               Cadastre-se

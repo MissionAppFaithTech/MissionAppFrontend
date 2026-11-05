@@ -46,7 +46,8 @@ const baseSx = () => ({
   borderRadius: BUTTON_BORDER_RADIUS,
   ...FORM_ACTION_BUTTON_SX,
   py: 0.5,
-  fontWeight: 500,
+  // NOTE: 600 everywhere — labels read clearly at the compact 34px height
+  fontWeight: 600,
   textTransform: 'none',
   boxShadow: 'none',
   transition:
@@ -65,7 +66,7 @@ const figmaActionBase = {
   borderRadius: BUTTON_BORDER_RADIUS,
   ...FORM_ACTION_BUTTON_SX,
   py: 0.5,
-  fontWeight: 500,
+  fontWeight: 600,
   lineHeight: 1.25,
   boxShadow: 'none',
 } as const;
@@ -123,11 +124,11 @@ const darkBrandFill: ToneEntry = (theme) =>
 const darkSecondaryOutline: ToneEntry = (theme) =>
   theme.applyStyles('dark', {
     backgroundColor: 'transparent',
-    borderColor: v(theme, 'palette.action2.borderStrong'),
+    borderColor: v(theme, 'palette.action2.controlBorder'),
     color: v(theme, 'palette.text.primary'),
     '--pill-fg': v(theme, 'palette.text.primary'),
     '--pill-bg': 'transparent',
-    '--pill-bd': v(theme, 'palette.action2.borderStrong'),
+    '--pill-bd': v(theme, 'palette.action2.controlBorder'),
     '&:hover': {
       backgroundColor: v(theme, 'palette.action2.secondaryHoverWash'),
       borderColor: v(theme, 'palette.connection.main'),
@@ -290,7 +291,7 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
       // sibling dark rule would tie with `&&` and lose on source order — which
       // is what kept these buttons white in dark mode.
       '&&': {
-        border: '1.5px solid',
+        border: '2px solid',
         borderColor: 'primary.main',
         bgcolor: 'common.white',
         color: 'primary.main',
@@ -298,12 +299,12 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
         '--pill-bg': 'var(--mui-palette-common-white)',
         '--pill-bd': 'var(--mui-palette-primary-main)',
         ...theme.applyStyles('dark', {
-          borderColor: v(theme, 'palette.action2.borderStrong'),
+          borderColor: v(theme, 'palette.action2.controlBorder'),
           backgroundColor: 'transparent',
           color: v(theme, 'palette.text.primary'),
           '--pill-fg': v(theme, 'palette.text.primary'),
           '--pill-bg': 'transparent',
-          '--pill-bd': v(theme, 'palette.action2.borderStrong'),
+          '--pill-bd': v(theme, 'palette.action2.controlBorder'),
         }),
       },
       '&&:hover': {
@@ -367,7 +368,7 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     (theme) => ({
       ...figmaActionBase,
       '&&': {
-        border: '1.5px solid',
+        border: '2px solid',
         borderColor: v(theme, 'palette.action2.danger'),
         bgcolor: 'transparent',
         color: v(theme, 'palette.action2.danger'),
@@ -396,6 +397,9 @@ const stateSx: ToneEntry = (theme) => ({
   '&&.Mui-disabled:not(.MuiButton-loading)': {
     backgroundColor: v(theme, 'palette.action2.disabledFill'),
     borderColor: v(theme, 'palette.action2.disabledBorder'),
+    // NOTE: a dashed edge says "off" without relying on a faded label (WCAG 1.4.1)
+    borderStyle: 'dashed',
+    borderWidth: '2px',
     color: v(theme, 'palette.action2.disabledText'),
     boxShadow: 'none',
     cursor: 'not-allowed',
