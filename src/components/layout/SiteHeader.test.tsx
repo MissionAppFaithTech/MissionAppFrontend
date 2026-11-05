@@ -51,7 +51,7 @@ describe('SiteHeader', () => {
     render(<SiteHeader />);
 
     const current = screen.getAllByRole('link', { name: 'Início' })[0];
-    const other = screen.getAllByRole('link', { name: 'Como funciona' })[0];
+    const other = screen.getAllByRole('link', { name: 'Campanha' })[0];
     const cssFor = (element: Element) => {
       const emotionClass = [...element.classList].find((name) => name.startsWith('css-'));
       return [...document.querySelectorAll('style')]

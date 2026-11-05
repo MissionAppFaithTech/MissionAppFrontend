@@ -70,9 +70,9 @@ export const CHECKLIST_PHASES: ChecklistPhase[] = [
     number: 1,
     title: 'Fase 1: Alinhamento Pastoral e Visão',
     action:
-      'Reunião inicial com o pastor e liderança da igreja para definir o propósito do conselho.',
+      'Reunião inicial com o pastor e liderança da igreja para definir o propósito do conselho missionário.',
     guideline:
-      'O conselho não é um departamento isolado que compete por agenda, mas um braço auxiliar do pastorado para conectar todos os ministérios da igreja à missão.',
+      'O conselho missionário não é um departamento isolado que compete por agenda, mas um braço auxiliar do pastorado para conectar todos os ministérios da igreja à missão.',
   },
   {
     id: 'fase-2',
@@ -88,7 +88,7 @@ export const CHECKLIST_PHASES: ChecklistPhase[] = [
     title: 'Fase 3: Capacitação Base da Liderança',
     action: 'Nivelamento teológico e estratégico da equipe.',
     guideline:
-      'Inscrever os membros do conselho no curso Perspectivas Brasil ou realizar uma Fatia do Perspectivas na igreja para alinhar a base bíblica, histórica, cultural e estratégica antes de iniciar o trabalho.',
+      'Inscrever os membros do conselho missionário no curso Perspectivas Brasil ou realizar uma Fatia do Perspectivas na igreja para alinhar a base bíblica, histórica, cultural e estratégica antes de iniciar o trabalho.',
   },
   {
     id: 'fase-4',
@@ -102,7 +102,7 @@ export const CHECKLIST_PHASES: ChecklistPhase[] = [
     id: 'fase-5',
     number: 5,
     title: 'Fase 5: Lançamento e Calendário Anual',
-    action: 'Culto de posse/apresentação do conselho à igreja.',
+    action: 'Culto de posse/apresentação do conselho missionário à igreja.',
     guideline:
       'Integrar as ações missionárias no calendário oficial de todos os departamentos (ministério infantil, jovens, escola bíblica e pequenos grupos).',
   },
@@ -115,7 +115,7 @@ export const COUNCIL_ROLES: CouncilRole[] = [
     roleBadge: 'Liderança & Relações',
     iconName: 'coordinator',
     description:
-      'Lidera as reuniões mensais do conselho, faz a ponte direta com o pastor titular e mantém o relacionamento institucional com as agências missionárias (como APMT, JMM e JMN).',
+      'Lidera as reuniões mensais do conselho missionário, faz a ponte direta com o pastor titular e mantém o relacionamento institucional com as agências missionárias (como APMT, JMM e JMN).',
   },
   {
     id: 'secretario',
@@ -347,7 +347,7 @@ export const COUNCIL_PLAYLIST: ChurchVideoPlaylist = {
     'Assista ao curso em vídeo completo com passos objetivos para criar um conselho missionário, formar a equipe, planejar a captação de recursos e manter a congregação engajada na evangelização e no cuidado de missionários.',
   topics: [
     'Fundamentos bíblicos e alinhamento pastoral',
-    'Como compor e estruturar a diretoria do conselho',
+    'Como compor e estruturar a diretoria do conselho missionário',
     'Elaboração de regimento interno e pautas de reunião',
     'Planejamento de orçamento e Ofertas de Promessa de Fé',
     'Ações dinâmicas para engajamento contínuo da congregação',
@@ -367,13 +367,13 @@ Art. 1º. O Conselho Missionário é um órgão auxiliar do pastorado e da lider
   e) Cuidar integralmente dos missionários enviados e adotados.
 
 CAPÍTULO II - DA COMPOSIÇÃO E MANDATO
-Art. 2º. O Conselho será composto por 4 a 7 membros da igreja em plena comunhão, indicados pela liderança pastoral, exercendo as seguintes funções:
+Art. 2º. O Conselho Missionário será composto por 4 a 7 membros da igreja em plena comunhão, indicados pela liderança pastoral, exercendo as seguintes funções:
   I. Coordenador Geral (ou Promotor de Missões);
   II. Secretário e Comunicação;
   III. Relator Financeiro / Tesoureiro de Missões;
   IV. Coordenador de Intercessão;
   V. Coordenador de Cuidado Integral e Vocacionados.
-§ 1º. O mandato dos membros do Conselho será de 1 (um) a 2 (dois) anos, permitida a recondução.
+§ 1º. O mandato dos membros do Conselho Missionário será de 1 (um) a 2 (dois) anos, permitida a recondução.
 § 2º. As reuniões ordinárias ocorrerão mensalmente, lavrando-se em ata todas as deliberações.
 
 CAPÍTULO III - DO FUNDO MISSIONÁRIO E RECURSOS
@@ -384,7 +384,7 @@ Art. 3º. O sustento missionário será gerido em parceria com a tesouraria gera
 Parágrafo único. A prestação de contas das entradas e envios mensais será apresentada trimestralmente à liderança e anualmente à igreja.
 
 CAPÍTULO IV - DOS CRITÉRIOS DE ADOÇÃO DE PROJETOS E MISSIONÁRIOS
-Art. 4º. Para a adoção ou envio de obreiros pelo Conselho, observar-se-ão os seguintes requisitos:
+Art. 4º. Para a adoção ou envio de obreiros pelo Conselho Missionário, observar-se-ão os seguintes requisitos:
   a) Alinhamento doutrinário com a confissão de fé da igreja local;
   b) Recomendação escrita do pastor titular e idoneidade moral comprovada;
   c) Vinculação formal a uma agência missionária reconhecida (ex.: JMM, JMN, APMT ou conveniada);
@@ -422,7 +422,8 @@ export const COPYABLE_TEMPLATES: CopyableTemplate[] = [
   {
     id: 'regimento-interno',
     title: 'Template 1: Modelo Simplificado de Regimento Interno',
-    subtitle: 'Diretrizes estatutárias e organizacionais para formalizar o conselho na igreja.',
+    subtitle:
+      'Diretrizes estatutárias e organizacionais para formalizar o conselho missionário na igreja.',
     content: TEMPLATE_REGIMENTO_INTERNO,
   },
   {

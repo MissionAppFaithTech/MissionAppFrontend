@@ -77,7 +77,7 @@ export default function InteractiveChecklist() {
                 color: (t) => (t.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
               }}
             >
-              Progresso de Implantação do Conselho
+              Progresso de Implantação do Conselho Missionário
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {isClient ? progressStatus : 'Acompanhe as 5 etapas de criação'}

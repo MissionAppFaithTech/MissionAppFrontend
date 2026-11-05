@@ -34,7 +34,7 @@ export default function CouncilRolesGrid() {
             color: (t) => (t.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
           }}
         >
-          Estrutura e Atribuições do Conselho (5 Funções Essenciais)
+          Estrutura e Atribuições do Conselho Missionário (5 Funções Essenciais)
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75, maxWidth: 800 }}>
           Cada função atua de forma complementar para conectar todos os ministérios da igreja local

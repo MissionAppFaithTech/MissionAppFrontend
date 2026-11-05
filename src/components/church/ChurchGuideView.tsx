@@ -15,6 +15,8 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import CampaignIcon from '@mui/icons-material/Campaign';
 import PillButton from '@/components/common/PillButton';
 import InteractiveChecklist from './InteractiveChecklist';
 import CouncilRolesGrid from './CouncilRolesGrid';
@@ -22,15 +24,31 @@ import MobilizationTimeline from './MobilizationTimeline';
 import MaterialsHub from './MaterialsHub';
 import CopyableTemplatesSection from './CopyableTemplatesSection';
 import ChurchVideoPlaylistSection from './ChurchVideoPlaylistSection';
+import AboutMissionAppSection from './AboutMissionAppSection';
+import CampaignAdoptionGuide from './CampaignAdoptionGuide';
+import { featuredCampaign } from '@/lib/campaigns/featured';
 
 const guideSections = [
-  { id: 'checklist', label: '1. Passo a Passo', icon: <ChecklistIcon fontSize="small" /> },
-  { id: 'funcoes', label: '2. Funções do Conselho', icon: <GroupsIcon fontSize="small" /> },
-  { id: 'curso-video', label: '3. Curso em Vídeo', icon: <OndemandVideoIcon fontSize="small" /> },
-  { id: 'cadencia', label: '4. Mobilização Anual', icon: <CalendarMonthIcon fontSize="small" /> },
-  { id: 'materiais', label: '5. Hub de Agências', icon: <LibraryBooksIcon fontSize="small" /> },
-  { id: 'templates', label: '6. Modelos Copiáveis', icon: <ContentCopyIcon fontSize="small" /> },
+  { id: 'mission-app', label: '1. O Mission App', icon: <InfoOutlinedIcon fontSize="small" /> },
+  {
+    id: 'campanha-recorrente',
+    label: '2. Campanha Recorrente',
+    icon: <CampaignIcon fontSize="small" />,
+  },
+  { id: 'checklist', label: '3. Passo a Passo', icon: <ChecklistIcon fontSize="small" /> },
+  {
+    id: 'funcoes',
+    label: '4. Funções do Conselho Missionário',
+    icon: <GroupsIcon fontSize="small" />,
+  },
+  { id: 'curso-video', label: '5. Curso em Vídeo', icon: <OndemandVideoIcon fontSize="small" /> },
+  { id: 'cadencia', label: '6. Mobilização Anual', icon: <CalendarMonthIcon fontSize="small" /> },
+  { id: 'materiais', label: '7. Hub de Agências', icon: <LibraryBooksIcon fontSize="small" /> },
+  { id: 'templates', label: '8. Modelos Copiáveis', icon: <ContentCopyIcon fontSize="small" /> },
 ];
+
+/** Index of a section in the quick-navigation tabs. */
+const tabOf = (id: string) => guideSections.findIndex((section) => section.id === id);
 
 export default function ChurchGuideView() {
   const [activeTab, setActiveTab] = useState(0);
@@ -76,7 +94,9 @@ export default function ChurchGuideView() {
               mb: 2,
               borderRadius: 2,
               bgcolor: (theme) =>
-                theme.palette.mode === 'dark' ? 'rgba(194, 65, 12, 0.2)' : 'rgba(194, 65, 12, 0.1)',
+                theme.palette.mode === 'dark'
+                  ? 'rgba(194, 65, 12, 0.2)'
+                  : 'rgba(194, 65, 12, 0.06)',
               color: 'accent.main',
               fontWeight: 700,
               fontSize: '0.8125rem',
@@ -111,10 +131,11 @@ export default function ChurchGuideView() {
               mb: 3.5,
             }}
           >
-            Um passo a passo completo para igrejas criarem seu <strong>Conselho Missionário</strong>{' '}
-            (ou Promotoria de Missões) e mobilizarem a congregação o ano inteiro, com frameworks e
-            materiais oficiais da <strong>JMM</strong>, <strong>JMN</strong>, <strong>APMT</strong>{' '}
-            e <strong>Perspectivas Brasil</strong>.
+            Conheça o Mission App, adote a <strong>campanha missionária recorrente</strong> com kit
+            de mídia e QR Code prontos e siga um passo a passo completo para criar seu{' '}
+            <strong>Conselho Missionário</strong> (ou Promotoria de Missões) e mobilizar a
+            congregação o ano inteiro, com frameworks e materiais oficiais da <strong>JMM</strong>,{' '}
+            <strong>JMN</strong>, <strong>APMT</strong> e <strong>Perspectivas Brasil</strong>.
           </Typography>
 
           <Stack
@@ -129,14 +150,29 @@ export default function ChurchGuideView() {
             }}
           >
             <PillButton
+              href="#campanha-recorrente"
+              onClick={(e) => {
+                e.preventDefault();
+                document
+                  .getElementById('campanha-recorrente')
+                  ?.scrollIntoView({ behavior: 'smooth' });
+                setActiveTab(tabOf('campanha-recorrente'));
+              }}
+              tone="missionFilled"
+              sx={{ minHeight: 44, px: 3, fontWeight: 700 }}
+            >
+              Adotar a campanha vigente
+            </PillButton>
+
+            <PillButton
               href="#checklist"
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('checklist')?.scrollIntoView({ behavior: 'smooth' });
-                setActiveTab(0);
+                setActiveTab(tabOf('checklist'));
               }}
-              tone="missionFilled"
-              sx={{ minHeight: 44, px: 3, fontWeight: 700 }}
+              tone="cta"
+              sx={{ minHeight: 44, px: 3, fontWeight: 600 }}
             >
               Começar Checklist
             </PillButton>
@@ -146,9 +182,9 @@ export default function ChurchGuideView() {
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('curso-video')?.scrollIntoView({ behavior: 'smooth' });
-                setActiveTab(2);
+                setActiveTab(tabOf('curso-video'));
               }}
-              tone="cta"
+              tone="primaryOutline"
               sx={{ minHeight: 44, px: 3, fontWeight: 600 }}
             >
               Assistir Curso em Vídeo
@@ -159,7 +195,7 @@ export default function ChurchGuideView() {
               onClick={(e) => {
                 e.preventDefault();
                 document.getElementById('templates')?.scrollIntoView({ behavior: 'smooth' });
-                setActiveTab(5);
+                setActiveTab(tabOf('templates'));
               }}
               tone="primaryOutline"
               sx={{ minHeight: 44, px: 3, fontWeight: 600 }}
@@ -216,7 +252,7 @@ export default function ChurchGuideView() {
                 iconPosition="start"
                 label={sec.label}
                 id={`guide-tab-${idx}`}
-                aria-controls={`guide-section-${sec.id}`}
+                aria-controls={sec.id}
               />
             ))}
           </Tabs>
@@ -224,6 +260,24 @@ export default function ChurchGuideView() {
 
         {/* Sections Content */}
         <Stack spacing={{ xs: 6, md: 8 }}>
+          {/* What the Mission App is, its vision and how to bring it to the church */}
+          <Box id="mission-app" sx={{ scrollMarginTop: { xs: '120px', md: '140px' } }}>
+            <AboutMissionAppSection />
+          </Box>
+
+          <Divider />
+
+          {/* How the church adopts the recurring campaign (media kit, official day, QR code) */}
+          <Box id="campanha-recorrente" sx={{ scrollMarginTop: { xs: '120px', md: '140px' } }}>
+            <CampaignAdoptionGuide
+              campaign={featuredCampaign}
+              variant="full"
+              headingId="campaign-adoption-heading"
+            />
+          </Box>
+
+          <Divider />
+
           {/* Section 1: Checklist */}
           <Box id="checklist" sx={{ scrollMarginTop: { xs: '120px', md: '140px' } }}>
             <InteractiveChecklist />

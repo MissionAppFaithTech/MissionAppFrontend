@@ -13,7 +13,7 @@ describe('SEO Metadata & OpenGraph Specifications', () => {
   describe('Root Layout Metadata', () => {
     it('defines accurate title template, description, and canonical URL', () => {
       expect(rootMetadata.title).toEqual({
-        default: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
+        default: `${siteConfig.name} — Campanhas Missionárias Recorrentes`,
         template: `%s | ${siteConfig.name}`,
       });
       expect(rootMetadata.description).toBe(siteConfig.description);

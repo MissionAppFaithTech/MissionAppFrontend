@@ -22,5 +22,11 @@ describe('LoginPage route (/login)', () => {
       'href',
       '/select-role'
     );
+
+    // Back to the landing page
+    expect(screen.getByRole('link', { name: 'Voltar para a página inicial' })).toHaveAttribute(
+      'href',
+      '/'
+    );
   });
 });

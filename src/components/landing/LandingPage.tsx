@@ -13,31 +13,46 @@ import {
   Avatar,
   Card,
   useTheme,
+  type Theme,
 } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import EventIcon from '@mui/icons-material/Event';
+import GroupsIcon from '@mui/icons-material/Groups';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
+import Chip from '@mui/material/Chip';
 import Image from 'next/image';
 import SiteHeader from '@/components/layout/SiteHeader';
 import PillButton from '@/components/common/PillButton';
 import SectionHeader from '@/components/common/SectionHeader';
 import AudienceCard from '@/components/landing/AudienceCard';
 import Logo from '@/components/common/Logo';
+import CampaignAdoptionGuide from '@/components/church/CampaignAdoptionGuide';
+import { campaignPath, featuredCampaign } from '@/lib/campaigns/featured';
 
 const LANDING_ICONS = {
   profile: '/icons/about-you.PNG',
   presentation: '/icons/your-space.PNG',
   embracing: '/icons/close.PNG',
   supporter: '/icons/supporter.PNG',
-  world: '/icons/world.PNG',
 } as const;
 
 const audienceCards = [
+  {
+    label: 'Para Igrejas & Conselhos missionários',
+    title: 'Se você lidera a missão na igreja',
+    accentColor: 'connection.main' as const,
+    icon: LANDING_ICONS.embracing,
+    benefit:
+      'Adote as campanhas recorrentes com kit de mídia e QR Code prontos, fortaleça o conselho missionário e mantenha a congregação mobilizada o ano inteiro.',
+  },
   {
     label: 'Para Missionários',
     title: 'Se você está na missão',
     accentColor: 'primary.main' as const,
     icon: LANDING_ICONS.presentation,
     benefit:
-      'Compartilhe atualizações facilmente, receba apoio em oração, fortaleça sua rede de mantenedores e mantenha todos conectados em um só lugar.',
+      'Divulgue seu ministério e seus projetos sociais, compartilhe atualizações, receba apoio em oração e fortaleça sua rede de mantenedores em um só lugar.',
   },
   {
     label: 'Para Apoiadores',
@@ -45,7 +60,64 @@ const audienceCards = [
     accentColor: 'supporter.main' as const,
     icon: LANDING_ICONS.supporter,
     benefit:
-      'Conecte-se à missão de forma mais próxima: acompanhe a jornada missionária, receba pedidos de oração e veja como sua participação faz a diferença na vida de pessoas ao redor do mundo.',
+      'Conheça missionários e projetos sociais, acompanhe a jornada, ore com direcionamento e, se quiser, oferte com transparência.',
+  },
+];
+
+/** The three pillars of the vision: campaigns, councils, missionaries and projects. */
+const visionPillars = [
+  {
+    title: 'Campanhas missionárias recorrentes',
+    icon: <CampaignIcon aria-hidden />,
+    text: 'Campanhas temáticas que divulgam missionários e projetos sociais, com artes, vídeos de campo e dados de impacto prontos para o culto.',
+  },
+  {
+    title: 'Conselhos missionários fortalecidos',
+    icon: <GroupsIcon aria-hidden />,
+    text: 'Um guia prático, cursos e modelos para a igreja estruturar o conselho missionário e mobilizar a congregação o ano inteiro.',
+  },
+  {
+    title: 'Missionários e projetos para apoiar',
+    icon: <VolunteerActivismIcon aria-hidden />,
+    text: 'Conheça quem está no campo e as iniciativas sociais de cada campanha: acompanhe, ore junto e, se quiser, faça uma doação.',
+  },
+];
+
+const faqItems = [
+  {
+    question: 'O que são as campanhas missionárias recorrentes?',
+    answer:
+      'São campanhas temáticas que divulgam missionários e projetos sociais. Cada uma traz um kit de mídia para o culto, um Dia Oficial sugerido e uma página com QR Code para a igreja conhecer o projeto, orar e ofertar com transparência.',
+  },
+  {
+    question: 'Como minha igreja adota uma campanha?',
+    answer:
+      'A liderança baixa o kit de mídia, define o Dia Oficial na igreja e exibe o QR Code da campanha no culto. O guia "Para Igrejas" mostra o passo a passo e os materiais para o conselho missionário.',
+  },
+  {
+    question: 'Como funciona o cadastro de missionários?',
+    answer:
+      'Após preencher seus dados e ministério, nossa equipe realiza a validação do seu perfil para garantir a segurança e autenticidade da comunidade.',
+  },
+  {
+    question: 'Como os apoiadores podem contribuir com as missões?',
+    answer:
+      'Apoiadores podem ofertar em campanhas específicas, acompanhar relatórios de impacto e interagir diretamente com os pedidos de oração.',
+  },
+  {
+    question: 'A plataforma cobra taxa sobre as ofertas enviadas?',
+    answer:
+      'O MissionApp prioriza o sustento missionário integral, aproximando você diretamente aos canais oficiais com total transparência e sem taxas abusivas.',
+  },
+  {
+    question: 'Posso receber apoio em oração pela plataforma?',
+    answer:
+      'Sim. Você pode compartilhar pedidos de oração e manter seus apoiadores atualizados em tempo real sobre os desafios e testemunhos da missão.',
+  },
+  {
+    question: 'O que são os Projetos de Impacto?',
+    answer:
+      'São causas estruturadas e ações sociais no campo que possuem metas claras, histórico de atividades, galeria de fotos e acompanhamento contínuo.',
   },
 ];
 
@@ -127,26 +199,20 @@ function HeroHeadline() {
         }}
       >
         <Box component="span" sx={{ display: 'block', color: headingPrimaryColor }}>
-          Conectando
+          Campanhas
         </Box>
-        <Box component="span" sx={{ display: 'block' }}>
-          <Box component="span" sx={{ color: 'accent.main' }}>
-            missionários
-          </Box>
-          <Box component="span" sx={{ color: headingPrimaryColor }}>
-            {' '}
-            e
-          </Box>
+        <Box component="span" sx={{ display: 'block', color: 'accent.main' }}>
+          missionárias
         </Box>
         <Box component="span" sx={{ display: 'block', color: headingPrimaryColor }}>
-          apoiadores ao
+          que mobilizam
         </Box>
         <Box component="span" sx={{ display: 'block' }}>
           <Box component="span" sx={{ color: headingPrimaryColor }}>
-            redor do{' '}
+            sua{' '}
           </Box>
           <Box component="span" sx={{ color: 'accent.main' }}>
-            mundo
+            igreja
           </Box>
         </Box>
       </Typography>
@@ -169,33 +235,45 @@ function HeroHeadline() {
         />
 
         <Stack
-          spacing={2}
+          spacing={2.5}
           sx={{
             width: '100%',
             alignItems: { xs: 'center', md: 'flex-start' },
           }}
         >
-          <Stack
-            direction="row"
-            spacing={2}
+          <Typography
             sx={{
-              flexWrap: 'wrap',
-              justifyContent: { xs: 'center', md: 'flex-start' },
+              m: 0,
+              maxWidth: '34rem',
+              color: 'var(--app-hero-ink)',
+              fontWeight: 500,
+              lineHeight: 1.55,
+              fontSize: { xs: '1rem', md: 'clamp(1rem, 0.6rem + 0.8vw, 1.3rem)' },
             }}
           >
-            <PillButton href="/select-role" tone="missionFilled" sx={heroCtaButtonSx}>
-              Comece agora
+            Plataforma de mobilização e conscientização missionária que divulga missionários e
+            projetos sociais e fortalece os conselhos missionários com campanhas recorrentes.
+          </Typography>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            useFlexGap
+            sx={{
+              flexWrap: 'wrap',
+              width: { xs: '100%', sm: 'auto' },
+              justifyContent: { xs: 'center', md: 'flex-start' },
+              '& > *': { width: { xs: '100%', sm: 'auto' }, justifyContent: 'center' },
+            }}
+          >
+            <PillButton
+              href={campaignPath(featuredCampaign)}
+              tone="missionFilled"
+              sx={heroCtaButtonSx}
+            >
+              Conheça a campanha vigente
             </PillButton>
             <PillButton
-              href="#como-funciona"
-              onClick={(e) => {
-                e.preventDefault();
-                const target = document.getElementById('como-funciona');
-                if (target) {
-                  target.scrollIntoView({ behavior: 'smooth' });
-                  window.history.pushState(null, '', '#como-funciona');
-                }
-              }}
+              href="/navegacao"
               tone="primaryOutline"
               sx={{
                 ...heroCtaButtonSx,
@@ -217,7 +295,7 @@ function HeroHeadline() {
                 },
               }}
             >
-              Saiba mais
+              Explorar missionários
             </PillButton>
           </Stack>
         </Stack>
@@ -337,6 +415,130 @@ function LandingHero() {
   );
 }
 
+const landingCardSx = {
+  p: { xs: 3, md: 4 },
+  height: '100%',
+  borderRadius: 3,
+  bgcolor: 'background.paper',
+  border: (theme: Theme) =>
+    theme.palette.mode === 'dark'
+      ? '1px solid var(--mui-palette-action2-borderSubtle)'
+      : '1px solid var(--mui-palette-divider)',
+  boxShadow: (theme: Theme) =>
+    theme.palette.mode === 'dark' ? 'none' : '0 14px 28px rgba(13, 43, 92, 0.08)',
+} as const;
+
+const landingCardTitleSx = {
+  fontWeight: 700,
+  lineHeight: 1.3,
+  fontSize: { xs: '1.125rem', md: '1.25rem' },
+  color: (t: Theme) => (t.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+} as const;
+
+/** The campaign in effect: banner, official day, projects, and how to take part. */
+function FeaturedCampaignCard() {
+  const campaign = featuredCampaign;
+  const projects = campaign.associatedImpactProjects?.length ?? 0;
+
+  return (
+    <Card
+      elevation={0}
+      sx={{
+        ...landingCardSx,
+        p: 0,
+        width: '100%',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+      }}
+    >
+      <Box
+        sx={{
+          position: 'relative',
+          flexShrink: 0,
+          width: { xs: '100%', md: '45%' },
+          minHeight: { xs: 200, sm: 260, md: 360 },
+        }}
+      >
+        <Image
+          src={campaign.bannerUrl}
+          alt=""
+          fill
+          sizes="(min-width: 900px) 45vw, 100vw"
+          style={{ objectFit: 'cover' }}
+        />
+      </Box>
+      <Stack spacing={2} sx={{ p: { xs: 3, md: 5 }, minWidth: 0, justifyContent: 'center' }}>
+        <Chip
+          icon={<CampaignIcon aria-hidden />}
+          label="Campanha vigente"
+          variant="outlined"
+          sx={{
+            alignSelf: 'flex-start',
+            fontWeight: 700,
+            // NOTE: accent is the orange that keeps 4.5:1 on the card in both themes
+            color: 'accent.main',
+            borderColor: 'accent.main',
+            '& .MuiChip-icon': { color: 'accent.main' },
+          }}
+        />
+        <Typography
+          id="featured-campaign-heading"
+          component="h3"
+          sx={{ ...landingCardTitleSx, fontSize: { xs: '1.375rem', md: '1.75rem' } }}
+        >
+          {campaign.title}
+        </Typography>
+        <Typography color="text.secondary" sx={{ lineHeight: 1.6 }}>
+          {campaign.subtitle}
+        </Typography>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={{ xs: 1, sm: 3 }}
+          useFlexGap
+          sx={{ flexWrap: 'wrap' }}
+        >
+          <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+            <EventIcon aria-hidden fontSize="small" sx={{ color: 'accent.main' }} />
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              Dia oficial nas igrejas: {campaign.churchDay}
+            </Typography>
+          </Stack>
+          {projects > 0 ? (
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+              <VolunteerActivismIcon aria-hidden fontSize="small" sx={{ color: 'accent.main' }} />
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {projects === 1 ? '1 projeto de impacto' : `${projects} projetos de impacto`}
+              </Typography>
+            </Stack>
+          ) : null}
+        </Stack>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          useFlexGap
+          sx={{ pt: 1, '& > *': { width: { xs: '100%', sm: 'auto' } } }}
+        >
+          <PillButton
+            href={campaignPath(campaign)}
+            tone="missionFilled"
+            sx={{ minHeight: 44, px: 3, fontWeight: 700, justifyContent: 'center' }}
+          >
+            Ver a campanha
+          </PillButton>
+          <PillButton
+            href="/conselho-missionario#campanha-recorrente"
+            tone="primaryOutline"
+            sx={{ minHeight: 44, px: 3, fontWeight: 600, justifyContent: 'center' }}
+          >
+            Levar para minha igreja
+          </PillButton>
+        </Stack>
+      </Stack>
+    </Card>
+  );
+}
+
 export default function LandingPage() {
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -351,13 +553,162 @@ export default function LandingPage() {
           sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
         >
           <Container maxWidth={false} sx={landingContainerSx}>
-            <Stack spacing={4} sx={{ alignItems: 'center' }}>
+            <Stack spacing={{ xs: 4, md: 6 }} sx={{ alignItems: 'center' }}>
               <SectionHeader
-                eyebrow="Nossa missão"
-                title="Conectamos missionários e apoiadores em um só lugar."
-                subtitle="Acompanhe histórias, compartilhe avanços, ore junto e fortaleça relacionamentos que sustentam a missão."
+                eyebrow="Nossa visão"
+                title="Mobilização missionária contínua, de igreja em igreja."
+                subtitle="O Mission App é uma plataforma de mobilização e conscientização missionária: campanhas recorrentes, conselhos missionários fortalecidos e missionários e projetos sociais para conhecer, orar e apoiar."
               />
+              <Grid container spacing={3} sx={{ width: '100%' }}>
+                {visionPillars.map((pillar) => (
+                  <Grid key={pillar.title} size={{ xs: 12, md: 4 }}>
+                    <Card elevation={0} sx={landingCardSx}>
+                      <Box
+                        sx={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 2,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'accent.main',
+                          bgcolor: 'var(--mui-palette-action2-secondaryHoverWash)',
+                          mb: 2,
+                        }}
+                      >
+                        {pillar.icon}
+                      </Box>
+                      <Typography component="h3" sx={landingCardTitleSx}>
+                        {pillar.title}
+                      </Typography>
+                      <Typography color="text.secondary" sx={{ mt: 1, lineHeight: 1.6 }}>
+                        {pillar.text}
+                      </Typography>
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
             </Stack>
+          </Container>
+        </Box>
+
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box
+          id="campanha"
+          component="section"
+          aria-labelledby="featured-campaign-heading"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Stack spacing={{ xs: 4, md: 5 }} sx={{ alignItems: 'center' }}>
+              <SectionHeader
+                eyebrow="Campanha vigente"
+                title="Uma campanha por vez, toda a igreja junto."
+                subtitle="A cada ciclo, uma campanha missionária reúne igrejas, missionários e apoiadores em torno de projetos sociais no campo."
+              />
+              <FeaturedCampaignCard />
+            </Stack>
+          </Container>
+        </Box>
+
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box
+          id="para-igrejas"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
+          <Container maxWidth={false} sx={{ ...landingContainerSx, maxWidth: { md: 1040 } }}>
+            <CampaignAdoptionGuide
+              campaign={featuredCampaign}
+              variant="summary"
+              headingId="landing-campaign-adoption-heading"
+            />
+          </Container>
+        </Box>
+
+        <Divider sx={{ width: '50%', mx: 'auto' }} />
+
+        <Box
+          id="explorar"
+          component="section"
+          aria-labelledby="explore-heading"
+          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
+        >
+          <Container maxWidth={false} sx={landingContainerSx}>
+            <Card
+              elevation={0}
+              sx={{
+                ...landingCardSx,
+                p: { xs: 3.5, sm: 5, md: 6 },
+                borderRadius: 4,
+                background: (theme) =>
+                  theme.palette.mode === 'dark'
+                    ? 'rgba(255, 255, 255, 0.03)'
+                    : 'linear-gradient(135deg, rgba(13, 43, 92, 0.04) 0%, rgba(194, 65, 12, 0.06) 100%)',
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                alignItems: { xs: 'stretch', md: 'center' },
+                justifyContent: 'space-between',
+                gap: 4,
+              }}
+            >
+              <Box sx={{ maxWidth: 720 }}>
+                <Typography
+                  variant="overline"
+                  sx={{
+                    display: 'block',
+                    fontWeight: 800,
+                    letterSpacing: '0.08em',
+                    color: 'accent.main',
+                    mb: 1,
+                  }}
+                >
+                  Missionários e projetos sociais
+                </Typography>
+                <Typography
+                  id="explore-heading"
+                  component="h2"
+                  sx={{
+                    fontSize: { xs: '1.5rem', sm: '1.85rem', md: '2.1rem' },
+                    fontWeight: 800,
+                    lineHeight: 1.25,
+                    mb: 1.5,
+                    color: (t) => (t.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
+                  }}
+                >
+                  Explore missionários e projetos para orar e apoiar
+                </Typography>
+                <Typography
+                  color="text.secondary"
+                  sx={{ lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.05rem' } }}
+                >
+                  Conheça quem está no campo e as iniciativas sociais de cada campanha. Acompanhe a
+                  jornada, ore junto e, se quiser, faça uma doação.
+                </Typography>
+              </Box>
+              <Stack
+                direction={{ xs: 'column', sm: 'row', md: 'column' }}
+                spacing={2}
+                useFlexGap
+                sx={{ flexShrink: 0, '& > *': { width: { xs: '100%', sm: 'auto', md: '100%' } } }}
+              >
+                <PillButton
+                  href="/navegacao"
+                  tone="missionFilled"
+                  sx={{ minHeight: 48, px: 3.5, fontWeight: 700, justifyContent: 'center' }}
+                >
+                  Explorar missionários e projetos
+                </PillButton>
+                <PillButton
+                  href="/select-role"
+                  tone="primaryOutline"
+                  sx={{ minHeight: 48, px: 3.5, fontWeight: 600, justifyContent: 'center' }}
+                >
+                  Comece agora
+                </PillButton>
+              </Stack>
+            </Card>
           </Container>
         </Box>
 
@@ -379,7 +730,7 @@ export default function LandingPage() {
                     index === 0 ? (
                       <SectionHeader
                         align="left"
-                        eyebrow="Dois lados da mesma missão"
+                        eyebrow="Uma missão, três frentes"
                         title="Para quem é?"
                       />
                     ) : undefined
@@ -531,89 +882,6 @@ export default function LandingPage() {
         <Divider sx={{ width: '50%', mx: 'auto' }} />
 
         <Box
-          id="para-igrejas"
-          component="section"
-          sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
-        >
-          <Container maxWidth={false} sx={landingContainerSx}>
-            <Card
-              elevation={0}
-              sx={{
-                p: { xs: 3.5, sm: 5, md: 6 },
-                borderRadius: 4,
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(255, 255, 255, 0.03)'
-                    : 'linear-gradient(135deg, rgba(13, 43, 92, 0.04) 0%, rgba(194, 65, 12, 0.06) 100%)',
-                border: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? '1px solid var(--mui-palette-action2-borderSubtle)'
-                    : '1px solid var(--mui-palette-divider)',
-                textAlign: { xs: 'center', md: 'left' },
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 4,
-              }}
-            >
-              <Box sx={{ maxWidth: 720 }}>
-                <Typography
-                  variant="overline"
-                  sx={{
-                    fontWeight: 800,
-                    letterSpacing: '0.08em',
-                    color: 'accent.main',
-                    display: 'block',
-                    mb: 1,
-                  }}
-                >
-                  Para Comunidades de Fé & Pastores
-                </Typography>
-                <Typography
-                  component="h2"
-                  sx={{
-                    fontSize: { xs: '1.5rem', sm: '1.85rem', md: '2.1rem' },
-                    fontWeight: 800,
-                    color: (t) => (t.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
-                    lineHeight: 1.25,
-                    mb: 1.5,
-                  }}
-                >
-                  Como trazer o Mission App para sua igreja
-                </Typography>
-                <Typography
-                  variant="body1"
-                  color="text.secondary"
-                  sx={{ lineHeight: 1.6, fontSize: { xs: '0.95rem', md: '1.05rem' } }}
-                >
-                  Acesse nosso guia prático completo para implantar o Conselho Missionário,
-                  estruturar o fundo e a cadência anual de mobilização, com materiais oficiais da
-                  JMM, JMN, APMT e Perspectivas Brasil.
-                </Typography>
-              </Box>
-
-              <PillButton
-                href="/conselho-missionario"
-                tone="missionFilled"
-                sx={{
-                  flexShrink: 0,
-                  minHeight: 48,
-                  px: 3.5,
-                  fontSize: '1rem',
-                  fontWeight: 700,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Como trazer o Mission App para sua igreja
-              </PillButton>
-            </Card>
-          </Container>
-        </Box>
-
-        <Divider sx={{ width: '50%', mx: 'auto' }} />
-
-        <Box
           id="faq"
           component="section"
           sx={{ py: { xs: 6, md: 10 }, scrollMarginTop: { xs: '72px', md: '88px' } }}
@@ -662,76 +930,18 @@ export default function LandingPage() {
 
               <Grid size={{ xs: 12, md: 7 }}>
                 <Stack spacing={2}>
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Como funciona o cadastro de missionários?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Após preencher seus dados e ministério, nossa equipe realiza a validação do
-                        seu perfil para garantir a segurança e autenticidade da comunidade.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Como os apoiadores podem contribuir com as missões?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Apoiadores podem ofertar em campanhas específicas, acompanhar relatórios de
-                        impacto e interagir diretamente com os pedidos de oração.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        A plataforma cobra taxa sobre as ofertas enviadas?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        O MissionApp prioriza o sustento missionário integral, aproximando você
-                        diretamente aos canais oficiais com total transparência e sem taxas
-                        abusivas.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        Posso receber apoio em oração pela plataforma?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        Sim. Você pode compartilhar pedidos de oração e manter seus apoiadores
-                        atualizados em tempo real sobre os desafios e testemunhos da missão.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-
-                  <Accordion>
-                    <AccordionSummary expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}>
-                      <Typography sx={{ fontWeight: 600 }}>
-                        O que são os Projetos de Impacto?
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography color="text.secondary">
-                        São causas estruturadas e ações sociais no campo que possuem metas claras,
-                        histórico de atividades, galeria de fotos e acompanhamento contínuo.
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
+                  {faqItems.map((item) => (
+                    <Accordion key={item.question}>
+                      <AccordionSummary
+                        expandIcon={<AddCircleIcon sx={{ color: 'primary.main' }} />}
+                      >
+                        <Typography sx={{ fontWeight: 600 }}>{item.question}</Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Typography color="text.secondary">{item.answer}</Typography>
+                      </AccordionDetails>
+                    </Accordion>
+                  ))}
                 </Stack>
               </Grid>
             </Grid>

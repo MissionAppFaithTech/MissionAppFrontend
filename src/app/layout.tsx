@@ -28,7 +28,7 @@ const siteUrl = getSiteUrl();
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
+    default: `${siteConfig.name} — Campanhas Missionárias Recorrentes`,
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -66,20 +66,20 @@ export const metadata: Metadata = {
     locale: siteConfig.locale,
     url: siteUrl,
     siteName: siteConfig.name,
-    title: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
+    title: `${siteConfig.name} — Campanhas Missionárias Recorrentes`,
     description: siteConfig.description,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: `${siteConfig.name} — conectamos missionários e apoiadores`,
+        alt: `${siteConfig.name} — campanhas missionárias recorrentes`,
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: `${siteConfig.name} — Conectando Missionários e Apoiadores`,
+    title: `${siteConfig.name} — Campanhas Missionárias Recorrentes`,
     description: siteConfig.description,
     images: [siteConfig.ogImage],
   },

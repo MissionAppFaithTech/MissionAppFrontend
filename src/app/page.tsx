@@ -5,14 +5,14 @@ import { getSiteUrl, siteConfig } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: {
-    absolute: `${siteConfig.name} — Conectamos missionários e apoiadores`,
+    absolute: `${siteConfig.name} — Campanhas missionárias recorrentes para sua igreja`,
   },
   description: siteConfig.description,
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: `${siteConfig.name} — Conectamos missionários e apoiadores`,
+    title: `${siteConfig.name} — Campanhas missionárias recorrentes para sua igreja`,
     description: siteConfig.description,
     url: '/',
   },

@@ -19,6 +19,9 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// jsdom has no canvas (e.g. the campaign QR code PNG copy): no 2D context, no noise
+HTMLCanvasElement.prototype.getContext = (() => null) as unknown as HTMLCanvasElement['getContext'];
+
 // Mock IntersectionObserver for JSDOM
 class MockIntersectionObserver {
   observe = vi.fn();

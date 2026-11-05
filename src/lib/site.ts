@@ -17,7 +17,7 @@ export const siteConfig = {
   name: 'Mission App',
   shortName: 'Mission App',
   description:
-    'Plataforma que conecta missionários, apoiadores e projetos sociais. Acompanhe a jornada, ore e apoie em um só lugar.',
+    'Plataforma de campanhas missionárias recorrentes: divulga missionários e projetos sociais e fortalece os conselhos missionários das igrejas.',
   locale: 'pt_BR',
   ogImage: '/landing-page/landing-page.png',
 } as const;
