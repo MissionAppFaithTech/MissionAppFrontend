@@ -21,6 +21,8 @@
     ".claude",
     ".agents",
     "e2e",
+    "e2e-real",
+    "playwright-report-real",
     "reports",
     "playwright-report",
     "test-results",
