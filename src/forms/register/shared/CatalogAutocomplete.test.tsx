@@ -186,9 +186,13 @@ describe('CatalogAutocomplete', () => {
 
     await user.type(screen.getByRole('combobox', { name: /Agência missionária/ }), 'jo');
 
-    expect(
-      await screen.findByText('Muitas buscas seguidas. Aguarde alguns segundos e tente de novo.')
-    ).toBeInTheDocument();
+    const message = await screen.findByRole('option', {
+      name: 'Muitas buscas seguidas. Aguarde alguns segundos e tente de novo.',
+    });
+    // Readable: black text with an icon, not faded by MUI's disabled opacity.
+    expect(message).toHaveStyle({ opacity: '1' });
+    expect(message).not.toHaveStyle({ fontStyle: 'italic' });
+    expect(within(message).getByTestId('ErrorOutlineRoundedIcon')).toBeInTheDocument();
     await user.click(screen.getByRole('option', { name: 'Tentar novamente' }));
 
     // Same term, list still open with the new results.

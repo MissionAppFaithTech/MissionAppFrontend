@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineRounded';
+import RefreshIcon from '@mui/icons-material/RefreshRounded';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -27,7 +29,7 @@ const visuallyHidden = {
 type Option =
   | { type: 'item'; id: string; name: string }
   | { type: 'add'; name: string }
-  | { type: 'info'; message: string; retry?: boolean };
+  | { type: 'info'; message: string; retry?: boolean; error?: boolean };
 
 const COPY: Record<CatalogKind, { add: string; none: string; placeholder: string }> = {
   missionaryAgencies: {
@@ -127,7 +129,11 @@ export default function CatalogAutocomplete({
       message: `Digite ao menos ${CATALOG_SEARCH_MIN_LENGTH} letras para buscar.`,
     });
   } else if (search.status === 'error') {
-    options.push({ type: 'info', message: search.error ?? 'Não foi possível buscar.' });
+    options.push({
+      type: 'info',
+      message: search.error ?? 'Não foi possível buscar.',
+      error: true,
+    });
     options.push({ type: 'info', message: 'Tentar novamente', retry: true });
   } else if (search.status === 'loading' && options.length === 0) {
     options.push({ type: 'info', message: 'Buscando…' });
@@ -210,7 +216,12 @@ export default function CatalogAutocomplete({
                     ...(noResults ? { bgcolor: 'action.selected' } : {}),
                   }
                 : option.type === 'info'
-                  ? { color: option.retry ? 'primary.main' : 'text.secondary', fontStyle: 'italic' }
+                  ? option.error
+                    ? // NOTE: black (text.primary) + icon, never a faded grey or color alone
+                      { color: 'text.primary', fontWeight: 500 }
+                    : option.retry
+                      ? { color: 'primary.main', fontWeight: 700 }
+                      : { color: 'text.secondary', fontStyle: 'italic' }
                   : undefined
             }
           >
@@ -218,6 +229,17 @@ export default function CatalogAutocomplete({
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
                 <AddIcon aria-hidden fontSize="small" />
                 <span>{copy.add}</span>
+              </Stack>
+            ) : option.type === 'info' && (option.error || option.retry) ? (
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center', minWidth: 0 }}>
+                {option.error ? (
+                  <ErrorOutlineIcon aria-hidden fontSize="small" color="error" />
+                ) : (
+                  <RefreshIcon aria-hidden fontSize="small" />
+                )}
+                <Box component="span" sx={{ overflowWrap: 'anywhere' }}>
+                  {option.message}
+                </Box>
               </Stack>
             ) : option.type === 'info' ? (
               option.message
@@ -232,6 +254,9 @@ export default function CatalogAutocomplete({
           listbox: {
             sx: {
               '& .MuiAutocomplete-option': { minHeight: 44 },
+              // NOTE: MUI fades disabled options to 38% opacity; the notices must
+              // stay readable (WCAG 1.4.3), so only their color sets them apart.
+              '& .MuiAutocomplete-option[aria-disabled="true"]': { opacity: 1 },
             },
           },
         }}

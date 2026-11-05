@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, type ElementType } from 'react';
+import type { ElementType } from 'react';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
@@ -74,13 +74,8 @@ export default function RegistrationEmailConfirmation({
     useSupporterRegisterStore.getState().reset();
   };
 
-  useEffect(() => {
-    return () => {
-      // Ensure registration wizard state resets after departure so completion screen is shown once
-      handleResetStores();
-    };
-  }, []);
-
+  // NOTE: no reset on unmount (StrictMode remounts would wipe this screen);
+  // the wizard starts over when opened again (`useRestartFinishedRegistration`).
   return (
     <Stack spacing={2.5} sx={{ width: '100%' }}>
       <Stack spacing={0.75}>
