@@ -8,6 +8,7 @@ import type {
 } from '@/forms/register/types';
 import { SELECT_OTHER } from '@/forms/register/options';
 import {
+  laterStepErrors,
   ministryStepErrors,
   personalStepErrors,
   signupFieldErrors,
@@ -79,7 +80,8 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
         set((state) => ({
           formData: { ...state.formData, ...values },
           step: 2,
-          stepErrors: {},
+          // NOTE: errors the API sent for step 2 wait there until step 1 is fixed.
+          stepErrors: laterStepErrors(state.stepErrors),
         }));
       },
 
@@ -148,16 +150,14 @@ export const useMissionaryRegisterStore = create<MissionaryRegisterState>()(
           await registerMissionary(payload);
         } catch (error) {
           set({ submission: {} });
-          // NOTE: a field of the first step (e-mail in use...) is fixed there, not here.
+          // NOTE: a field of the first step (CPF or e-mail in use...) is fixed there;
+          // agency, faith community and mission description on step 2. With both,
+          // step 1 comes first and step 2 keeps its errors for when the user gets there.
           const personal = personalStepErrors(signupFieldErrors(error));
-          if (Object.keys(personal).length > 0) {
-            set({ step: 1, stepErrors: personal });
-            return;
-          }
-          // NOTE: agency, faith community and mission description are fixed on step 2.
           const ministry = ministryStepErrors(error);
-          if (Object.keys(ministry).length > 0) {
-            set({ step: 2, stepErrors: ministry });
+          const hasPersonal = Object.keys(personal).length > 0;
+          if (hasPersonal || Object.keys(ministry).length > 0) {
+            set({ step: hasPersonal ? 1 : 2, stepErrors: { ...personal, ...ministry } });
             return;
           }
           throw error;

@@ -24,6 +24,14 @@ const nextConfig: NextConfig = {
       revalidate: 300,
       expire: 60 * 60 * 24,
     },
+    // Catalog searches (agencies, faith communities; backend ADR-0041): the
+    // catalogs change rarely and a new item expires the tag at once (`updateTag`),
+    // so a search is served from the cache for 10 minutes before revalidating.
+    catalog: {
+      stale: 300,
+      revalidate: 600,
+      expire: 60 * 60 * 24,
+    },
   },
   turbopack: {
     root: path.resolve(__dirname),

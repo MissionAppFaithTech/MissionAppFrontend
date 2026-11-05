@@ -77,6 +77,13 @@ export function personalStepErrors(errors: Record<string, string>): Record<strin
   return Object.fromEntries(Object.entries(errors).filter(([field]) => PERSONAL_FIELDS.has(field)));
 }
 
+/** The errors left for the next steps once "Dados pessoais" is done. */
+export function laterStepErrors(errors: Record<string, string>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(errors).filter(([field]) => !PERSONAL_FIELDS.has(field))
+  );
+}
+
 /** React Hook Form `errors` option built from server messages. */
 export function toFormErrors(errors: Record<string, string>) {
   return Object.fromEntries(

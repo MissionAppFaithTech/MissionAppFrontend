@@ -2,6 +2,7 @@
 
 import type { ReactNode, SyntheticEvent } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -23,6 +24,8 @@ type CatalogCreateDialogProps = {
   onClose: () => void;
   onSubmit: (e: SyntheticEvent<HTMLFormElement>) => void;
   isSubmitting?: boolean;
+  /** Error that belongs to no field (e.g. the API is down), shown above the fields. */
+  errorMessage?: string | null;
   children: ReactNode;
 };
 
@@ -35,6 +38,7 @@ export default function CatalogCreateDialog({
   onClose,
   onSubmit,
   isSubmitting = false,
+  errorMessage,
   children,
 }: CatalogCreateDialogProps) {
   const theme = useTheme();
@@ -136,6 +140,11 @@ export default function CatalogCreateDialog({
             },
           }}
         >
+          {errorMessage ? (
+            <Alert severity="error" role="alert">
+              {errorMessage}
+            </Alert>
+          ) : null}
           {children}
         </Stack>
       </DialogContent>

@@ -25,6 +25,18 @@ export async function forwardedClientHeaders(): Promise<Record<string, string>> 
 }
 
 /**
+ * The end user's IP from the proxy headers (`x-real-ip`, else the first
+ * `x-forwarded-for` hop), or `null` when no proxy set them (local runs).
+ */
+export function clientIpFrom(incoming: Pick<Headers, 'get'>): string | null {
+  return (
+    incoming.get('x-real-ip')?.trim() ||
+    incoming.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    null
+  );
+}
+
+/**
  * Same as {@link forwardedClientHeaders} for code that already holds the request
  * headers, such as the proxy, where `next/headers` is not available.
  */
@@ -32,8 +44,7 @@ export function clientHeadersFrom(incoming: Pick<Headers, 'get'>): Record<string
   const secret = process.env.BFF_SHARED_SECRET;
   if (!secret) return {};
 
-  const ip =
-    incoming.get('x-real-ip')?.trim() || incoming.get('x-forwarded-for')?.split(',')[0]?.trim();
+  const ip = clientIpFrom(incoming);
   if (!ip) return {};
 
   return { [BFF_SECRET_HEADER]: secret, [CLIENT_IP_HEADER]: ip };

@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BFF_SECRET_HEADER, CLIENT_IP_HEADER, forwardedClientHeaders } from './clientIp';
+import {
+  BFF_SECRET_HEADER,
+  CLIENT_IP_HEADER,
+  clientIpFrom,
+  forwardedClientHeaders,
+} from './clientIp';
 
 const incoming = new Map<string, string>();
 const headersMock = vi.fn(async () => ({ get: (name: string) => incoming.get(name) ?? null }));
@@ -55,5 +60,21 @@ describe('forwardedClientHeaders', () => {
   it('uses the header names agreed with the backend (ADR-0032)', () => {
     expect(CLIENT_IP_HEADER).toBe('x-missionapp-client-ip');
     expect(BFF_SECRET_HEADER).toBe('x-missionapp-bff-secret');
+  });
+});
+
+describe('clientIpFrom', () => {
+  const headersOf = (values: Record<string, string>) => new Headers(values);
+
+  it('prefers x-real-ip, then the first x-forwarded-for hop', () => {
+    expect(
+      clientIpFrom(headersOf({ 'x-real-ip': ' 1.1.1.1 ', 'x-forwarded-for': '2.2.2.2' }))
+    ).toBe('1.1.1.1');
+    expect(clientIpFrom(headersOf({ 'x-forwarded-for': ' 2.2.2.2 , 3.3.3.3' }))).toBe('2.2.2.2');
+  });
+
+  it('answers null without proxy headers', () => {
+    expect(clientIpFrom(headersOf({}))).toBeNull();
+    expect(clientIpFrom(headersOf({ 'x-real-ip': '  ' }))).toBeNull();
   });
 });

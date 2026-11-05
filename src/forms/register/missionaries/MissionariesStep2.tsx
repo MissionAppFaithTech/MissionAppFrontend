@@ -8,7 +8,7 @@ import { useMissionaryRegisterWizard } from '@/components/register/missionaries/
 import CreateFaithCommunityModal from '@/forms/register/shared/CreateFaithCommunityModal';
 import CreateMissionaryAgencyModal from '@/forms/register/shared/CreateMissionaryAgencyModal';
 import { toFormErrors } from '@/forms/register/shared/fieldErrors';
-import RegisterCatalogSelect from '@/forms/register/shared/RegisterCatalogSelect';
+import CatalogAutocomplete from '@/forms/register/shared/CatalogAutocomplete';
 import RegisterStepForm from '@/forms/register/shared/RegisterStepForm';
 import { useOtherCatalogEntry } from '@/forms/register/shared/useOtherCatalogEntry';
 import {
@@ -23,15 +23,12 @@ import {
   createMissionaryAgencySchema,
 } from '@/schemas/catalog-create.schema';
 import { missionaryStep2Schema, type MissionaryStep2FormData } from '@/schemas/register.schema';
-import { useCatalogItems } from '@/services/queries/catalog';
 
 export default function MissionariesStep2() {
   const { formData, completeStep2, goBack, stepErrors } = useMissionaryRegisterWizard();
   // Read once: the form keeps them until the user fixes each field.
   const [serverErrors] = useState(() => toFormErrors(stepErrors));
   const [showServerErrors] = useState(() => Object.keys(stepErrors).length > 0);
-  const agencies = useCatalogItems('missionaryAgencies');
-  const communities = useCatalogItems('faithCommunities');
   const agencyEntry = useOtherCatalogEntry();
   const communityEntry = useOtherCatalogEntry();
   const {
@@ -48,15 +45,19 @@ export default function MissionariesStep2() {
     errors: serverErrors,
     defaultValues: {
       missionaryAgency: formData.missionaryAgency || '',
+      missionaryAgencyName: formData.missionaryAgencyName || '',
       agencyDetails: formData.agencyDetails || EMPTY_MISSIONARY_AGENCY,
       missionDescription: formData.missionDescription || '',
       faithCommunity: formData.faithCommunity || '',
+      faithCommunityName: formData.faithCommunityName || '',
       communityDetails: formData.communityDetails || EMPTY_FAITH_COMMUNITY,
     },
   });
 
   const agencyDetails = watch('agencyDetails');
   const communityDetails = watch('communityDetails');
+  const agencyName = watch('missionaryAgencyName');
+  const communityName = watch('faithCommunityName');
 
   const handleStepSubmit = async (data: MissionaryStep2FormData) => {
     await yieldToMain();
@@ -78,16 +79,26 @@ export default function MissionariesStep2() {
         name="missionaryAgency"
         control={control}
         render={({ field }) => (
-          <RegisterCatalogSelect
+          <CatalogAutocomplete
             id="missionaryAgency"
+            kind="missionaryAgencies"
             label="Agência missionária"
             required
-            onBlur={field.onBlur}
+            // NOTE: focus moving into the sign-up modal is not leaving the field
+            onBlur={() => {
+              if (!agencyEntry.open) field.onBlur();
+            }}
             value={field.value}
-            onChange={(value) => agencyEntry.selectValue(value, field.value, field.onChange)}
-            options={agencies.items}
-            isLoading={agencies.isLoading}
-            loadError={agencies.error}
+            selectedName={agencyName}
+            onChange={(value, item) => {
+              field.onChange(value);
+              setValue('missionaryAgencyName', item?.name ?? '');
+            }}
+            onAddNew={(typedName) => {
+              // NOTE: o modal abre já com o nome que a pessoa digitou na busca
+              if (typedName) setValue('agencyDetails', { ...agencyDetails, name: typedName });
+              agencyEntry.selectValue(SELECT_OTHER, field.value, field.onChange);
+            }}
             error={Boolean(errors.missionaryAgency)}
             helperText={errors.missionaryAgency?.message}
             otherSummary={field.value === SELECT_OTHER ? agencyDetails.name : undefined}
@@ -116,16 +127,25 @@ export default function MissionariesStep2() {
         name="faithCommunity"
         control={control}
         render={({ field }) => (
-          <RegisterCatalogSelect
+          <CatalogAutocomplete
             id="faithCommunity"
+            kind="faithCommunities"
             label="Comunidade de fé"
             required
-            onBlur={field.onBlur}
+            // NOTE: focus moving into the sign-up modal is not leaving the field
+            onBlur={() => {
+              if (!communityEntry.open) field.onBlur();
+            }}
             value={field.value}
-            onChange={(value) => communityEntry.selectValue(value, field.value, field.onChange)}
-            options={communities.items}
-            isLoading={communities.isLoading}
-            loadError={communities.error}
+            selectedName={communityName}
+            onChange={(value, item) => {
+              field.onChange(value);
+              setValue('faithCommunityName', item?.name ?? '');
+            }}
+            onAddNew={(typedName) => {
+              if (typedName) setValue('communityDetails', { ...communityDetails, name: typedName });
+              communityEntry.selectValue(SELECT_OTHER, field.value, field.onChange);
+            }}
             error={Boolean(errors.faithCommunity)}
             helperText={errors.faithCommunity?.message}
             otherSummary={field.value === SELECT_OTHER ? communityDetails.name : undefined}
@@ -140,7 +160,11 @@ export default function MissionariesStep2() {
         onClose={() =>
           agencyEntry.cancel(
             createMissionaryAgencySchema.safeParse(agencyDetails).success,
-            (value) => setValue('missionaryAgency', value)
+            // NOTE: a field already in error is checked again, never left red without text
+            (value) =>
+              setValue('missionaryAgency', value, {
+                shouldValidate: Boolean(errors.missionaryAgency),
+              })
           )
         }
         onSave={(details) => {
@@ -156,7 +180,9 @@ export default function MissionariesStep2() {
         onClose={() =>
           communityEntry.cancel(
             createFaithCommunitySchema.safeParse(communityDetails).success,
-            (value) => setValue('faithCommunity', value)
+            // NOTE: a field already in error is checked again, never left red without text
+            (value) =>
+              setValue('faithCommunity', value, { shouldValidate: Boolean(errors.faithCommunity) })
           )
         }
         onSave={(details) => {

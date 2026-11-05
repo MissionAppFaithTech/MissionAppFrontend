@@ -137,6 +137,8 @@ describe('registerMissionaryAction', () => {
     });
     expect(cookieValue(AUTH_COOKIE.accessToken)).toBe('acc-m');
     expect(cookieValue(AUTH_COOKIE.refreshToken)).toBe('ref-m');
+    // Existing catalog items: the cached searches stay valid.
+    expect(cacheMock.updateTag).not.toHaveBeenCalled();
   });
 
   it('sends a new agency and community (with the pastor) instead of ids', async () => {
@@ -157,6 +159,10 @@ describe('registerMissionaryAction', () => {
       missionaryAgency: { name: 'Nova Agência', city: 'Recife' },
       faithCommunity: { name: 'Nova Igreja', pastorName: 'Pr. Ana', pastorPhone: '+5521912345678' },
     });
+    expect(cacheMock.updateTag.mock.calls).toEqual([
+      ['catalog:missionaryAgencies'],
+      ['catalog:faithCommunities'],
+    ]);
   });
 
   it.each([

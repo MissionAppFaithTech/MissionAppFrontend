@@ -6,6 +6,13 @@ const TAKEN_FIELD_LABELS: Record<string, string> = {
   phone_number: 'telefone',
 };
 
+/**
+ * Fields whose `database.unique` message the backend already writes in pt-BR and
+ * more precisely than a label could ("Este CPF já está cadastrado." /
+ * "Este passaporte já está cadastrado.": the same field holds both documents).
+ */
+const TAKEN_MESSAGE_FROM_API = new Set(['identityDocument']);
+
 export type BffErrorBody = {
   message: string;
   /** Field name (backend camelCase) → pt-BR message, for react-hook-form `setError`. */
@@ -123,6 +130,14 @@ export function localizeFieldError(error: VineFieldError): string {
       return 'A senha atual está incorreta.';
     case 'database.unique':
     case 'unique': {
+      if (
+        typeof error.field === 'string' &&
+        TAKEN_MESSAGE_FROM_API.has(error.field) &&
+        typeof error.message === 'string' &&
+        error.message.trim()
+      ) {
+        return error.message.trim();
+      }
       const label = typeof error.field === 'string' ? TAKEN_FIELD_LABELS[error.field] : undefined;
       return label ? `Este ${label} já está em uso.` : 'Este valor já está em uso.';
     }

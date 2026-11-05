@@ -31,13 +31,9 @@ import PillButton from '@/components/common/PillButton';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import ThemeModeSwitch from '@/components/common/ThemeModeSwitch';
 import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
-import CatalogLinkSection, {
-  type CatalogSelection,
-} from '@/components/profile/settings/CatalogLinkSection';
-import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
+import CatalogLinkSection from '@/components/profile/settings/CatalogLinkSection';
 import { updateAbout } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
 import ActiveSessionsSection from '@/components/profile/settings/ActiveSessionsSection';
 
 export type AccountSettingsViewProps = {
@@ -142,14 +138,10 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
   };
 
   // Ecclesiastical data save handler (RF 15.3)
-  const handleSaveEcclesiastical = async (selection: CatalogSelection): Promise<string> => {
-    const id =
-      selection.kind === 'new'
-        ? (await createFaithCommunity(selection.details as FaithCommunityData)).id
-        : selection.id;
+  const handleSaveEcclesiastical = async (id: string): Promise<string> => {
     if (role === 'supporter') {
       // NOTE: the API has no faith community link for supporters yet; a new
-      // community is still registered in the catalog.
+      // community is still registered in the catalog (from the field's modal).
       notify(
         'O vínculo de apoiadores com a comunidade de fé ainda não é salvo na plataforma.',
         'info'
@@ -158,18 +150,15 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
     }
     // NOTE: the pastor and address of an existing community are edited only by
     // whoever registered it (PATCH /faith-communities/:id); here the user only
-    // switches the link, or registers a new community with its pastor.
+    // switches the link; a new community is registered with its pastor in the
+    // field's modal.
     await updateAbout({ faithCommunityId: id || null });
     notify('Dados eclesiásticos atualizados com sucesso!', 'success');
     return id;
   };
 
   // Missionary agency save handler (RF 3.1.2)
-  const handleSaveAgency = async (selection: CatalogSelection): Promise<string> => {
-    const id =
-      selection.kind === 'new'
-        ? (await createMissionaryAgency(selection.details as MissionaryAgencyData)).id
-        : selection.id;
+  const handleSaveAgency = async (id: string): Promise<string> => {
     await updateAbout({ missionaryAgencyId: id });
     notify('Agência missionária atualizada com sucesso!', 'success');
     return id;
@@ -485,8 +474,7 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
               ? 'Comunidade de Fé (Igreja) (opcional)'
               : 'Comunidade de Fé (Igreja)'
           }
-          emptyValueLabel="Nenhuma comunidade de fé"
-          hint="Não encontrou a sua? Escolha “Não encontrei na lista” para cadastrá-la com o pastor responsável."
+          hint="Digite o nome para buscar. Não encontrou a sua? Escolha “Adicionar Comunidade de Fé” para cadastrá-la com o pastor responsável. Para desvincular, limpe o campo e salve."
           saveLabel="Salvar Dados Eclesiásticos"
           cancelLabel="Cancelar alterações dos dados eclesiásticos"
           savedId={owner.about.faithCommunityId}
@@ -504,7 +492,7 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
             subheader="Escolha a organização missionária à qual seu ministério está vinculado"
             selectLabel="Agência Missionária"
             required
-            hint="A agência pode ser trocada, mas não removida. Não encontrou a sua? Escolha “Não encontrei na lista” para cadastrá-la."
+            hint="Digite o nome para buscar. A agência pode ser trocada, mas não removida. Não encontrou a sua? Escolha “Adicionar Agência Missionária” para cadastrá-la."
             saveLabel="Salvar Agência Missionária"
             cancelLabel="Cancelar alterações da agência missionária"
             savedId={owner.about.missionaryAgencyId}

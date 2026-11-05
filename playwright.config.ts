@@ -53,6 +53,8 @@ export default defineConfig({
       env: {
         PATH: `${process.env.HOME}/.nvm/versions/node/v24.19.0/bin:${process.env.PATH}`,
         API_URL: mockApiUrl,
+        // Every spec searches from the same IP; the per-IP limit has unit tests.
+        CATALOG_SEARCH_IP_LIMIT: '100000',
       },
     },
   ],

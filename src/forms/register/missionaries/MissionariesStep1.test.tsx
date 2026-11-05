@@ -128,4 +128,20 @@ describe('MissionariesStep1 component', () => {
       'Este e-mail já está em uso'
     );
   });
+
+  it('shows a taken CPF on the document field and leaves the step 2 errors for later', async () => {
+    setStepErrors({
+      document: 'Este CPF já está cadastrado.',
+      missionaryAgency: 'Agência missionária informada não existe',
+    });
+    renderStep();
+
+    const summary = await screen.findByRole('alert');
+    expect(summary).toHaveFocus();
+    expect(summary).toHaveTextContent('CPF ou passaporte: Este CPF já está cadastrado.');
+    expect(summary).not.toHaveTextContent(/agência/i);
+    const document = screen.getByRole('textbox', { name: /cpf ou passaporte/i });
+    expect(document).toHaveAttribute('aria-invalid', 'true');
+    expect(document).toHaveAccessibleDescription(/Este CPF já está cadastrado\./);
+  });
 });

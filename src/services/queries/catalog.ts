@@ -1,48 +1,67 @@
 'use client';
 
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions, useQuery } from '@tanstack/react-query';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { CATALOG_SEARCH_MIN_LENGTH, normalizeCatalogTerm } from '@/lib/catalog/search';
 import { getQueryClient } from '@/lib/query/client';
 import { queryKeys, type CatalogKind } from '@/lib/query/keys';
-import {
-  listFaithCommunities,
-  listMissionaryAgencies,
-  type CatalogItem,
-} from '@/services/catalog.service';
+import { searchCatalog, type CatalogItem } from '@/services/catalog.service';
 
-/** The backend allows 20 catalog reads per minute per IP: keep the lists for 5 minutes. */
+/** Catalogs change rarely; a search result stays fresh for 5 minutes. */
 export const CATALOG_STALE_TIME_MS = 5 * 60_000;
+/** Pause in typing before a search starts. */
+export const CATALOG_SEARCH_DEBOUNCE_MS = 300;
 
-// Resolved on call: catalog.service also imports this module.
-const LOADERS: Record<CatalogKind, () => Promise<CatalogItem[]>> = {
-  missionaryAgencies: () => listMissionaryAgencies(),
-  faithCommunities: () => listFaithCommunities(),
-};
-
-export function catalogQuery(kind: CatalogKind) {
+export function catalogSearchQuery(kind: CatalogKind, term: string) {
   return queryOptions({
-    queryKey: queryKeys.catalog(kind),
-    queryFn: LOADERS[kind],
+    queryKey: queryKeys.catalogSearch(kind, term),
+    // NOTE: the query cache aborts the request (signal) when the term changes
+    queryFn: ({ signal }) => searchCatalog(kind, term, { signal }),
     staleTime: CATALOG_STALE_TIME_MS,
   });
 }
 
-/** Options of a sign-up select, shared by every step that lists the same catalog. */
-export function useCatalogItems(kind: CatalogKind) {
-  const query = useQuery(catalogQuery(kind));
+export type CatalogSearchStatus = 'short' | 'loading' | 'ready' | 'error';
+
+/**
+ * Autocomplete search of a catalog (backend ADR-0041):
+ * - waits {@link CATALOG_SEARCH_DEBOUNCE_MS} after the last keystroke;
+ * - searches from {@link CATALOG_SEARCH_MIN_LENGTH} letters, by the normalized
+ *   term, so "Missões" and "missoes" share the cached result;
+ * - keeps the previous results on screen while the next ones load.
+ */
+export function useCatalogSearch(kind: CatalogKind, input: string) {
+  const term = normalizeCatalogTerm(useDebouncedValue(input, CATALOG_SEARCH_DEBOUNCE_MS));
+  const enabled = term.length >= CATALOG_SEARCH_MIN_LENGTH;
+  const query = useQuery({
+    ...catalogSearchQuery(kind, term),
+    enabled,
+    placeholderData: keepPreviousData,
+  });
+  const typing = normalizeCatalogTerm(input) !== term;
+
+  const status: CatalogSearchStatus = !enabled
+    ? 'short'
+    : query.isError
+      ? 'error'
+      : // NOTE: results of the previous term stay listed, but are not "the" answer yet
+        query.isPending || typing || query.isPlaceholderData
+        ? 'loading'
+        : 'ready';
+
   return {
-    items: query.data ?? [],
-    isLoading: query.isPending,
-    error: query.error
-      ? query.error instanceof Error
-        ? query.error.message
-        : 'Não foi possível carregar as opções'
-      : null,
+    term,
+    items: (enabled ? query.data?.items : undefined) ?? ([] as CatalogItem[]),
+    hasMore: enabled && query.data?.hasMore === true,
+    status,
+    /** Still fetching or waiting for the user to stop typing. */
+    isSearching: enabled && (query.isFetching || typing),
+    error: query.error instanceof Error ? query.error.message : null,
+    retry: () => void query.refetch(),
   };
 }
 
-/** Shows an item just created through a Server Action without listing again. */
-export function addCatalogItem(kind: CatalogKind, item: CatalogItem) {
-  getQueryClient().setQueryData(catalogQuery(kind).queryKey, (items) =>
-    items ? [...items.filter((existing) => existing.id !== item.id), item] : items
-  );
+/** After an item is created, the next search of that catalog must include it. */
+export function invalidateCatalogSearches(kind: CatalogKind) {
+  void getQueryClient().invalidateQueries({ queryKey: queryKeys.catalogSearches(kind) });
 }

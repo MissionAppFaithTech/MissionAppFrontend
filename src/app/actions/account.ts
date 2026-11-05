@@ -1,8 +1,10 @@
 'use server';
 
+import { updateTag } from 'next/cache';
 import { cookies, headers } from 'next/headers';
 import type { AuthTokensResponse, AuthUser } from '@/lib/api/auth-response';
 import { backendFetch } from '@/lib/api/backend';
+import { catalogTag } from '@/lib/cache/tags';
 import { expireAuthCookies, setAuthCookies } from '@/lib/auth/cookies';
 import { deviceHeaders, deviceIdFor, rememberDeviceId } from '@/lib/auth/device';
 import { actionFailure, parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
@@ -120,6 +122,10 @@ export async function registerMissionaryAction(
     'actions/accounts-missionaries'
   );
   if (!result.ok) return result;
+  // A new agency or church registered with the account must show up in the
+  // next catalog search (backend ADR-0041).
+  if (parsed.data.missionaryAgency) updateTag(catalogTag('missionaryAgencies'));
+  if (parsed.data.faithCommunity) updateTag(catalogTag('faithCommunities'));
   const { user, missionary, workAddress, missionaryAgency, faithCommunity } = result.data;
   return { ok: true, data: { user, missionary, workAddress, missionaryAgency, faithCommunity } };
 }

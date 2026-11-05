@@ -6,61 +6,94 @@ vi.mock('@/app/actions/catalog', () => ({
   createFaithCommunityAction: vi.fn(),
   createMissionaryAgencyAction: vi.fn(),
 }));
+vi.mock('@/services/queries/catalog', () => ({ invalidateCatalogSearches: vi.fn() }));
+import { invalidateCatalogSearches } from '@/services/queries/catalog';
 import {
   createFaithCommunity,
   createMissionaryAgency,
-  listFaithCommunities,
-  listMissionaryAgencies,
+  searchCatalog,
   toCreateFaithCommunityPayload,
   toCreateMissionaryAgencyPayload,
 } from './catalog.service';
 import { EMPTY_FAITH_COMMUNITY, EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
 
+function stubFetch(ok: boolean, status: number, json: () => Promise<unknown>) {
+  const fetchMock = vi.fn().mockResolvedValue({ ok, status, json });
+  vi.stubGlobal('fetch', fetchMock);
+  return fetchMock;
+}
+
 describe('catalog.service', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.mocked(invalidateCatalogSearches).mockReset();
   });
 
-  it('returns missionary agencies from the BFF', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ data: [{ id: 'agency-1', name: 'JOCUM' }] }),
-      })
-    );
+  it('searches agencies through the BFF with the term, page size and abort signal', async () => {
+    const fetchMock = stubFetch(true, 200, async () => ({
+      data: [{ id: 'agency-1', name: 'JOCUM' }],
+      meta: { hasMore: true },
+    }));
+    const controller = new AbortController();
 
-    await expect(listMissionaryAgencies()).resolves.toEqual([{ id: 'agency-1', name: 'JOCUM' }]);
-    expect(fetch).toHaveBeenCalledWith(
-      '/api/missionary-agencies',
-      expect.objectContaining({ method: 'GET' })
-    );
+    await expect(
+      searchCatalog('missionaryAgencies', 'jo cum', { signal: controller.signal })
+    ).resolves.toEqual({ items: [{ id: 'agency-1', name: 'JOCUM' }], hasMore: true });
+    expect(fetchMock).toHaveBeenCalledWith('/api/missionary-agencies?search=jo+cum&limit=10', {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    });
   });
 
-  it('returns faith communities from the BFF', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => ({ data: [{ id: 'community-1', name: 'Igreja Batista' }] }),
-      })
-    );
+  it('searches faith communities and reads a body without meta as the last page', async () => {
+    const fetchMock = stubFetch(true, 200, async () => ({
+      data: [{ id: 'community-1', name: 'Igreja Batista' }],
+    }));
 
-    await expect(listFaithCommunities()).resolves.toEqual([
-      { id: 'community-1', name: 'Igreja Batista' },
-    ]);
+    await expect(searchCatalog('faithCommunities', 'igreja')).resolves.toEqual({
+      items: [{ id: 'community-1', name: 'Igreja Batista' }],
+      hasMore: false,
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/faith-communities?search=igreja&limit=10');
   });
 
-  it('throws the API message when the BFF fails', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        ok: false,
-        json: async () => ({ message: 'Falha no catálogo' }),
-      })
-    );
+  it('answers an empty last page when an OK body is not JSON', async () => {
+    stubFetch(true, 200, async () => {
+      throw new SyntaxError('not json');
+    });
 
-    await expect(listMissionaryAgencies()).rejects.toThrow('Falha no catálogo');
+    await expect(searchCatalog('missionaryAgencies', 'jo')).resolves.toEqual({
+      items: [],
+      hasMore: false,
+    });
+  });
+
+  it('answers no items when the body is not a list', async () => {
+    stubFetch(true, 200, async () => ({ data: 'oops' }));
+
+    await expect(searchCatalog('faithCommunities', 'igreja')).resolves.toEqual({
+      items: [],
+      hasMore: false,
+    });
+  });
+
+  it('throws an ApiError with the BFF message and status', async () => {
+    stubFetch(false, 429, async () => ({ message: 'Muitas buscas seguidas.' }));
+
+    const error = await searchCatalog('missionaryAgencies', 'jo').catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({ status: 429, message: 'Muitas buscas seguidas.' });
+  });
+
+  it.each([
+    ['missionaryAgencies', 'Não foi possível buscar as agências missionárias'],
+    ['faithCommunities', 'Não foi possível buscar as comunidades de fé'],
+  ] as const)('falls back to a pt-BR message for %s', async (kind, message) => {
+    stubFetch(false, 502, async () => {
+      throw new SyntaxError('not json');
+    });
+
+    await expect(searchCatalog(kind, 'jo')).rejects.toMatchObject({ status: 502, message });
   });
 
   it('maps agency form fields to the backend create payload', () => {
@@ -132,6 +165,8 @@ describe('catalog.service', () => {
     expect(createMissionaryAgencyAction).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Nova Agência' })
     );
+    // The next search of the catalog must include the new agency.
+    expect(invalidateCatalogSearches).toHaveBeenCalledWith('missionaryAgencies');
   });
 
   it('creates a faith community through the Server Action', async () => {
@@ -143,6 +178,7 @@ describe('catalog.service', () => {
     await expect(
       createFaithCommunity({ ...EMPTY_FAITH_COMMUNITY, name: 'Igreja Nova' })
     ).resolves.toEqual({ id: 'church-2', name: 'Igreja Nova' });
+    expect(invalidateCatalogSearches).toHaveBeenCalledWith('faithCommunities');
   });
 
   it('passes on the pt-BR message and code of a failed create', async () => {
@@ -157,6 +193,7 @@ describe('catalog.service', () => {
       (e: unknown) => e
     );
     expect(error).toBeInstanceOf(ApiError);
+    expect(invalidateCatalogSearches).not.toHaveBeenCalled();
     expect(error).toMatchObject({
       status: 409,
       message: 'Esta ação entra em conflito com dados já existentes.',

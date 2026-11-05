@@ -346,9 +346,26 @@ describe('missionaryRegisterStore', () => {
 
       await submit();
 
+      // Step 2 keeps its error for when the user gets there.
       expect(useMissionaryRegisterStore.getState()).toMatchObject({
         step: 1,
-        stepErrors: { email: 'Em uso' },
+        stepErrors: { email: 'Em uso', missionaryAgency: 'Não existe' },
+      });
+    });
+
+    it('sends a taken CPF back to the document field of step 1', async () => {
+      startStep3();
+      registerMissionary.mockRejectedValueOnce(
+        new ApiError('Revise os campos destacados e tente novamente.', 422, {
+          identityDocument: 'Este CPF já está cadastrado.',
+        })
+      );
+
+      await expect(submit()).resolves.toBeUndefined();
+
+      expect(useMissionaryRegisterStore.getState()).toMatchObject({
+        step: 1,
+        stepErrors: { document: 'Este CPF já está cadastrado.' },
       });
     });
 
@@ -381,8 +398,15 @@ describe('missionaryRegisterStore', () => {
       expect(useMissionaryRegisterStore.getState().submission).toEqual({});
     });
 
-    it('clears the API errors once step 1 is completed again', () => {
-      useMissionaryRegisterStore.setState({ step: 1, stepErrors: { email: 'Em uso' } });
+    it('clears the step 1 errors once it is completed again, keeping those of step 2', () => {
+      useMissionaryRegisterStore.setState({
+        step: 1,
+        stepErrors: {
+          email: 'Em uso',
+          document: 'Este CPF já está cadastrado.',
+          missionaryAgency: 'Não existe',
+        },
+      });
 
       useMissionaryRegisterStore.getState().completeStep1({
         fullName: 'Ana',
@@ -393,7 +417,10 @@ describe('missionaryRegisterStore', () => {
         phone: '+5521999999999',
       });
 
-      expect(useMissionaryRegisterStore.getState().stepErrors).toEqual({});
+      expect(useMissionaryRegisterStore.getState()).toMatchObject({
+        step: 2,
+        stepErrors: { missionaryAgency: 'Não existe' },
+      });
     });
 
     it('retries the whole sign-up after a failure, since the request is transactional', async () => {

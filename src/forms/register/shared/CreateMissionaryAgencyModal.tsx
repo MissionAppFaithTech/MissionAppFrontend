@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Stack from '@mui/material/Stack';
@@ -8,6 +8,7 @@ import TextField from '@mui/material/TextField';
 import PhoneField from '@/components/common/PhoneField';
 import CatalogCreateDialog from '@/forms/register/shared/CatalogCreateDialog';
 import CatalogZipField from '@/forms/register/shared/CatalogZipField';
+import { applyCatalogFieldErrors } from '@/forms/register/shared/catalogFormErrors';
 import { EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
 import { applyCepAddress, useCepAutofill } from '@/hooks/useCepAutofill';
 import { maskCep } from '@/lib/masks';
@@ -22,7 +23,11 @@ type CreateMissionaryAgencyModalProps = {
   open: boolean;
   initialValues?: Partial<MissionaryAgencyData>;
   onClose: () => void;
-  onSave: (data: CreateMissionaryAgencyFormData) => void;
+  /**
+   * Called with valid data. May create the item right away (Server Action):
+   * a rejection keeps the modal open with the API's errors on the fields.
+   */
+  onSave: (data: CreateMissionaryAgencyFormData) => void | Promise<void>;
 };
 
 export default function CreateMissionaryAgencyModal({
@@ -38,6 +43,7 @@ export default function CreateMissionaryAgencyModal({
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm<CreateMissionaryAgencyFormData>({
     resolver: zodResolver(createMissionaryAgencySchema),
@@ -45,6 +51,7 @@ export default function CreateMissionaryAgencyModal({
     defaultValues: { ...EMPTY_MISSIONARY_AGENCY, ...initialValues },
   });
 
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const zipCode = watch('zipCode');
   const { status, message, search } = useCepAutofill({
     zipCode,
@@ -54,6 +61,7 @@ export default function CreateMissionaryAgencyModal({
 
   useEffect(() => {
     if (open) {
+      setSubmitError(null);
       reset({ ...EMPTY_MISSIONARY_AGENCY, ...initialValues });
     }
     // NOTE: só reidrata ao abrir — senão o reset apaga o que a pessoa está digitando
@@ -68,7 +76,15 @@ export default function CreateMissionaryAgencyModal({
       titleId="create-agency-title"
       descriptionId="create-agency-description"
       onClose={onClose}
-      onSubmit={handleSubmit((values) => onSave(values))}
+      onSubmit={handleSubmit(async (values) => {
+        setSubmitError(null);
+        try {
+          await onSave(values);
+        } catch (error) {
+          setSubmitError(applyCatalogFieldErrors(error, setError, 'phone'));
+        }
+      })}
+      errorMessage={submitError}
       isSubmitting={isSubmitting}
     >
       <TextField

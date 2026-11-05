@@ -52,11 +52,14 @@ const catalogDetailsDraft = z.object({
 export const missionaryStep2Schema = z
   .object({
     missionaryAgency: z.string().trim().min(1, 'Selecione a agência missionária'),
+    // NOTE: só para exibir a escolha; o que vai para a API é o id
+    missionaryAgencyName: z.string().optional(),
     agencyDetails: catalogDetailsDraft.extend({
       phone: z.string(),
     }),
     missionDescription: z.string().trim().min(1, 'Descreva seu projeto ou atuação missionária'),
     faithCommunity: z.string().trim().min(1, 'Selecione a comunidade de fé'),
+    faithCommunityName: z.string().optional(),
     communityDetails: catalogDetailsDraft.extend({
       churchPhone: z.string(),
       pastorName: z.string(),
@@ -115,6 +118,7 @@ export const supporterStep1Schema = z
       ),
     email: requiredEmailSchema,
     faithCommunity: z.string(),
+    faithCommunityName: z.string().optional(),
     communityDetails: catalogDetailsDraft.extend({
       churchPhone: z.string(),
       pastorName: z.string(),

@@ -31,6 +31,23 @@ describe('localizeFieldError', () => {
     expect(localizeFieldError({ field: 'x', message: 'english copy', ...error })).toBe(expected);
   });
 
+  it.each([
+    ['Este CPF já está cadastrado.', 'Este CPF já está cadastrado.'],
+    ['  Este passaporte já está cadastrado. ', 'Este passaporte já está cadastrado.'],
+    ['', 'Este valor já está em uso.'],
+    [undefined, 'Este valor já está em uso.'],
+  ])('keeps the backend copy of a taken identity document (%j)', (message, expected) => {
+    expect(
+      localizeFieldError({ field: 'identityDocument', rule: 'database.unique', message })
+    ).toBe(expected);
+  });
+
+  it('labels other taken fields instead of trusting their (English) message', () => {
+    expect(localizeFieldError({ field: 'email', rule: 'database.unique', message: 'taken' })).toBe(
+      'Este e-mail já está em uso.'
+    );
+  });
+
   it('keeps the backend message for rules without copy here (custom rules send pt-BR)', () => {
     expect(localizeFieldError({ field: 'x', rule: 'custom', message: ' Mensagem própria ' })).toBe(
       'Mensagem própria'

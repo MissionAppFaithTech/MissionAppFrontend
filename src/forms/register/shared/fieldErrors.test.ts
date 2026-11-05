@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ApiError } from '@/lib/api/client';
 import {
   ministryStepErrors,
+  laterStepErrors,
   personalStepErrors,
   REGISTER_FIELD_LABELS,
   signupFieldErrors,
@@ -89,5 +90,19 @@ describe('registration field errors', () => {
   it('has a visible label for every field', () => {
     expect(REGISTER_FIELD_LABELS.phone).toBe('Telefone');
     expect(REGISTER_FIELD_LABELS.confirmPassword).toBe('Confirmar senha');
+  });
+});
+
+describe('laterStepErrors', () => {
+  it('keeps only what does not belong to "Dados pessoais"', () => {
+    expect(
+      laterStepErrors({
+        document: 'Este CPF já está cadastrado.',
+        email: 'Em uso',
+        missionaryAgency: 'Não existe',
+        missionDescription: 'Longo demais',
+      })
+    ).toEqual({ missionaryAgency: 'Não existe', missionDescription: 'Longo demais' });
+    expect(laterStepErrors({})).toEqual({});
   });
 });

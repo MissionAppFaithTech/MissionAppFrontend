@@ -3,6 +3,7 @@ import { clearRefreshCache } from '@/lib/api/bff';
 import {
   ACCESS,
   backendMock,
+  cacheMock,
   mockBackend,
   resetActionHarness,
   setSession,
@@ -10,6 +11,7 @@ import {
 import { createFaithCommunityAction, createMissionaryAgencyAction } from './catalog';
 
 vi.mock('next/headers', async () => (await import('@/test/actionHarness')).headersMock);
+vi.mock('next/cache', async () => (await import('@/test/actionHarness')).cacheMock);
 vi.mock('@/lib/api/backend', async () => (await import('@/test/actionHarness')).backendMock);
 
 beforeEach(() => {
@@ -34,6 +36,8 @@ describe('catalog actions', () => {
       body: { name: 'JMN', city: 'Rio' },
       accessToken: ACCESS,
     });
+    // The cached BFF searches must list the new agency at once (ADR-0041).
+    expect(cacheMock.updateTag.mock.calls).toEqual([['catalog:missionaryAgencies']]);
   });
 
   it('creates a faith community', async () => {
@@ -47,6 +51,7 @@ describe('catalog actions', () => {
       ok: true,
       data: { id: 'fc-1', name: 'Igreja Batista Central' },
     });
+    expect(cacheMock.updateTag.mock.calls).toEqual([['catalog:faithCommunities']]);
   });
 
   it('sends the pastor of a new faith community', async () => {
@@ -104,6 +109,7 @@ describe('catalog actions', () => {
       status: 502,
       message: 'Não foi possível cadastrar a igreja',
     });
+    expect(cacheMock.updateTag).not.toHaveBeenCalled();
     vi.mocked(console.error).mockRestore();
   });
 

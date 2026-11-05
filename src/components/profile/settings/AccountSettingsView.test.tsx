@@ -5,21 +5,32 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import AccountSettingsView from './AccountSettingsView';
 import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
 import { ApiError } from '@/lib/api/client';
+import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
 import { emptyProfile, updateAbout } from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 
-vi.mock('@/services/catalog.service', () => ({
-  listFaithCommunities: vi.fn(async () => [
-    { id: 'fc-1', name: 'Igreja Batista Central' },
-    { id: 'fc-2', name: 'Igreja Presbiteriana' },
-  ]),
-  listMissionaryAgencies: vi.fn(async () => [
-    { id: 'ma-1', name: 'JOCUM' },
-    { id: 'ma-2', name: 'Missão do Interior' },
-  ]),
-  createFaithCommunity: vi.fn(),
-  createMissionaryAgency: vi.fn(),
-}));
+vi.mock('@/services/catalog.service', async () => {
+  const { normalizeCatalogTerm } = await import('@/lib/catalog/search');
+  const catalogs: Record<string, Array<{ id: string; name: string }>> = {
+    faithCommunities: [
+      { id: 'fc-1', name: 'Igreja Batista Central' },
+      { id: 'fc-2', name: 'Igreja Presbiteriana' },
+    ],
+    missionaryAgencies: [
+      { id: 'ma-1', name: 'JOCUM' },
+      { id: 'ma-2', name: 'Missão do Interior' },
+    ],
+  };
+  return {
+    // Same matching as the backend: accent and case insensitive, "contains".
+    searchCatalog: vi.fn(async (kind: string, term: string) => ({
+      items: catalogs[kind].filter((item) => normalizeCatalogTerm(item.name).includes(term)),
+      hasMore: false,
+    })),
+    createFaithCommunity: vi.fn(),
+    createMissionaryAgency: vi.fn(),
+  };
+});
 
 vi.mock('@/services/profile.service', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/services/profile.service')>()),
@@ -45,12 +56,29 @@ function renderMissionary() {
   );
 }
 
-async function choose(label: RegExp, option: string) {
+/** Fills the required location and phone fields of an open create modal. */
+async function fillRequired(
+  user: ReturnType<typeof userEvent.setup>,
+  dialog: HTMLElement,
+  phones: RegExp[]
+) {
+  await user.type(within(dialog).getByRole('textbox', { name: /^país/i }), 'Brasil');
+  await user.type(within(dialog).getByRole('textbox', { name: /^estado/i }), 'RJ');
+  await user.type(within(dialog).getByRole('textbox', { name: /^cidade/i }), 'Niterói');
+  for (const phone of phones) {
+    await user.type(within(dialog).getByRole('textbox', { name: phone }), '21987654321');
+  }
+}
+
+/** Types `term` in the catalog field and picks `option` from the server results. */
+async function choose(label: RegExp, term: string, option: string | RegExp) {
   const user = userEvent.setup();
   const combobox = screen.getByRole('combobox', { name: label });
-  await waitFor(() => expect(combobox).not.toHaveAttribute('aria-disabled', 'true'));
-  await user.click(combobox);
-  await user.click(within(screen.getByRole('listbox')).getByRole('option', { name: option }));
+  await user.clear(combobox);
+  await user.type(combobox, term);
+  await user.click(
+    await within(await screen.findByRole('listbox')).findByRole('option', { name: option })
+  );
   return user;
 }
 
@@ -175,7 +203,7 @@ describe('AccountSettingsView Component', () => {
   it('links another faith community through the about endpoint', async () => {
     renderMissionary();
 
-    const user = await choose(/comunidade de fé/i, 'Igreja Presbiteriana');
+    const user = await choose(/comunidade de fé/i, 'presb', 'Igreja Presbiteriana');
     await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
 
     await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ faithCommunityId: 'fc-2' }));
@@ -191,7 +219,9 @@ describe('AccountSettingsView Component', () => {
   it('unlinks the faith community with null', async () => {
     renderMissionary();
 
-    const user = await choose(/comunidade de fé/i, 'Nenhuma comunidade de fé');
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('combobox', { name: /comunidade de fé/i }));
+    await user.click(screen.getByRole('button', { name: 'Limpar' }));
     await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
 
     await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ faithCommunityId: null }));
@@ -200,7 +230,7 @@ describe('AccountSettingsView Component', () => {
   it('switches the missionary agency through the about endpoint', async () => {
     renderMissionary();
 
-    const user = await choose(/^agência missionária/i, 'Missão do Interior');
+    const user = await choose(/^agência missionária/i, 'missao', 'Missão do Interior');
     await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
 
     await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ missionaryAgencyId: 'ma-2' }));
@@ -213,7 +243,7 @@ describe('AccountSettingsView Component', () => {
     vi.mocked(updateAbout).mockRejectedValueOnce(new ApiError('Agência inexistente', 422));
     renderMissionary();
 
-    const user = await choose(/^agência missionária/i, 'Missão do Interior');
+    const user = await choose(/^agência missionária/i, 'missao', 'Missão do Interior');
     await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
 
     const alerts = await screen.findAllByRole('alert');
@@ -223,12 +253,76 @@ describe('AccountSettingsView Component', () => {
     ).toBeEnabled();
   });
 
-  it('opens the sign-up modal to register a community that is not listed', async () => {
+  it('shows a link error of the API on the field', async () => {
+    vi.mocked(updateAbout).mockRejectedValueOnce(
+      new ApiError('Revise os campos destacados e tente novamente.', 422, {
+        missionaryAgencyId: 'Agência missionária informada não existe',
+      })
+    );
     renderMissionary();
 
-    await choose(/comunidade de fé/i, 'Não encontrei na lista');
+    const user = await choose(/^agência missionária/i, 'missao', 'Missão do Interior');
+    await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
 
-    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    const field = screen.getByRole('combobox', { name: /^agência missionária/i });
+    await waitFor(() => expect(field).toHaveAttribute('aria-invalid', 'true'));
+    expect(field).toHaveAccessibleDescription(/Agência missionária informada não existe/);
+    expect(field).toHaveFocus();
+  });
+
+  it('keeps the agency required', async () => {
+    renderMissionary();
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('combobox', { name: /^agência missionária/i }));
+    await user.click(screen.getByRole('button', { name: 'Limpar' }));
+    await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
+
+    expect(
+      screen.getByRole('combobox', { name: /^agência missionária/i })
+    ).toHaveAccessibleDescription(/Selecione a agência missionária\./);
+    expect(updateAbout).not.toHaveBeenCalled();
+  });
+
+  it('registers a missing community in the modal and links it on save', async () => {
+    vi.mocked(createFaithCommunity).mockResolvedValueOnce({ id: 'fc-9', name: 'Igreja Nova' });
+    renderMissionary();
+
+    const user = await choose(/comunidade de fé/i, 'Igreja Nova', /adicionar comunidade de fé/i);
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByRole('textbox', { name: /^nome$/i })).toHaveValue('Igreja Nova');
+    await user.type(within(dialog).getByRole('textbox', { name: /nome do pastor/i }), 'Pr. Ana');
+    await fillRequired(user, dialog, [/^telefone da igreja/i, /^telefone do pastor/i]);
+    await user.click(within(dialog).getByRole('button', { name: /^salvar$/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(createFaithCommunity).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Igreja Nova', pastorName: 'Pr. Ana' })
+    );
+    expect(screen.getByRole('combobox', { name: /comunidade de fé/i })).toHaveValue('Igreja Nova');
+
+    await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
+    await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ faithCommunityId: 'fc-9' }));
+  });
+
+  it('shows the API field errors inside the modal, which stays open', async () => {
+    vi.mocked(createMissionaryAgency).mockRejectedValueOnce(
+      new ApiError('Revise os campos destacados e tente novamente.', 422, {
+        name: 'Já existe uma agência com este nome nesta cidade.',
+      })
+    );
+    renderMissionary();
+
+    const user = await choose(/^agência missionária/i, 'JOCUM Rio', /adicionar agência/i);
+    const dialog = await screen.findByRole('dialog');
+    await fillRequired(user, dialog, [/^telefone$/i]);
+    await user.click(within(dialog).getByRole('button', { name: /^salvar$/i }));
+
+    const name = await within(dialog).findByRole('textbox', { name: /^nome$/i });
+    await waitFor(() => expect(name).toHaveAttribute('aria-invalid', 'true'));
+    expect(name).toHaveAccessibleDescription(/Já existe uma agência com este nome nesta cidade\./);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(updateAbout).not.toHaveBeenCalled();
   });
 
   it('tells a supporter the link is not saved yet, without calling the API', async () => {
@@ -348,14 +442,14 @@ describe('AccountSettingsView Component', () => {
     it('restores the last saved selection and stays on the page', async () => {
       renderMissionary();
 
-      const user = await choose(/comunidade de fé/i, 'Igreja Presbiteriana');
+      const user = await choose(/comunidade de fé/i, 'presb', 'Igreja Presbiteriana');
       const cancel = screen.getByRole('button', {
         name: 'Cancelar alterações dos dados eclesiásticos',
       });
       expect(cancel).toBeEnabled();
       await user.click(cancel);
 
-      expect(screen.getByRole('combobox', { name: /comunidade de fé/i })).toHaveTextContent(
+      expect(screen.getByRole('combobox', { name: /comunidade de fé/i })).toHaveValue(
         'Igreja Batista Central'
       );
       expect(cancel).toBeDisabled();
@@ -396,7 +490,7 @@ describe('AccountSettingsView Component', () => {
       expect(screen.getAllByText('ana.nova@example.com').length).toBeGreaterThan(0);
       expect(screen.queryByText('ana@example.com')).not.toBeInTheDocument();
       await waitFor(() =>
-        expect(screen.getByRole('combobox', { name: /^agência missionária/i })).toHaveTextContent(
+        expect(screen.getByRole('combobox', { name: /^agência missionária/i })).toHaveValue(
           'Missão do Interior'
         )
       );
@@ -414,22 +508,44 @@ describe('AccountSettingsView Component', () => {
 
     it('follows a new agency id even when the name is the same', async () => {
       const { rerender } = renderWithQuery(renderOwner(ownerWith('a@x.com', 'ma-1', 'JOCUM')));
-      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('JOCUM'));
+      const user = await choose(/^agência missionária/i, 'missao', 'Missão do Interior');
 
       rerender(renderOwner(ownerWith('a@x.com', 'ma-2', 'JOCUM')));
 
-      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('Missão do Interior'));
+      // The server's link wins over the unsaved pick, and nothing is left to cancel.
+      await waitFor(() => expect(agencyCombobox()).toHaveValue('JOCUM'));
+      expect(
+        screen.getByRole('button', { name: 'Cancelar alterações da agência missionária' })
+      ).toBeDisabled();
+      await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
+      await waitFor(() => expect(updateAbout).toHaveBeenCalledWith({ missionaryAgencyId: 'ma-2' }));
+    });
+
+    it('keeps what the user types when the refresh after saving brings the same link', async () => {
+      const { rerender } = renderWithQuery(renderOwner(ownerWith('a@x.com', 'ma-1', 'JOCUM')));
+      const user = await choose(/^agência missionária/i, 'missao', 'Missão do Interior');
+      await user.click(screen.getByRole('button', { name: /salvar agência missionária/i }));
+      await waitFor(() => expect(updateAbout).toHaveBeenCalledTimes(1));
+      await user.clear(agencyCombobox());
+      await user.type(agencyCombobox(), 'jo');
+      const before = agencyCombobox();
+
+      rerender(renderOwner(ownerWith('a@x.com', 'ma-2', 'Missão do Interior')));
+
+      expect(agencyCombobox()).toBe(before);
+      expect(before).toHaveValue('jo');
+      expect(before).toHaveFocus();
     });
 
     it('follows a new name of an agency that is not in the catalog yet', async () => {
       const { rerender } = renderWithQuery(
         renderOwner(ownerWith('a@x.com', 'ma-9', 'Agência Nova'))
       );
-      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('Agência Nova'));
+      expect(agencyCombobox()).toHaveValue('Agência Nova');
 
       rerender(renderOwner(ownerWith('a@x.com', 'ma-9', 'Agência Renomeada')));
 
-      await waitFor(() => expect(agencyCombobox()).toHaveTextContent('Agência Renomeada'));
+      await waitFor(() => expect(agencyCombobox()).toHaveValue('Agência Renomeada'));
     });
   });
 
