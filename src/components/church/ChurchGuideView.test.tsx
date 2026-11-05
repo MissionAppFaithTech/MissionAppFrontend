@@ -28,6 +28,8 @@ describe('ChurchGuideView Component', () => {
 
     expect(screen.getByText(/guia prático para igrejas locais/i)).toBeInTheDocument();
 
+    expect(screen.getByRole('tab', { name: /o mission app/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /campanha recorrente/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /passo a passo/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /funções do conselho/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /curso em vídeo/i })).toBeInTheDocument();

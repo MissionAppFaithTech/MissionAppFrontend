@@ -95,7 +95,7 @@ export default function ChurchVideoPlaylistSection() {
                     bgcolor: (theme) =>
                       theme.palette.mode === 'dark'
                         ? 'rgba(194, 65, 12, 0.2)'
-                        : 'rgba(194, 65, 12, 0.1)',
+                        : 'rgba(194, 65, 12, 0.06)',
                     color: 'accent.main',
                   }}
                 />

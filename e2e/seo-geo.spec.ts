@@ -9,7 +9,10 @@ test.describe('SEO & GEO (Generative Engine Optimization) End-to-End Verificatio
     // Validate page title and meta description
     await expect(page).toHaveTitle(/Mission App/);
     const metaDesc = page.locator('meta[name="description"]');
-    await expect(metaDesc).toHaveAttribute('content', /Plataforma que conecta missionários/);
+    await expect(metaDesc).toHaveAttribute(
+      'content',
+      /Plataforma de campanhas missionárias recorrentes/
+    );
 
     // Validate OpenGraph and Twitter tags
     const ogTitle = page.locator('meta[property="og:title"]');

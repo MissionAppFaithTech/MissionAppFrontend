@@ -1,9 +1,11 @@
 'use client';
 
 import { Stack, Typography } from '@mui/material';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import AuthLayout from '@/components/common/AuthLayout';
+import PillButton from '@/components/common/PillButton';
 import LoginForm from '@/forms/LoginForm';
 
 const roleLabels: Record<string, string> = {
@@ -23,6 +25,23 @@ export default function LoginPageContent() {
       footerPrompt="Ainda não tem uma conta?"
       footerActionLabel="Registre-se"
       footerActionHref="/select-role"
+      subFooter={
+        <PillButton
+          href="/"
+          tone="primaryOutline"
+          startIcon={<ArrowBackIcon aria-hidden />}
+          sx={{
+            alignSelf: 'center',
+            minHeight: 44,
+            px: 3,
+            fontWeight: 600,
+            width: { xs: '100%', sm: 'auto' },
+            justifyContent: 'center',
+          }}
+        >
+          Voltar para a página inicial
+        </PillButton>
+      }
       header={
         roleLabel ? (
           <Stack

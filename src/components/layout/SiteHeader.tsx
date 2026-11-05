@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Box, Drawer, IconButton, Stack, Typography, useMediaQuery, useTheme } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import LoginIcon from '@mui/icons-material/Login';
 import MenuIcon from '@mui/icons-material/Menu';
 import Link from 'next/link';
 import Logo from '@/components/common/Logo';
@@ -11,10 +12,10 @@ import PageNavbar from '@/components/layout/PageNavbar';
 
 const navLinks = [
   { label: 'Início', href: '/', sectionId: 'inicio' },
-  { label: 'Propósito', href: '/#objetivo', sectionId: 'objetivo' },
-  { label: 'Comunidade', href: '/#sobre', sectionId: 'sobre' },
-  { label: 'Como funciona', href: '/#como-funciona', sectionId: 'como-funciona' },
-  { label: 'Para Igrejas', href: '/conselho-missionario', sectionId: 'conselho-missionario' },
+  { label: 'Visão', href: '/#objetivo', sectionId: 'objetivo' },
+  { label: 'Campanha', href: '/#campanha', sectionId: 'campanha' },
+  { label: 'Para Igrejas', href: '/conselho-missionario', sectionId: 'para-igrejas' },
+  { label: 'Explorar', href: '/#explorar', sectionId: 'explorar' },
   { label: 'Perguntas frequentes', href: '/#faq', sectionId: 'faq' },
 ];
 
@@ -183,30 +184,18 @@ export default function SiteHeader() {
             <PillButton
               href="/login"
               size="small"
-              tone="primaryOutline"
+              tone="cta"
+              startIcon={<LoginIcon aria-hidden />}
               sx={{
                 flexShrink: 0,
                 // 44px on phones per AGENTS.md; the desktop header stays compact.
-                minHeight: { xs: 44, sm: 38 },
-                px: { xs: 1.5, sm: 2.25 },
-                fontSize: { xs: '0.8125rem', sm: '0.875rem' },
-                fontWeight: 600,
-                borderWidth: '1.5px',
-                borderColor: (theme) =>
-                  theme.palette.mode === 'dark' ? 'text.secondary' : 'primary.main',
-                bgcolor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'var(--mui-palette-action2-secondaryHoverWash)'
-                    : 'transparent',
-                color: (theme) => (theme.palette.mode === 'dark' ? 'common.white' : 'primary.main'),
-                boxShadow: (theme) =>
-                  theme.palette.mode === 'dark' ? 'var(--app-shadow-xs)' : 'none',
-                '&:hover': {
-                  borderColor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'primary.main' : 'primary.dark',
-                  bgcolor: 'primary.main',
-                  color: 'primary.contrastText',
-                },
+                minHeight: { xs: 44, sm: 40 },
+                px: { xs: 1.75, sm: 2.5 },
+                fontSize: { xs: '0.875rem', sm: '0.9375rem' },
+                fontWeight: 700,
+                // NOTE: filled navy (white text) stands out on the transparent hero header
+                boxShadow: 'var(--app-shadow-xs)',
+                '& .MuiButton-startIcon': { mr: 0.75 },
               }}
             >
               Entrar
