@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import AdminComingSoon from '@/components/admin/AdminComingSoon';
+import AdminRegistrations from '@/components/admin/AdminRegistrations';
 
 export const metadata: Metadata = {
-  title: 'Painel administrativo',
+  title: 'Missionários cadastrados | Administração',
   robots: { index: false, follow: false },
 };
 
 export default function AdminPage() {
-  return <AdminComingSoon />;
+  return <AdminRegistrations />;
 }
