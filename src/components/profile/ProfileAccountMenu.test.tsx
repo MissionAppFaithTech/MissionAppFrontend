@@ -13,7 +13,7 @@ vi.mock('@/services/session.service', () => ({ logout: vi.fn() }));
 
 const profile = { username: 'samuel', displayName: 'Samuel' };
 
-async function openMenu(role?: 'missionary' | 'supporter') {
+async function openMenu(role?: 'missionary' | 'supporter' | 'admin') {
   const user = userEvent.setup();
   render(<ProfileAccountMenu profile={profile} role={role} />);
   await user.click(screen.getByRole('button', { name: /abrir menu do perfil/i }));
@@ -80,6 +80,14 @@ describe('ProfileAccountMenu', () => {
       'href',
       '/profile/supporter/configuracoes'
     );
+  });
+
+  it('keeps admin appearance and logout without links to another role', async () => {
+    await openMenu('admin');
+    expect(screen.getByRole('group', { name: 'Aparência' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Sair da conta' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /editar perfil/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /configurações/i })).not.toBeInTheDocument();
   });
 
   it('logs out and goes to the login page', async () => {

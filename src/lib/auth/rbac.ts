@@ -50,15 +50,43 @@ export function canAccess(role: BackendRole | null | undefined, area: AccessArea
  * Decides whether a role may open a path. Visitors are sent to login (keeping
  * the path in `next`); a logged-in role outside its area goes to its own home.
  */
+// export function accessDecision(
+//   role: BackendRole | null | undefined,
+//   pathname: string,
+//   search = ''
+// ): AccessDecision {
+//   const area = accessAreaFor(pathname);
+//   if (canAccess(role, area)) return { allow: true };
+//   if (!role) {
+//     return { allow: false, redirectTo: `/login?next=${encodeURIComponent(pathname + search)}` };
+//   }
+//   return { allow: false, redirectTo: homePathForRole(role) };
+// }
+
 export function accessDecision(
   role: BackendRole | null | undefined,
   pathname: string,
   search = ''
 ): AccessDecision {
   const area = accessAreaFor(pathname);
-  if (canAccess(role, area)) return { allow: true };
-  if (!role) {
-    return { allow: false, redirectTo: `/login?next=${encodeURIComponent(pathname + search)}` };
+
+  // Permite visualizar a UI administrativa sem login
+  // somente no ambiente local de desenvolvimento.
+  const adminPreviewEnabled =
+    process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_ADMIN_UI_PREVIEW === 'true';
+
+  if (area === 'admin' && adminPreviewEnabled) {
+    return { allow: true };
   }
+
+  if (canAccess(role, area)) return { allow: true };
+
+  if (!role) {
+    return {
+      allow: false,
+      redirectTo: `/login?next=${encodeURIComponent(pathname + search)}`,
+    };
+  }
+
   return { allow: false, redirectTo: homePathForRole(role) };
 }

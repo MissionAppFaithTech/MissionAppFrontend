@@ -12,7 +12,10 @@ function base64url(value: object) {
 }
 
 /** Unsigned JWT: the proxy and the server session only read it, the backend is mocked. */
-export function fakeAccessToken(role: 'MISSIONARY' | 'SUPPORTER' = 'MISSIONARY', sub = 'e2e-user') {
+export function fakeAccessToken(
+  role: 'MISSIONARY' | 'SUPPORTER' | 'ADMIN' = 'MISSIONARY',
+  sub = 'e2e-user'
+) {
   const exp = Math.floor(Date.now() / 1000) + 3600;
   return `${base64url({ alg: 'HS256' })}.${base64url({ sub, role, exp })}.e2e`;
 }
