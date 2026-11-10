@@ -22,6 +22,7 @@ import Typography from '@mui/material/Typography';
 import PhotoLightbox from '@/components/common/PhotoLightbox';
 import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
+import ReportKebabMenu from '@/components/report/ReportKebabMenu';
 import { getYouTubeEmbedUrl } from '@/lib/youtube';
 import type { ImpactProjectData } from '@/types/profile';
 
@@ -192,30 +193,36 @@ export default function ImpactProjectCard({
                 </Typography>
               </Box>
 
-              {/* Kebab Menu (3 pontos) */}
-              <IconButton
-                aria-label="Mais opções do projeto"
-                size="small"
-                onClick={handleOpenMenu}
-                sx={{
-                  color: 'text.secondary',
-                  minWidth: 44,
-                  minHeight: 44,
-                  '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
-                }}
-              >
-                <MoreVertIcon />
-              </IconButton>
+              {/* Kebab Menu (3 pontos): editar (dono) ou denunciar (visitante, RF 16.2) */}
+              {isOwnProfile ? (
+                <>
+                  <IconButton
+                    aria-label="Mais opções do projeto"
+                    size="small"
+                    onClick={handleOpenMenu}
+                    sx={{
+                      color: 'text.secondary',
+                      minWidth: 44,
+                      minHeight: 44,
+                      '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
+                    }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </>
+              ) : (
+                <ReportKebabMenu targetType="project" targetId={project.id} />
+              )}
             </Stack>
 
-            <Menu
-              anchorEl={menuAnchor}
-              open={Boolean(menuAnchor)}
-              onClose={handleCloseMenu}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              {isOwnProfile ? (
+            {isOwnProfile ? (
+              <Menu
+                anchorEl={menuAnchor}
+                open={Boolean(menuAnchor)}
+                onClose={handleCloseMenu}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              >
                 <MenuItem
                   component={Link}
                   href="/profile/projetos-de-impacto/edit"
@@ -226,18 +233,8 @@ export default function ImpactProjectCard({
                 >
                   Editar projeto
                 </MenuItem>
-              ) : (
-                <MenuItem
-                  sx={{ color: 'error.main' }}
-                  onClick={() => {
-                    handleCloseMenu();
-                    alert('Denúncia recebida para análise da moderação.');
-                  }}
-                >
-                  Denunciar projeto
-                </MenuItem>
-              )}
-            </Menu>
+              </Menu>
+            ) : null}
 
             {/* 3. Descrição do Projeto */}
             <Typography

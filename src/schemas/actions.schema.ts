@@ -188,3 +188,25 @@ export const profilePictureUploadInputSchema = z.object({
 });
 
 export const mediaAssetIdSchema = z.uuid();
+
+/** A report (RF 16): one reason, plus a free text (up to 250 words) for "other". */
+export const reportInputSchema = z
+  .object({
+    targetType: z.enum(['profile', 'project', 'post']),
+    targetId: z.string().trim().min(1).max(128),
+    reason: z.enum(['false_content', 'spam', 'hate_violence', 'harassment', 'other']),
+    details: z.string().trim().max(5000).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.reason !== 'other') return;
+    const words = value.details ? value.details.split(/\s+/).length : 0;
+    if (words === 0) {
+      ctx.addIssue({ code: 'custom', path: ['details'], message: 'Escreva a razão da denúncia' });
+    } else if (words > 250) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['details'],
+        message: 'A razão deve ter no máximo 250 palavras',
+      });
+    }
+  });

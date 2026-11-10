@@ -17,6 +17,7 @@ import PhotoLightbox from '@/components/common/PhotoLightbox';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
 import DonationModal from '@/components/profile/DonationModal';
+import ReportKebabMenu from '@/components/report/ReportKebabMenu';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { focusVisibleSx } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
@@ -134,8 +135,17 @@ export default function ProfileSummaryCard({
         borderColor: 'divider',
         boxShadow: 'var(--app-shadow-sm)',
         bgcolor: 'background.paper',
+        position: 'relative',
       }}
     >
+      {/* RF 16.1: kebab no canto superior direito do cabeçalho, só para visitantes */}
+      {!isOwnProfile && (profile.userId || profile.username) ? (
+        <ReportKebabMenu
+          targetType="profile"
+          targetId={profile.userId || profile.username}
+          sx={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}
+        />
+      ) : null}
       <CardContent
         sx={{
           p: { xs: 2, sm: 3 },
