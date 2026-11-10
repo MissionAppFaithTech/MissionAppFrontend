@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SupporterEditForm from '@/components/profile/SupporterEditForm';
 import { mockProfile } from '@/mocks/profile';
-import { saveProfileEdits } from '@/services/profileSave.service';
+import { ApiError } from '@/lib/api/client';
+import { changeProfilePicture, removeProfilePicture } from '@/services/profilePicture.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 
 const push = vi.fn();
@@ -15,11 +16,14 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-vi.mock('@/services/profileSave.service', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('@/services/profileSave.service')>()),
-  saveProfileEdits: vi.fn(async () => ({ picture: 'unchanged' })),
+vi.mock('@/services/profilePicture.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/profilePicture.service')>()),
+  changeProfilePicture: vi.fn(),
+  removeProfilePicture: vi.fn(),
 }));
 
+const sendPhoto = vi.mocked(changeProfilePicture);
+const removePhoto = vi.mocked(removeProfilePicture);
 const toast = () => useFeedbackStore.getState().current;
 
 vi.mock('@/services/username.service', () => ({
@@ -35,7 +39,10 @@ describe('SupporterEditForm Component', () => {
     useFeedbackStore.setState({ current: null });
     push.mockClear();
     refresh.mockClear();
-    vi.mocked(saveProfileEdits).mockClear();
+    sendPhoto.mockReset();
+    sendPhoto.mockResolvedValue({ url: 'https://cdn.test/new.webp' });
+    removePhoto.mockReset();
+    removePhoto.mockResolvedValue(undefined);
     vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:preview');
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
   });
@@ -91,33 +98,55 @@ describe('SupporterEditForm Component', () => {
       })
     );
     expect(push).not.toHaveBeenCalled();
-    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(sendPhoto).not.toHaveBeenCalled();
   });
 
-  it('saves a chosen photo only on "Salvar"', async () => {
+  it('saves a confirmed photo right away and keeps showing it', async () => {
     const user = userEvent.setup();
-    vi.mocked(saveProfileEdits).mockResolvedValueOnce({ picture: 'replaced' });
     renderWithQuery(
       <SupporterEditForm profile={{ ...mockProfile, avatarUrl: 'https://cdn.test/a.webp' }} />
     );
 
     const file = new File(['photo'], 'foto.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText(/editar foto de perfil/i), file);
-    expect(saveProfileEdits).not.toHaveBeenCalled();
+    expect(sendPhoto).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Usar esta foto' }));
 
-    await user.click(screen.getByRole('button', { name: /salvar/i }));
-
-    await waitFor(() =>
-      expect(saveProfileEdits).toHaveBeenCalledWith(
-        expect.objectContaining({ picture: { kind: 'replace', file }, hadPicture: true })
-      )
-    );
     await waitFor(() =>
       expect(toast()).toMatchObject({
         message: 'Foto de perfil atualizada com sucesso.',
         severity: 'success',
       })
     );
+    expect(sendPhoto).toHaveBeenCalledWith(expect.objectContaining({ file }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(screen.getByRole('img', { name: /foto de perfil de/i })).toHaveAttribute(
+      'src',
+      'https://cdn.test/new.webp'
+    );
+    expect(refresh).toHaveBeenCalledTimes(1);
+    // Not an unsaved change of the form.
+    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
+  });
+
+  it('removes the photo right away once confirmed', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(
+      <SupporterEditForm profile={{ ...mockProfile, avatarUrl: 'https://cdn.test/a.webp' }} />
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Remover foto' }));
+    await user.click(
+      within(screen.getByRole('dialog')).getByRole('button', { name: 'Remover foto' })
+    );
+
+    await waitFor(() =>
+      expect(toast()).toMatchObject({
+        message: 'Foto de perfil removida com sucesso.',
+        severity: 'success',
+      })
+    );
+    expect(removePhoto).toHaveBeenCalledTimes(1);
   });
 
   it('"Salvar" without changes says so in a blue toast', async () => {
@@ -129,7 +158,6 @@ describe('SupporterEditForm Component', () => {
     await waitFor(() =>
       expect(toast()).toMatchObject({ message: 'Nenhuma alteração para salvar.', severity: 'info' })
     );
-    expect(saveProfileEdits).not.toHaveBeenCalled();
   });
 
   it('"Cancelar" undoes the changes with a blue toast and stays', async () => {
@@ -163,23 +191,21 @@ describe('SupporterEditForm Component', () => {
     expect(push).toHaveBeenCalledWith('/profile/supporter/missionarios');
   });
 
-  it('reports a failed photo save in a red toast', async () => {
+  it('shows a failed photo send in the dialog', async () => {
     const user = userEvent.setup();
-    vi.mocked(saveProfileEdits).mockRejectedValueOnce(new Error('rede'));
+    sendPhoto.mockRejectedValueOnce(new ApiError('rede', 0));
     renderWithQuery(<SupporterEditForm profile={mockProfile} />);
 
     await user.upload(
       screen.getByLabelText(/(adicionar|editar) foto de perfil/i),
       new File(['photo'], 'foto.png', { type: 'image/png' })
     );
-    await user.click(screen.getByRole('button', { name: /salvar/i }));
+    await user.click(screen.getByRole('button', { name: 'Usar esta foto' }));
 
-    await waitFor(() =>
-      expect(toast()).toMatchObject({
-        message: 'Não foi possível salvar o perfil.',
-        severity: 'error',
-      })
-    );
+    expect(
+      await screen.findByRole('dialog', { name: 'Sem conexão com a internet' })
+    ).toBeInTheDocument();
+    expect(toast()).toBeNull();
   });
 
   it('blocks save when the typed username is already taken', async () => {

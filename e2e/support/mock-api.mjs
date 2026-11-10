@@ -23,6 +23,9 @@ const REVOKED_USER = 'e2e-revoked';
 const LOGIN = { email: /^samuel(?:\+([\w-]+))?@privado\.test$/, password: 'Senha@123' };
 const isLoginUser = (sub) => sub.startsWith('e2e-login');
 
+/** The "worker" cannot process the photos these users upload (`FAILED`). */
+const failsPhotoProcessing = (sub) => sub.startsWith('e2e-photo-fail');
+
 /** `POST /accounts` answers "e-mail em uso" for this address. */
 const TAKEN_EMAIL = 'usado@missionapp.test';
 /** `POST /accounts/missionaries` answers "CPF já cadastrado" for this document. */
@@ -550,11 +553,13 @@ const server = createServer((request, response) => {
 
   const completionMatch = request.method === 'POST' && MEDIA_COMPLETION.exec(path);
   if (completionMatch) {
-    if (!userOf(request)) return unauthorized(response);
+    const sub = userOf(request);
+    if (!sub) return unauthorized(response);
     const asset = mediaAssets.get(decodeURIComponent(completionMatch[1]));
     if (!asset?.bytes) return send(response, 404, { message: 'Arquivo não encontrado' });
     asset.status = 'PROCESSING';
     asset.pendingReads = 1;
+    asset.failing = failsPhotoProcessing(sub);
     return send(response, 202, { data: { mediaAsset: assetJson(asset) } });
   }
 
@@ -566,7 +571,7 @@ const server = createServer((request, response) => {
     // The "worker" finishes after one PROCESSING answer.
     if (asset.status === 'PROCESSING') {
       if (asset.pendingReads > 0) asset.pendingReads -= 1;
-      else asset.status = 'READY';
+      else asset.status = asset.failing ? 'FAILED' : 'READY';
     }
     return send(response, 200, { data: { mediaAsset: assetJson(asset) } });
   }

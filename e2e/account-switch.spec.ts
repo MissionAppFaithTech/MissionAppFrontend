@@ -36,7 +36,7 @@ test.describe('Switching accounts in the same tab', () => {
       .getByLabel('Adicionar foto de perfil')
       .locator('input[type="file"]')
       .setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: PNG });
-    await page.getByRole('button', { name: 'Salvar' }).click();
+    await page.getByRole('button', { name: 'Usar esta foto' }).click();
     await expect(
       page.getByRole('status').filter({ hasText: 'Foto de perfil adicionada com sucesso.' })
     ).toBeVisible({ timeout: 15000 });

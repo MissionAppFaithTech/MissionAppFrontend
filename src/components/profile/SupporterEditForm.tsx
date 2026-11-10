@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Box from '@mui/material/Box';
@@ -18,16 +17,14 @@ import ProfilePictureField from '@/components/profile/ProfilePictureField';
 import PublicContactFields from '@/components/profile/PublicContactFields';
 import UsernameAvailabilityField from '@/components/profile/UsernameAvailabilityField';
 import StyledTextArea from '@/components/common/StyledTextArea';
-import { useProfilePictureDraft } from '@/hooks/useProfilePictureDraft';
+import { useProfilePictureChange } from '@/hooks/useProfilePictureChange';
 import type { UsernameAvailabilityStatus } from '@/hooks/useUsernameAvailability';
-import { ApiError } from '@/lib/api/client';
 import { profileLocations } from '@/lib/profileOptions';
 import {
   samePhone,
   supporterEditSchema,
   type SupporterEditFormData,
 } from '@/schemas/profile.schema';
-import { profileSaveFeedback, saveProfileEdits } from '@/services/profileSave.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
@@ -55,11 +52,10 @@ function toFormValues(profile: ProfileData): SupporterEditFormData {
 }
 
 export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
-  const router = useRouter();
   const notify = useFeedbackStore((s) => s.notify);
   const [usernameStatus, setUsernameStatus] = useState<UsernameAvailabilityStatus>('idle');
-  const [processing, setProcessing] = useState(false);
-  const picture = useProfilePictureDraft(profile.avatarUrl);
+  // Saved on its own, right away: not part of Salvar, Cancelar or Voltar.
+  const picture = useProfilePictureChange(profile.avatarUrl, profile.userId);
 
   const {
     register,
@@ -79,12 +75,11 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
   // mount, so react-hook-form's `isDirty` would flag an untouched form.
   const watched = useWatch({ control });
   const baseline = { ...toFormValues(profile), ...defaultValues };
-  const fieldsDirty = (Object.keys(baseline) as (keyof SupporterEditFormData)[]).some((key) =>
+  const dirty = (Object.keys(baseline) as (keyof SupporterEditFormData)[]).some((key) =>
     key === 'publicPhone'
       ? !samePhone(watched.publicPhone, baseline.publicPhone)
       : watched[key] !== baseline[key]
   );
-  const dirty = fieldsDirty || picture.dirty;
 
   const onSubmit = async (data: SupporterEditFormData) => {
     if (usernameStatus === 'taken' || usernameStatus === 'checking') {
@@ -108,37 +103,14 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
       }
     }
 
-    // NOTE: the supporter's fields are not sent to the API yet (example data);
-    // the photo is saved on the account.
-    try {
-      const result = await saveProfileEdits({
-        picture: picture.change,
-        hadPicture: Boolean(profile.avatarUrl),
-        onProcessing: () => setProcessing(true),
-      });
-      const feedback = profileSaveFeedback({
-        fieldsSaved: fieldsDirty,
-        picture: result.picture,
-        fieldsMessage: 'Perfil de apoiador atualizado com sucesso!',
-      });
-      notify(feedback.message, feedback.severity);
-      reset(data);
-      picture.reset();
-      router.refresh();
-    } catch (error) {
-      notify(
-        error instanceof ApiError ? error.message : 'Não foi possível salvar o perfil.',
-        'error'
-      );
-    } finally {
-      setProcessing(false);
-    }
+    // NOTE: the supporter's fields are not sent to the API yet (example data).
+    notify('Perfil de apoiador atualizado com sucesso!');
+    reset(data);
   };
 
-  /** Drops every unsaved change (fields and photo) and stays on the page. */
+  /** Drops every unsaved field change and stays on the page. */
   const discardChanges = () => {
     reset(toFormValues(profile));
-    picture.reset();
     notify('Alterações descartadas.', 'info');
   };
 
@@ -198,7 +170,6 @@ export default function SupporterEditForm({ profile }: SupporterEditFormProps) {
                 picture={picture}
                 displayName={profile.displayName}
                 disabled={isSubmitting}
-                processing={processing}
               />
 
               {/* Seção 1: Informações Gerais */}
