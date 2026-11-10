@@ -19,6 +19,18 @@ describe('ImpactProjectCard Component', () => {
     campaignBadge: true,
   };
 
+  it('lets a visitor report the project through the kebab (RF 16.2)', async () => {
+    const user = userEvent.setup();
+    render(<ImpactProjectCard project={mockProject} isOwnProfile={false} />);
+
+    await user.click(screen.getByRole('button', { name: 'Mais opções do projeto' }));
+    expect(screen.queryByRole('menuitem', { name: /editar projeto/i })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('menuitem', { name: 'Denunciar' }));
+
+    expect(await screen.findByRole('dialog', { name: 'Denunciar' })).toBeInTheDocument();
+    expect(screen.getByRole('radiogroup', { name: /denunciando este projeto/ })).toBeVisible();
+  });
+
   it('renders project title, campaign badge, description, and Ofertar button', () => {
     render(
       <ImpactProjectCard

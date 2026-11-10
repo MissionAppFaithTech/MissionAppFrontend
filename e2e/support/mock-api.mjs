@@ -551,6 +551,17 @@ const server = createServer((request, response) => {
     if (request.method === 'GET') return serveFile(response, id);
   }
 
+  if (request.method === 'POST' && path === '/api/v1/reports') {
+    const sub = userOf(request);
+    if (!sub) return unauthorized(response);
+    // Users of their own keep the failure/duplicate cases away from the other specs.
+    if (sub.startsWith('e2e-report-fail')) return send(response, 500, { message: 'Falha' });
+    if (sub.startsWith('e2e-report-dup')) {
+      return send(response, 409, { message: 'Já denunciado', code: 'E_ALREADY_REPORTED' });
+    }
+    return send(response, 201, { data: {} });
+  }
+
   const completionMatch = request.method === 'POST' && MEDIA_COMPLETION.exec(path);
   if (completionMatch) {
     const sub = userOf(request);

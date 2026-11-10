@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import EmptyState from '@/components/common/EmptyState';
 import LockedContentNotice from '@/components/common/LockedContentNotice';
 import PillButton from '@/components/common/PillButton';
+import ReportKebabMenu from '@/components/report/ReportKebabMenu';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { SavedPost } from '@/types/profile';
 
@@ -106,39 +107,47 @@ export default function VisitorProfilePostsSection({ posts }: VisitorProfilePost
                   </Box>
                 </Stack>
 
-                <Chip
-                  label={
-                    post.type === 'prayer'
-                      ? 'ORAÇÃO'
-                      : post.type === 'campaign'
-                        ? 'CAMPANHA'
-                        : 'ATUALIZAÇÃO'
-                  }
-                  size="small"
-                  sx={{
-                    // Only the post type varies here: the light/dark half lives in
-                    // the CSS variables, so the chip is correct on the first paint
-                    // instead of waiting for the color scheme to reach React.
-                    bgcolor:
-                      post.type === 'campaign'
-                        ? 'var(--app-chip-warn-bg)'
-                        : 'var(--app-chip-info-bg)',
-                    color:
-                      post.type === 'campaign'
-                        ? 'var(--app-chip-warn-fg)'
-                        : 'var(--app-chip-info-fg)',
-                    border: '1px solid',
-                    borderColor:
-                      post.type === 'campaign'
-                        ? 'var(--app-chip-warn-border)'
-                        : 'var(--app-chip-info-border)',
-                    fontWeight: 700,
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.05em',
-                    borderRadius: 1.5,
-                    px: 0.5,
-                  }}
-                />
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  useFlexGap
+                  sx={{ alignItems: 'center', flexShrink: 0 }}
+                >
+                  <Chip
+                    label={
+                      post.type === 'prayer'
+                        ? 'ORAÇÃO'
+                        : post.type === 'campaign'
+                          ? 'CAMPANHA'
+                          : 'ATUALIZAÇÃO'
+                    }
+                    size="small"
+                    sx={{
+                      // Only the post type varies here: the light/dark half lives in
+                      // the CSS variables, so the chip is correct on the first paint
+                      // instead of waiting for the color scheme to reach React.
+                      bgcolor:
+                        post.type === 'campaign'
+                          ? 'var(--app-chip-warn-bg)'
+                          : 'var(--app-chip-info-bg)',
+                      color:
+                        post.type === 'campaign'
+                          ? 'var(--app-chip-warn-fg)'
+                          : 'var(--app-chip-info-fg)',
+                      border: '1px solid',
+                      borderColor:
+                        post.type === 'campaign'
+                          ? 'var(--app-chip-warn-border)'
+                          : 'var(--app-chip-info-border)',
+                      fontWeight: 700,
+                      fontSize: '0.7rem',
+                      letterSpacing: '0.05em',
+                      borderRadius: 1.5,
+                      px: 0.5,
+                    }}
+                  />
+                  <ReportKebabMenu targetType="post" targetId={post.id} />
+                </Stack>
               </Stack>
 
               {/* Conteúdo */}
