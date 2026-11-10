@@ -6,10 +6,10 @@ const PNG = Buffer.from(
   'base64'
 );
 
-// "Editar perfil": the photo is only staged until "Salvar"; "Cancelar" undoes
-// it; both stay on the page with a toast; "Voltar" asks before dropping changes.
+// "Editar perfil": the photo is saved on its own, right away; "Cancelar" and
+// "Voltar" only deal with the fields; both stay on the page with a toast.
 test.describe('Edit profile actions', () => {
-  test('staged photo, Cancelar, Salvar and Voltar', async ({ page }, testInfo) => {
+  test('photo saved right away, Cancelar, Salvar and Voltar', async ({ page }, testInfo) => {
     await mockMissionarySession(
       page,
       page.context(),
@@ -18,46 +18,54 @@ test.describe('Edit profile actions', () => {
     await page.goto('/profile/edit-profile');
     await page.waitForLoadState('networkidle');
 
-    const photo = page.getByRole('img', { name: /^Foto de perfil de / });
+    const photo = page.getByRole('img', { name: /^Foto de perfil de / }).filter({ visible: true });
     const toast = (text: string) => page.getByRole('status').filter({ hasText: text });
-    const pick = () =>
-      page
-        .getByLabel(/(Adicionar|Alterar) foto de perfil/)
-        .locator('input[type="file"]')
-        .setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: PNG });
+    const name = page.getByRole('textbox', { name: 'Nome completo:' });
+    const savedName = await name.inputValue();
 
-    // Picking only previews the photo.
-    await pick();
-    await expect(photo).toHaveAttribute('src', /^blob:/);
-    await expect(
-      page.getByText('Nova foto selecionada. Ela será salva quando você clicar em Salvar.')
-    ).toBeVisible();
+    // Closing the confirmation saves nothing.
+    await page
+      .getByLabel('Adicionar foto de perfil')
+      .locator('input[type="file"]')
+      .setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: PNG });
+    const confirm = page.getByRole('dialog', { name: 'Usar esta foto?' });
+    await confirm.getByRole('button', { name: 'Fechar' }).click();
+    await expect(confirm).toBeHidden();
+    await expect(photo).toHaveCount(0);
 
-    // "Cancelar" undoes it, says so and stays.
+    // Confirming saves the photo without "Salvar".
+    await page
+      .getByLabel('Adicionar foto de perfil')
+      .locator('input[type="file"]')
+      .setInputFiles({ name: 'foto.png', mimeType: 'image/png', buffer: PNG });
+    await confirm.getByRole('button', { name: 'Usar esta foto' }).click();
+    await expect(toast('Foto de perfil adicionada com sucesso.')).toBeVisible({ timeout: 15000 });
+    await expect(photo).toHaveAttribute('src', /\/storage\//);
+    await expect(page).toHaveURL(/\/profile\/edit-profile$/);
+
+    // A saved photo is not an unsaved change: "Voltar" is still a plain link.
+    await expect(page.getByRole('link', { name: 'Voltar para o perfil' }).first()).toBeVisible();
+
+    // "Cancelar" undoes the fields, keeps the photo, says so and stays.
+    await name.fill('Outro nome');
     await page.getByRole('button', { name: 'Cancelar' }).click();
     await expect(toast('Alterações descartadas.')).toBeVisible();
-    await expect(photo).toHaveCount(0);
-    await expect(page).toHaveURL(/\/profile\/edit-profile$/);
-
-    // "Salvar" applies it with a green toast and stays.
-    await pick();
-    await page.getByRole('button', { name: 'Salvar' }).click();
-    await expect(toast('Foto de perfil adicionada com sucesso.')).toBeVisible({ timeout: 15000 });
-    await expect(page).toHaveURL(/\/profile\/edit-profile$/);
+    await expect(name).toHaveValue(savedName);
     await expect(photo).toHaveAttribute('src', /\/storage\//);
+    await expect(page).toHaveURL(/\/profile\/edit-profile$/);
 
     // "Voltar" with unsaved changes asks first.
-    await page.getByRole('textbox', { name: 'Nome completo:' }).fill('Outro nome');
+    await name.fill('Outro nome');
     await page.getByRole('button', { name: 'Voltar para o perfil' }).first().click();
     const dialog = page.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
     await expect(dialog).toBeVisible();
     await dialog.getByRole('button', { name: 'Continuar editando' }).click();
     await expect(dialog).toBeHidden();
-    await expect(page.getByRole('textbox', { name: 'Nome completo:' })).toHaveValue('Outro nome');
+    await expect(name).toHaveValue('Outro nome');
 
     await page.getByRole('button', { name: 'Voltar para o perfil' }).last().click();
     await page.getByRole('button', { name: 'Descartar e voltar' }).click();
     await expect(page).toHaveURL(/\/profile\/sobre$/);
-    await expect(photo.filter({ visible: true })).toHaveAttribute('src', /\/storage\//);
+    await expect(photo).toHaveAttribute('src', /\/storage\//);
   });
 });

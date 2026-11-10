@@ -19,7 +19,8 @@ export const BACKEND_PORT = process.env.E2E_REAL_API_PORT ?? '3334';
 export const FRONTEND_PORT = process.env.E2E_REAL_WEB_PORT ?? '3100';
 export const E2E_DATABASE = 'app_e2e';
 // NOTE: the queues live in this Redis db (dev uses 0, the backend tests 1) and
-// no worker consumes them, so the suite sends no real e-mail (Resend).
+// the suite's own workers consume them (`start-backend.mjs`). E-mails are real
+// jobs too: specs must only use undeliverable `.test` addresses.
 export const E2E_REDIS_DB = '2';
 // NOTE: the suite's own catalog search indexes (backend ADR-0042), so the dev
 // indexes on the same Elasticsearch are never touched.

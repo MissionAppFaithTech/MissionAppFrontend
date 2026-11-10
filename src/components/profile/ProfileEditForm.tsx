@@ -18,7 +18,7 @@ import EditBackButton from '@/components/profile/EditBackButton';
 import ProfilePictureField from '@/components/profile/ProfilePictureField';
 import PublicContactFields from '@/components/profile/PublicContactFields';
 import UsernameAvailabilityField from '@/components/profile/UsernameAvailabilityField';
-import { useProfilePictureDraft } from '@/hooks/useProfilePictureDraft';
+import { useProfilePictureChange } from '@/hooks/useProfilePictureChange';
 import type { UsernameAvailabilityStatus } from '@/hooks/useUsernameAvailability';
 import { ApiError } from '@/lib/api/client';
 import {
@@ -28,7 +28,7 @@ import {
   type ProfileEditFormData,
 } from '@/schemas/profile.schema';
 import type { UpdateHeaderPayload, UpdatePublicContactsPayload } from '@/services/profile.service';
-import { profileSaveFeedback, saveProfileEdits } from '@/services/profileSave.service';
+import { saveProfileEdits } from '@/services/profileSave.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ProfileData } from '@/types/profile';
@@ -97,8 +97,8 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
   const notify = useFeedbackStore((s) => s.notify);
   const [usernameStatus, setUsernameStatus] = useState<UsernameAvailabilityStatus>('idle');
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [processing, setProcessing] = useState(false);
-  const picture = useProfilePictureDraft(profile.avatarUrl);
+  // Saved on its own, right away: not part of Salvar, Cancelar or Voltar.
+  const picture = useProfilePictureChange(profile.avatarUrl, profile.userId);
 
   const {
     register,
@@ -124,9 +124,7 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
     baseline,
     dirtyFields
   );
-  const fieldsDirty =
-    Object.keys(pending.header).length > 0 || Object.keys(pending.contacts).length > 0;
-  const dirty = fieldsDirty || picture.dirty;
+  const dirty = Object.keys(pending.header).length > 0 || Object.keys(pending.contacts).length > 0;
 
   // MUI forwards `ref` to the root div; the input needs it so errors can focus it.
   const { ref: displayNameRef, ...displayNameField } = register('displayName');
@@ -145,25 +143,17 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
 
     const { header, contacts } = buildPayloads(data, toFormValues(profile), dirtyFields);
     const fieldsChanged = Object.keys(header).length > 0 || Object.keys(contacts).length > 0;
-    if (!fieldsChanged && !picture.change) {
+    if (!fieldsChanged) {
       notify('Nenhuma alteração para salvar.', 'info');
       return;
     }
 
     try {
-      const result = await saveProfileEdits({
-        header,
-        contacts,
-        picture: picture.change,
-        hadPicture: Boolean(profile.avatarUrl),
-        onProcessing: () => setProcessing(true),
-      });
-      const feedback = profileSaveFeedback({ fieldsSaved: fieldsChanged, picture: result.picture });
-      notify(feedback.message, feedback.severity);
+      await saveProfileEdits({ header, contacts });
+      notify('Perfil atualizado com sucesso.');
       // Stays on the page with the saved values; the refresh brings the server's
-      // data (new photo URL) to this form and to the profile header (ADR-0005).
+      // data to this form and to the profile header (ADR-0005).
       reset(data, { keepDirtyValues: false });
-      picture.reset();
       router.refresh();
     } catch (error) {
       const fieldErrors = error instanceof ApiError ? error.fieldErrors : {};
@@ -180,15 +170,12 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
         setSubmitError(message);
         notify(message, 'error');
       }
-    } finally {
-      setProcessing(false);
     }
   };
 
-  /** Drops every unsaved change (fields and photo) and stays on the page. */
+  /** Drops every unsaved field change and stays on the page. */
   const discardChanges = () => {
     reset(toFormValues(profile), { keepDirtyValues: false });
-    picture.reset();
     setSubmitError(null);
     notify('Alterações descartadas.', 'info');
   };
@@ -255,7 +242,6 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
                 picture={picture}
                 displayName={profile.displayName}
                 disabled={isSubmitting}
-                processing={processing}
               />
 
               <Stack spacing={{ xs: 2.5, sm: 3 }}>

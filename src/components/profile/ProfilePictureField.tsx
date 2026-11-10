@@ -1,56 +1,49 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import PersonIcon from '@mui/icons-material/Person';
 import PhotoCameraOutlinedIcon from '@mui/icons-material/PhotoCameraOutlined';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
-import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
 import PhotoLightbox from '@/components/common/PhotoLightbox';
 import PillButton from '@/components/common/PillButton';
-import type { ProfilePictureDraftState } from '@/hooks/useProfilePictureDraft';
+import ProfilePictureDialog from '@/components/profile/ProfilePictureDialog';
+import type { ProfilePictureChangeState } from '@/hooks/useProfilePictureChange';
 import { PROFILE_PICTURE_ACCEPT } from '@/services/profilePicture.service';
 import { focusVisibleSx } from '@/theme/theme';
 
 type ProfilePictureFieldProps = {
-  /** Staged photo of the form (`useProfilePictureDraft`). */
-  picture: ProfilePictureDraftState;
+  /** Photo state of the form (`useProfilePictureChange`). */
+  picture: ProfilePictureChangeState;
   /** Name for the image's alt text. */
   displayName: string;
   /** The form is being saved. */
   disabled?: boolean;
-  /** The saved photo is being compressed by the backend. */
-  processing?: boolean;
 };
 
 /** Full-width touch targets of at least 44px, centered label. */
 const ACTION_SX = { width: '100%', minHeight: 44, justifyContent: 'center' } as const;
 
-function statusMessage({ draft }: ProfilePictureDraftState, processing: boolean) {
-  if (processing) return 'Processando a foto de perfil...';
-  if (draft.kind === 'replace')
-    return 'Nova foto selecionada. Ela será salva quando você clicar em Salvar.';
-  if (draft.kind === 'remove') return 'A foto será removida quando você clicar em Salvar.';
-  return '';
-}
-
 /**
- * Avatar of the edit forms. Choosing or removing a photo only stages the
- * change: it is applied with the form's "Salvar" and undone by "Cancelar".
+ * Avatar of the edit forms. The photo does not wait for the form's "Salvar":
+ * a chosen photo is confirmed in a dialog and saved right away, and removing
+ * it asks first.
  */
 export default function ProfilePictureField({
   picture,
   displayName,
   disabled = false,
-  processing = false,
 }: ProfilePictureFieldProps) {
-  const { photoUrl, error } = picture;
-  const hintId = 'profile-picture-hint';
+  const { photoUrl, removal } = picture;
+  const hintId = useId();
   const [viewing, setViewing] = useState(false);
+  const locked = disabled || picture.busy;
+  const removalFailed = removal === 'failed';
 
   const avatar = (
     <Avatar
@@ -64,7 +57,6 @@ export default function ProfilePictureField({
         border: '1px solid',
         borderColor: 'primary.main',
         boxShadow: 2,
-        opacity: processing ? 0.6 : 1,
       }}
     >
       <PersonIcon aria-hidden sx={{ fontSize: { xs: 48, sm: 56 } }} />
@@ -73,31 +65,22 @@ export default function ProfilePictureField({
 
   return (
     <Stack spacing={1.5} sx={{ alignItems: 'center', textAlign: 'center', minWidth: 0 }}>
-      <Box sx={{ position: 'relative' }} aria-busy={processing || undefined}>
-        {photoUrl ? (
-          <ButtonBase
-            aria-label={`Ampliar foto de perfil de ${displayName}`}
-            aria-haspopup="dialog"
-            onClick={() => setViewing(true)}
-            sx={(theme) => ({
-              borderRadius: '50%',
-              cursor: 'zoom-in',
-              ...focusVisibleSx(theme),
-            })}
-          >
-            {avatar}
-          </ButtonBase>
-        ) : (
-          avatar
-        )}
-        {processing ? (
-          <CircularProgress
-            size={32}
-            aria-hidden
-            sx={{ position: 'absolute', inset: 0, m: 'auto' }}
-          />
-        ) : null}
-      </Box>
+      {photoUrl ? (
+        <ButtonBase
+          aria-label={`Ampliar foto de perfil de ${displayName}`}
+          aria-haspopup="dialog"
+          onClick={() => setViewing(true)}
+          sx={(theme) => ({
+            borderRadius: '50%',
+            cursor: 'zoom-in',
+            ...focusVisibleSx(theme),
+          })}
+        >
+          {avatar}
+        </ButtonBase>
+      ) : (
+        avatar
+      )}
 
       {/* Same width, stacked: the main action above "Remover foto". */}
       <Stack spacing={1} sx={{ width: { xs: '100%', sm: 240 }, maxWidth: '100%' }}>
@@ -108,7 +91,7 @@ export default function ProfilePictureField({
           startIcon={<PhotoCameraOutlinedIcon aria-hidden />}
           aria-label={photoUrl ? 'Editar foto de perfil' : 'Adicionar foto de perfil'}
           aria-describedby={hintId}
-          disabled={disabled}
+          disabled={locked}
           sx={ACTION_SX}
         >
           {photoUrl ? 'Editar foto' : 'Adicionar foto'}
@@ -117,7 +100,7 @@ export default function ProfilePictureField({
             type="file"
             accept={PROFILE_PICTURE_ACCEPT}
             hidden
-            disabled={disabled}
+            disabled={locked}
             onChange={picture.select}
           />
         </PillButton>
@@ -127,8 +110,8 @@ export default function ProfilePictureField({
             tone="primarySoftOutline"
             size="medium"
             startIcon={<DeleteOutlinedIcon aria-hidden />}
-            onClick={picture.remove}
-            disabled={disabled}
+            onClick={picture.askRemoval}
+            disabled={locked}
             sx={ACTION_SX}
           >
             Remover foto
@@ -137,18 +120,38 @@ export default function ProfilePictureField({
       </Stack>
 
       <Typography id={hintId} variant="body2" color="text.secondary">
-        JPG, PNG ou WebP de até 5 MB. A foto é salva quando você clica em Salvar.
+        Use uma foto em JPG, PNG ou WebP. A foto é salva assim que você confirma.
       </Typography>
 
-      <Typography role="status" aria-live="polite" variant="body2" color="text.secondary">
-        {statusMessage(picture, processing)}
-      </Typography>
+      <ProfilePictureDialog
+        dialog={picture.dialog}
+        previewUrl={picture.previewUrl}
+        hadPicture={picture.hadPicture}
+        onConfirm={picture.send}
+        onRetry={picture.send}
+        onSelect={picture.select}
+        onClose={picture.close}
+      />
 
-      {error ? (
-        <Typography role="alert" variant="body2" color="error.main">
-          {error}
-        </Typography>
-      ) : null}
+      <ConfirmDialog
+        open={removal !== 'closed'}
+        title="Remover sua foto de perfil?"
+        description={
+          removalFailed ? (
+            <span role="alert">
+              Não foi possível remover a foto. Tente novamente. Sua foto atual não foi alterada.
+            </span>
+          ) : (
+            'Seu perfil vai ficar sem foto até você adicionar outra.'
+          )
+        }
+        cancelLabel="Manter foto"
+        confirmLabel={removalFailed ? 'Tentar novamente' : 'Remover foto'}
+        confirmTone="danger"
+        loading={removal === 'removing'}
+        onCancel={picture.cancelRemoval}
+        onConfirm={picture.confirmRemoval}
+      />
 
       {photoUrl ? (
         <PhotoLightbox
