@@ -4,6 +4,7 @@ import {
   requestProfilePictureUploadAction,
 } from '@/app/actions/media';
 import { callAction } from '@/lib/api/callAction';
+import { uploadMediaFile } from '@/services/mediaUpload.service';
 import { ApiError } from '@/lib/api/client';
 import { PROFILE_PICTURE_MAX_BYTES, PROFILE_PICTURE_MIME_TYPES } from '@/lib/profilePicture';
 import { updateHeader } from '@/services/profile.service';
@@ -11,7 +12,6 @@ import { updateHeader } from '@/services/profile.service';
 /** `accept` of the file input: only what the backend takes for a profile picture. */
 export const PROFILE_PICTURE_ACCEPT = PROFILE_PICTURE_MIME_TYPES.join(',');
 
-const UPLOAD_FAILED = 'Não foi possível enviar a foto. Verifique sua conexão e tente novamente.';
 const PROCESSING_FAILED = 'Não foi possível processar a imagem. Tente enviar outra foto.';
 
 /** `ApiError.code` of an image the backend worker could not process. */
@@ -53,24 +53,7 @@ export async function uploadPictureFile(file: File): Promise<string> {
     requestProfilePictureUploadAction({ mimeType: file.type, fileSizeBytes: file.size })
   );
 
-  // NOTE: Content-Type and Content-Length are part of the signature. The browser
-  // sets Content-Length from the File itself (scripts may not set it).
-  const signedHeaders = Object.fromEntries(
-    Object.entries(ticket.upload.headers ?? {}).filter(
-      ([name]) => name.toLowerCase() !== 'content-length'
-    )
-  );
-  let response: Response;
-  try {
-    response = await fetch(ticket.upload.url, {
-      method: ticket.upload.method ?? 'PUT',
-      headers: { 'Content-Type': file.type, ...signedHeaders },
-      body: file,
-    });
-  } catch {
-    throw new ApiError(UPLOAD_FAILED, 0);
-  }
-  if (!response.ok) throw new ApiError(UPLOAD_FAILED, response.status);
+  await uploadMediaFile(file, ticket);
 
   const { id } = await callAction(() => completeMediaUploadAction(ticket.mediaAsset.id));
   return id;

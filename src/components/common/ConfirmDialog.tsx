@@ -21,6 +21,8 @@ type ConfirmDialogProps = {
   loading?: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  /** Restore focus after the transition when an async trigger lost focus while disabled. */
+  onExited?: () => void;
 };
 
 /**
@@ -38,6 +40,7 @@ export default function ConfirmDialog({
   loading = false,
   onCancel,
   onConfirm,
+  onExited,
 }: ConfirmDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -48,7 +51,10 @@ export default function ConfirmDialog({
       onClose={() => !loading && onCancel()}
       aria-labelledby={titleId}
       aria-describedby={descriptionId}
-      slotProps={{ paper: { sx: { borderRadius: 3, p: 1, maxWidth: 480, mx: 2 } } }}
+      slotProps={{
+        paper: { sx: { borderRadius: 3, p: 1, maxWidth: 480, mx: 2 } },
+        transition: { onExited },
+      }}
     >
       <DialogTitle id={titleId} sx={{ fontWeight: 700 }}>
         {title}

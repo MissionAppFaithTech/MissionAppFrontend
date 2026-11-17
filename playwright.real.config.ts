@@ -43,7 +43,6 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 120 * 1000,
       env: {
-        PATH: `${process.env.HOME}/.nvm/versions/node/v24.19.0/bin:${process.env.PATH}`,
         API_URL: apiUrl,
         // Same secret on both sides (ADR-0032), read from the backend `.env`.
         BFF_SHARED_SECRET: backendEnvFile().BFF_SHARED_SECRET ?? '',

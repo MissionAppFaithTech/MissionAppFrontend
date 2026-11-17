@@ -5,6 +5,9 @@
 export type CatalogKind = 'missionaryAgencies' | 'faithCommunities';
 
 export const queryKeys = {
+  posts: () => ['posts'] as const,
+  postFeed: (ownerId: string, missionaryId?: string) =>
+    ['posts', ownerId, missionaryId ?? 'general'] as const,
   usernameAvailability: (username: string) => ['username-availability', username] as const,
   /** Every search of one catalog (to invalidate after creating an item). */
   catalogSearches: (kind: CatalogKind) => ['catalog-search', kind] as const,

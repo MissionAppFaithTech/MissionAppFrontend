@@ -10,6 +10,7 @@
  * Runs on its own port (3335 by default) so it never touches a real backend.
  */
 import { createServer } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import missionaryProfile from './missionary-profile.json' with { type: 'json' };
 
 const port = Number(process.env.E2E_MOCK_API_PORT || 3335);
@@ -163,6 +164,10 @@ async function storeFile(request, response, id) {
   }
   const chunks = [];
   for await (const chunk of request) chunks.push(chunk);
+  if (asset.owner?.postScenario?.uploadFail) {
+    response.writeHead(503, CORS_HEADERS);
+    return response.end();
+  }
   asset.bytes = Buffer.concat(chunks);
   response.writeHead(200, CORS_HEADERS);
   return response.end();
@@ -431,10 +436,26 @@ const routes = {
     Object.assign(profile.user, body);
     return send(response, 200, { data: { user: withPicture(profile.user) } });
   }),
-  'POST /api/v1/media-assets/uploads': authenticated((_profile, body, response) => {
+  'POST /api/v1/media-assets/uploads': authenticated((profile, body, response) => {
+    if (
+      body.purpose === 'POST_IMAGE' &&
+      (!['image/jpeg', 'image/png', 'image/webp'].includes(body.mimeType) ||
+        body.fileSizeBytes <= 0 ||
+        body.fileSizeBytes > 10 * 1024 * 1024)
+    )
+      return send(response, 422, { code: 'E_VALIDATION_ERROR', message: 'Imagem inválida' });
     mediaSequence += 1;
     const id = `019a0000-0000-7000-8000-${String(mediaSequence).padStart(12, '0')}`;
-    const asset = { id, purpose: body.purpose, mimeType: body.mimeType, status: 'PENDING_UPLOAD' };
+    const asset = {
+      id,
+      purpose: body.purpose,
+      mimeType: body.mimeType,
+      status: 'PENDING_UPLOAD',
+      owner: profile,
+    };
+    if (body.purpose === 'POST_IMAGE') {
+      profile.postUploads = (profile.postUploads ?? 0) + 1;
+    }
     mediaAssets.set(id, asset);
     return send(response, 200, {
       data: {
@@ -519,6 +540,241 @@ function publicProfile() {
   };
 }
 
+function postUuid() {
+  const timestamp = Date.now().toString(16).padStart(12, '0');
+  const random = randomUUID();
+  return `${timestamp.slice(0, 8)}-${timestamp.slice(8)}-7${random.slice(15)}`;
+}
+
+/** Stateful post contract: only actual HTTP mutations change these collections. */
+const postsByUser = new Map();
+const postRequests = new Map();
+const FOREIGN_MISSIONARY = '019a0000-0000-7000-8000-000000000fff';
+const POST_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function postsOf(sub) {
+  if (!postsByUser.has(sub)) postsByUser.set(sub, []);
+  return postsByUser.get(sub);
+}
+function postJson(post) {
+  return {
+    ...post,
+    images: post.images.map((entry) => {
+      const asset = mediaAssets.get(entry.imageAssetId);
+      if (asset?.status === 'PROCESSING') {
+        if (asset.pendingReads > 0) asset.pendingReads -= 1;
+        else asset.status = asset.failing ? 'FAILED' : 'READY';
+      }
+      return { ...entry, image: asset ? assetJson(asset) : entry.image };
+    }),
+  };
+}
+async function handlePosts(request, response, path) {
+  const sub = userOf(request);
+  if (!sub) return unauthorized(response);
+  const profile = profileOf(sub);
+  const posts = postsOf(sub);
+  const id = path.split('/')[4];
+  const post = posts.find((entry) => entry.id === id);
+  const url = new URL(request.url, 'http://localhost');
+  if (id && !POST_UUID.test(id))
+    return send(response, 422, { code: 'E_VALIDATION_ERROR', message: 'Identificador inválido' });
+  if (request.method === 'GET') {
+    if (id)
+      return post
+        ? send(response, 200, { data: { post: postJson(post) } })
+        : send(response, 404, { code: 'E_POST_NOT_FOUND', message: 'Postagem não encontrada' });
+    const limit = Number(url.searchParams.get('limit') ?? 20);
+    if (limit < 1 || limit > 20) return send(response, 422, { code: 'E_VALIDATION_ERROR' });
+    const owner = url.searchParams.get('missionaryId');
+    if (owner && !POST_UUID.test(owner))
+      return send(response, 422, { code: 'E_VALIDATION_ERROR', message: 'Identificador inválido' });
+    let visible = posts.filter((entry) => !owner || entry.missionaryId === owner).toReversed();
+    const cursor = url.searchParams.get('cursor');
+    if (cursor) {
+      let position;
+      try {
+        position = JSON.parse(Buffer.from(cursor, 'base64url').toString());
+      } catch {
+        return send(response, 422, { code: 'E_INVALID_CURSOR', message: 'Cursor inválido' });
+      }
+      visible = visible.slice(visible.findIndex((entry) => entry.id === position.id) + 1);
+    }
+    const page = visible.slice(0, limit);
+    return send(response, 200, {
+      data: { posts: page.map(postJson) },
+      meta: {
+        hasMore: visible.length > limit,
+        nextCursor:
+          visible.length > limit
+            ? Buffer.from(
+                JSON.stringify({ v: page.at(-1).createdAt, id: page.at(-1).id })
+              ).toString('base64url')
+            : null,
+      },
+    });
+  }
+  const body = await readBody(request);
+  const log = postRequests.get(sub) ?? [];
+  log.push({ method: request.method, id, body });
+  postRequests.set(sub, log);
+  const scenario = profile.postScenario ?? {};
+  if (scenario.error)
+    return send(response, scenario.error, {
+      code:
+        scenario.error === 403
+          ? 'E_POST_FORBIDDEN'
+          : scenario.error === 409
+            ? 'E_OTHER_CONFLICT'
+            : 'E_VALIDATION_ERROR',
+      message: `Erro de postagem ${scenario.error}`,
+    });
+  if (id && !post)
+    return send(response, 404, { code: 'E_POST_NOT_FOUND', message: 'Postagem não encontrada' });
+  if (post && post.missionaryId !== profile.missionary.id)
+    return send(response, 403, {
+      code: 'E_POST_FORBIDDEN',
+      message: 'Postagem de outro missionário',
+    });
+  if (request.method === 'DELETE') {
+    posts.splice(posts.indexOf(post), 1);
+    return send(response, 200, { message: 'Postagem removida com sucesso' });
+  }
+  const ids = body.imageAssetIds ?? post?.images.map((image) => image.imageAssetId) ?? [];
+  if (
+    ((request.method === 'POST' || body.content !== undefined) &&
+      (typeof body.content !== 'string' || !body.content.trim() || body.content.length > 5000)) ||
+    ids.length > 3 ||
+    ids.some((assetId) => !POST_UUID.test(assetId)) ||
+    new Set(ids).size !== ids.length
+  )
+    return send(response, 422, { code: 'E_VALIDATION_ERROR', message: 'Postagem inválida' });
+  for (const assetId of ids) {
+    const asset = mediaAssets.get(assetId);
+    const held = post?.images.some((entry) => entry.imageAssetId === assetId);
+    if (
+      !held &&
+      (!asset ||
+        asset.owner !== profile ||
+        asset.purpose !== 'POST_IMAGE' ||
+        !['PROCESSING', 'READY'].includes(asset.status) ||
+        !asset.bytes)
+    )
+      return send(response, 422, {
+        code: 'E_MEDIA_ASSET_NOT_ATTACHABLE',
+        message: 'Imagem não confirmada',
+      });
+  }
+  const currentCount = posts
+    .filter((entry) => entry.missionaryId === profile.missionary.id)
+    .reduce((sum, entry) => sum + entry.images.length, 0);
+  const overflow = currentCount - (post?.images.length ?? 0) + ids.length - 50;
+  if (overflow > 0 && !body.replaceOldestImages)
+    return send(response, 409, {
+      code: 'E_POST_IMAGE_LIMIT_REACHED',
+      message: 'Limite de 50 imagens atingido',
+    });
+  if (overflow > 0) {
+    let remaining = overflow;
+    for (const old of posts) {
+      if (old.missionaryId !== profile.missionary.id) continue;
+      old.images = old.images.filter((image) => {
+        if (remaining > 0 && !ids.includes(image.imageAssetId)) {
+          remaining -= 1;
+          return false;
+        }
+        return true;
+      });
+    }
+  }
+  const images = ids.map((imageAssetId, order) => ({
+    id: post?.images.find((image) => image.imageAssetId === imageAssetId)?.id ?? postUuid(),
+    order,
+    imageAssetId,
+    createdAt: new Date().toISOString(),
+    image: assetJson(mediaAssets.get(imageAssetId)),
+  }));
+  if (post) {
+    Object.assign(post, {
+      content: body.content ?? post.content,
+      highlightLink: body.highlightLink === undefined ? post.highlightLink : body.highlightLink,
+      images,
+    });
+    return send(response, 200, { data: { post: postJson(post) } });
+  }
+  const created = {
+    id: postUuid(),
+    content: body.content.trim(),
+    highlightLink: body.highlightLink ?? null,
+    slug: postUuid(),
+    missionaryId: profile.missionary.id,
+    images,
+    createdAt: new Date().toISOString(),
+  };
+  posts.push(created);
+  return send(response, 200, { data: { post: postJson(created) } });
+}
+
+/** Explicit test fixtures; never intercept a mutation to manufacture a success. */
+async function postTestControl(request, response, sub) {
+  const profile = profileOf(sub);
+  if (request.method === 'POST') {
+    const config = await readBody(request);
+    profile.postScenario = config;
+    if (config.seedImages || config.seedPosts || config.foreign) {
+      const posts = postsOf(sub);
+      for (let i = 0; i < (config.seedPosts ?? Math.ceil((config.seedImages ?? 0) / 3)); i++) {
+        const images = [];
+        for (let n = 0; n < Math.min(3, (config.seedImages ?? 0) - i * 3); n++) {
+          const id = postUuid();
+          const asset = {
+            id,
+            bytes: Buffer.from(
+              'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+              'base64'
+            ),
+            owner: profile,
+            purpose: 'POST_IMAGE',
+            mimeType: 'image/png',
+            status: 'READY',
+          };
+          mediaAssets.set(id, asset);
+          images.push({
+            id: postUuid(),
+            imageAssetId: id,
+            image: assetJson(asset),
+            order: n,
+            createdAt: new Date().toISOString(),
+          });
+        }
+        posts.push({
+          id: postUuid(),
+          missionaryId: profile.missionary.id,
+          content: `Texto preservado ${i + 1}`,
+          highlightLink: null,
+          slug: postUuid(),
+          createdAt: new Date().toISOString(),
+          images,
+        });
+      }
+      if (config.foreign)
+        posts.push({
+          id: postUuid(),
+          missionaryId: FOREIGN_MISSIONARY,
+          content: 'Publicação de outro missionário',
+          highlightLink: null,
+          slug: 'foreign',
+          images: [],
+          createdAt: new Date().toISOString(),
+        });
+    }
+  }
+  return send(response, 200, {
+    posts: postsOf(sub),
+    requests: postRequests.get(sub) ?? [],
+    uploads: profile.postUploads ?? 0,
+  });
+}
+
 const PUBLIC_PROFILE = /^\/api\/v1\/public\/missionaries\/([^/]+)$/;
 const SESSION = /^\/api\/v1\/auth\/sessions\/([^/]+)$/;
 const STORAGE = /^\/storage\/([^/]+)$/;
@@ -527,6 +783,17 @@ const MEDIA_COMPLETION = /^\/api\/v1\/media-assets\/([^/]+)\/completion$/;
 
 const server = createServer((request, response) => {
   const path = new URL(request.url ?? '/', 'http://localhost').pathname;
+  if (path.startsWith('/__test/posts/'))
+    return postTestControl(
+      request,
+      response,
+      decodeURIComponent(path.slice('/__test/posts/'.length))
+    );
+  if (/^\/api\/v1\/posts(?:\/[^/]+)?$/.test(path))
+    return handlePosts(request, response, path).catch((error) => {
+      console.error(error);
+      send(response, 500, { message: 'Post mock failure' });
+    });
   if (path === '/health') return send(response, 200, { ok: true });
 
   const publicMatch = request.method === 'GET' && PUBLIC_PROFILE.exec(path);
