@@ -37,7 +37,7 @@ const menuItemSx = (theme: Theme) => ({
 
 type ProfileAccountMenuProps = {
   profile: Pick<ProfileData, 'username' | 'displayName' | 'avatarUrl'>;
-  role?: 'missionary' | 'supporter' | 'visitor';
+  role?: 'missionary' | 'supporter' | 'visitor' | 'admin';
 };
 
 export default function ProfileAccountMenu({
@@ -159,41 +159,50 @@ export default function ProfileAccountMenu({
 
         <Divider />
 
-        <Box
-          component={Link}
-          href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
-          onClick={handleClose}
-          sx={menuItemSx}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Editar perfil</Typography>
-        </Box>
-
-        <Divider />
-
-        {role === 'missionary' && (
+        {role !== 'admin' && (
           <>
-            <Box component={Link} href="/profile/financeiro" onClick={handleClose} sx={menuItemSx}>
+            <Box
+              component={Link}
+              href={isSupporter ? '/profile/supporter/edit-profile' : '/profile/edit-profile'}
+              onClick={handleClose}
+              sx={menuItemSx}
+            >
+              <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>Editar perfil</Typography>
+            </Box>
+
+            <Divider />
+
+            {role === 'missionary' && (
+              <>
+                <Box
+                  component={Link}
+                  href="/profile/financeiro"
+                  onClick={handleClose}
+                  sx={menuItemSx}
+                >
+                  <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
+                    Configurações Financeiras
+                  </Typography>
+                </Box>
+              </>
+            )}
+
+            <Divider />
+
+            <Box
+              component={Link}
+              href={isSupporter ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
+              onClick={handleClose}
+              sx={menuItemSx}
+            >
               <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-                Configurações Financeiras
+                Configurações de conta
               </Typography>
             </Box>
+
+            <Divider />
           </>
         )}
-
-        <Divider />
-
-        <Box
-          component={Link}
-          href={isSupporter ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
-          onClick={handleClose}
-          sx={menuItemSx}
-        >
-          <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>
-            Configurações de conta
-          </Typography>
-        </Box>
-
-        <Divider />
         <ButtonBase onClick={handleLogout} disabled={loggingOut} sx={menuItemSx}>
           <LogoutIcon aria-hidden sx={{ fontSize: 20, mr: 1.5, color: 'error.main' }} />
           <Typography sx={{ fontWeight: 700, fontSize: '0.875rem' }}>

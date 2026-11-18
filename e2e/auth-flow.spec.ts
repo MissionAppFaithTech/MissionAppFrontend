@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Auth Flow E2E', () => {
+  test('redirects visitors from the admin area to login, preserving the destination', async ({
+    page,
+  }) => {
+    await page.goto('/admin?tab=1');
+
+    await expect(page).toHaveURL(/\/login\?next=%2Fadmin%3Ftab%3D1$/);
+    await expect(page.getByRole('textbox', { name: 'E-mail' })).toBeVisible();
+  });
+
   test('navigates to login and checks input fields and forgot password navigation', async ({
     page,
   }) => {
