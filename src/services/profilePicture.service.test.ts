@@ -96,6 +96,7 @@ describe('uploadPictureFile', () => {
     // Content-Length is set by the browser from the File itself.
     expect(fetchMock).toHaveBeenCalledWith(UPLOAD_URL, {
       method: 'PUT',
+      credentials: 'omit',
       headers: { 'Content-Type': 'image/png' },
       body: file,
     });
@@ -126,6 +127,7 @@ describe('uploadPictureFile', () => {
 
     expect(fetchMock).toHaveBeenCalledWith(UPLOAD_URL, {
       method: 'PUT',
+      credentials: 'omit',
       headers: { 'Content-Type': 'image/png', 'x-amz-acl': 'public-read' },
       body: file,
     });

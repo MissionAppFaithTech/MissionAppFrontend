@@ -26,7 +26,7 @@ export const E2E_REDIS_DB = '2';
 // indexes on the same Elasticsearch are never touched.
 export const E2E_INDEX_PREFIX = 'e2e_';
 const PG_CONTAINER = 'missionapp-pg';
-const REDIS_CONTAINER = 'missionapp-dragonfly';
+const REDIS_CONTAINER = process.env.E2E_REDIS_CONTAINER ?? 'missionapp-dragonfly';
 
 /** Values of the backend `.env` (no expansion; enough for user/password keys). */
 export function backendEnvFile() {
@@ -49,11 +49,23 @@ export function backendEnv() {
   };
 }
 
-function psql(sql) {
+function psql(sql, database = 'postgres') {
   const { DB_USER = 'root' } = backendEnvFile();
   execFileSync(
     'docker',
-    ['exec', PG_CONTAINER, 'psql', '-U', DB_USER, '-d', 'postgres', '-qc', sql],
+    [
+      'exec',
+      PG_CONTAINER,
+      'psql',
+      '-U',
+      DB_USER,
+      '-d',
+      database,
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-qc',
+      sql,
+    ],
     {
       stdio: 'inherit',
     }
@@ -62,20 +74,11 @@ function psql(sql) {
 
 /** Empties the suite's Redis db (queued jobs of the previous run). */
 export function flushRedis() {
-  const { REDIS_PASSWORD = '' } = backendEnvFile();
+  const REDIS_PASSWORD = process.env.REDIS_PASSWORD ?? backendEnvFile().REDIS_PASSWORD ?? '';
   execFileSync(
     'docker',
-    [
-      'exec',
-      '-e',
-      `REDISCLI_AUTH=${REDIS_PASSWORD}`,
-      REDIS_CONTAINER,
-      'redis-cli',
-      '-n',
-      E2E_REDIS_DB,
-      'FLUSHDB',
-    ],
-    { stdio: 'ignore' }
+    ['exec', '-e', 'REDISCLI_AUTH', REDIS_CONTAINER, 'redis-cli', '-n', E2E_REDIS_DB, 'FLUSHDB'],
+    { stdio: 'ignore', env: { ...process.env, REDISCLI_AUTH: REDIS_PASSWORD } }
   );
 }
 
@@ -114,6 +117,17 @@ export function resetDatabase() {
     });
   ace('migration:run', '--force');
   ace('db:seed');
+  // Backend seeds create users only. Complete the two local missionary fixtures
+  // in app_e2e so owner flows exercise actual missionary permissions and IDs.
+  psql(
+    `INSERT INTO missionaries (id, user_id, missionary_agency_id, created_at)
+     SELECT uuidv7(), id,
+       (SELECT id FROM missionary_agencies ORDER BY id LIMIT 1), NOW() FROM users
+     WHERE email IN ('missionary1@missionapp.test', 'missionary2@missionapp.test')
+       AND role = 'MISSIONARY'
+     ON CONFLICT (user_id) DO NOTHING`,
+    E2E_DATABASE
+  );
   ace('search:reindex-catalogs');
   flushRedis();
 }

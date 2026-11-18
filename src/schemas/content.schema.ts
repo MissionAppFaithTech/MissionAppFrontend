@@ -13,15 +13,3 @@ export const impactProjectEditSchema = z.object({
 });
 
 export type ImpactProjectEditFormData = z.infer<typeof impactProjectEditSchema>;
-
-export const newPostSchema = z.object({
-  content: z
-    .string()
-    .trim()
-    .min(1, 'Escreva o conteúdo da publicação')
-    .max(3000, 'A publicação não pode ultrapassar 3000 caracteres'),
-  youtubeUrl: z.string(),
-  images: z.array(z.string()),
-});
-
-export type NewPostFormData = z.infer<typeof newPostSchema>;

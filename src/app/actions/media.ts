@@ -1,5 +1,6 @@
 'use server';
 
+import { postUploadSchema } from '@/schemas/post.schema';
 import { backendFetch } from '@/lib/api/backend';
 import { parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
 import { mediaAssetIdSchema, profilePictureUploadInputSchema } from '@/schemas/actions.schema';
@@ -77,6 +78,30 @@ export async function getMediaAssetAction(
       );
       const { id, status, url } = result.data.mediaAsset;
       return { id, status, url: url ?? null };
+    }
+  );
+}
+
+/** A post image is attachable immediately after completion, including PROCESSING. */
+export async function requestPostImageUploadAction(
+  input: unknown
+): Promise<ActionResult<MediaUploadTicket>> {
+  const parsed = parseInput(
+    postUploadSchema,
+    input,
+    'Envie uma imagem JPG, PNG ou WebP de até 10 MB'
+  );
+  if (!parsed.ok) return parsed;
+  return runWithSession(
+    'actions/post-image-upload',
+    'Não foi possível preparar o envio da imagem',
+    async (accessToken) => {
+      const result = await backendFetch<{ data: MediaUploadTicket }>('/media-assets/uploads', {
+        method: 'POST',
+        body: { purpose: 'POST_IMAGE', ...parsed.data },
+        accessToken,
+      });
+      return result.data;
     }
   );
 }

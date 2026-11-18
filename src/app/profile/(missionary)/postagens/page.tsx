@@ -1,351 +1,196 @@
 'use client';
 
-import Image from 'next/image';
-import { useState, type SyntheticEvent } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import RichTextEditor from '@/components/common/RichTextEditor';
-import AddIcon from '@mui/icons-material/Add';
-import BookmarkBorderOutlinedIcon from '@mui/icons-material/BookmarkBorderOutlined';
-import FavoriteBorderOutlinedIcon from '@mui/icons-material/FavoriteBorderOutlined';
-import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined';
-import PersonIcon from '@mui/icons-material/Person';
-import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined';
-import Avatar from '@mui/material/Avatar';
+import { useRef, useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PillButton from '@/components/common/PillButton';
-import { mockProfile } from '@/mocks/profile';
-import { newPostSchema, type NewPostFormData } from '@/schemas/content.schema';
+import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
+import PostForm from '@/components/posts/PostForm';
+import PostCard from '@/components/posts/PostCard';
+import { usePosts } from '@/services/queries/posts';
+import { deletePost, getPost } from '@/services/post.service';
+import { queryKeys } from '@/lib/query/keys';
 import { useFeedbackStore } from '@/stores/feedbackStore';
-import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
-
-type FeedView = 'mine' | 'general';
-
-const cardSx = {
-  borderRadius: { xs: 2, sm: 3 },
-  border: '1px solid',
-  borderColor: 'divider',
-  boxShadow: 1,
-} as const;
-
-type NewPostFormProps = {
-  onCancel?: () => void;
-  onSubmitPost?: (data: NewPostFormData) => void;
-};
-
-function NewPostForm({ onCancel, onSubmitPost }: NewPostFormProps) {
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<NewPostFormData>({
-    resolver: zodResolver(newPostSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      content: '',
-      youtubeUrl: '',
-      images: [],
-    },
-  });
-
-  const onSubmit = (data: NewPostFormData) => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem('draft_missionary_new_post');
-      } catch {
-        // Ignore
-      }
-    }
-    onSubmitPost?.(data);
-    onCancel?.();
-  };
-
-  return (
-    <Card component="section" elevation={0} sx={cardSx}>
-      <CardContent
-        sx={{
-          p: { xs: 2, sm: 3, md: 4 },
-          '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
-        }}
-      >
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <Stack spacing={2}>
-            <Typography variant="subtitle2" color="primary.main">
-              Nova postagem
-            </Typography>
-
-            <Controller
-              name="content"
-              control={control}
-              render={({ field }) => (
-                <RichTextEditor
-                  id="post-content-editor"
-                  label="Mensagem"
-                  value={field.value}
-                  onChange={field.onChange}
-                  minRows={6}
-                  draftKey="missionary_new_post"
-                  placeholder="Comece a escrever..."
-                  error={Boolean(errors.content)}
-                  helperText={errors.content?.message}
-                />
-              )}
-            />
-
-            <Stack spacing={0.75}>
-              <Typography
-                component="label"
-                htmlFor="post-youtube-link"
-                variant="body2"
-                sx={{ color: 'primary.main', fontWeight: 600 }}
-              >
-                Link para o YouTube:
-              </Typography>
-              <TextField
-                id="post-youtube-link"
-                {...register('youtubeUrl')}
-                type="url"
-                size="small"
-                fullWidth
-                placeholder="www.youtube.com/..."
-                error={Boolean(errors.youtubeUrl)}
-                helperText={errors.youtubeUrl?.message}
-              />
-            </Stack>
-
-            <Box>
-              <PillButton
-                component="label"
-                tone="primarySoftOutline"
-                size="medium"
-                sx={{
-                  ...FORM_ACTION_BUTTON_SX,
-                  width: { xs: '100%', sm: 'auto' },
-                }}
-              >
-                <ImageOutlinedIcon sx={{ mr: 0.75, fontSize: 19 }} />
-                Inserir imagens
-                <Box component="input" type="file" accept="image/*" multiple hidden />
-              </PillButton>
-            </Box>
-
-            <Stack
-              direction={{ xs: 'column-reverse', sm: 'row' }}
-              spacing={{ xs: 1.5, sm: 1 }}
-              sx={{
-                justifyContent: 'flex-end',
-                pt: { xs: 2, sm: 4 },
-                '& .MuiButton-root': {
-                  ...FORM_ACTION_BUTTON_SX,
-                  width: { xs: '100%', sm: 'auto' },
-                },
-              }}
-            >
-              <PillButton tone="primarySoftOutline" size="medium" type="button" onClick={onCancel}>
-                Cancelar
-              </PillButton>
-              <PillButton tone="primaryFilled" size="medium" type="submit">
-                Postar
-              </PillButton>
-            </Stack>
-          </Stack>
-        </Box>
-      </CardContent>
-    </Card>
-  );
-}
-
-function FeedNavigation({
-  value,
-  onChange,
-}: {
-  value: FeedView;
-  onChange: (value: FeedView) => void;
-}) {
-  const handleChange = (_event: SyntheticEvent, nextValue: FeedView) => {
-    onChange(nextValue);
-  };
-
-  return (
-    <Paper
-      elevation={0}
-      sx={{
-        borderRadius: { xs: 2, sm: 3 },
-        border: '1px solid',
-        borderColor: 'divider',
-        boxShadow: 1,
-        overflow: 'hidden',
-      }}
-    >
-      <Tabs
-        value={value}
-        onChange={handleChange}
-        variant="fullWidth"
-        aria-label="Filtros de postagens"
-        sx={{
-          minHeight: 44,
-          '& .MuiTabs-indicator': { height: 3, bgcolor: 'accent.main' },
-          '& .MuiTab-root': {
-            minHeight: 44,
-            color: 'var(--app-nav-rest)',
-            fontSize: { xs: '0.8rem', sm: '0.875rem' },
-            fontWeight: 700,
-          },
-          '& .Mui-selected': { color: 'accent.main' },
-        }}
-      >
-        <Tab value="mine" label="Meu feed" disableRipple />
-        <Tab value="general" label="Geral" disableRipple />
-      </Tabs>
-    </Paper>
-  );
-}
-
-function PostAuthor() {
-  return (
-    <>
-      <Stack direction="row" spacing={1.25} sx={{ alignItems: 'center' }}>
-        <Avatar
-          sx={{
-            width: 40,
-            height: 40,
-            bgcolor: 'avatar.main',
-            color: 'avatar.contrastText',
-            border: '1px solid',
-            borderColor: 'primary.main',
-          }}
-        >
-          <PersonIcon sx={{ fontSize: 23 }} />
-        </Avatar>
-        <Box sx={{ minWidth: 0 }}>
-          <Stack direction="row" spacing={0.75} sx={{ alignItems: 'baseline', flexWrap: 'wrap' }}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
-              {mockProfile.displayName}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              @{mockProfile.username}
-            </Typography>
-          </Stack>
-          <Typography component="time" dateTime="2025-07-10T22:06:00" variant="caption">
-            10/07/2025 às 22:06h
-          </Typography>
-        </Box>
-      </Stack>
-      <Divider />
-    </>
-  );
-}
-
-function PostCard({ showAuthor, onShare }: { showAuthor: boolean; onShare?: () => void }) {
-  return (
-    <Card component="article" elevation={0} sx={cardSx}>
-      <CardContent
-        sx={{
-          p: { xs: 2, sm: 3, md: 4 },
-          '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
-        }}
-      >
-        <Stack spacing={{ xs: 2, sm: 2.5 }}>
-          {showAuthor ? (
-            <PostAuthor />
-          ) : (
-            <Typography component="time" dateTime="2025-07-10T22:06:00" variant="caption">
-              10/07/2025 às 22:06h
-            </Typography>
-          )}
-
-          <Typography variant="body2">
-            Hoje, fizemos uma leitura bíblica com as crianças sobre a vida de Jesus. Ensinamos a
-            elas como manusear a Bíblia e a diferença entre o novo e velho Testamento.
-          </Typography>
-
-          <Box
-            sx={{
-              position: 'relative',
-              width: '100%',
-              maxWidth: { sm: 640 },
-              aspectRatio: '4 / 3',
-              alignSelf: 'center',
-              overflow: 'hidden',
-              borderRadius: 1,
-              bgcolor: 'surface.main',
-            }}
-          >
-            <Image
-              src="/landing-page/landing-page.png"
-              alt="Encontro de atuação missionária com crianças"
-              fill
-              preload
-              sizes="(max-width: 600px) 100vw, 640px"
-              style={{ objectFit: 'cover' }}
-            />
-          </Box>
-
-          <Stack direction="row" spacing={1.5}>
-            <IconButton aria-label="Curtir postagem" color="primary">
-              <FavoriteBorderOutlinedIcon />
-            </IconButton>
-            <IconButton aria-label="Salvar postagem" color="primary">
-              <BookmarkBorderOutlinedIcon />
-            </IconButton>
-            <IconButton aria-label="Compartilhar postagem" color="primary" onClick={onShare}>
-              <ShareOutlinedIcon />
-            </IconButton>
-          </Stack>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
+import type { Post } from '@/schemas/post.schema';
 
 export default function ProfilePostsPage() {
-  const [feedView, setFeedView] = useState<FeedView>('mine');
-  const [isCreatingPost, setIsCreatingPost] = useState(false);
-  const notify = useFeedbackStore((s) => s.notify);
-
-  const handleShare = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      notify('Link copiado para a área de transferência!');
+  const profile = useOwnerProfile();
+  const ownerId = profile.missionaryId ?? '';
+  const canPost = profile.role === 'missionary' && Boolean(ownerId);
+  const [view, setView] = useState<'mine' | 'general'>('mine');
+  const [editor, setEditor] = useState<Post | 'new' | null>(null);
+  const [deleting, setDeleting] = useState<Post | null>(null);
+  const [deleteError, setDeleteError] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const feed = usePosts(ownerId, view === 'mine' ? ownerId : undefined);
+  const notify = useFeedbackStore((state) => state.notify);
+  const queryClient = useQueryClient();
+  const publishButton = useRef<HTMLButtonElement>(null);
+  const editTrigger = useRef<HTMLElement | null>(null);
+  const remove = useMutation({
+    mutationFn: (id: string) => deletePost(id),
+    retry: false,
+    onSuccess: () => {
+      setDeleting(null);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts() });
+      notify('Postagem excluída.');
+      publishButton.current?.focus();
+    },
+    onError: (error) => {
+      setDeleteError(error.message);
+      notify(error.message, 'error');
+    },
+  });
+  async function edit(post: Post) {
+    if (editingId || editor || remove.isPending) return;
+    editTrigger.current = document.activeElement as HTMLElement;
+    setEditingId(post.id);
+    try {
+      const latest = await getPost(post.id);
+      if (latest.missionaryId !== ownerId) throw new Error('Você não pode editar esta postagem.');
+      setEditor(latest);
+      requestAnimationFrame(() => document.getElementById('post-content')?.focus());
+    } catch (error) {
+      notify(
+        error instanceof Error ? error.message : 'Não foi possível carregar a postagem',
+        'error'
+      );
+    } finally {
+      setEditingId(null);
     }
-  };
-
+  }
+  function closeEditor() {
+    setEditor(null);
+    requestAnimationFrame(() =>
+      (editTrigger.current?.isConnected ? editTrigger.current : publishButton.current)?.focus()
+    );
+  }
+  const posts = feed.data?.pages.flatMap((page) => page.data.posts) ?? [];
   return (
-    <Stack spacing={{ xs: 2, sm: 3 }}>
-      {isCreatingPost ? (
-        <NewPostForm onCancel={() => setIsCreatingPost(false)} />
+    <Stack spacing={2} useFlexGap sx={{ minWidth: 0 }}>
+      <Typography component="h2" variant="h5">
+        Postagens
+      </Typography>
+      {editor && canPost ? (
+        <PostForm
+          key={editor === 'new' ? 'new' : editor.id}
+          post={editor === 'new' ? undefined : editor}
+          onClose={closeEditor}
+        />
       ) : (
-        <PillButton
-          tone="primaryFilled"
-          size="large"
-          onClick={() => setIsCreatingPost(true)}
-          sx={{
-            width: '100%',
-            minHeight: { xs: 44, sm: 48 },
-            borderRadius: { xs: 2, sm: 3 },
-            fontWeight: 700,
-            fontSize: { xs: '0.9375rem', sm: '1rem' },
-            boxShadow: 'var(--app-shadow-sm)',
-          }}
-        >
-          <AddIcon sx={{ fontSize: 20, mr: 1 }} />
-          Postar
-        </PillButton>
+        canPost && (
+          <PillButton
+            ref={publishButton}
+            tone="primaryFilled"
+            disabled={editingId !== null || remove.isPending}
+            onClick={() => {
+              editTrigger.current = null;
+              setEditor('new');
+              requestAnimationFrame(() => document.getElementById('post-content')?.focus());
+            }}
+            sx={{ alignSelf: { xs: 'stretch', sm: 'flex-end' } }}
+          >
+            Postar
+          </PillButton>
+        )
       )}
-
-      <FeedNavigation value={feedView} onChange={setFeedView} />
-      <PostCard showAuthor={feedView === 'general'} onShare={handleShare} />
+      <Tabs
+        value={view}
+        onChange={(_, value: 'mine' | 'general') => setView(value)}
+        variant="fullWidth"
+        aria-label="Filtros de postagens"
+      >
+        <Tab
+          id="posts-mine"
+          aria-controls="posts-panel"
+          value="mine"
+          label="Meu feed"
+          sx={{ minHeight: 44 }}
+        />
+        <Tab
+          id="posts-general"
+          aria-controls="posts-panel"
+          value="general"
+          label="Geral"
+          sx={{ minHeight: 44 }}
+        />
+      </Tabs>
+      <Box role="tabpanel" id="posts-panel" aria-labelledby={`posts-${view}`}>
+        <Stack spacing={2} useFlexGap>
+          {feed.isLoading && <Typography role="status">Carregando postagens…</Typography>}
+          {feed.isError && (
+            <Alert severity="error">
+              {feed.error.message}
+              <PillButton tone="primarySoftOutline" onClick={() => void feed.refetch()}>
+                Tentar novamente
+              </PillButton>
+            </Alert>
+          )}
+          {feed.isSuccess && posts.length === 0 && (
+            <Typography>Nenhuma postagem por aqui ainda.</Typography>
+          )}
+          {posts.map((post) => (
+            <PostCard
+              key={post.id}
+              post={post}
+              author={
+                post.missionaryId === ownerId
+                  ? { name: profile.displayName, avatar: profile.avatarUrl }
+                  : undefined
+              }
+              onEdit={canPost && post.missionaryId === ownerId ? () => void edit(post) : undefined}
+              onDelete={
+                canPost && post.missionaryId === ownerId
+                  ? () => {
+                      setDeleteError('');
+                      setDeleting(post);
+                    }
+                  : undefined
+              }
+              loading={editingId === post.id}
+              disabled={editor !== null || editingId !== null || remove.isPending}
+            />
+          ))}
+          {feed.hasNextPage && (
+            <PillButton
+              tone="primarySoftOutline"
+              loading={feed.isFetchingNextPage}
+              onClick={() => void feed.fetchNextPage()}
+            >
+              Carregar mais postagens
+            </PillButton>
+          )}
+        </Stack>
+      </Box>
+      <ConfirmDialog
+        open={Boolean(deleting)}
+        title="Excluir postagem?"
+        description={
+          <>
+            {deleteError && (
+              <Box component="span" role="alert" sx={{ display: 'block', color: 'error.main' }}>
+                {deleteError}
+              </Box>
+            )}
+            A postagem será excluída. As imagens serão removidas pelo sistema em seguida. Esta ação
+            não pode ser desfeita.
+          </>
+        }
+        cancelLabel="Cancelar"
+        confirmLabel="Excluir postagem"
+        confirmTone="danger"
+        loading={remove.isPending}
+        onCancel={() => setDeleting(null)}
+        onConfirm={() => {
+          if (deleting && !remove.isPending) remove.mutate(deleting.id);
+        }}
+      />
     </Stack>
   );
 }

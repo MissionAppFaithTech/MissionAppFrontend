@@ -643,6 +643,10 @@ export default function RichTextEditor({
         <Box
           component="textarea"
           id={editorId}
+          required={required}
+          maxLength={maxLength}
+          aria-invalid={error || undefined}
+          aria-describedby={helperText ? `${editorId}-help` : undefined}
           value={currentValue}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleTextChange(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -656,6 +660,11 @@ export default function RichTextEditor({
             minHeight: `${minHeightPx}px`,
             border: 'none',
             outline: 'none',
+            '&:focus-visible': {
+              outline: '2px solid',
+              outlineColor: 'primary.main',
+              outlineOffset: -2,
+            },
             resize: 'vertical',
             fontSize: { xs: '1rem', sm: '0.9375rem' },
             lineHeight: 1.6,
@@ -676,6 +685,8 @@ export default function RichTextEditor({
       {/* Helper text or error message */}
       {helperText && (
         <FormHelperText
+          id={`${editorId}-help`}
+          role={error ? 'alert' : undefined}
           error={error}
           sx={{ mx: 1.5, mt: 0.5, fontSize: { xs: '0.8125rem', sm: '0.75rem' } }}
         >

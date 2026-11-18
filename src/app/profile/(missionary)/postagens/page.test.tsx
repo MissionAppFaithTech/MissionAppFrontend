@@ -1,144 +1,76 @@
-import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { renderWithQuery } from '@/test/query';
+import { postFixture, MISSIONARY_ID, IMAGE_ID } from '@/test/posts';
+import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
+import { emptyProfile } from '@/services/profile.service';
+import { listPosts, getPost, deletePost } from '@/services/post.service';
 import ProfilePostsPage from './page';
-import { useFeedbackStore } from '@/stores/feedbackStore';
-
-describe('ProfilePostsPage - Postar button & collapsible Nova Postagem', () => {
-  beforeEach(() => {
-    useFeedbackStore.setState({ current: null });
+vi.mock('@/services/post.service', () => ({
+  listPosts: vi.fn(),
+  getPost: vi.fn(),
+  deletePost: vi.fn(),
+  createPost: vi.fn(),
+  updatePost: vi.fn(),
+  uploadPostImage: vi.fn(),
+}));
+const foreign = {
+  ...postFixture,
+  id: IMAGE_ID,
+  missionaryId: IMAGE_ID,
+  content: '<script>alert(1)</script>',
+};
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.mocked(listPosts).mockImplementation(async ({ missionaryId } = {}) => ({
+    data: { posts: missionaryId ? [postFixture] : [postFixture, foreign] },
+    meta: { hasMore: false, nextCursor: null },
+  }));
+  vi.mocked(getPost).mockResolvedValue(postFixture);
+  vi.mocked(deletePost).mockResolvedValue({ id: postFixture.id });
+});
+function renderPage() {
+  return renderWithQuery(
+    <OwnerProfileProvider
+      profile={{
+        ...emptyProfile,
+        missionaryId: MISSIONARY_ID,
+        role: 'missionary',
+        displayName: 'Ana',
+      }}
+    >
+      <ProfilePostsPage />
+    </OwnerProfileProvider>
+  );
+}
+describe('real posts UI', () => {
+  it('filters own/general posts, renders content as text and hides foreign actions', async () => {
+    renderPage();
+    await screen.findByText(postFixture.content);
+    expect(listPosts).toHaveBeenCalledWith(
+      expect.objectContaining({ missionaryId: MISSIONARY_ID, limit: 20 })
+    );
+    await userEvent.click(screen.getByRole('tab', { name: 'Geral' }));
+    await screen.findByText(foreign.content);
+    expect(screen.getAllByRole('button', { name: 'Excluir postagem' })).toHaveLength(1);
+    expect(document.querySelector('article script')).toBeNull();
   });
-
-  it('initially renders the full-width Postar button and hides the Nova Postagem form', () => {
-    render(<ProfilePostsPage />);
-
-    const postarButton = screen.getByRole('button', { name: /^postar$/i });
-    expect(postarButton).toBeInTheDocument();
-    expect(screen.queryByText(/nova postagem/i)).not.toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /meu feed/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /geral/i })).toBeInTheDocument();
-  });
-
-  it('opens Nova Postagem card when Postar button is clicked and hides the Postar button', async () => {
+  it('loads the current post before editing and confirms deletion', async () => {
+    renderPage();
     const user = userEvent.setup();
-    render(<ProfilePostsPage />);
-
-    const postarButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(postarButton);
-
-    expect(screen.getByText(/nova postagem/i)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText(/comece a escrever/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/link para o youtube/i)).toBeInTheDocument();
-    expect(screen.getByText(/inserir imagens/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
-  });
-
-  it('closes Nova Postagem card when Cancelar button is clicked and restores Postar button', async () => {
-    const user = userEvent.setup();
-    render(<ProfilePostsPage />);
-
-    // Open card
-    const postarButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(postarButton);
-    expect(screen.getByText(/nova postagem/i)).toBeInTheDocument();
-
-    // Click cancel
-    const cancelButton = screen.getByRole('button', { name: /cancelar/i });
-    await user.click(cancelButton);
-
-    // Card closed, Postar button back
-    expect(screen.queryByText(/nova postagem/i)).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^postar$/i })).toBeInTheDocument();
-  });
-
-  it('displays the Postar button on both Meu feed and Geral tabs', async () => {
-    const user = userEvent.setup();
-    render(<ProfilePostsPage />);
-
-    // On Meu feed (default)
-    expect(screen.getByRole('button', { name: /^postar$/i })).toBeInTheDocument();
-
-    // Switch to Geral
-    const geralTab = screen.getByRole('tab', { name: /geral/i });
-    await user.click(geralTab);
-
-    // Postar button is still displayed on Geral
-    expect(screen.getByRole('button', { name: /^postar$/i })).toBeInTheDocument();
-  });
-
-  it('preserves open Nova Postagem card state when switching between tabs', async () => {
-    const user = userEvent.setup();
-    render(<ProfilePostsPage />);
-
-    // Open card
-    const postarButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(postarButton);
-    expect(screen.getByText(/nova postagem/i)).toBeInTheDocument();
-
-    // Switch to Geral tab
-    const geralTab = screen.getByRole('tab', { name: /geral/i });
-    await user.click(geralTab);
-
-    // Card remains open
-    expect(screen.getByText(/nova postagem/i)).toBeInTheDocument();
-
-    // Switch back to Meu feed
-    const meuFeedTab = screen.getByRole('tab', { name: /meu feed/i });
-    await user.click(meuFeedTab);
-
-    // Card remains open
-    expect(screen.getByText(/nova postagem/i)).toBeInTheDocument();
-  });
-
-  it('copies current URL to clipboard and displays toast when clicking share button', async () => {
-    const user = userEvent.setup();
-    const writeTextMock = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      value: { writeText: writeTextMock },
-      configurable: true,
-      writable: true,
-    });
-
-    render(<ProfilePostsPage />);
-
-    const shareBtn = screen.getByRole('button', { name: /compartilhar postagem/i });
-    await user.click(shareBtn);
-
-    expect(writeTextMock).toHaveBeenCalledWith(window.location.href);
-    expect(useFeedbackStore.getState().current).toMatchObject({
-      message: 'Link copiado para a área de transferência!',
-      severity: 'success',
-    });
-  });
-
-  it('validates required content field on submit', async () => {
-    const user = userEvent.setup();
-    render(<ProfilePostsPage />);
-
-    const openButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(openButton);
-
-    const submitButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(submitButton);
-
-    expect(await screen.findByText(/escreva o conteúdo da publicação/i)).toBeInTheDocument();
-  });
-
-  it('submits successfully when content is provided', async () => {
-    const user = userEvent.setup();
-    render(<ProfilePostsPage />);
-
-    const openButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(openButton);
-
-    const contentInput = screen.getByPlaceholderText(/comece a escrever/i);
-    await user.type(contentInput, 'Esta é uma nova publicação de teste.');
-
-    const submitButton = screen.getByRole('button', { name: /^postar$/i });
-    await user.click(submitButton);
-
-    // Form should close after successful submission
-    expect(screen.queryByText(/nova postagem/i)).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /^postar$/i })).toBeInTheDocument();
+    await user.click(await screen.findByRole('button', { name: 'Editar postagem' }));
+    expect(getPost).toHaveBeenCalledWith(postFixture.id);
+    expect(await screen.findByRole('textbox', { name: /legenda/i })).toHaveValue(
+      postFixture.content
+    );
+    expect(screen.getByRole('button', { name: 'Editar postagem' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Excluir postagem' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
+    await user.click(screen.getByRole('button', { name: 'Excluir postagem' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Excluir postagem?' });
+    expect(deletePost).not.toHaveBeenCalled();
+    await user.click(within(dialog).getByRole('button', { name: 'Excluir postagem' }));
+    await waitFor(() => expect(deletePost).toHaveBeenCalledWith(postFixture.id));
   });
 });

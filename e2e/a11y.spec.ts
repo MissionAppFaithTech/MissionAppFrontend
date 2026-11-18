@@ -85,6 +85,7 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
     { name: 'Missionary Profile (Sobre)', path: '/profile/sobre' },
     { name: 'Missionary Profile (Edit header)', path: '/profile/edit-profile' },
     { name: 'Missionary Profile (Edit Sobre)', path: '/profile/sobre/edit' },
+    { name: 'Missionary Profile (Postagens)', path: '/profile/postagens' },
     { name: 'Missionary Profile (Campanha)', path: '/profile/campanha' },
     { name: 'Missionary Profile (Projetos de Impacto)', path: '/profile/projetos-de-impacto' },
     { name: 'Missionary Profile (Financial Settings)', path: '/profile/financeiro' },
