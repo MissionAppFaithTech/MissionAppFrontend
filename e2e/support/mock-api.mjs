@@ -39,11 +39,33 @@ const TAKEN_CPF = '11144477735';
  */
 const catalogs = {
   faithCommunities: [
-    { id: '019a0000-0000-7000-9000-00000000c001', name: 'Igreja Batista Central', city: 'Niterói' },
+    {
+      id: '019a0000-0000-7000-9000-00000000c001',
+      name: 'Igreja Batista Central',
+      phoneNumber: '+552134567890',
+      addressLine1: 'Rua da Conceição, 100',
+      addressLine2: null,
+      city: 'Niterói',
+      state: 'RJ',
+      country: 'Brasil',
+      postalCode: '24020080',
+      website: 'https://ibcentral.org.br',
+      pastorName: 'Pr. Carlos Mendes',
+      pastorPhone: '+5521987654321',
+    },
     {
       id: '019a0000-0000-7000-9000-00000000c002',
       name: 'Igreja Presbiteriana da Paz',
+      phoneNumber: '+558132223333',
+      addressLine1: 'Av. Boa Viagem, 500',
+      addressLine2: null,
       city: 'Recife',
+      state: 'PE',
+      country: 'Brasil',
+      postalCode: '51011000',
+      website: null,
+      pastorName: 'Pr. Marcos Lima',
+      pastorPhone: '+5581999998888',
     },
   ],
   missionaryAgencies: [
@@ -112,7 +134,16 @@ const createCatalogItem = (kind, singular) =>
     const item = {
       id: `019a0000-0000-7000-9000-${String(catalogSequence).padStart(12, 'f')}`,
       name: body.name,
-      city: body.city,
+      phoneNumber: body.phoneNumber ?? null,
+      addressLine1: body.addressLine1 ?? null,
+      addressLine2: body.addressLine2 ?? null,
+      city: body.city ?? null,
+      state: body.state ?? null,
+      country: body.country ?? null,
+      postalCode: body.postalCode ?? null,
+      website: body.website ?? null,
+      pastorName: body.pastorName ?? null,
+      pastorPhone: body.pastorPhone ?? null,
     };
     catalogs[kind].push(item);
     return send(response, 201, { data: { [singular]: item } });
@@ -436,6 +467,58 @@ const routes = {
     Object.assign(profile.user, body);
     return send(response, 200, { data: { user: withPicture(profile.user) } });
   }),
+  'PATCH /api/v1/account/email': authenticated((profile, body, response) => {
+    if (body.currentPassword !== LOGIN.password) {
+      return send(response, 422, {
+        message: 'Validation failure',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          {
+            field: 'currentPassword',
+            rule: 'current_password',
+            message: 'The current password is incorrect',
+          },
+        ],
+      });
+    }
+    if (body.email === TAKEN_EMAIL) return emailTaken(response);
+    if (body.email === profile.user.email) {
+      return send(response, 422, {
+        message: 'Validation failure',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          {
+            field: 'email',
+            rule: 'same_email',
+            message: 'O novo e-mail deve ser diferente do e-mail atual.',
+          },
+        ],
+      });
+    }
+    profile.user.email = body.email;
+    return send(response, 200, { data: { user: withPicture(profile.user) } });
+  }),
+  'PATCH /api/v1/account/password': authenticated((_profile, body, response) => {
+    if (body.currentPassword !== LOGIN.password) {
+      return send(response, 422, {
+        message: 'Validation failure',
+        code: 'E_VALIDATION_ERROR',
+        errors: [
+          {
+            field: 'currentPassword',
+            rule: 'current_password',
+            message: 'The current password is incorrect',
+          },
+        ],
+      });
+    }
+    return send(response, 200, { message: 'Password changed successfully' });
+  }),
+  'POST /api/v1/auth/forgot-password': (_request, response) =>
+    send(response, 200, {
+      message:
+        'Se o email informado estiver cadastrado, você receberá instruções de redefinição de senha.',
+    }),
   'POST /api/v1/media-assets/uploads': authenticated((profile, body, response) => {
     if (
       body.purpose === 'POST_IMAGE' &&
@@ -780,6 +863,7 @@ const SESSION = /^\/api\/v1\/auth\/sessions\/([^/]+)$/;
 const STORAGE = /^\/storage\/([^/]+)$/;
 const MEDIA_ASSET = /^\/api\/v1\/media-assets\/([^/]+)$/;
 const MEDIA_COMPLETION = /^\/api\/v1\/media-assets\/([^/]+)\/completion$/;
+const FAITH_COMMUNITY = /^\/api\/v1\/faith-communities\/([^/]+)$/;
 
 const server = createServer((request, response) => {
   const path = new URL(request.url ?? '/', 'http://localhost').pathname;
@@ -856,6 +940,35 @@ const server = createServer((request, response) => {
 
   const sessionMatch = request.method === 'DELETE' && SESSION.exec(path);
   if (sessionMatch) return endSession(request, response, decodeURIComponent(sessionMatch[1]));
+
+  const faithCommunityMatch = FAITH_COMMUNITY.exec(path);
+  if (faithCommunityMatch) {
+    const id = decodeURIComponent(faithCommunityMatch[1]);
+    const community = catalogs.faithCommunities.find((entry) => entry.id === id);
+    if (request.method === 'GET') {
+      return community
+        ? send(response, 200, { data: { faithCommunity: community } })
+        : send(response, 404, {
+            message: 'Comunidade de fé não encontrada',
+            code: 'E_FAITH_COMMUNITY_NOT_FOUND',
+          });
+    }
+    if (request.method === 'PATCH') {
+      return authenticated((profile, body, res) => {
+        if (!community) {
+          return send(res, 404, {
+            message: 'Comunidade de fé não encontrada',
+            code: 'E_FAITH_COMMUNITY_NOT_FOUND',
+          });
+        }
+        Object.assign(community, body);
+        if (profile.faithCommunity?.id === community.id) {
+          profile.faithCommunity = { id: community.id, name: community.name };
+        }
+        return send(res, 200, { data: { faithCommunity: community } });
+      })(request, response);
+    }
+  }
 
   const handler = routes[`${request.method} ${path}`];
   if (handler) {

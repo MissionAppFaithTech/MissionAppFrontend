@@ -20,8 +20,8 @@
     "lifeVerse": "Filipenses 4:13",
     "publicEmail": "contato@missao.test",
     "publicPhone": "+5521912345678",
-    "missionaryAgencyId": "agency-1",
-    "faithCommunityId": "community-1"
+    "missionaryAgencyId": "019a0000-0000-7000-9000-00000000a001",
+    "faithCommunityId": "019a0000-0000-7000-9000-00000000c001"
   },
   "workAddress": {
     "zip": "48900-000",
@@ -31,11 +31,11 @@
     "country": "Brasil"
   },
   "missionaryAgency": {
-    "id": "agency-1",
+    "id": "019a0000-0000-7000-9000-00000000a001",
     "name": "JOCUM"
   },
   "faithCommunity": {
-    "id": "community-1",
+    "id": "019a0000-0000-7000-9000-00000000c001",
     "name": "Igreja Batista Central"
   }
 }

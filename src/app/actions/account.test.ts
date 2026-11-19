@@ -16,6 +16,7 @@ import {
   resetActionHarness,
 } from '@/test/actionHarness';
 import {
+  changeEmailAction,
   changePasswordAction,
   registerAccountAction,
   registerMissionaryAction,
@@ -246,6 +247,69 @@ describe('registerMissionaryAction', () => {
   });
 });
 
+describe('changeEmailAction', () => {
+  const input = {
+    email: 'novo@example.com',
+    currentPassword: 'Senha123!',
+  };
+
+  it('updates the email, expires the public profile and refreshes the page', async () => {
+    mockBackend({
+      'PATCH /account/email': () => ({
+        data: {
+          user: { id: 'usr-1', fullName: 'Ana', username: 'ana', email: 'novo@example.com' },
+        },
+      }),
+    });
+
+    await expect(changeEmailAction(input)).resolves.toEqual({
+      ok: true,
+      data: { user: { id: 'usr-1', fullName: 'Ana', username: 'ana', email: 'novo@example.com' } },
+    });
+    expect(backendMock.backendFetch).toHaveBeenCalledWith('/account/email', {
+      method: 'PATCH',
+      body: input,
+      accessToken: ACCESS,
+    });
+    expect(cacheMock.updateTag).toHaveBeenCalledWith('profile:ana');
+    expect(cacheMock.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('validates the email format and current password on the server', async () => {
+    const result = await changeEmailAction({ email: 'invalido', currentPassword: '' });
+
+    expect(result).toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: {
+        email: 'Informe um endereço de e-mail válido',
+        currentPassword: 'A senha atual é obrigatória para confirmar a alteração',
+      },
+    });
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
+  });
+
+  it('maps taken email or wrong current password from the backend', async () => {
+    mockBackend({
+      'PATCH /account/email': () => {
+        throw backendError(422, {
+          message: 'Validation failure',
+          code: 'E_VALIDATION_ERROR',
+          errors: [
+            { field: 'currentPassword', rule: 'current_password', message: 'Wrong password' },
+          ],
+        });
+      },
+    });
+
+    await expect(changeEmailAction(input)).resolves.toMatchObject({
+      ok: false,
+      status: 422,
+      fieldErrors: { currentPassword: 'A senha atual está incorreta.' },
+    });
+  });
+});
+
 describe('changePasswordAction', () => {
   const input = {
     currentPassword: 'Velha123!',
@@ -343,6 +407,21 @@ describe('updateAccountProfileAction', () => {
       { profilePictureId: null },
     ]);
     expect(cacheMock.updateTag).toHaveBeenCalledWith('profile:ana');
+  });
+
+  it('links or unlinks a faith community on the account', async () => {
+    const COMMUNITY_ID = '019a0000-0000-7000-8000-0000000000c1';
+    mockBackend({ 'PATCH /account/profile': () => saved('ana') });
+
+    await expect(
+      updateAccountProfileAction({ faithCommunityId: COMMUNITY_ID })
+    ).resolves.toMatchObject({ ok: true });
+    await updateAccountProfileAction({ faithCommunityId: null });
+
+    expect(backendMock.backendFetch.mock.calls.map(([, options]) => options.body)).toEqual([
+      { faithCommunityId: COMMUNITY_ID },
+      { faithCommunityId: null },
+    ]);
   });
 
   it('rejects a profile picture id that is not a UUID', async () => {

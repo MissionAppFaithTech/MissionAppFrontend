@@ -51,6 +51,22 @@ export type BackendWorkAddress = {
 
 export type NamedRef = { id: string; name: string };
 
+export type BackendFaithCommunity = {
+  id: string;
+  name: string;
+  phoneNumber: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  postalCode: string | null;
+  website: string | null;
+  pastorName: string | null;
+  pastorPhone: string | null;
+  createdAt?: string;
+};
+
 /**
  * Missionary part of `GET /account/profile`, also answered by
  * `PATCH /missionaries/about` and `POST /accounts/missionaries`.

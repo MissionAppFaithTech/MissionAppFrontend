@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -575,5 +576,16 @@ describe('withSession', () => {
     expect(handlerB).toHaveBeenCalledWith('new-access');
     expectCookiesRewritten(a);
     expectCookiesRewritten(b);
+  });
+
+  it('rethrows Next.js prerender hanging promise rejections instead of turning them into 502', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const prerenderAbort = Object.assign(new Error('During prerendering, cookies() rejects'), {
+      digest: 'HANGING_PROMISE_REJECTION',
+    });
+    vi.mocked(cookies).mockRejectedValueOnce(prerenderAbort);
+
+    await expect(withSession(TAG, FALLBACK, okHandler())).rejects.toBe(prerenderAbort);
+    expect(consoleError).not.toHaveBeenCalled();
   });
 });

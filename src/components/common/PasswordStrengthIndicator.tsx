@@ -5,7 +5,7 @@ import LinearProgress from '@mui/material/LinearProgress';
 import Typography from '@mui/material/Typography';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import { colors } from '@/theme/theme';
+import { colors, darkTokens } from '@/theme/theme';
 import { getPasswordStrength, passwordRequirements } from '@/lib/passwordStrength';
 
 const strengthColor = {
@@ -35,7 +35,7 @@ export default function PasswordStrengthIndicator({ password }: PasswordStrength
               height: 4,
               borderRadius: 1,
               mb: 0.5,
-              bgcolor: colors.border,
+              bgcolor: 'divider',
               '& .MuiLinearProgress-bar': {
                 bgcolor: strengthColor[strength.color],
               },
@@ -73,7 +73,14 @@ export default function PasswordStrengthIndicator({ password }: PasswordStrength
                 alignItems: 'center',
                 gap: 0.75,
                 minWidth: 0,
-                color: met ? colors.success : colors.textSecondary,
+                color: (t) =>
+                  met
+                    ? t.palette.mode === 'dark'
+                      ? '#4ADE80'
+                      : colors.success
+                    : t.palette.mode === 'dark'
+                      ? darkTokens.textSecondary
+                      : colors.textSecondary,
               }}
             >
               {met ? (

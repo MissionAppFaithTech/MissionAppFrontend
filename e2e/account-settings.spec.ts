@@ -43,6 +43,72 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
     await expect(page).toHaveURL(/\/profile\/configuracoes$/);
   });
 
+  test('updates the login email with current password confirmation', async ({ page }) => {
+    await page.goto('/profile/configuracoes');
+
+    await page.getByLabel('Novo E-mail').fill('samuel.novo@privado.test');
+    await page.getByLabel('Senha Atual (para confirmar)').fill('Senha@123');
+    await page.getByRole('button', { name: 'Atualizar E-mail' }).click();
+
+    await expect(page.getByText('samuel.novo@privado.test').first()).toBeVisible();
+  });
+
+  test('displays API validation errors when changing email with wrong password or taken email', async ({
+    page,
+  }) => {
+    await page.goto('/profile/configuracoes');
+
+    await page.getByLabel('Novo E-mail').fill('usado@missionapp.test');
+    await page.getByLabel('Senha Atual (para confirmar)').fill('Senha@123');
+    await page.getByRole('button', { name: 'Atualizar E-mail' }).click();
+
+    await expect(page.getByText('Este e-mail já está em uso.')).toBeVisible();
+
+    await page.getByLabel('Novo E-mail').fill('livre@missionapp.test');
+    await page.getByLabel('Senha Atual (para confirmar)').fill('SenhaErrada');
+    await page.getByRole('button', { name: 'Atualizar E-mail' }).click();
+
+    await expect(page.getByText('A senha atual está incorreta.')).toBeVisible();
+  });
+
+  test('triggers password reset email link and displays confirmation feedback', async ({
+    page,
+  }) => {
+    await page.goto('/profile/configuracoes');
+
+    await page.getByRole('button', { name: 'Enviar Link de Redefinição para meu E-mail' }).click();
+
+    await expect(page.getByText(/Link seguro de redefinição de senha enviado/i)).toBeVisible();
+  });
+
+  test('edits the linked faith community details in the modal', async ({ page }) => {
+    await page.goto('/profile/configuracoes');
+
+    await page.getByRole('button', { name: 'Editar dados da comunidade' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByRole('heading', { name: 'Editar comunidade de fé' })).toBeVisible();
+
+    const pastorInput = dialog.getByRole('textbox', { name: /Nome do pastor/i });
+    await pastorInput.fill('Pr. Lucas Silva');
+    await dialog.getByRole('button', { name: /^Salvar$/i }).click();
+
+    await expect(dialog).toBeHidden();
+    await expect(
+      page.getByText(/Dados da comunidade de fé atualizados com sucesso/i)
+    ).toBeVisible();
+  });
+
+  test('changes the password directly and redirects to login', async ({ page }) => {
+    await page.goto('/profile/configuracoes');
+
+    await page.getByLabel('Senha Atual', { exact: true }).fill('Senha@123');
+    await page.getByLabel('Nova Senha', { exact: true }).fill('NovaSenha@123');
+    await page.getByLabel('Confirmar Nova Senha').fill('NovaSenha@123');
+    await page.getByRole('button', { name: 'Alterar Senha' }).click();
+
+    await expect(page).toHaveURL(/\/login(?:\?|$)/);
+  });
+
   test('fits a 360 px phone: stacked full-width actions, no horizontal scroll', async ({
     page,
   }) => {

@@ -1,9 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { changePasswordAction, updateAccountProfileAction } from '@/app/actions/account';
+import {
+  changeEmailAction,
+  changePasswordAction,
+  updateAccountProfileAction,
+} from '@/app/actions/account';
 import { updateAboutAction, updatePublicContactsAction } from '@/app/actions/missionary';
 import { ApiError } from '@/lib/api/client';
 import type { AccountProfilePayload, BackendUser } from '@/types/backend';
 import {
+  changeAccountEmail,
   changeAccountPassword,
   emptyProfile,
   formatWorkAddress,
@@ -15,6 +20,7 @@ import {
 } from './profile.service';
 
 vi.mock('@/app/actions/account', () => ({
+  changeEmailAction: vi.fn(),
   changePasswordAction: vi.fn(),
   updateAccountProfileAction: vi.fn(),
 }));
@@ -344,6 +350,28 @@ describe('profile.service saves (Server Actions)', () => {
     ).rejects.toMatchObject({
       status: 400,
       fieldErrors: { currentPassword: 'Senha atual incorreta' },
+    });
+  });
+
+  it('changeAccountEmail returns the updated user from the action', async () => {
+    const user = {
+      id: 'u-1',
+      fullName: 'Samuel',
+      username: 'samuel',
+      email: 'novo@missao.org',
+      phoneNumber: '+5521999999999',
+      biography: null,
+      profilePictureId: null,
+      role: 'MISSIONARY' as const,
+    };
+    vi.mocked(changeEmailAction).mockResolvedValue({ ok: true, data: { user } });
+
+    await expect(
+      changeAccountEmail({ email: 'novo@missao.org', currentPassword: 'Senha@123' })
+    ).resolves.toEqual(user);
+    expect(changeEmailAction).toHaveBeenCalledWith({
+      email: 'novo@missao.org',
+      currentPassword: 'Senha@123',
     });
   });
 });

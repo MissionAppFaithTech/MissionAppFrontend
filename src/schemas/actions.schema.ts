@@ -56,6 +56,14 @@ const signupFields = {
 
 export const signupInputSchema = z.object(signupFields);
 
+export const changeEmailInputSchema = z.object({
+  email: z.email('Informe um endereço de e-mail válido').max(254),
+  currentPassword: z
+    .string()
+    .min(1, 'A senha atual é obrigatória para confirmar a alteração')
+    .max(128),
+});
+
 export const changePasswordInputSchema = z
   .object({
     currentPassword: z.string().min(1, 'Informe a senha atual'),
@@ -77,6 +85,8 @@ export const updateAccountProfileInputSchema = z.object({
   biography: z.string().trim().max(BIO_MAX_LENGTH).nullable().optional(),
   /** Confirmed `PROFILE_PICTURE` media asset; `null` removes the photo. */
   profilePictureId: z.uuid().nullable().optional(),
+  /** `null` unlinks the faith community from the user account. */
+  faithCommunityId: z.uuid().nullable().optional(),
 });
 
 export const updatePublicContactsInputSchema = z.object({
@@ -145,6 +155,17 @@ const PASTOR_NAME_REQUIRED = {
 export const createCatalogItemInputSchema = z
   .object({ ...catalogItemFields, ...pastorFields })
   .refine(pastorNameWithPhone, PASTOR_NAME_REQUIRED);
+
+export const faithCommunityIdSchema = z.uuid();
+
+const updatePastorFields = {
+  pastorName: z.string().trim().min(1).max(255).nullable().optional(),
+  pastorPhone: z.string().regex(E164).nullable().optional(),
+};
+
+export const updateFaithCommunityInputSchema = z
+  .object({ ...catalogItemFields, ...updatePastorFields })
+  .refine((data) => !data.pastorPhone || Boolean(data.pastorName), PASTOR_NAME_REQUIRED);
 
 /** Agencies have no pastor: zod strips those fields. */
 export const createMissionaryAgencyInputSchema = z.object(catalogItemFields);

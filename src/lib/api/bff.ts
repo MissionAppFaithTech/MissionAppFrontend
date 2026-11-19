@@ -1,4 +1,5 @@
 import { cookies, headers } from 'next/headers';
+import { unstable_rethrow } from 'next/navigation';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { BackendApiError, backendFetch } from '@/lib/api/backend';
@@ -196,6 +197,9 @@ export async function withSession(
     if (!result.ok) return sessionExpiredResponse();
     response = result.value;
   } catch (error) {
+    // Next.js aborts request-time work (e.g. `cookies()`) when a prerender completes;
+    // let Next handle its own control-flow rejection instead of logging a 502.
+    unstable_rethrow(error);
     response = bffErrorResponse(error, fallbackMessage, tag);
   }
 
