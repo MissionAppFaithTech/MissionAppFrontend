@@ -6,9 +6,12 @@ import { createdItemFrom } from '@/lib/api/catalog';
 import { catalogTag } from '@/lib/cache/tags';
 import type { CatalogKind } from '@/lib/query/keys';
 import { parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
+import { ownerUsername, showSavedProfile } from '@/lib/server/profileCache';
 import {
   createCatalogItemInputSchema,
   createMissionaryAgencyInputSchema,
+  faithCommunityIdSchema,
+  updateFaithCommunityInputSchema,
 } from '@/schemas/actions.schema';
 import type { CatalogItem } from '@/services/catalog.service';
 
@@ -28,6 +31,10 @@ type CatalogInput = {
 
 /** A faith community may come with its pastor (E.164 phone; name required with a phone). */
 type FaithCommunityInput = CatalogInput & { pastorName?: string; pastorPhone?: string };
+type UpdateFaithCommunityInput = CatalogInput & {
+  pastorName?: string | null;
+  pastorPhone?: string | null;
+};
 
 function createCatalogItem(
   kind: CatalogKind,
@@ -76,4 +83,37 @@ export async function createFaithCommunityAction(
     'Dados da igreja inválidos',
     'Não foi possível cadastrar a igreja'
   );
+}
+
+export async function updateFaithCommunityAction(
+  id: string,
+  input: UpdateFaithCommunityInput
+): Promise<ActionResult<CatalogItem>> {
+  const parsedId = parseInput(faithCommunityIdSchema, id, 'Comunidade de fé inválida');
+  if (!parsedId.ok) return parsedId;
+  const parsed = parseInput(updateFaithCommunityInputSchema, input, 'Dados da igreja inválidos');
+  if (!parsed.ok) return parsed;
+
+  const result = await runWithSession(
+    'actions/update-faith-community',
+    'Não foi possível atualizar a igreja',
+    async (accessToken) => {
+      const response = await backendFetch(
+        `/faith-communities/${encodeURIComponent(parsedId.data)}`,
+        {
+          method: 'PATCH',
+          body: parsed.data,
+          accessToken,
+        }
+      );
+      const item = createdItemFrom(response, 'faithCommunity');
+      updateTag(catalogTag('faithCommunities'));
+      const username = await ownerUsername(accessToken);
+      return { item, username };
+    }
+  );
+  if (!result.ok) return result;
+
+  showSavedProfile(result.data.username);
+  return { ok: true, data: result.data.item };
 }

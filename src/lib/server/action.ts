@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { unstable_rethrow } from 'next/navigation';
 import type { z } from 'zod';
 import { BackendApiError } from '@/lib/api/backend';
 import { SESSION_EXPIRED_MESSAGE, callWithSession } from '@/lib/api/bff';
@@ -62,6 +63,7 @@ export async function runWithSession<T>(
     }
     return { ok: true, data: result.value };
   } catch (error) {
+    unstable_rethrow(error);
     return actionFailure(error, fallbackMessage, tag);
   }
 }

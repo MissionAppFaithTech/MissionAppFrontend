@@ -10,6 +10,7 @@ import { deviceHeaders, deviceIdFor, rememberDeviceId } from '@/lib/auth/device'
 import { actionFailure, parseInput, runWithSession, type ActionResult } from '@/lib/server/action';
 import { ownerUsername, showSavedProfile } from '@/lib/server/profileCache';
 import {
+  changeEmailInputSchema,
   changePasswordInputSchema,
   missionarySignupInputSchema,
   signupInputSchema,
@@ -130,6 +131,32 @@ export async function registerMissionaryAction(
   return { ok: true, data: { user, missionary, workAddress, missionaryAgency, faithCommunity } };
 }
 
+/** Updates the login email after verifying the current password (`PATCH /account/email`). */
+export async function changeEmailAction(input: {
+  email: string;
+  currentPassword: string;
+}): Promise<ActionResult<{ user: BackendUser }>> {
+  const parsed = parseInput(changeEmailInputSchema, input, 'Dados de e-mail inválidos');
+  if (!parsed.ok) return parsed;
+
+  const result = await runWithSession(
+    'actions/change-email',
+    'Não foi possível alterar o e-mail',
+    async (accessToken) => {
+      const saved = await backendFetch<{ data: { user: BackendUser } }>('/account/email', {
+        method: 'PATCH',
+        body: parsed.data,
+        accessToken,
+      });
+      return saved.data;
+    }
+  );
+  if (!result.ok) return result;
+
+  showSavedProfile(result.data.user.username);
+  return result;
+}
+
 /** The backend revokes every session after a password change, so cookies are cleared. */
 export async function changePasswordAction(input: {
   currentPassword: string;
@@ -164,6 +191,7 @@ export async function updateAccountProfileAction(input: {
   username?: string;
   biography?: string | null;
   profilePictureId?: string | null;
+  faithCommunityId?: string | null;
 }): Promise<ActionResult<{ user: BackendUser }>> {
   const parsed = parseInput(updateAccountProfileInputSchema, input, 'Dados de perfil inválidos');
   if (!parsed.ok) return parsed;

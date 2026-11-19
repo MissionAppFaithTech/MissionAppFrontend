@@ -1,19 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createFaithCommunityAction, createMissionaryAgencyAction } from '@/app/actions/catalog';
+import {
+  createFaithCommunityAction,
+  createMissionaryAgencyAction,
+  updateFaithCommunityAction,
+} from '@/app/actions/catalog';
 import { ApiError } from '@/lib/api/client';
 
 vi.mock('@/app/actions/catalog', () => ({
   createFaithCommunityAction: vi.fn(),
   createMissionaryAgencyAction: vi.fn(),
+  updateFaithCommunityAction: vi.fn(),
 }));
 vi.mock('@/services/queries/catalog', () => ({ invalidateCatalogSearches: vi.fn() }));
 import { invalidateCatalogSearches } from '@/services/queries/catalog';
 import {
   createFaithCommunity,
   createMissionaryAgency,
+  getFaithCommunity,
   searchCatalog,
   toCreateFaithCommunityPayload,
   toCreateMissionaryAgencyPayload,
+  updateFaithCommunity,
 } from './catalog.service';
 import { EMPTY_FAITH_COMMUNITY, EMPTY_MISSIONARY_AGENCY } from '@/forms/register/options';
 
@@ -199,5 +206,60 @@ describe('catalog.service', () => {
       message: 'Esta ação entra em conflito com dados já existentes.',
       code: 'E_CONFLICT',
     });
+  });
+
+  it('loads and maps a faith community by id from the BFF', async () => {
+    stubFetch(true, 200, async () => ({
+      data: {
+        faithCommunity: {
+          id: 'fc-1',
+          name: 'Igreja Batista Central',
+          phoneNumber: '+552134567890',
+          addressLine1: 'Rua A, 10',
+          addressLine2: 'Sala 1',
+          city: 'Niterói',
+          state: 'RJ',
+          country: 'Brasil',
+          postalCode: '24020000',
+          website: 'https://ibc.org.br',
+          pastorName: 'Pr. João',
+          pastorPhone: '+5521987654321',
+        },
+      },
+    }));
+
+    await expect(getFaithCommunity('fc-1')).resolves.toEqual({
+      name: 'Igreja Batista Central',
+      address1: 'Rua A, 10',
+      address2: 'Sala 1',
+      city: 'Niterói',
+      state: 'RJ',
+      country: 'Brasil',
+      zipCode: '24020-000',
+      website: 'https://ibc.org.br',
+      churchPhone: '+552134567890',
+      pastorName: 'Pr. João',
+      pastorPhone: '+5521987654321',
+    });
+  });
+
+  it('updates a faith community through the Server Action and invalidates searches', async () => {
+    vi.mocked(updateFaithCommunityAction).mockResolvedValue({
+      ok: true,
+      data: { id: 'fc-1', name: 'Igreja Batista Renovada' },
+    });
+
+    await expect(
+      updateFaithCommunity('fc-1', {
+        ...EMPTY_FAITH_COMMUNITY,
+        name: 'Igreja Batista Renovada',
+        city: 'Niterói',
+      })
+    ).resolves.toEqual({ id: 'fc-1', name: 'Igreja Batista Renovada' });
+    expect(updateFaithCommunityAction).toHaveBeenCalledWith(
+      'fc-1',
+      expect.objectContaining({ name: 'Igreja Batista Renovada', city: 'Niterói' })
+    );
+    expect(invalidateCatalogSearches).toHaveBeenCalledWith('faithCommunities');
   });
 });

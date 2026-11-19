@@ -1,10 +1,16 @@
-import { createFaithCommunityAction, createMissionaryAgencyAction } from '@/app/actions/catalog';
+import {
+  createFaithCommunityAction,
+  createMissionaryAgencyAction,
+  updateFaithCommunityAction,
+} from '@/app/actions/catalog';
 import { callAction } from '@/lib/api/callAction';
-import { ApiError } from '@/lib/api/client';
+import { ApiError, bffRequest } from '@/lib/api/client';
 import { CATALOG_SEARCH_LIMIT } from '@/lib/catalog/search';
+import { maskCep } from '@/lib/masks';
 import type { CatalogKind } from '@/lib/query/keys';
 import { invalidateCatalogSearches } from '@/services/queries/catalog';
 import type { FaithCommunityData, MissionaryAgencyData } from '@/types/account';
+import type { BackendFaithCommunity } from '@/types/backend';
 
 export type CatalogItem = {
   id: string;
@@ -118,6 +124,41 @@ export async function createMissionaryAgency(input: MissionaryAgencyData): Promi
 export async function createFaithCommunity(input: FaithCommunityData): Promise<CatalogItem> {
   const item = await callAction(() =>
     createFaithCommunityAction(toCreateFaithCommunityPayload(input))
+  );
+  invalidateCatalogSearches('faithCommunities');
+  return item;
+}
+
+export function mapFaithCommunityToForm(community: BackendFaithCommunity): FaithCommunityData {
+  return {
+    name: community.name ?? '',
+    address1: community.addressLine1 ?? '',
+    address2: community.addressLine2 ?? '',
+    country: community.country ?? '',
+    state: community.state ?? '',
+    city: community.city ?? '',
+    zipCode: community.postalCode ? maskCep(community.postalCode) : '',
+    website: community.website ?? '',
+    churchPhone: community.phoneNumber ?? '+55',
+    pastorName: community.pastorName ?? '',
+    pastorPhone: community.pastorPhone ?? '+55',
+  };
+}
+
+export async function getFaithCommunity(id: string): Promise<FaithCommunityData> {
+  const { data } = await bffRequest<{ data: { faithCommunity: BackendFaithCommunity } }>(
+    `/api/faith-communities/${encodeURIComponent(id)}`,
+    { fallbackMessage: 'Não foi possível carregar os dados da comunidade de fé' }
+  );
+  return mapFaithCommunityToForm(data.faithCommunity);
+}
+
+export async function updateFaithCommunity(
+  id: string,
+  input: FaithCommunityData
+): Promise<CatalogItem> {
+  const item = await callAction(() =>
+    updateFaithCommunityAction(id, toCreateFaithCommunityPayload(input))
   );
   invalidateCatalogSearches('faithCommunities');
   return item;

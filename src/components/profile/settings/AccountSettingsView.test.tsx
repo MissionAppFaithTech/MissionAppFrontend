@@ -5,9 +5,44 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import AccountSettingsView from './AccountSettingsView';
 import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
 import { ApiError } from '@/lib/api/client';
-import { createFaithCommunity, createMissionaryAgency } from '@/services/catalog.service';
-import { emptyProfile, updateAbout } from '@/services/profile.service';
+import { requestPasswordReset } from '@/services/auth.service';
+import {
+  createFaithCommunity,
+  createMissionaryAgency,
+  getFaithCommunity,
+  updateFaithCommunity,
+} from '@/services/catalog.service';
+import {
+  changeAccountEmail,
+  changeAccountPassword,
+  emptyProfile,
+  updateAbout,
+  updateHeader,
+} from '@/services/profile.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
+
+const mockReplace = vi.fn();
+const mockRefresh = vi.fn();
+vi.mock('next/navigation', async () => {
+  const actual = await vi.importActual('next/navigation');
+  return {
+    ...actual,
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: mockReplace,
+      refresh: mockRefresh,
+      prefetch: vi.fn(),
+    }),
+  };
+});
+
+vi.mock('@/services/auth.service', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/services/auth.service')>()),
+  requestPasswordReset: vi.fn(async () => ({
+    found: true,
+    message: 'Se o e-mail estiver cadastrado, você receberá as instruções.',
+  })),
+}));
 
 vi.mock('@/services/catalog.service', async () => {
   const { normalizeCatalogTerm } = await import('@/lib/catalog/search');
@@ -29,12 +64,17 @@ vi.mock('@/services/catalog.service', async () => {
     })),
     createFaithCommunity: vi.fn(),
     createMissionaryAgency: vi.fn(),
+    getFaithCommunity: vi.fn(),
+    updateFaithCommunity: vi.fn(),
   };
 });
 
 vi.mock('@/services/profile.service', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/services/profile.service')>()),
+  changeAccountEmail: vi.fn(async ({ email }: { email: string }) => ({ email })),
+  changeAccountPassword: vi.fn(async () => undefined),
   updateAbout: vi.fn(async () => ({})),
+  updateHeader: vi.fn(async () => ({})),
 }));
 
 /** The missionary area provides the owner's profile, with the saved catalog links. */
@@ -179,10 +219,181 @@ describe('AccountSettingsView Component', () => {
     await user.type(passwordInput, 'senha123');
     await user.click(updateEmailButton);
 
+    await waitFor(() =>
+      expect(changeAccountEmail).toHaveBeenCalledWith({
+        email: 'novo.missionario@email.com',
+        currentPassword: 'senha123',
+      })
+    );
     expect(useFeedbackStore.getState().current?.message).toMatch(
       /e-mail alterado com sucesso para novo.missionario@email.com/i
     );
     expect(useFeedbackStore.getState().current?.severity).toBe('success');
+  });
+
+  it('shows API field errors when changing email fails', async () => {
+    vi.mocked(changeAccountEmail).mockRejectedValueOnce(
+      new ApiError('A senha atual está incorreta.', 422, {
+        currentPassword: 'A senha atual está incorreta.',
+      })
+    );
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" />);
+
+    await user.type(screen.getByLabelText(/novo e-mail/i), 'outro@email.com');
+    await user.type(screen.getByLabelText(/senha atual \(para confirmar\)/i), 'errada');
+    await user.click(screen.getByRole('button', { name: /atualizar e-mail/i }));
+
+    const passwordField = screen.getByLabelText(/senha atual \(para confirmar\)/i);
+    await waitFor(() => expect(passwordField).toHaveAttribute('aria-invalid', 'true'));
+    expect(passwordField).toHaveAccessibleDescription(/A senha atual está incorreta\./);
+  });
+
+  it('rejects changing email to the same current email (case-insensitive) and toggles password visibility', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" initialEmail="samuelhe@gmail.com" />);
+
+    const emailField = screen.getByLabelText(/novo e-mail/i);
+    const passwordField = screen.getByLabelText(/senha atual \(para confirmar\)/i);
+
+    expect(passwordField).toHaveAttribute('type', 'password');
+    const toggleButtons = screen.getAllByRole('button', { name: /exibir senha/i });
+    await user.click(toggleButtons[0]);
+    expect(passwordField).toHaveAttribute('type', 'text');
+
+    await user.type(emailField, 'SAMUELHE@GMAIL.COM');
+    await user.type(passwordField, 'Senha@123');
+    await user.click(screen.getByRole('button', { name: /atualizar e-mail/i }));
+
+    expect(emailField).toHaveAttribute('aria-invalid', 'true');
+    expect(emailField).toHaveAccessibleDescription(
+      /O novo e-mail deve ser diferente do e-mail atual\./
+    );
+    expect(changeAccountEmail).not.toHaveBeenCalled();
+  });
+
+  it('maps API email field error and generic 502 error in email change', async () => {
+    vi.mocked(changeAccountEmail)
+      .mockRejectedValueOnce(
+        new ApiError('Este e-mail já está em uso.', 422, {
+          email: 'Este e-mail já está em uso.',
+        })
+      )
+      .mockRejectedValueOnce(new ApiError('Servidor indisponível no momento.', 502));
+
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" />);
+
+    const emailField = screen.getByLabelText(/novo e-mail/i);
+    await user.type(emailField, 'usado@email.com');
+    await user.type(screen.getByLabelText(/senha atual \(para confirmar\)/i), 'Senha@123');
+    await user.click(screen.getByRole('button', { name: /atualizar e-mail/i }));
+
+    await waitFor(() => expect(emailField).toHaveAttribute('aria-invalid', 'true'));
+    expect(emailField).toHaveAccessibleDescription(/Este e-mail já está em uso\./);
+
+    // Retry and hit generic 502 alert
+    await user.click(screen.getByRole('button', { name: /atualizar e-mail/i }));
+    const alerts = await screen.findAllByRole('alert');
+    expect(
+      alerts.some((alert) => alert.textContent?.includes('Servidor indisponível no momento.'))
+    ).toBe(true);
+  });
+
+  it('validates and updates password directly, then redirects to login', async () => {
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" />);
+
+    const submitBtn = screen.getByRole('button', { name: /^alterar senha$/i });
+    await user.click(submitBtn);
+
+    expect(screen.getByText(/informe a senha atual/i)).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/^senha atual$/i), 'Velha@123');
+    await user.type(screen.getByLabelText(/^nova senha$/i), 'NovaSenha@123');
+    await user.type(screen.getByLabelText(/confirmar nova senha/i), 'NovaSenha@123');
+    await user.click(submitBtn);
+
+    await waitFor(() =>
+      expect(changeAccountPassword).toHaveBeenCalledWith({
+        currentPassword: 'Velha@123',
+        newPassword: 'NovaSenha@123',
+        newPasswordConfirmation: 'NovaSenha@123',
+      })
+    );
+    expect(useFeedbackStore.getState().current?.severity).toBe('success');
+    expect(mockReplace).toHaveBeenCalledWith('/login');
+  });
+
+  it('shows API field errors when current password is wrong in password change', async () => {
+    vi.mocked(changeAccountPassword).mockRejectedValueOnce(
+      new ApiError('A senha atual está incorreta.', 422, {
+        currentPassword: 'A senha atual está incorreta.',
+      })
+    );
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" />);
+
+    await user.type(screen.getByLabelText(/^senha atual$/i), 'Errada@123');
+    await user.type(screen.getByLabelText(/^nova senha$/i), 'NovaSenha@123');
+    await user.type(screen.getByLabelText(/confirmar nova senha/i), 'NovaSenha@123');
+    await user.click(screen.getByRole('button', { name: /^alterar senha$/i }));
+
+    const currentPasswordInput = screen.getByLabelText(/^senha atual$/i);
+    await waitFor(() => expect(currentPasswordInput).toHaveAttribute('aria-invalid', 'true'));
+    expect(currentPasswordInput).toHaveAccessibleDescription(/A senha atual está incorreta\./);
+  });
+
+  it('validates weak password, >32 chars, mismatched confirmation, cancel reset, and generic API error in password change', async () => {
+    vi.mocked(changeAccountPassword).mockRejectedValueOnce(
+      new ApiError('Erro temporário ao atualizar senha.', 502)
+    );
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" />);
+
+    const currentPwd = screen.getByLabelText(/^senha atual$/i);
+    const newPwd = screen.getByLabelText(/^nova senha$/i);
+    const confirmPwd = screen.getByLabelText(/confirmar nova senha/i);
+    const submitBtn = screen.getByRole('button', { name: /^alterar senha$/i });
+    const cancelBtn = screen.getByRole('button', { name: /cancelar alteração de senha/i });
+
+    expect(cancelBtn).toBeDisabled();
+
+    // Weak password & mismatched confirmation
+    await user.type(currentPwd, 'Velha@123');
+    await user.type(newPwd, 'fraca');
+    await user.type(confirmPwd, 'outra');
+    await user.click(submitBtn);
+
+    expect(newPwd).toHaveAttribute('aria-invalid', 'true');
+    expect(newPwd).toHaveAccessibleDescription(/senha fraca: inclua/i);
+    expect(confirmPwd).toHaveAttribute('aria-invalid', 'true');
+    expect(confirmPwd).toHaveAccessibleDescription(/as senhas não coincidem/i);
+
+    // >32 characters password
+    await user.clear(newPwd);
+    await user.type(newPwd, 'NovaSenhaMuitoLonga1234567890@AbcDef');
+    await user.click(submitBtn);
+    expect(newPwd).toHaveAccessibleDescription(/no máximo 32 caracteres/i);
+
+    // Cancel clears fields and errors
+    await user.click(cancelBtn);
+    expect(currentPwd).toHaveValue('');
+    expect(newPwd).toHaveValue('');
+    expect(confirmPwd).toHaveValue('');
+    expect(newPwd).toHaveAttribute('aria-invalid', 'false');
+    expect(cancelBtn).toBeDisabled();
+
+    // Valid inputs hitting 502 alert
+    await user.type(currentPwd, 'Velha@123');
+    await user.type(newPwd, 'NovaSenha@123');
+    await user.type(confirmPwd, 'NovaSenha@123');
+    await user.click(submitBtn);
+
+    const alerts = await screen.findAllByRole('alert');
+    expect(
+      alerts.some((alert) => alert.textContent?.includes('Erro temporário ao atualizar senha.'))
+    ).toBe(true);
   });
 
   it('triggers secure password reset link email and displays feedback toast', async () => {
@@ -194,10 +405,34 @@ describe('AccountSettingsView Component', () => {
     });
     await user.click(resetLinkButton);
 
+    await waitFor(() =>
+      expect(requestPasswordReset).toHaveBeenCalledWith({ login: 'teste@missao.org' })
+    );
     expect(useFeedbackStore.getState().current?.message).toMatch(
       /link seguro de redefinição de senha enviado para teste@missao.org/i
     );
     expect(useFeedbackStore.getState().current?.severity).toBe('info');
+  });
+
+  it('shows an error toast when requesting password reset link fails', async () => {
+    vi.mocked(requestPasswordReset).mockRejectedValueOnce(
+      new ApiError('Serviço de e-mail indisponível.', 502)
+    );
+    const user = userEvent.setup();
+    renderWithQuery(<AccountSettingsView role="missionary" initialEmail="teste@missao.org" />);
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /enviar link de redefinição para meu e-mail/i,
+      })
+    );
+
+    await waitFor(() =>
+      expect(useFeedbackStore.getState().current).toMatchObject({
+        message: 'Serviço de e-mail indisponível.',
+        severity: 'error',
+      })
+    );
   });
 
   it('links another faith community through the about endpoint', async () => {
@@ -325,16 +560,110 @@ describe('AccountSettingsView Component', () => {
     expect(updateAbout).not.toHaveBeenCalled();
   });
 
-  it('tells a supporter the link is not saved yet, without calling the API', async () => {
-    const user = userEvent.setup();
+  it('saves a supporter faith community link through updateHeader', async () => {
     renderWithQuery(<AccountSettingsView role="supporter" />);
 
+    const user = await choose(/comunidade de fé/i, 'presb', 'Igreja Presbiteriana');
     await user.click(screen.getByRole('button', { name: /salvar dados eclesiásticos/i }));
 
-    await waitFor(() =>
-      expect(useFeedbackStore.getState().current).toMatchObject({ severity: 'info' })
-    );
+    await waitFor(() => expect(updateHeader).toHaveBeenCalledWith({ faithCommunityId: 'fc-2' }));
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: expect.stringMatching(/dados eclesiásticos atualizados com sucesso/i),
+      severity: 'success',
+    });
     expect(updateAbout).not.toHaveBeenCalled();
+  });
+
+  it('edits the linked faith community details in the modal', async () => {
+    vi.mocked(getFaithCommunity).mockResolvedValueOnce({
+      name: 'Igreja Batista Central',
+      address1: 'Rua Central, 100',
+      address2: '',
+      city: 'Niterói',
+      state: 'RJ',
+      country: 'Brasil',
+      zipCode: '24020-000',
+      website: 'https://ibcentral.org.br',
+      churchPhone: '+552134567890',
+      pastorName: 'Pr. Carlos',
+      pastorPhone: '+5521987654321',
+    });
+    vi.mocked(updateFaithCommunity).mockResolvedValueOnce({
+      id: 'fc-1',
+      name: 'Igreja Batista Central Renovada',
+    });
+    renderMissionary();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /editar dados da comunidade/i }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(
+      within(dialog).getByRole('heading', { name: /editar comunidade de fé/i })
+    ).toBeInTheDocument();
+    const nameInput = within(dialog).getByRole('textbox', { name: /^nome$/i });
+    expect(nameInput).toHaveValue('Igreja Batista Central');
+
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Igreja Batista Central Renovada');
+    await user.click(within(dialog).getByRole('button', { name: /^salvar$/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(updateFaithCommunity).toHaveBeenCalledWith(
+      'fc-1',
+      expect.objectContaining({
+        name: 'Igreja Batista Central Renovada',
+        pastorName: 'Pr. Carlos',
+      })
+    );
+    expect(screen.getByRole('combobox', { name: /comunidade de fé/i })).toHaveValue(
+      'Igreja Batista Central Renovada'
+    );
+    expect(useFeedbackStore.getState().current).toMatchObject({
+      message: expect.stringMatching(/dados da comunidade de fé atualizados com sucesso/i),
+      severity: 'success',
+    });
+  });
+
+  it('shows an alert when loading faith community details fails or saving edited community returns 403', async () => {
+    vi.mocked(getFaithCommunity)
+      .mockRejectedValueOnce(new ApiError('Comunidade não encontrada.', 404))
+      .mockResolvedValueOnce({
+        name: 'Igreja Batista Central',
+        address1: 'Rua Central, 100',
+        address2: '',
+        city: 'Niterói',
+        state: 'RJ',
+        country: 'Brasil',
+        zipCode: '24020-000',
+        website: 'https://ibcentral.org.br',
+        churchPhone: '+552134567890',
+        pastorName: 'Pr. Carlos',
+        pastorPhone: '+5521987654321',
+      });
+    vi.mocked(updateFaithCommunity).mockRejectedValueOnce(
+      new ApiError('Você não tem permissão para editar esta comunidade.', 403)
+    );
+
+    renderMissionary();
+    const user = userEvent.setup();
+
+    // First click fails on getFaithCommunity
+    await user.click(screen.getByRole('button', { name: /editar dados da comunidade/i }));
+    const sectionAlerts = await screen.findAllByRole('alert');
+    expect(sectionAlerts.some((a) => a.textContent?.includes('Comunidade não encontrada.'))).toBe(
+      true
+    );
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    // Second click loads modal, then save fails with 403 inside modal
+    await user.click(screen.getByRole('button', { name: /editar dados da comunidade/i }));
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: /^salvar$/i }));
+
+    const modalAlert = await within(dialog).findByRole('alert');
+    expect(modalAlert).toHaveTextContent('Você não tem permissão para editar esta comunidade.');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('handles soft delete confirmation modal for missionary', async () => {

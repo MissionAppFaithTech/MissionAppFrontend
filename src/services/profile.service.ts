@@ -1,4 +1,8 @@
-import { changePasswordAction, updateAccountProfileAction } from '@/app/actions/account';
+import {
+  changeEmailAction,
+  changePasswordAction,
+  updateAccountProfileAction,
+} from '@/app/actions/account';
 import { updateAboutAction, updatePublicContactsAction } from '@/app/actions/missionary';
 import { callAction } from '@/lib/api/callAction';
 import type {
@@ -149,13 +153,15 @@ export function mapPublicProfile(missionary: PublicMissionaryProfile): ProfileDa
   };
 }
 
-/** Header fields (RF 10.5). `biography: null` clears the mini-bio. */
+/** Header fields (RF 10.5) and account faith community link (RF 15.3). `biography: null` clears the mini-bio. */
 export type UpdateHeaderPayload = {
   fullName?: string;
   username?: string;
   biography?: string | null;
   /** Confirmed profile picture upload; `null` removes the photo. */
   profilePictureId?: string | null;
+  /** Faith community linked to the user account; `null` unlinks it. */
+  faithCommunityId?: string | null;
 };
 
 export async function updateHeader(payload: UpdateHeaderPayload): Promise<Partial<BackendUser>> {
@@ -196,6 +202,17 @@ export type UpdateAboutPayload = {
 /** Saves the "Sobre", catalog links and work address in one `PATCH /missionaries/about`. */
 export async function updateAbout(payload: UpdateAboutPayload): Promise<MissionaryProfilePayload> {
   return callAction(() => updateAboutAction(payload));
+}
+
+export type ChangeAccountEmailPayload = {
+  email: string;
+  currentPassword: string;
+};
+
+/** Updates the login email after verifying the current password (`PATCH /account/email`). */
+export async function changeAccountEmail(payload: ChangeAccountEmailPayload): Promise<BackendUser> {
+  const { user } = await callAction(() => changeEmailAction(payload));
+  return user;
 }
 
 export type ChangeAccountPasswordPayload = {

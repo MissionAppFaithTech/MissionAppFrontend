@@ -8,7 +8,11 @@ import {
   resetActionHarness,
   setSession,
 } from '@/test/actionHarness';
-import { createFaithCommunityAction, createMissionaryAgencyAction } from './catalog';
+import {
+  createFaithCommunityAction,
+  createMissionaryAgencyAction,
+  updateFaithCommunityAction,
+} from './catalog';
 
 vi.mock('next/headers', async () => (await import('@/test/actionHarness')).headersMock);
 vi.mock('next/cache', async () => (await import('@/test/actionHarness')).cacheMock);
@@ -120,5 +124,51 @@ describe('catalog actions', () => {
       ok: false,
       status: 401,
     });
+  });
+
+  it('updates an existing faith community and invalidates the catalog cache', async () => {
+    const id = '019a0000-0000-7000-9000-00000000c001';
+    mockBackend({
+      [`PATCH /faith-communities/${id}`]: () => ({
+        data: { faithCommunity: { id, name: 'Igreja Batista Renovada' } },
+      }),
+      'GET /account/profile': () => ({ data: { user: { username: 'samuel_m' } } }),
+    });
+
+    await expect(
+      updateFaithCommunityAction(id, {
+        name: ' Igreja Batista Renovada ',
+        city: 'Niterói',
+        pastorName: 'Pr. João',
+        pastorPhone: '+5521988887777',
+      })
+    ).resolves.toEqual({
+      ok: true,
+      data: { id, name: 'Igreja Batista Renovada' },
+    });
+
+    expect(backendMock.backendFetch).toHaveBeenCalledWith(`/faith-communities/${id}`, {
+      method: 'PATCH',
+      body: {
+        name: 'Igreja Batista Renovada',
+        city: 'Niterói',
+        pastorName: 'Pr. João',
+        pastorPhone: '+5521988887777',
+      },
+      accessToken: ACCESS,
+    });
+    expect(cacheMock.updateTag).toHaveBeenCalledWith('catalog:faithCommunities');
+    expect(cacheMock.updateTag).toHaveBeenCalledWith('profile:samuel_m');
+  });
+
+  it('rejects updating a faith community with an invalid UUID', async () => {
+    await expect(updateFaithCommunityAction('nao-uuid', { name: 'Igreja' })).resolves.toMatchObject(
+      {
+        ok: false,
+        status: 422,
+        message: 'Comunidade de fé inválida',
+      }
+    );
+    expect(backendMock.backendFetch).not.toHaveBeenCalled();
   });
 });

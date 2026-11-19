@@ -19,8 +19,11 @@ import type { CatalogKind } from '@/lib/query/keys';
 import {
   createFaithCommunity,
   createMissionaryAgency,
+  getFaithCommunity,
+  updateFaithCommunity,
   type CatalogItem,
 } from '@/services/catalog.service';
+import type { FaithCommunityData } from '@/types/account';
 
 /** `PATCH /me/about` field that holds each link. */
 const LINK_API_FIELD: Record<CatalogKind, string> = {
@@ -46,6 +49,8 @@ type CatalogLinkSectionProps = {
   hint?: string;
   /** Persists the link (`''` = none) and resolves with the saved catalog id. */
   onSave: (id: string) => Promise<string>;
+  /** Called after the linked faith community's own details are updated in the modal. */
+  onCommunityUpdated?: (item: CatalogItem) => void;
 };
 
 /**
@@ -68,6 +73,7 @@ export default function CatalogLinkSection({
   required = false,
   hint,
   onSave,
+  onCommunityUpdated,
 }: CatalogLinkSectionProps) {
   const isCommunity = kind === 'faithCommunities';
 
@@ -88,6 +94,8 @@ export default function CatalogLinkSection({
     }
   }
   const [creating, setCreating] = useState<string | null>(null);
+  const [editingCommunity, setEditingCommunity] = useState<FaithCommunityData | null>(null);
+  const [loadingCommunity, setLoadingCommunity] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -104,6 +112,25 @@ export default function CatalogLinkSection({
   const handleCancel = () => {
     pick(saved, true);
     setSubmitError(null);
+  };
+
+  const handleOpenEditCommunity = async () => {
+    if (!value.id) return;
+    setError(null);
+    setSubmitError(null);
+    setLoadingCommunity(true);
+    try {
+      const details = await getFaithCommunity(value.id);
+      setEditingCommunity(details);
+    } catch (loadError) {
+      setSubmitError(
+        loadError instanceof Error
+          ? loadError.message
+          : 'Não foi possível carregar os dados da comunidade de fé.'
+      );
+    } finally {
+      setLoadingCommunity(false);
+    }
   };
 
   const handleSubmit = async (event: SyntheticEvent<HTMLFormElement>) => {
@@ -198,6 +225,18 @@ export default function CatalogLinkSection({
                 },
               }}
             >
+              {isCommunity && value.id ? (
+                <PillButton
+                  type="button"
+                  tone="primarySoftOutline"
+                  size="small"
+                  onClick={handleOpenEditCommunity}
+                  loading={loadingCommunity}
+                  disabled={saving}
+                >
+                  Editar dados da comunidade
+                </PillButton>
+              ) : null}
               <PillButton
                 type="button"
                 tone="primarySoftOutline"
@@ -217,10 +256,26 @@ export default function CatalogLinkSection({
 
         {isCommunity ? (
           <CreateFaithCommunityModal
-            open={creating !== null}
-            initialValues={{ ...EMPTY_FAITH_COMMUNITY, name: creating ?? '' }}
-            onClose={() => setCreating(null)}
-            onSave={async (details) => registered(await createFaithCommunity(details))}
+            open={creating !== null || editingCommunity !== null}
+            mode={editingCommunity !== null ? 'edit' : 'create'}
+            initialValues={editingCommunity ?? { ...EMPTY_FAITH_COMMUNITY, name: creating ?? '' }}
+            onClose={() => {
+              setCreating(null);
+              setEditingCommunity(null);
+            }}
+            onSave={async (details) => {
+              if (editingCommunity !== null) {
+                const updated = await updateFaithCommunity(value.id, details);
+                if (saved.id === updated.id) {
+                  setSaved({ id: updated.id, name: updated.name });
+                }
+                pick({ id: updated.id, name: updated.name }, true);
+                setEditingCommunity(null);
+                onCommunityUpdated?.(updated);
+                return;
+              }
+              registered(await createFaithCommunity(details));
+            }}
           />
         ) : (
           <CreateMissionaryAgencyModal

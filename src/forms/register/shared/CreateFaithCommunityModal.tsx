@@ -21,10 +21,11 @@ import type { FaithCommunityData } from '@/types/account';
 
 type CreateFaithCommunityModalProps = {
   open: boolean;
+  mode?: 'create' | 'edit';
   initialValues?: Partial<FaithCommunityData>;
   onClose: () => void;
   /**
-   * Called with valid data. May create the item right away (Server Action):
+   * Called with valid data. May create or update the item right away (Server Action):
    * a rejection keeps the modal open with the API's errors on the fields.
    */
   onSave: (data: CreateFaithCommunityFormData) => void | Promise<void>;
@@ -32,6 +33,7 @@ type CreateFaithCommunityModalProps = {
 
 export default function CreateFaithCommunityModal({
   open,
+  mode = 'create',
   initialValues,
   onClose,
   onSave,
@@ -68,11 +70,17 @@ export default function CreateFaithCommunityModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- initialValues é um snapshot da abertura
   }, [open, reset]);
 
+  const isEdit = mode === 'edit';
+
   return (
     <CatalogCreateDialog
       open={open}
-      title="Cadastrar comunidade de fé"
-      description="Cadastre uma nova comunidade de fé."
+      title={isEdit ? 'Editar comunidade de fé' : 'Cadastrar comunidade de fé'}
+      description={
+        isEdit
+          ? 'Atualize os dados da comunidade de fé e do pastor responsável.'
+          : 'Cadastre uma nova comunidade de fé.'
+      }
       titleId="create-church-title"
       descriptionId="create-church-description"
       onClose={onClose}
