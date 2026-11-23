@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { isValidInternationalPhone } from '@/components/common/PhoneField';
 import { SELECT_OTHER } from '@/forms/register/options';
-import { isValidBirthDate } from '@/lib/masks';
 import { validateStrongPassword } from '@/lib/passwordStrength';
 import {
   createFaithCommunitySchema,
@@ -17,8 +16,7 @@ export const missionaryStep1Schema = z.object({
     .max(255, 'Use no máximo 255 caracteres'),
   birthDate: z
     .string()
-    .min(1, 'Informe sua data de nascimento')
-    .refine((val) => isValidBirthDate(val), { message: 'Use o formato DD/MM/AAAA' }),
+    .min(1, 'Informe sua data de nascimento'),
   gender: z.enum(['feminino', 'masculino'], {
     message: 'Selecione o gênero',
   }),
@@ -101,8 +99,7 @@ export const supporterStep1Schema = z
       .max(255, 'Use no máximo 255 caracteres'),
     birthDate: z
       .string()
-      .min(1, 'Informe sua data de nascimento')
-      .refine((val) => isValidBirthDate(val), { message: 'Use o formato DD/MM/AAAA' }),
+      .min(1, 'Informe sua data de nascimento'),
     gender: z.enum(['feminino', 'masculino'], {
       message: 'Selecione o gênero',
     }),

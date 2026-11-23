@@ -116,7 +116,6 @@ export default function SupportersStep1() {
             }}
             error={Boolean(errors.birthDate)}
             // The format stays visible after the placeholder disappears.
-            helperText={errors.birthDate?.message ?? 'Use o formato DD/MM/AAAA'}
             onChange={(event) => field.onChange(maskBirthDate(event.target.value))}
           />
         )}
