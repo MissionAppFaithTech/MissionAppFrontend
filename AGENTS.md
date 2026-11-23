@@ -37,6 +37,7 @@ Skills live in `.agents/skills/` (canonical) and are symlinked into `.claude/ski
 | `format-check`                                                          | `pnpm format:check` before every commit (CI Prettier gate)                    |
 | `test-check`                                                            | `pnpm test` before every commit (CI Vitest gate)                              |
 | `e2e-check`                                                             | Playwright spec for the changed flow before every commit (CI `pnpm test:e2e`) |
+| `preserve-button-design`                                                | Never remove or restyle Allana's buttons (`PillButton` tones) and colors      |
 
 ---
 
