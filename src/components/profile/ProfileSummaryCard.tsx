@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState, type ChangeEvent } from 'react';
 import Link from 'next/link';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import PersonIcon from '@mui/icons-material/Person';
@@ -16,6 +16,7 @@ import PillButton from '@/components/common/PillButton';
 import PhotoLightbox from '@/components/common/PhotoLightbox';
 import ExampleDataBadge from '@/components/common/ExampleDataBadge';
 import ContactModal from '@/components/profile/ContactModal';
+import ProfilePhotoAddButton from '@/components/profile/ProfilePhotoAddButton';
 import DonationModal from '@/components/profile/DonationModal';
 import ReportKebabMenu from '@/components/report/ReportKebabMenu';
 import { useFeedbackStore } from '@/stores/feedbackStore';
