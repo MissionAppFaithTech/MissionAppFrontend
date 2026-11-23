@@ -1,6 +1,5 @@
 'use client';
 
-import CheckIcon from '@mui/icons-material/Check';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { visuallyHiddenSx } from '@/lib/a11y';
@@ -33,9 +32,9 @@ export default function RegistrationStepper({
 
   return (
     <Box component="nav" aria-label="Progresso do cadastro" sx={{ width: '100%', mb: 4, pt: 0.5 }}>
-      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+      <Box component="p" sx={{ ...visuallyHiddenSx, m: 0 }}>
         Etapa {currentStep} de {totalSteps}
-      </Typography>
+      </Box>
       <Box sx={{ position: 'relative', width: '100%' }}>
         <Box
           aria-hidden
@@ -43,7 +42,7 @@ export default function RegistrationStepper({
             position: 'absolute',
             left: `calc(100% / ${totalSteps} / 2)`,
             right: `calc(100% / ${totalSteps} / 2)`,
-            bottom: 9,
+            bottom: 7,
             height: 2,
             bgcolor: 'action2.borderStrong',
             zIndex: 0,
@@ -54,7 +53,7 @@ export default function RegistrationStepper({
           sx={{
             position: 'absolute',
             left: `calc(100% / ${totalSteps} / 2)`,
-            bottom: 9,
+            bottom: 7,
             height: 2,
             width: `calc((100% - 100% / ${totalSteps}) * ${progressPercent / 100})`,
             bgcolor: 'primary.main',
@@ -92,14 +91,12 @@ export default function RegistrationStepper({
                   component="span"
                   sx={{
                     mb: 1,
-                    fontSize: { xs: '0.75rem', sm: '0.8125rem' },
-                    fontWeight: isCurrent ? 700 : isActive ? 600 : 400,
+                    fontSize: { xs: '0.625rem', sm: '0.75rem' },
+                    fontWeight: isActive ? 600 : 400,
                     lineHeight: 1.25,
                     textAlign: 'center',
                     color: isActive ? 'primary.main' : 'text.secondary',
-                    textDecoration: isCurrent ? 'underline' : 'none',
-                    textUnderlineOffset: 3,
-                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
                   }}
                 >
                   {label}
@@ -110,25 +107,15 @@ export default function RegistrationStepper({
                 <Box
                   aria-hidden
                   sx={{
-                    width: 20,
-                    height: 20,
+                    width: 16,
+                    height: 16,
                     borderRadius: '50%',
                     border: '2px solid',
                     borderColor: isActive ? 'primary.main' : 'action2.borderStrong',
-                    bgcolor: isCompleted ? 'primary.main' : 'background.paper',
-                    color: 'primary.contrastText',
+                    bgcolor: isCompleted ? 'primary.main' : 'common.white',
                     boxSizing: 'border-box',
-                    display: 'grid',
-                    placeItems: 'center',
                   }}
-                >
-                  {isCompleted ? <CheckIcon sx={{ fontSize: 14 }} /> : null}
-                  {isCurrent ? (
-                    <Box
-                      sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main' }}
-                    />
-                  ) : null}
-                </Box>
+                />
               </Box>
             );
           })}

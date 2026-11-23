@@ -109,7 +109,7 @@ export default function RegisterStepForm({
             component="h2"
             variant="body1"
             tabIndex={-1}
-            sx={{ fontWeight: 600, scrollMarginTop: 80 }}
+            sx={{ scrollMarginTop: 80 }}
           >
             {progress ? (
               <Box component="span" sx={visuallyHiddenSx}>

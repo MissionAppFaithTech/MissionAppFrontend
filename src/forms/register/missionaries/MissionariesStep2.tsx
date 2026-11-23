@@ -119,7 +119,7 @@ export default function MissionariesStep2() {
         helperText={errors.missionDescription?.message}
       />
 
-      <Typography component="h3" variant="body1" sx={{ fontWeight: 600 }}>
+      <Typography component="h3" variant="body1">
         Dados da comunidade de fé
       </Typography>
 
