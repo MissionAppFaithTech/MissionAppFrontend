@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
-import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
-import { mockProfile } from '@/mocks/profile';
+import ImpactProjectsPageContent from './ImpactProjectsPageContent';
 
 export const metadata: Metadata = {
   title: 'Projetos de Impacto | Meu perfil',
@@ -8,11 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function ImpactProjectsPage() {
-  return (
-    <ImpactProjectCard
-      project={mockProfile.impactProject}
-      isOwnProfile={true}
-      missionaryName={mockProfile.displayName}
-    />
-  );
+  return <ImpactProjectsPageContent />;
 }

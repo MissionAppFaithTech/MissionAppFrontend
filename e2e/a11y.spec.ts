@@ -88,6 +88,10 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
     { name: 'Missionary Profile (Postagens)', path: '/profile/postagens' },
     { name: 'Missionary Profile (Campanha)', path: '/profile/campanha' },
     { name: 'Missionary Profile (Projetos de Impacto)', path: '/profile/projetos-de-impacto' },
+    {
+      name: 'Missionary Profile (Projeto de Impacto - criar/editar)',
+      path: '/profile/projetos-de-impacto/edit',
+    },
     { name: 'Missionary Profile (Financial Settings)', path: '/profile/financeiro' },
     { name: 'Account Settings (Sessões ativas)', path: '/profile/configuracoes' },
     { name: 'Supporter Profile (Following)', path: '/profile/supporter/missionarios' },
@@ -97,6 +101,9 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   // Owner pages need a session since src/proxy.ts; the BFF is mocked with fixtures.
   test.beforeEach(async ({ page }) => {
     await mockMissionarySession(page);
+    await page.route('**/api/impact-projects?*', (route) =>
+      route.fulfill({ json: { data: [], meta: { nextCursor: null, hasMore: false } } })
+    );
   });
 
   for (const scheme of COLOR_SCHEMES) {

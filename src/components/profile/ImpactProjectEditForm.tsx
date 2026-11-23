@@ -1,121 +1,153 @@
 'use client';
 
-import type { ChangeEvent } from 'react';
+import { useEffect, useId, useState, type ChangeEvent } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import AddPhotoAlternateOutlinedIcon from '@mui/icons-material/AddPhotoAlternateOutlined';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
-import CollectionsOutlinedIcon from '@mui/icons-material/CollectionsOutlined';
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Image from 'next/image';
 import PillButton from '@/components/common/PillButton';
 import StyledTextArea from '@/components/common/StyledTextArea';
-import { getYouTubeEmbedUrl } from '@/components/profile/ImpactProjectCard';
+import { ApiError } from '@/lib/api/client';
+import { getVideoEmbedUrl } from '@/lib/youtube';
 import { impactProjectEditSchema, type ImpactProjectEditFormData } from '@/schemas/content.schema';
-import { useFeedbackStore } from '@/stores/feedbackStore';
+import { validateCoverFile } from '@/services/impactProject.service';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
 import type { ImpactProjectData } from '@/types/profile';
 
-type ImpactProjectEditFormProps = {
-  project: ImpactProjectData;
-  onSave?: (updatedProject: ImpactProjectData) => void;
+export type ImpactProjectFormValues = ImpactProjectEditFormData & {
+  /** Set only when the user picked a new cover. */
+  coverFile?: File;
 };
 
-export default function ImpactProjectEditForm({ project, onSave }: ImpactProjectEditFormProps) {
-  const notify = useFeedbackStore((s) => s.notify);
+type ImpactProjectEditFormProps = {
+  /** Existing project (edit mode); omit to create the missionary's first project. */
+  project?: ImpactProjectData | null;
+  onSubmit: (values: ImpactProjectFormValues) => Promise<void>;
+  /** Offered only when editing an existing project. */
+  onDelete?: () => Promise<void>;
+};
+
+const FIELD_NAMES = ['title', 'description', 'videoUrl'] as const;
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error && error.message ? error.message : fallback;
+}
+
+export default function ImpactProjectEditForm({
+  project,
+  onSubmit,
+  onDelete,
+}: ImpactProjectEditFormProps) {
+  const isEditing = Boolean(project);
+  const coverInputId = useId();
+  const coverHelpId = useId();
+  const coverErrorId = useId();
 
   const {
     register,
     handleSubmit,
-    setValue,
     watch,
     control,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm<ImpactProjectEditFormData>({
     resolver: zodResolver(impactProjectEditSchema),
     mode: 'onTouched',
     defaultValues: {
-      title: project.title || '',
-      description: project.description || '',
-      bannerUrl: project.bannerUrl || project.imageUrl || '',
-      videoUrl: project.videoUrl || project.youtubeUrl || '',
-      galleryImages: project.galleryImages ?? project.images ?? [],
+      title: project?.title ?? '',
+      description: project?.description ?? '',
+      videoUrl: project?.videoUrl ?? '',
     },
   });
 
-  const [bannerUrl, videoUrl, galleryImages] = watch(['bannerUrl', 'videoUrl', 'galleryImages']);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  const isLinkedWithCampaign = Boolean(project.campaignBadge && project.campaignTitle);
-  const youtubeEmbedUrl = getYouTubeEmbedUrl(videoUrl || '');
+  useEffect(() => {
+    if (!coverFile) return;
+    const url = URL.createObjectURL(coverFile);
+    setCoverPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [coverFile]);
 
-  const handleBannerFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const previewUrl = URL.createObjectURL(file);
-      setValue('bannerUrl', previewUrl, { shouldDirty: true, shouldValidate: true });
+  const videoUrl = watch('videoUrl');
+  const videoEmbedUrl = getVideoEmbedUrl(videoUrl);
+  const currentCover = coverPreview ?? (project?.imageUrl || null);
+  const isLinkedWithCampaign = Boolean(project?.campaignBadge && project?.campaignTitle);
+
+  const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    const problem = validateCoverFile(file);
+    if (problem) {
+      setCoverError(problem);
+      return;
     }
+    setCoverError(null);
+    setCoverFile(file);
   };
 
-  const handleGalleryFilesChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        newUrls.push(URL.createObjectURL(files[i]));
+  const submit = async (data: ImpactProjectEditFormData) => {
+    setFormError(null);
+    if (!isEditing && !coverFile) {
+      setCoverError('Selecione uma foto de capa para o projeto.');
+      return;
+    }
+
+    try {
+      await onSubmit({ ...data, coverFile: coverFile ?? undefined });
+    } catch (error) {
+      if (error instanceof ApiError) {
+        for (const name of FIELD_NAMES) {
+          const message = error.fieldErrors[name];
+          if (message) setError(name, { type: 'server', message });
+        }
+        if (error.fieldErrors.coverImageAssetId) setCoverError(error.fieldErrors.coverImageAssetId);
       }
-      setValue('galleryImages', [...(galleryImages || []), ...newUrls], {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+      setFormError(errorMessage(error, 'Não foi possível salvar o projeto de impacto.'));
     }
   };
 
-  const handleRemoveGalleryImage = (indexToRemove: number) => {
-    setValue(
-      'galleryImages',
-      (galleryImages || []).filter((_, idx) => idx !== indexToRemove),
-      { shouldDirty: true, shouldValidate: true }
-    );
-  };
-
-  const onSubmit = (data: ImpactProjectEditFormData) => {
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.removeItem(`draft_impact_project_${project.id}`);
-      } catch {
-        // Ignore
-      }
+  const confirmDelete = async () => {
+    if (!onDelete) return;
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      await onDelete();
+    } catch (error) {
+      setDeleteError(errorMessage(error, 'Não foi possível excluir o projeto de impacto.'));
+      setDeleting(false);
     }
-    const updated: ImpactProjectData = {
-      ...project,
-      title: data.title,
-      description: data.description,
-      imageUrl: data.bannerUrl,
-      bannerUrl: data.bannerUrl,
-      videoUrl: data.videoUrl.trim() ? data.videoUrl.trim() : undefined,
-      youtubeUrl: data.videoUrl.trim() ? data.videoUrl.trim() : undefined,
-      galleryImages: data.galleryImages,
-    };
-    onSave?.(updated);
-    notify('Projeto de impacto atualizado com sucesso!');
   };
 
   return (
     <Card
       component="section"
+      aria-labelledby="impact-project-form-title"
       elevation={0}
       sx={{
         borderRadius: { xs: 2, sm: 3 },
@@ -131,26 +163,37 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
           '&:last-child': { pb: { xs: 2, sm: 3, md: 4 } },
         }}
       >
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+        <Box component="form" onSubmit={handleSubmit(submit)} noValidate aria-busy={isSubmitting}>
           <Stack spacing={{ xs: 3, sm: 4 }}>
-            {/* Cabeçalho */}
             <Box>
-              <Typography variant="h6" color="primary.main" sx={{ fontWeight: 700 }}>
-                Editar Projeto de Impacto
+              <Typography
+                id="impact-project-form-title"
+                component="h1"
+                variant="h6"
+                color="primary.main"
+                sx={{ fontWeight: 700 }}
+              >
+                {isEditing ? 'Editar Projeto de Impacto' : 'Criar Projeto de Impacto'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Envie fotos do seu dispositivo, personalize a capa, descrição e o vídeo de
-                apresentação do seu projeto.
+                Envie a capa, descreva o projeto e, se quiser, adicione um vídeo de apresentação.
+                Cada missionário pode ter um projeto de impacto.
               </Typography>
             </Box>
 
-            {/* 1. Imagem de Capa / Banner Principal */}
+            {formError && (
+              <Alert severity="error" role="alert">
+                {formError}
+              </Alert>
+            )}
+
+            {/* 1. Imagem de capa (obrigatória) */}
             <Stack spacing={1.5}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                Imagem de Capa (Banner)
+                Imagem de capa (obrigatória)
               </Typography>
 
-              {bannerUrl ? (
+              {currentCover ? (
                 <Box
                   sx={{
                     position: 'relative',
@@ -164,9 +207,10 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   }}
                 >
                   <Image
-                    src={bannerUrl}
+                    src={currentCover}
                     alt="Prévia da capa do projeto"
                     fill
+                    unoptimized
                     sizes="(max-width: 600px) 100vw, 800px"
                     style={{ objectFit: 'cover' }}
                   />
@@ -178,15 +222,19 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                     height: { xs: 140, sm: 180 },
                     borderRadius: 2,
                     border: '2px dashed',
-                    borderColor: 'divider',
+                    borderColor: coverError ? 'error.main' : 'divider',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     bgcolor: 'action.hover',
+                    px: 2,
+                    textAlign: 'center',
                   }}
                 >
                   <Typography variant="body2" color="text.secondary">
-                    Nenhuma imagem de capa selecionada.
+                    {isEditing && project?.coverStatus === 'PROCESSING'
+                      ? 'A capa atual ainda está sendo processada.'
+                      : 'Nenhuma imagem de capa selecionada.'}
                   </Typography>
                 </Box>
               )}
@@ -203,32 +251,54 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                     display: 'inline-flex',
                     width: { xs: '100%', sm: 'auto' },
                     justifyContent: 'center',
+                    '&:focus-within': { outline: '3px solid', outlineOffset: 2 },
                   }}
                 >
                   <CloudUploadOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />
-                  {bannerUrl ? 'Alterar foto de capa' : 'Selecionar foto de capa'}
+                  {currentCover ? 'Alterar foto de capa' : 'Selecionar foto de capa'}
                   <Box
                     component="input"
+                    id={coverInputId}
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp"
                     aria-label="Upload de foto de capa"
-                    hidden
-                    onChange={handleBannerFileChange}
+                    aria-invalid={coverError ? true : undefined}
+                    aria-describedby={coverError ? `${coverHelpId} ${coverErrorId}` : coverHelpId}
+                    sx={{
+                      position: 'absolute',
+                      width: 1,
+                      height: 1,
+                      opacity: 0,
+                      overflow: 'hidden',
+                    }}
+                    onChange={handleCoverChange}
                   />
                 </PillButton>
                 <Typography
+                  id={coverHelpId}
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: 'block', mt: 0.75 }}
                 >
-                  Selecione uma imagem do seu dispositivo (JPG, PNG, WebP)
+                  JPG, PNG ou WebP, até 10 MB
                 </Typography>
+                {coverError && (
+                  <Typography
+                    id={coverErrorId}
+                    role="alert"
+                    variant="caption"
+                    color="error"
+                    sx={{ display: 'block', mt: 0.5, fontWeight: 600 }}
+                  >
+                    {coverError}
+                  </Typography>
+                )}
               </Box>
             </Stack>
 
             <Divider />
 
-            {/* 2. Informações Principais */}
+            {/* 2. Informações principais */}
             <Stack spacing={2.5}>
               <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
                 Informações básicas
@@ -250,7 +320,8 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   size="small"
                   error={Boolean(errors.title)}
                   helperText={errors.title?.message}
-                  placeholder="Ex: Projeto Social na África do Sul"
+                  placeholder="Ex: Escola na Comunidade"
+                  slotProps={{ htmlInput: { maxLength: 255 } }}
                 />
               </Stack>
 
@@ -274,7 +345,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
 
             <Divider />
 
-            {/* 3. Campanha Vinculada (Controlada pelo Backend / Administração - RF 13.2 / 18.4) */}
+            {/* 3. Campanha vinculada (gerida pela administração) */}
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                 <CampaignIcon sx={{ fontSize: 20, color: 'primary.main' }} />
@@ -294,7 +365,12 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   }}
                 >
                   <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap' }}>
+                    <Stack
+                      direction="row"
+                      spacing={1.5}
+                      useFlexGap
+                      sx={{ alignItems: 'center', flexWrap: 'wrap' }}
+                    >
                       <Chip
                         icon={
                           <VerifiedIcon
@@ -312,74 +388,66 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                       />
                       <Typography
                         variant="subtitle2"
-                        sx={{ fontWeight: 700, color: 'primary.main' }}
+                        sx={{ fontWeight: 700, color: 'primary.main', minWidth: 0 }}
                       >
-                        {project.campaignTitle}
+                        {project?.campaignTitle}
                       </Typography>
-                    </Box>
-
+                    </Stack>
                     <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      Este projeto de impacto está associado a uma campanha oficial da plataforma. O
-                      vínculo e o selo de &quot;Campanha Ativa&quot; são gerenciados pela
-                      administração e sincronizados automaticamente através do backend.
+                      Este projeto está associado a uma campanha oficial da plataforma. O vínculo e
+                      o selo de &quot;Campanha Ativa&quot; são gerenciados pela administração.
                     </Typography>
                   </Stack>
                 </Box>
               ) : (
-                <Box
+                <Stack
+                  direction="row"
+                  spacing={1}
                   sx={{
                     p: 2.5,
                     borderRadius: 2,
                     bgcolor: 'rgba(13, 43, 92, 0.03)',
                     border: '1px dashed',
                     borderColor: 'divider',
+                    alignItems: 'flex-start',
                   }}
                 >
-                  <Stack spacing={1.5}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <InfoOutlinedIcon sx={{ color: 'primary.main', fontSize: 20 }} />
-                      <Typography variant="subtitle2" color="primary.main" sx={{ fontWeight: 700 }}>
-                        Aguardando integração com o backend
-                      </Typography>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
-                      O status de &quot;Campanha Ativa&quot; será exibido automaticamente neste
-                      projeto assim que ele for vinculado a uma campanha oficial no backend.
-                      Vínculos e selos são gerenciados exclusivamente por administradores e
-                      avaliadores da plataforma.
-                    </Typography>
-                  </Stack>
-                </Box>
+                  <InfoOutlinedIcon sx={{ color: 'primary.main', fontSize: 20, mt: 0.25 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                    O selo de &quot;Campanha Ativa&quot; aparece aqui quando o projeto é vinculado a
+                    uma campanha oficial. Vínculos são gerenciados exclusivamente por
+                    administradores da plataforma.
+                  </Typography>
+                </Stack>
               )}
             </Stack>
 
             <Divider />
 
-            {/* 4. Vídeo do YouTube (Opcional - Suporta URL) */}
+            {/* 4. Vídeo (opcional) */}
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                 <PlayCircleOutlinedIcon sx={{ fontSize: 20, color: 'accent.main' }} />
                 <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  Vídeo de Apresentação (YouTube)
+                  Vídeo de Apresentação (opcional)
                 </Typography>
               </Stack>
 
               <TextField
-                id="project-youtube-url"
-                label="Link do Vídeo no YouTube"
+                id="project-video-url"
+                label="Link do vídeo (YouTube ou Vimeo)"
                 {...register('videoUrl')}
-                placeholder="https://www.youtube.com/watch?v=... ou https://youtu.be/..."
+                placeholder="https://youtu.be/... ou https://vimeo.com/..."
                 fullWidth
                 size="small"
                 error={Boolean(errors.videoUrl)}
                 helperText={
                   errors.videoUrl?.message ||
-                  'Cole o link completo de um vídeo normal, Shorts ou embed do YouTube'
+                  'Apenas links do YouTube ou do Vimeo. Deixe em branco para não exibir vídeo.'
                 }
               />
 
-              {youtubeEmbedUrl && (
+              {videoEmbedUrl && (
                 <Stack spacing={1}>
                   <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
                     Prévia do vídeo incorporado:
@@ -398,7 +466,7 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
                   >
                     <Box
                       component="iframe"
-                      src={youtubeEmbedUrl}
+                      src={videoEmbedUrl}
                       title="Prévia do vídeo de apresentação"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -416,127 +484,33 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
               )}
             </Stack>
 
-            <Divider />
-
-            {/* 5. Galeria de Fotos do Carrossel (Upload do Dispositivo) */}
-            <Stack spacing={2}>
-              <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <CollectionsOutlinedIcon sx={{ fontSize: 20, color: 'primary.main' }} />
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    Fotos da Galeria ({galleryImages.length})
-                  </Typography>
-                </Stack>
-                <Typography variant="caption" color="text.secondary">
-                  Exibidas no carrossel e lightbox
-                </Typography>
-              </Stack>
-
-              {/* Lista de Miniaturas da Galeria */}
-              {galleryImages.length > 0 ? (
-                <Stack
-                  direction="row"
-                  spacing={1.5}
-                  useFlexGap
-                  sx={{ flexWrap: 'wrap', alignItems: 'center' }}
-                >
-                  {galleryImages.map((imgUrl, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        position: 'relative',
-                        width: { xs: 90, sm: 110 },
-                        height: { xs: 70, sm: 80 },
-                        borderRadius: 1.5,
-                        overflow: 'hidden',
-                        border: '1px solid',
-                        borderColor: 'divider',
-                        boxShadow: 1,
-                      }}
-                    >
-                      <Image
-                        src={imgUrl}
-                        alt={`Foto da galeria ${index + 1}`}
-                        fill
-                        sizes="110px"
-                        style={{ objectFit: 'cover' }}
-                      />
-                      <IconButton
-                        aria-label={`Remover foto ${index + 1} da galeria`}
-                        size="small"
-                        onClick={() => handleRemoveGalleryImage(index)}
-                        sx={{
-                          position: 'absolute',
-                          top: 4,
-                          right: 4,
-                          bgcolor: 'rgba(0, 0, 0, 0.7)',
-                          color: 'common.white',
-                          p: 0.5,
-                          '&:hover': { bgcolor: 'error.main' },
-                        }}
-                      >
-                        <DeleteOutlinedIcon sx={{ fontSize: 16 }} />
-                      </IconButton>
-                    </Box>
-                  ))}
-                </Stack>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Nenhuma foto na galeria. Clique no botão abaixo para selecionar fotos do seu
-                  computador ou celular.
-                </Typography>
-              )}
-
-              {/* Botão para Fazer Upload de Fotos do Dispositivo */}
-              <Box>
-                <PillButton
-                  component="label"
-                  tone="primarySoftOutline"
-                  size="small"
-                  sx={{
-                    minHeight: 44,
-                    px: 2.5,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    width: { xs: '100%', sm: 'auto' },
-                    justifyContent: 'center',
-                  }}
-                >
-                  <AddPhotoAlternateOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />
-                  Adicionar fotos do dispositivo
-                  <Box
-                    component="input"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    aria-label="Upload de fotos da galeria"
-                    hidden
-                    onChange={handleGalleryFilesChange}
-                  />
-                </PillButton>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: 'block', mt: 0.75 }}
-                >
-                  Você pode selecionar uma ou várias imagens ao mesmo tempo do seu dispositivo
-                </Typography>
-              </Box>
-            </Stack>
-
-            {/* Ações Finais */}
+            {/* Ações */}
             <Stack
               direction={{ xs: 'column-reverse', sm: 'row' }}
-              spacing={{ xs: 1.5, sm: 1.5 }}
+              spacing={1.5}
+              useFlexGap
               sx={{
                 justifyContent: 'flex-end',
-                pt: { xs: 2, sm: 2 },
+                pt: 2,
                 '& .MuiButton-root': {
                   ...FORM_ACTION_BUTTON_SX,
                   width: { xs: '100%', sm: 'auto' },
+                  justifyContent: 'center',
                 },
               }}
             >
+              {isEditing && onDelete && (
+                <PillButton
+                  type="button"
+                  tone="outline"
+                  size="medium"
+                  disabled={isSubmitting}
+                  onClick={() => setConfirmingDelete(true)}
+                  sx={{ mr: { sm: 'auto' }, color: 'error.main', borderColor: 'error.main' }}
+                >
+                  Excluir projeto
+                </PillButton>
+              )}
               <PillButton
                 href="/profile/projetos-de-impacto"
                 tone="primarySoftOutline"
@@ -544,13 +518,60 @@ export default function ImpactProjectEditForm({ project, onSave }: ImpactProject
               >
                 Voltar
               </PillButton>
-              <PillButton type="submit" tone="primaryFilled" size="medium">
-                Salvar
+              <PillButton type="submit" tone="primaryFilled" size="medium" disabled={isSubmitting}>
+                {isSubmitting ? 'Salvando…' : isEditing ? 'Salvar' : 'Criar projeto'}
               </PillButton>
             </Stack>
           </Stack>
         </Box>
       </CardContent>
+
+      <Dialog
+        open={confirmingDelete}
+        onClose={() => !deleting && setConfirmingDelete(false)}
+        aria-labelledby="delete-impact-project-title"
+        aria-describedby="delete-impact-project-description"
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle id="delete-impact-project-title">Excluir projeto de impacto?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="delete-impact-project-description">
+            O projeto e a capa serão removidos de forma permanente. Esta ação não pode ser desfeita.
+          </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" role="alert" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions
+          sx={{
+            flexDirection: { xs: 'column-reverse', sm: 'row' },
+            gap: 1,
+            p: 2,
+            '& > :not(style)': { m: 0, width: { xs: '100%', sm: 'auto' } },
+          }}
+        >
+          <PillButton
+            type="button"
+            tone="primarySoftOutline"
+            disabled={deleting}
+            onClick={() => setConfirmingDelete(false)}
+          >
+            Cancelar
+          </PillButton>
+          <PillButton
+            type="button"
+            tone="primaryFilled"
+            disabled={deleting}
+            onClick={confirmDelete}
+            sx={{ bgcolor: 'error.main', '&:hover': { bgcolor: 'error.dark' } }}
+          >
+            {deleting ? 'Excluindo…' : 'Excluir'}
+          </PillButton>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 }

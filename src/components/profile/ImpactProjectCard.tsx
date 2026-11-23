@@ -23,7 +23,7 @@ import PhotoLightbox from '@/components/common/PhotoLightbox';
 import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
 import ReportKebabMenu from '@/components/report/ReportKebabMenu';
-import { getYouTubeEmbedUrl } from '@/lib/youtube';
+import { getVideoEmbedUrl, getYouTubeEmbedUrl } from '@/lib/youtube';
 import type { ImpactProjectData } from '@/types/profile';
 
 type ImpactProjectCardProps = {
@@ -72,7 +72,7 @@ export default function ImpactProjectCard({
 
   const bannerImage = project.bannerUrl || project.imageUrl;
   const galleryPhotos = project.galleryImages ?? project.images ?? [];
-  const youtubeEmbedUrl = getYouTubeEmbedUrl(project.videoUrl || project.youtubeUrl);
+  const youtubeEmbedUrl = getVideoEmbedUrl(project.videoUrl || project.youtubeUrl);
 
   const handleNextSlide = () => {
     if (galleryPhotos.length > 0) {
@@ -102,14 +102,38 @@ export default function ImpactProjectCard({
       >
         {/* 1. Imagem de Capa / Banner do Projeto */}
         <Box sx={{ position: 'relative', width: '100%', height: { xs: 200, sm: 280, md: 320 } }}>
-          <Image
-            src={bannerImage}
-            alt={project.title}
-            fill
-            sizes="(max-width: 600px) 100vw, (max-width: 1200px) 80vw, 70vw"
-            priority
-            style={{ objectFit: 'cover' }}
-          />
+          {bannerImage ? (
+            <Image
+              src={bannerImage}
+              alt={project.title}
+              fill
+              unoptimized={bannerImage.startsWith('http')}
+              sizes="(max-width: 600px) 100vw, (max-width: 1200px) 80vw, 70vw"
+              priority
+              style={{ objectFit: 'cover' }}
+            />
+          ) : (
+            <Box
+              role="img"
+              aria-label="Capa do projeto indisponível"
+              sx={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: 'action.hover',
+                px: 2,
+                textAlign: 'center',
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                {project.coverStatus === 'FAILED'
+                  ? 'Não foi possível processar a capa. Envie outra imagem.'
+                  : 'A capa está sendo processada.'}
+              </Typography>
+            </Box>
+          )}
 
           {/* Selos / Badges sobrepostos ao banner */}
           <Box

@@ -109,6 +109,41 @@ export type AccountProfilePayload = {
   faithCommunity: NamedRef | null;
 };
 
+export type BackendMediaAssetStatus = 'PENDING_UPLOAD' | 'PROCESSING' | 'READY' | 'FAILED';
+
+export type BackendMediaAsset = {
+  id: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  purpose: string;
+  status: BackendMediaAssetStatus;
+  /** Public URL; `null` until the worker finishes (`READY`). */
+  url: string | null;
+};
+
+/** Presigned PUT instructions from `POST /media-assets/uploads`. */
+export type BackendMediaUpload = {
+  url: string;
+  method: 'PUT';
+  headers: Record<string, string>;
+  expiresAt?: string;
+};
+
+export type BackendImpactProject = {
+  id: string;
+  title: string;
+  description: string;
+  missionaryId: string;
+  coverImageAssetId: string;
+  /** Stored as an embed URL (YouTube/Vimeo); `null` when there is no video. */
+  videoUrl?: string | null;
+  coverImage?: BackendMediaAsset | null;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type BackendCursorMeta = { nextCursor: string | null; hasMore: boolean };
+
 /** `GET /api/auth/session` (BFF). */
 export type SessionInfo = {
   authenticated: true;

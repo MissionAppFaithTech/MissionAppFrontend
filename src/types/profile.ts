@@ -48,6 +48,9 @@ export type ProfileAboutData = {
 
 export type ImpactProjectData = {
   id: string;
+  missionaryId?: string;
+  /** Cover processing state; the public URL is empty until `READY`. */
+  coverStatus?: 'PENDING_UPLOAD' | 'PROCESSING' | 'READY' | 'FAILED';
   title: string;
   description: string;
   imageUrl: string;
