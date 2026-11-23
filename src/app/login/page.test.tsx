@@ -23,10 +23,9 @@ describe('LoginPage route (/login)', () => {
       '/select-role'
     );
 
-    // Back to the landing page
-    expect(screen.getByRole('link', { name: 'Voltar para a página inicial' })).toHaveAttribute(
-      'href',
-      '/'
-    );
+    // The login page has no shortcut back to the landing page
+    expect(
+      screen.queryByRole('link', { name: /voltar para a página inicial/i })
+    ).not.toBeInTheDocument();
   });
 });
