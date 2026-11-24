@@ -244,7 +244,7 @@ export default function MissionaryCampaignSection({
                 {/* Botão Página da Campanha */}
                 <PillButton
                   component={Link}
-                  href={`/campanha/${campaign.id}`}
+                  href={`/campaign/${campaign.id}`}
                   tone="primarySoftOutline"
                   size="medium"
                   aria-label="Ver Página da Campanha"

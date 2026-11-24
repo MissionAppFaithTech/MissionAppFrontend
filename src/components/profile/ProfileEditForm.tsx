@@ -37,7 +37,7 @@ type ProfileEditFormProps = {
   profile: ProfileData;
 };
 
-const BACK_HREF = '/profile/sobre';
+const BACK_HREF = '/profile/about';
 
 /** Backend field → form field, for errors returned by the API. */
 const API_FIELD_TO_FORM: Record<string, FieldPath<ProfileEditFormData>> = {

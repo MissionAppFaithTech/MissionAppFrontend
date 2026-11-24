@@ -176,7 +176,7 @@ export default function ProfileAccountMenu({
               <>
                 <Box
                   component={Link}
-                  href="/profile/financeiro"
+                  href="/profile/financial-settings"
                   onClick={handleClose}
                   sx={menuItemSx}
                 >
@@ -191,7 +191,7 @@ export default function ProfileAccountMenu({
 
             <Box
               component={Link}
-              href={isSupporter ? '/profile/supporter/configuracoes' : '/profile/configuracoes'}
+              href={isSupporter ? '/profile/supporter/settings' : '/profile/settings'}
               onClick={handleClose}
               sx={menuItemSx}
             >

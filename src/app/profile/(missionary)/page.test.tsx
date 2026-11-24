@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import ProfilePage from './page';
-import ProfileAboutPage from './sobre/page';
+import ProfileAboutPage from './about/page';
 
 const mockRedirect = vi.fn();
 vi.mock('next/navigation', async () => {
@@ -9,7 +9,7 @@ vi.mock('next/navigation', async () => {
   return {
     ...actual,
     redirect: (url: string) => mockRedirect(url),
-    usePathname: () => '/profile/sobre',
+    usePathname: () => '/profile/about',
     useRouter: () => ({
       push: vi.fn(),
       replace: vi.fn(),
@@ -28,9 +28,9 @@ describe('Missionary Profile routes', () => {
     expect(screen.getAllByText('A definir').length).toBeGreaterThan(0);
   });
 
-  it('redirects root profile page to /profile/sobre', () => {
+  it('redirects root profile page to /profile/about', () => {
     mockRedirect.mockClear();
     ProfilePage();
-    expect(mockRedirect).toHaveBeenCalledWith('/profile/sobre');
+    expect(mockRedirect).toHaveBeenCalledWith('/profile/about');
   });
 });

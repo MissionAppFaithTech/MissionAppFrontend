@@ -35,6 +35,6 @@ describe('AboutMissionAppSection', () => {
     );
     expect(
       screen.getByRole('link', { name: 'Aprender a fundar o conselho missionário' })
-    ).toHaveAttribute('href', '/conselho-missionario#checklist');
+    ).toHaveAttribute('href', '/missionary-council#checklist');
   });
 });

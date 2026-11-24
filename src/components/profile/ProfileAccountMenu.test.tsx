@@ -56,13 +56,13 @@ describe('ProfileAccountMenu', () => {
     );
     expect(screen.getByRole('link', { name: 'Configurações Financeiras' })).toHaveAttribute(
       'href',
-      '/profile/financeiro'
+      '/profile/financial-settings'
     );
     expect(screen.queryByRole('link', { name: 'Perfil Apoiador' })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Perfil Missionário' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: /configurações de conta/i })).toHaveAttribute(
       'href',
-      '/profile/configuracoes'
+      '/profile/settings'
     );
   });
 
@@ -78,7 +78,7 @@ describe('ProfileAccountMenu', () => {
     );
     expect(screen.getByRole('link', { name: /configurações de conta/i })).toHaveAttribute(
       'href',
-      '/profile/supporter/configuracoes'
+      '/profile/supporter/settings'
     );
   });
 

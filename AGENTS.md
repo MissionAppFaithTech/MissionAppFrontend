@@ -109,6 +109,7 @@ This project may use Next.js APIs that differ from older training data. Prefer p
 ## Code conventions (short)
 
 - Routes / metadata: `src/app/`
+- Routes: URL segments in **English** only (`/impact-projects`, `/settings`, `/about`...); never Portuguese slugs. The page text stays pt-BR
 - UI components: `src/components/`
 - Forms: `src/forms/`
 - API client / BFF helpers: `src/services/`, `src/app/actions/` (mutations), `src/app/api/` (reads for client islands), `src/lib/api/`

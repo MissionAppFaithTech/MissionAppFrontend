@@ -17,10 +17,10 @@ describe('CampaignQrCode', () => {
     expect(
       screen.getByRole('img', { name: 'QR Code que abre a página da campanha Campanha Teste' })
     ).toBeInTheDocument();
-    expect(screen.getByText('http://localhost:3000/campanha/campanha-teste')).toBeVisible();
+    expect(screen.getByText('http://localhost:3000/campaign/campanha-teste')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Abrir a página da campanha' })).toHaveAttribute(
       'href',
-      '/campanha/campanha-teste'
+      '/campaign/campanha-teste'
     );
   });
 

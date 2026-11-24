@@ -28,14 +28,14 @@ test.describe('Impact project (owner) E2E', () => {
 
   test('shows the project loaded from the backend and links to the edit page', async ({ page }) => {
     await mockProjectList(page, [backendProject]);
-    await page.goto('/profile/projetos-de-impacto');
+    await page.goto('/profile/impact-projects');
 
     await expect(page.getByRole('heading', { name: /escola na comunidade/i })).toBeVisible();
     await expect(page.getByText(/vídeo de apresentação/i)).toBeVisible();
     await expect(page.locator('iframe')).toBeVisible();
     await expect(page.getByRole('button', { name: /ofertar/i })).toBeVisible();
 
-    await page.goto('/profile/projetos-de-impacto/edit');
+    await page.goto('/profile/impact-projects/edit');
     await expect(page.getByRole('heading', { name: /editar projeto de impacto/i })).toBeVisible();
     await expect(page.getByText(/alterar foto de capa/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /excluir projeto/i })).toBeVisible();
@@ -78,7 +78,7 @@ test.describe('Impact project (owner) E2E', () => {
       return route.fulfill({ status: 201, json: { data: { impactProject: backendProject } } });
     });
 
-    await page.goto('/profile/projetos-de-impacto/edit');
+    await page.goto('/profile/impact-projects/edit');
     await expect(page.getByRole('heading', { name: /criar projeto de impacto/i })).toBeVisible();
 
     await page.getByLabel(/título do projeto/i).fill('Escola na Comunidade');
@@ -98,22 +98,22 @@ test.describe('Impact project (owner) E2E', () => {
       coverImageAssetId: ASSET_ID,
       videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
     });
-    await expect(page).toHaveURL(/\/profile\/projetos-de-impacto$/);
+    await expect(page).toHaveURL(/\/profile\/impact-projects$/);
   });
 
   test('shows the creation form in the tab when there is no project yet', async ({ page }) => {
     await mockProjectList(page, []);
-    await page.goto('/profile/projetos-de-impacto');
+    await page.goto('/profile/impact-projects');
 
     await expect(page.getByRole('heading', { name: /criar projeto de impacto/i })).toBeVisible();
     await expect(page.getByLabel(/título do projeto/i)).toBeVisible();
     await expect(page.getByRole('link', { name: /criar projeto de impacto/i })).toHaveCount(0);
-    await expect(page).toHaveURL(/\/profile\/projetos-de-impacto$/);
+    await expect(page).toHaveURL(/\/profile\/impact-projects$/);
   });
 
   test('requires a cover image when creating', async ({ page }) => {
     await mockProjectList(page, []);
-    await page.goto('/profile/projetos-de-impacto/edit');
+    await page.goto('/profile/impact-projects/edit');
 
     await page.getByLabel(/título do projeto/i).fill('Escola');
     await page.getByLabel(/descrição detalhada/i).fill('Descrição');

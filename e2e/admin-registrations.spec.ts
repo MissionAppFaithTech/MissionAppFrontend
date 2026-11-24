@@ -105,7 +105,7 @@ for (const width of [360, 768, 1280, 1920]) {
 }
 
 test('handles unknown registrations and dark mode', async ({ page }) => {
-  await page.goto('/admin/missionarios/missing');
+  await page.goto('/admin/missionaries/missing');
   await expect(page.getByRole('heading', { name: 'Cadastro não encontrado' })).toBeVisible();
   await page.getByRole('link', { name: 'Voltar para a lista' }).click();
   await page.getByRole('button', { name: 'Abrir menu do perfil' }).click();

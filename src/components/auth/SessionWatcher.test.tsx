@@ -25,7 +25,7 @@ describe('SessionWatcher', () => {
   });
 
   it('wipes user data and sends the user to login from a protected page', () => {
-    window.history.pushState({}, '', '/profile/sobre/edit?x=1');
+    window.history.pushState({}, '', '/profile/about/edit?x=1');
     render(<SessionWatcher />);
 
     act(() => {
@@ -35,12 +35,12 @@ describe('SessionWatcher', () => {
     expect(clearUserStores).toHaveBeenCalledTimes(1);
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(replace).toHaveBeenCalledWith(
-      `/login?reason=expired&next=${encodeURIComponent('/profile/sobre/edit?x=1')}`
+      `/login?reason=expired&next=${encodeURIComponent('/profile/about/edit?x=1')}`
     );
   });
 
   it('only wipes data on public pages', () => {
-    window.history.pushState({}, '', '/campanha/1');
+    window.history.pushState({}, '', '/campaign/1');
     render(<SessionWatcher />);
 
     act(() => {
@@ -61,7 +61,7 @@ describe('SessionWatcher', () => {
   it('treats the public missionary view as unprotected', () => {
     expect(isProtectedPath('/profile')).toBe(true);
     expect(isProtectedPath('/profile/supporter')).toBe(true);
-    expect(isProtectedPath('/profile/missionario/samuel')).toBe(false);
+    expect(isProtectedPath('/profile/missionary/samuel')).toBe(false);
     expect(isProtectedPath('/profiles')).toBe(false);
   });
 });

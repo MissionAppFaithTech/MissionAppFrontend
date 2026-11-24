@@ -7,7 +7,7 @@ vi.mock('./CampaignContent', () => ({
   CampaignBody: () => <div data-testid="campaign-body" />,
 }));
 
-describe('Dedicated Campaign Page (/campanha/[id])', () => {
+describe('Dedicated Campaign Page (/campaign/[id])', () => {
   it('renders the visitor shell around the streamed campaign body', () => {
     render(CampaignPage({ params: Promise.resolve({ id: 'campanha-educacao-esperanca' }) }));
 

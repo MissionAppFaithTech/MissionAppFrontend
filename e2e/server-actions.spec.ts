@@ -10,7 +10,7 @@ const userFor = (prefix: string, info: TestInfo) =>
 test.describe('Mutations through Server Actions', () => {
   test('saving the "Sobre" shows the new value right away', async ({ page }, testInfo) => {
     await mockMissionarySession(page, page.context(), userFor('editor', testInfo));
-    await page.goto('/profile/sobre/edit');
+    await page.goto('/profile/about/edit');
     // Type only after hydration, or React puts the initial value back.
     await page.waitForLoadState('networkidle');
 
@@ -69,7 +69,7 @@ test.describe('Mutations through Server Actions', () => {
 
   test('logging out from the account menu goes to login', async ({ page }) => {
     await mockMissionarySession(page);
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
 
     await page.getByRole('button', { name: 'Abrir menu do perfil' }).click();
     await page.getByRole('button', { name: 'Sair da conta' }).click();

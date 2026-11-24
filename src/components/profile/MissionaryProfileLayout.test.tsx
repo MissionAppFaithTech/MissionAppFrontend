@@ -8,7 +8,7 @@ import { emptyProfile } from '@/services/profile.service';
 const refresh = vi.fn();
 const router = { push: vi.fn(), replace: vi.fn(), prefetch: vi.fn(), refresh };
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/profile/sobre',
+  usePathname: () => '/profile/about',
   useRouter: () => router,
   useSearchParams: () => new URLSearchParams(),
 }));

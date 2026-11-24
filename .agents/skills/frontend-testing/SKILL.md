@@ -58,7 +58,7 @@ vi.mock('next/navigation', async () => {
       replace: vi.fn(),
       prefetch: vi.fn(),
     }),
-    usePathname: () => '/profile/sobre',
+    usePathname: () => '/profile/about',
     useSearchParams: () => new URLSearchParams(),
     redirect: vi.fn(),
   };

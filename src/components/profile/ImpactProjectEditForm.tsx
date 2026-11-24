@@ -415,11 +415,7 @@ export default function ImpactProjectEditForm({
                   Excluir projeto
                 </PillButton>
               )}
-              <PillButton
-                href="/profile/projetos-de-impacto"
-                tone="primarySoftOutline"
-                size="medium"
-              >
+              <PillButton href="/profile/impact-projects" tone="primarySoftOutline" size="medium">
                 Voltar
               </PillButton>
               <PillButton type="submit" tone="primaryFilled" size="medium" disabled={isSubmitting}>

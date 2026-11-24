@@ -253,7 +253,7 @@ export default function FinancialSettingsForm({
                   }}
                 >
                   <PillButton
-                    href="/profile/sobre"
+                    href="/profile/about"
                     tone="primarySoftOutline"
                     size="medium"
                     aria-label="Voltar para o perfil"
@@ -661,7 +661,7 @@ export default function FinancialSettingsForm({
                 }}
               >
                 <PillButton
-                  href="/profile/sobre"
+                  href="/profile/about"
                   tone="primarySoftOutline"
                   size="medium"
                   aria-label="Voltar para o perfil"

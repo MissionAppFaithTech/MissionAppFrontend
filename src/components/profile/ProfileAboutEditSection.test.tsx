@@ -63,7 +63,7 @@ function renderSection(about: ProfileAboutData = data) {
       data={about}
       onSave={onSave}
       onDone={onDone}
-      backHref="/profile/sobre"
+      backHref="/profile/about"
       onDiscard={onDiscard}
     />
   );
@@ -83,7 +83,7 @@ describe('ProfileAboutEditSection', () => {
     expect(screen.queryByRole('button', { name: /cancelar/i })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
       'href',
-      '/profile/sobre'
+      '/profile/about'
     );
   });
 
@@ -112,7 +112,7 @@ describe('ProfileAboutEditSection', () => {
     await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
 
     expect(onDiscard).toHaveBeenCalledTimes(1);
-    expect(useRouter().push).toHaveBeenCalledWith('/profile/sobre');
+    expect(useRouter().push).toHaveBeenCalledWith('/profile/about');
     expect(onSave).not.toHaveBeenCalled();
   });
 

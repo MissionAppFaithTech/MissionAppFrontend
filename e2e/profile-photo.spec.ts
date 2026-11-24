@@ -73,7 +73,7 @@ test.describe('Owner profile photo', () => {
     await page.keyboard.press('Escape');
 
     // Saved on the backend: the profile header has it too.
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
     await expect(
       page.getByRole('img', { name: /^Foto de perfil de / }).filter(visible)
     ).toHaveAttribute('src', STORED_PHOTO);
@@ -93,7 +93,7 @@ test.describe('Owner profile photo', () => {
     await expect(formPhoto).toHaveCount(0);
     await expect(menuButton.locator('img')).toHaveCount(0);
 
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
     await expect(page.getByRole('heading', { level: 1 }).filter(visible)).toBeVisible();
     await expect(
       page.getByRole('img', { name: /^Foto de perfil de / }).filter(visible)

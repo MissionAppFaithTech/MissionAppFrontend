@@ -11,5 +11,5 @@ export const featuredCampaign: CampaignData = mockCampaign;
 
 /** Public page of a campaign, the one the QR code opens. */
 export function campaignPath(campaign: Pick<CampaignData, 'id'>): string {
-  return `/campanha/${campaign.id}`;
+  return `/campaign/${campaign.id}`;
 }

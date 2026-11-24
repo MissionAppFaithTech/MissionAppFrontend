@@ -725,8 +725,8 @@ describe('AccountSettingsView Component', () => {
 
   describe('Voltar e Cancelar', () => {
     it.each([
-      ['missionary', '/profile/sobre'],
-      ['supporter', '/profile/supporter/missionarios'],
+      ['missionary', '/profile/about'],
+      ['supporter', '/profile/supporter/missionaries'],
     ] as const)('shows "Voltar" at the top and bottom leading to the %s profile', (role, href) => {
       renderWithQuery(<AccountSettingsView role={role} />);
 

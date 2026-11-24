@@ -13,7 +13,7 @@ test.describe('Sessões ativas', () => {
     page,
   }, testInfo) => {
     await mockMissionarySession(page, page.context(), `e2e-sessions-${testInfo.project.name}`);
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     const section = sessionsSection(page);
     const items = section.getByRole('listitem');
@@ -49,7 +49,7 @@ test.describe('Sessões ativas', () => {
 
   test('Escape closes the confirmation without ending the session', async ({ page }, testInfo) => {
     await mockMissionarySession(page, page.context(), `e2e-sessions-esc-${testInfo.project.name}`);
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     const trigger = sessionsSection(page).getByRole('button', {
       name: 'Encerrar sessão: Mobile Safari no iOS',
@@ -68,7 +68,7 @@ test.describe('Sessões ativas', () => {
   }, testInfo) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await mockMissionarySession(page, page.context(), `e2e-sessions-360-${testInfo.project.name}`);
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     const section = sessionsSection(page);
     const button = section.getByRole('button', { name: 'Encerrar sessão: Mobile Safari no iOS' });
@@ -115,7 +115,7 @@ test.describe('Aparelho no login', () => {
     const sameDevice = (await page.context().cookies()).find((c) => c.name === 'ma_device_id');
     expect(sameDevice?.value).toBe(deviceCookie?.value);
 
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
     const items = sessionsSection(page).getByRole('listitem');
     await expect(items).toHaveCount(1);
     await expect(items.first()).toContainText('Este aparelho');

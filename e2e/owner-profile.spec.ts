@@ -20,7 +20,7 @@ test.describe('Owner profile read on the server', () => {
       }
     });
 
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
 
     await expect(
       page
@@ -49,13 +49,13 @@ test.describe('Owner profile read on the server', () => {
       },
     ]);
 
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
 
     await expect(page).toHaveURL(/\/login\?reason=expired/);
   });
 
   test('a visitor is sent to login, keeping where they were going', async ({ page }) => {
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
 
     await expect(page).toHaveURL(/\/login\?next=%2Fprofile%2Fsobre/);
     await expect(page.getByRole('heading', { name: 'Acesse sua conta' })).toBeVisible();

@@ -65,7 +65,7 @@ test.describe('Mobile-First Layout & Touch Targets Verification', () => {
     page,
     isMobile,
   }) => {
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
     await page.waitForLoadState('networkidle');
 
     // Verify edit profile action button touch target
@@ -101,7 +101,7 @@ test.describe('Mobile-First Layout & Touch Targets Verification', () => {
     page,
     isMobile,
   }) => {
-    await page.goto('/profile/financeiro');
+    await page.goto('/profile/financial-settings');
     await page.waitForLoadState('networkidle');
 
     // Verify no horizontal overflow
@@ -145,7 +145,7 @@ test.describe('Mobile-First Layout & Touch Targets Verification', () => {
     page,
     isMobile,
   }) => {
-    await page.goto('/profile/campanha');
+    await page.goto('/profile/campaign');
     await page.waitForLoadState('networkidle');
 
     // Ofertar button

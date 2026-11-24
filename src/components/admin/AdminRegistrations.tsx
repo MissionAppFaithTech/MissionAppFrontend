@@ -332,7 +332,7 @@ export default function AdminRegistrations() {
                         </TableCell>
                         <TableCell align="right">
                           <PillButton
-                            href={`/admin/missionarios/${record.id}`}
+                            href={`/admin/missionaries/${record.id}`}
                             tone="primaryOutline"
                             aria-label={`Ver cadastro de ${record.name}`}
                             sx={{
@@ -391,7 +391,7 @@ export default function AdminRegistrations() {
                       </dd>
                     </Box>
                     <PillButton
-                      href={`/admin/missionarios/${record.id}`}
+                      href={`/admin/missionaries/${record.id}`}
                       tone="primaryOutline"
                       aria-label={`Ver cadastro de ${record.name}`}
                       sx={{ width: '100%', minHeight: 44, justifyContent: 'center' }}

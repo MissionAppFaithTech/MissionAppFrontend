@@ -38,7 +38,7 @@ describe('ImpactProjectEditForm', () => {
     expect(screen.getByText('Campanha Ativa')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /voltar/i })).toHaveAttribute(
       'href',
-      '/profile/projetos-de-impacto'
+      '/profile/impact-projects'
     );
     expect(screen.getByRole('button', { name: /excluir projeto/i })).toBeInTheDocument();
   });

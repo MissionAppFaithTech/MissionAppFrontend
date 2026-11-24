@@ -105,14 +105,14 @@ describe('LoginForm component', () => {
   });
 
   it('returns to a safe ?next= path and ignores external redirects', async () => {
-    mockSearchParams = new URLSearchParams('next=/profile/sobre/edit');
+    mockSearchParams = new URLSearchParams('next=/profile/about/edit');
     const user = userEvent.setup();
     const { unmount } = render(<LoginForm />);
 
     await user.type(screen.getByPlaceholderText('seu@email.com'), 'teste@missionapp.com');
     await user.type(screen.getByPlaceholderText('Sua senha'), 'SenhaForte123!');
     await user.click(screen.getByRole('button', { name: 'Entrar' }));
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/profile/sobre/edit'));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/profile/about/edit'));
     unmount();
 
     mockPush.mockClear();

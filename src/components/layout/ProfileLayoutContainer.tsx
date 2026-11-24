@@ -8,7 +8,7 @@ export default function ProfileLayoutContainer({ children, sx, ...props }: Conta
   const isFreePage =
     Boolean(pathname?.includes('/edit')) ||
     Boolean(pathname?.endsWith('/edit-profile')) ||
-    Boolean(pathname?.includes('/financeiro'));
+    Boolean(pathname?.includes('/financial-settings'));
 
   return (
     <Container

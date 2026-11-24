@@ -30,11 +30,11 @@ export interface MobileNavigationBarProps {
   searchHref?: string;
   /** Custom label for the search/navigation icon ('Navegar' or 'Pesquisar') */
   searchLabel?: string;
-  /** Custom destination for the missionary project icon. Defaults to /profile/projetos-de-impacto */
+  /** Custom destination for the missionary project icon. Defaults to /profile/impact-projects */
   projectHref?: string;
   /** Custom label for the missionary project icon. Defaults to 'Projeto' */
   projectLabel?: string;
-  /** Target URL for current/selected campaign (supporter view). Defaults to /campanha/campanha-educacao-esperanca */
+  /** Target URL for current/selected campaign (supporter view). Defaults to /campaign/campanha-educacao-esperanca */
   campaignHref?: string;
   /** Custom label for the supporter campaign icon. Defaults to 'Campanha' */
   campaignLabel?: string;
@@ -51,11 +51,11 @@ export default function MobileNavigationBar({
   isLoggedIn,
   role = 'visitor',
   viewMode,
-  searchHref = '/navegacao',
+  searchHref = '/explore',
   searchLabel = 'Navegar',
-  projectHref = '/profile/projetos-de-impacto',
+  projectHref = '/profile/impact-projects',
   projectLabel = 'Projeto',
-  campaignHref = '/campanha/campanha-educacao-esperanca',
+  campaignHref = '/campaign/campanha-educacao-esperanca',
   campaignLabel = 'Campanha',
   hideOnEditPages = true,
   forceShow = false,
@@ -67,8 +67,8 @@ export default function MobileNavigationBar({
   const isFreePage =
     Boolean(pathname?.includes('/edit')) ||
     Boolean(pathname?.endsWith('/edit-profile')) ||
-    Boolean(pathname?.includes('/financeiro')) ||
-    Boolean(pathname?.includes('/configuracoes'));
+    Boolean(pathname?.includes('/financial-settings')) ||
+    Boolean(pathname?.includes('/settings'));
 
   if (hideOnEditPages && !forceShow && isFreePage) {
     return null;
@@ -129,7 +129,7 @@ export default function MobileNavigationBar({
     },
     {
       label: 'Feed',
-      href: '/profile/postagens',
+      href: '/profile/posts',
       icon: FeedOutlinedIcon,
     },
   ];

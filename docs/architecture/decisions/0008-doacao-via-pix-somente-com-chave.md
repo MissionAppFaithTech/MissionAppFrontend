@@ -10,7 +10,7 @@
 
 ## Contexto e Problema
 
-A tela **Configurações de Doação** (`/profile/financeiro`, `FinancialSettingsForm`) permitia, além da chave PIX, enviar a imagem de um **QR Code estático** (upload, preview com `URL.createObjectURL` e "Remover"). O modal de doação (`DonationModal`) mostrava essa imagem, ou um ícone de QR Code genérico quando não havia imagem, com a legenda "Escaneie o QR Code no app do seu banco".
+A tela **Configurações de Doação** (`/profile/financial-settings`, `FinancialSettingsForm`) permitia, além da chave PIX, enviar a imagem de um **QR Code estático** (upload, preview com `URL.createObjectURL` e "Remover"). O modal de doação (`DonationModal`) mostrava essa imagem, ou um ícone de QR Code genérico quando não havia imagem, com a legenda "Escaneie o QR Code no app do seu banco".
 
 Isso vinha do RF 12.1.2 da lista de requisitos ("Pode enviar opcionalmente um QR Code estático"). Na prática:
 

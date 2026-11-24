@@ -137,7 +137,7 @@ export default function ImpactProjectCard({
               }}
             >
               <PillButton
-                href="/profile/projetos-de-impacto/edit"
+                href="/profile/impact-projects/edit"
                 tone="primarySoftOutline"
                 size="small"
                 aria-label="Editar projeto de impacto"

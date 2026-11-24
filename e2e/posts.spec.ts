@@ -16,7 +16,7 @@ async function control(request: APIRequestContext, sub: string, data?: object) {
 }
 async function start(page: Page, sub: string) {
   await mockMissionarySession(page, page.context(), sub);
-  await page.goto('/profile/postagens');
+  await page.goto('/profile/posts');
   await page.getByRole('button', { name: 'Postar', exact: true }).click();
 }
 async function caption(page: Page, content: string) {
@@ -177,7 +177,7 @@ test('owner filter, cursor pagination, foreign permissions and 320px/1280px acce
   await control(request, sub, { seedPosts: 21, foreign: true });
   await mockMissionarySession(page, page.context(), sub);
   await page.setViewportSize({ width: 320, height: 800 });
-  await page.goto('/profile/postagens');
+  await page.goto('/profile/posts');
   await expect(page.getByRole('article')).toHaveCount(20);
   await page.getByRole('button', { name: 'Carregar mais postagens' }).click();
   await expect(page.getByRole('article')).toHaveCount(21);

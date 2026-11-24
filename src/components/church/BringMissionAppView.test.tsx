@@ -32,7 +32,7 @@ describe('BringMissionAppView', () => {
     expect(within(callout).getAllByRole('listitem')).toHaveLength(3);
     expect(
       within(callout).getByRole('link', { name: 'Aprenda como fundar um conselho missionário' })
-    ).toHaveAttribute('href', '/conselho-missionario');
+    ).toHaveAttribute('href', '/missionary-council');
     // The council materials live on their own page now.
     expect(screen.queryByText(/progresso de implantação/i)).not.toBeInTheDocument();
   });

@@ -25,12 +25,12 @@ export async function generateMetadata({ params }: CampaignPageProps): Promise<M
     title,
     description,
     alternates: {
-      canonical: `/campanha/${id}`,
+      canonical: `/campaign/${id}`,
     },
     openGraph: {
       title,
       description,
-      url: `${baseUrl}/campanha/${id}`,
+      url: `${baseUrl}/campaign/${id}`,
       type: 'article',
       siteName: 'Mission App',
       images: [

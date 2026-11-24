@@ -15,10 +15,10 @@ A cada ciclo, uma campanha missionária reúne igrejas, missionários e apoiador
 
 ## Rotas Principais e Recursos Públicos
 - [Início / Landing Page](/): Apresentação institucional da plataforma, proposta de valor, badges para aplicativo e visão de impacto.
-- [Leve o Mission App para sua igreja](/leve-o-mission-app-para-sua-igreja): O que é o Mission App, visão e propósito, e como a igreja adota a campanha recorrente: kit de mídia, Dia Oficial definido pelo Mission App e QR Code da campanha. Termina com o convite para formar um grupo de mobilizadores.
-- [Conselho Missionário](/conselho-missionario): Guia para fundar o conselho missionário da igreja (passo a passo, funções, curso em vídeo, mobilização anual, materiais das agências e modelos).
-- [Campanhas](/campanha/{id}): Página pública da campanha missionária, com o projeto de impacto, o Dia Oficial e o QR Code para ofertar.
-- [Explorar](/navegacao): Missionários e projetos sociais para conhecer, orar e apoiar.
+- [Leve o Mission App para sua igreja](/bring-mission-app-to-your-church): O que é o Mission App, visão e propósito, e como a igreja adota a campanha recorrente: kit de mídia, Dia Oficial definido pelo Mission App e QR Code da campanha. Termina com o convite para formar um grupo de mobilizadores.
+- [Conselho Missionário](/missionary-council): Guia para fundar o conselho missionário da igreja (passo a passo, funções, curso em vídeo, mobilização anual, materiais das agências e modelos).
+- [Campanhas](/campaign/{id}): Página pública da campanha missionária, com o projeto de impacto, o Dia Oficial e o QR Code para ofertar.
+- [Explorar](/explore): Missionários e projetos sociais para conhecer, orar e apoiar.
 - [Seleção de Perfil](/select-role): Escolha inicial de cadastro entre "Sou Missionário" e "Quero Apoiar".
 - [Cadastro de Missionários](/register/missionaries): Fluxo de onboarding para missionários e agências.
 - [Cadastro de Apoiadores](/register/supporters): Fluxo de onboarding para mantenedores e intercessores.

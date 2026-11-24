@@ -32,7 +32,7 @@ describe('ChurchGuideView Component', () => {
     expect(screen.queryByRole('tab', { name: /campanha recorrente/i })).not.toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Leve o Mission App para sua igreja' })
-    ).toHaveAttribute('href', '/leve-o-mission-app-para-sua-igreja');
+    ).toHaveAttribute('href', '/bring-mission-app-to-your-church');
     expect(screen.getByRole('tab', { name: /passo a passo/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /funções do conselho/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /curso em vídeo/i })).toBeInTheDocument();

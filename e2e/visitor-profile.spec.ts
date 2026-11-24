@@ -44,7 +44,7 @@ test.describe('Visitor Profile E2E', () => {
     // Tabs without an API yet say their content is an example.
     await expect(page.getByText('Dados de exemplo').filter({ visible: true })).toBeVisible();
 
-    const campanhaTab = page.getByRole('tab', { name: /campanha/i });
+    const campanhaTab = page.getByRole('tab', { name: /campaign/i });
     await campanhaTab.click();
     await expect(page.getByRole('button', { name: /ofertar na campanha/i })).toBeVisible();
   });
@@ -65,7 +65,7 @@ test.describe('Visitor Profile E2E', () => {
   });
 
   test('the supporter view shows the same real profile, accessibly', async ({ page }) => {
-    await page.goto('/profile/missionario/samuel_missionary');
+    await page.goto('/profile/missionary/samuel_missionary');
 
     await expect(
       page.getByRole('heading', { level: 1, name: /samuel mendonça/i }).filter({ visible: true })

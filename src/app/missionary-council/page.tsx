@@ -15,12 +15,12 @@ export async function generateMetadata(): Promise<Metadata> {
     title,
     description,
     alternates: {
-      canonical: '/conselho-missionario',
+      canonical: '/missionary-council',
     },
     openGraph: {
       title,
       description,
-      url: `${baseUrl}/conselho-missionario`,
+      url: `${baseUrl}/missionary-council`,
       type: 'website',
       siteName: 'Mission App',
       images: [

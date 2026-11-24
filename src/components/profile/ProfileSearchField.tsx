@@ -16,7 +16,7 @@ type ProfileSearchFieldProps = {
 export default function ProfileSearchField({
   placeholder = 'Pesquisar missionário',
   maxWidth = { xs: 150, sm: 240, md: 280 },
-  href = '/navegacao',
+  href = '/explore',
 }: ProfileSearchFieldProps) {
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);

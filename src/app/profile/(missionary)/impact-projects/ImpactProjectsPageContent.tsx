@@ -3,7 +3,7 @@
 import ImpactProjectCard from '@/components/profile/ImpactProjectCard';
 import ImpactProjectStateGate from '@/components/profile/ImpactProjectStateGate';
 import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
-import { ImpactProjectEditor } from '@/app/profile/(missionary)/projetos-de-impacto/edit/ImpactProjectEditPageContent';
+import { ImpactProjectEditor } from '@/app/profile/(missionary)/impact-projects/edit/ImpactProjectEditPageContent';
 
 /**
  * The tab shows the project; while there is none, the creation form is right

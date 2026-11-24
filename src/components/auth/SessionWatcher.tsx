@@ -9,7 +9,7 @@ import { clearUserStores, purgeLegacyProfileCache } from '@/stores/sessionStore'
 export function isProtectedPath(pathname: string) {
   return (
     (pathname === '/profile' || pathname.startsWith('/profile/')) &&
-    !pathname.startsWith('/profile/missionario/')
+    !pathname.startsWith('/profile/missionary/')
   );
 }
 

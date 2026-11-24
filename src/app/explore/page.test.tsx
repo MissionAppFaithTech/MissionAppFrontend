@@ -6,7 +6,7 @@ import NavigationPage from './page';
 
 // Mock next/navigation
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/navegacao',
+  usePathname: () => '/explore',
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
@@ -14,7 +14,7 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-describe('NavigationPage route (/navegacao)', () => {
+describe('NavigationPage route (/explore)', () => {
   it('renders page layout with heading, search bar, categories, and initiatives', () => {
     render(<NavigationPageContent />);
 
@@ -176,15 +176,15 @@ describe('NavigationPage route (/navegacao)', () => {
     );
     expect(within(missionaryNav).getByRole('link', { name: /navegar/i })).toHaveAttribute(
       'href',
-      '/navegacao'
+      '/explore'
     );
     expect(within(missionaryNav).getByRole('link', { name: /^projeto$/i })).toHaveAttribute(
       'href',
-      '/profile/projetos-de-impacto'
+      '/profile/impact-projects'
     );
     expect(within(missionaryNav).getByRole('link', { name: /feed/i })).toHaveAttribute(
       'href',
-      '/profile/postagens'
+      '/profile/posts'
     );
 
     // Switch to Usuário Comum (Supporter) view
@@ -198,9 +198,9 @@ describe('NavigationPage route (/navegacao)', () => {
       'href',
       '/profile/supporter'
     );
-    expect(within(supporterNav).getByRole('link', { name: /campanha/i })).toHaveAttribute(
+    expect(within(supporterNav).getByRole('link', { name: /campaign/i })).toHaveAttribute(
       'href',
-      '/campanha/campanha-educacao-esperanca'
+      '/campaign/campanha-educacao-esperanca'
     );
     expect(within(supporterNav).getByRole('link', { name: /meu perfil/i })).toHaveAttribute(
       'href',

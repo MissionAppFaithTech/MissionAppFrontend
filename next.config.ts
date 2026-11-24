@@ -44,12 +44,12 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/profile',
-        destination: '/profile/sobre',
+        destination: '/profile/about',
         permanent: false,
       },
       {
         source: '/profile/supporter',
-        destination: '/profile/supporter/missionarios',
+        destination: '/profile/supporter/missionaries',
         permanent: false,
       },
     ];

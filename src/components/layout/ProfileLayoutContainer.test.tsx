@@ -41,7 +41,7 @@ describe('ProfileLayoutContainer component', () => {
   });
 
   it('renders clean free layout on impact project edit page', () => {
-    mockPathname = '/profile/projetos-de-impacto/edit';
+    mockPathname = '/profile/impact-projects/edit';
     render(
       <ProfileLayoutContainer>
         <div>Edit Impact Project Screen</div>
@@ -64,8 +64,8 @@ describe('ProfileLayoutContainer component', () => {
     expect(main).toBeInTheDocument();
   });
 
-  it('renders clean free layout on missionary financial settings page (/profile/financeiro)', () => {
-    mockPathname = '/profile/financeiro';
+  it('renders clean free layout on missionary financial settings page (/profile/financial-settings)', () => {
+    mockPathname = '/profile/financial-settings';
     render(
       <ProfileLayoutContainer>
         <div>Financial Settings Form Screen</div>

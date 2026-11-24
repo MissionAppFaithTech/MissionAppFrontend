@@ -8,13 +8,13 @@ export const metadata: Metadata = {
   title: 'Navegação e Descoberta | Mission App',
   description:
     'Explore o trabalho missionário pelo mundo. Encontre missionários, conheça projetos de impacto e participe de campanhas oficiais.',
-  alternates: { canonical: '/navegacao' },
+  alternates: { canonical: '/explore' },
   robots: { index: true, follow: true },
   openGraph: {
     title: 'Navegação e Descoberta | Mission App',
     description:
       'Explore causas, conheça missionários em campo e acompanhe projetos de impacto com transparência.',
-    url: '/navegacao',
+    url: '/explore',
   },
 };
 

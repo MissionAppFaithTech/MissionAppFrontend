@@ -90,7 +90,7 @@ describe('ProfileEditForm', () => {
     expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
       'href',
-      '/profile/sobre'
+      '/profile/about'
     );
   });
 
@@ -425,7 +425,7 @@ describe('ProfileEditForm – photo and Voltar', () => {
     await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
     await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
 
-    expect(push).toHaveBeenCalledWith('/profile/sobre');
+    expect(push).toHaveBeenCalledWith('/profile/about');
     expect(toast()).toMatchObject({ message: 'Alterações descartadas.', severity: 'info' });
     expect(saveHeader).not.toHaveBeenCalled();
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());

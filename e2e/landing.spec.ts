@@ -31,7 +31,7 @@ test.describe('Landing Page E2E', () => {
       /^\/campanha\//
     );
     await Promise.all([
-      page.waitForURL('**/leve-o-mission-app-para-sua-igreja'),
+      page.waitForURL('**/bring-mission-app-to-your-church'),
       campaign.getByRole('link', { name: 'Leve o Mission App para sua igreja' }).click(),
     ]);
 
@@ -56,7 +56,7 @@ test.describe('Landing Page E2E', () => {
     });
     await callout.scrollIntoViewIfNeeded();
     await Promise.all([
-      page.waitForURL('**/conselho-missionario'),
+      page.waitForURL('**/missionary-council'),
       callout.getByRole('link', { name: 'Aprenda como fundar um conselho missionário' }).click(),
     ]);
     await expect(page.getByRole('tab', { name: /passo a passo/i })).toBeVisible();

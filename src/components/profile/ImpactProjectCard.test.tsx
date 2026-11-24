@@ -35,7 +35,7 @@ describe('ImpactProjectCard Component', () => {
     render(<ImpactProjectCard project={mockProject} isOwnProfile />);
 
     const edit = screen.getByRole('link', { name: 'Editar projeto de impacto' });
-    expect(edit).toHaveAttribute('href', '/profile/projetos-de-impacto/edit');
+    expect(edit).toHaveAttribute('href', '/profile/impact-projects/edit');
     expect(
       screen.queryByRole('button', { name: 'Mais opções do projeto' })
     ).not.toBeInTheDocument();

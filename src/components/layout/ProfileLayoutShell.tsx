@@ -31,8 +31,8 @@ export default function ProfileLayoutShell({
   const isFreePage =
     Boolean(pathname?.includes('/edit')) ||
     Boolean(pathname?.endsWith('/edit-profile')) ||
-    Boolean(pathname?.includes('/financeiro')) ||
-    Boolean(pathname?.includes('/configuracoes'));
+    Boolean(pathname?.includes('/financial-settings')) ||
+    Boolean(pathname?.includes('/settings'));
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>

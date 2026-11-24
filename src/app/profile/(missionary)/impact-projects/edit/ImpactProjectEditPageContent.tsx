@@ -15,7 +15,7 @@ import {
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import type { ImpactProjectData } from '@/types/profile';
 
-const LIST_HREF = '/profile/projetos-de-impacto';
+const LIST_HREF = '/profile/impact-projects';
 
 /** Only what changed: the backend treats every update field as optional. */
 export function buildUpdate(

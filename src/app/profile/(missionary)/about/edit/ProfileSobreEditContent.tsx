@@ -6,7 +6,7 @@ import { useOwnerProfile } from '@/components/profile/OwnerProfileProvider';
 import { saveProfileAbout } from '@/services/profileSave.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 
-const ABOUT_HREF = '/profile/sobre';
+const ABOUT_HREF = '/profile/about';
 
 export default function ProfileSobreEditContent() {
   const router = useRouter();

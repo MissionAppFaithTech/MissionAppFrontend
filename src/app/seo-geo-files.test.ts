@@ -103,7 +103,7 @@ describe('SEO & GEO (Generative Engine Optimization) Infrastructure Files', () =
       const content = fs.readFileSync(filePath, 'utf-8');
       expect(content).toContain('# Mission App');
       expect(content).toContain('Plataforma de campanhas missionárias recorrentes');
-      expect(content).toContain('/conselho-missionario');
+      expect(content).toContain('/missionary-council');
       expect(content).toContain('## Visão Geral');
       expect(content).toContain('## Público-Alvo');
       expect(content).toContain('## Rotas Principais e Recursos Públicos');

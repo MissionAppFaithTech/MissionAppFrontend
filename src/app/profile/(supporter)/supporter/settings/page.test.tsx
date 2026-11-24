@@ -22,7 +22,7 @@ vi.mock('@/lib/server/profile', () => ({
   loadMyProfile: vi.fn(),
 }));
 
-describe('SupporterSettingsPage (/profile/supporter/configuracoes)', () => {
+describe('SupporterSettingsPage (/profile/supporter/settings)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

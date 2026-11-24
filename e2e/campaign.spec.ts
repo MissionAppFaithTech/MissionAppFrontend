@@ -11,7 +11,7 @@ test.describe('Missionary Campaign & Dedicated Campaign Page E2E Flow', () => {
     page,
   }) => {
     // 1. Visit missionary campaign tab
-    await page.goto('/profile/campanha');
+    await page.goto('/profile/campaign');
 
     // 2. Check Campaign Badge & Titles
     await expect(
@@ -53,7 +53,7 @@ test.describe('Missionary Campaign & Dedicated Campaign Page E2E Flow', () => {
     await expect(verPaginaBtn).toBeVisible();
     await verPaginaBtn.click();
 
-    await page.waitForURL('**/campanha/campanha-educacao-esperanca');
+    await page.waitForURL('**/campaign/campanha-educacao-esperanca');
     await expect(
       page.getByRole('heading', { level: 1, name: 'Campanha de Educação & Esperança' })
     ).toBeVisible();

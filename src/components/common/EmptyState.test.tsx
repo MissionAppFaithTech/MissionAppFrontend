@@ -47,11 +47,11 @@ describe('EmptyState component', () => {
         title="Nenhuma campanha"
         description="Conheça outras causas e faça parte."
         actionLabel="Explorar campanhas"
-        actionHref="/campanhas"
+        actionHref="/campaigns"
       />
     );
 
     const link = screen.getByRole('link', { name: /explorar campanhas/i });
-    expect(link).toHaveAttribute('href', '/campanhas');
+    expect(link).toHaveAttribute('href', '/campaigns');
   });
 });

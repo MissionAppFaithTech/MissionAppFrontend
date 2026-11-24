@@ -10,7 +10,7 @@
 
 ## Contexto e Problema
 
-Algumas rotas do MissionApp são públicas e devem ser indexáveis: o perfil público do missionário (`/user/[username]`), a campanha (`/campanha/[id]`) e, no futuro, a busca (RF 1.4, RF 7, RF 13). O `docs/seo-and-ai-discoverability.md` já define metadata, JSON-LD (`Person`, `ProfilePage`, `DonateAction`) e `revalidate = 300` nessas páginas. Hoje elas mostram dados de `src/mocks/`, porque o backend ainda não tem GETs públicos de perfil, campanha ou busca.
+Algumas rotas do MissionApp são públicas e devem ser indexáveis: o perfil público do missionário (`/user/[username]`), a campanha (`/campaign/[id]`) e, no futuro, a busca (RF 1.4, RF 7, RF 13). O `docs/seo-and-ai-discoverability.md` já define metadata, JSON-LD (`Person`, `ProfilePage`, `DonateAction`) e `revalidate = 300` nessas páginas. Hoje elas mostram dados de `src/mocks/`, porque o backend ainda não tem GETs públicos de perfil, campanha ou busca.
 
 A primeira versão deste ADR propunha buscar no servidor e hidratar o TanStack Query. Com o modelo server-first ([ADR-0001](./0001-separacao-entre-estado-de-servidor-cliente-url-e-formulario.md), [ADR-0005](./0005-renderizacao-server-first-com-cache-components.md)), essa hidratação deixa de ser necessária: o Next.js 16 cacheia o dado compartilhado no servidor e o revalida por tag.
 
@@ -40,10 +40,10 @@ Nas rotas públicas indexáveis, o dado compartilhado é lido em Server Componen
 
 **Notas de implementação (2026-11-03):**
 
-- Implementado para o perfil público de missionário, com o endpoint anônimo do backend (`GET /api/v1/public/missionaries/:username`, ADR-0036 do backend). `getPublicProfile` (`src/lib/server/publicProfile.ts`) usa `'use cache'`, `cacheTag('profile:<username>')` e `cacheLife('public')` e serve `/user/[username]` e `/profile/missionario/[username]`, página e metadata. Campanha, projetos e posts esperam os endpoints públicos do backend.
+- Implementado para o perfil público de missionário, com o endpoint anônimo do backend (`GET /api/v1/public/missionaries/:username`, ADR-0036 do backend). `getPublicProfile` (`src/lib/server/publicProfile.ts`) usa `'use cache'`, `cacheTag('profile:<username>')` e `cacheLife('public')` e serve `/user/[username]` e `/profile/missionary/[username]`, página e metadata. Campanha, projetos e posts esperam os endpoints públicos do backend.
 - `publicBackendFetch` (`src/lib/api/public.ts`) envia o segredo do BFF sem o IP do visitante, o que coloca essas leituras no orçamento próprio do servidor do Next (600/min).
 - Username fora do formato do backend nem chega à API. Perfil inexistente, pendente, inativo ou excluído (o backend responde o mesmo 404) vai para `notFound()`, com o `not-found.tsx` da raiz em pt-BR e `noindex`. Falha da API vai para o `error.tsx` da rota, com "Tentar novamente".
-- Decisão do usuário (2026-11-03): **só dados reais**. Os usernames de exemplo (`_SamiMendonca`, `MariaSilva`…) também dão 404, e o perfil de exemplo saiu do `sitemap.xml`. Os links de exemplo em `/navegacao`, na campanha e em "missionários que sigo" ficam assim até essas telas terem dados reais.
+- Decisão do usuário (2026-11-03): **só dados reais**. Os usernames de exemplo (`_SamiMendonca`, `MariaSilva`…) também dão 404, e o perfil de exemplo saiu do `sitemap.xml`. Os links de exemplo em `/explore`, na campanha e em "missionários que sigo" ficam assim até essas telas terem dados reais.
 - O cabeçalho, as estatísticas e o "Sobre" vêm do backend. As abas sem API (projetos, postagens e campanha) mostram o selo "Dados de exemplo", e o JSON-LD descreve só o que é real (o projeto de exemplo fica de fora).
 - "Seguir" e "Doar" mantêm o comportamento atual, porque ainda não há endpoint para eles.
 

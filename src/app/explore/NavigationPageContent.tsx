@@ -136,7 +136,7 @@ const mockNavigationItems: NavigationItem[] = [
     description:
       'Mobilizando comunidades de fé para transformar a infância e capacitar novas gerações através do suporte educacional no campo missionário.',
     imageUrl: '/images/projects/projeto-impacto.jpg',
-    href: '/campanha/campanha-educacao-esperanca',
+    href: '/campaign/campanha-educacao-esperanca',
     hasBadge: true,
   },
   {
@@ -151,7 +151,7 @@ const mockNavigationItems: NavigationItem[] = [
     description:
       'Levando água potável, apoio nutricional e discipulado bíblico para mais de 300 crianças e suas famílias em aldeias do interior.',
     imageUrl: '/landing-page/background.png',
-    href: '/campanha/campanha-esperanca-mocambique',
+    href: '/campaign/campanha-esperanca-mocambique',
     hasBadge: true,
   },
 
@@ -1148,8 +1148,8 @@ export default function NavigationPageContent({
                 <PillButton
                   href={
                     activeViewMode === 'supporter'
-                      ? '/profile/supporter/missionarios'
-                      : '/profile/projetos-de-impacto'
+                      ? '/profile/supporter/missionaries'
+                      : '/profile/impact-projects'
                   }
                   tone="primarySoftOutline"
                   fullWidth
@@ -1162,8 +1162,8 @@ export default function NavigationPageContent({
                 <PillButton
                   href={
                     activeViewMode === 'supporter'
-                      ? '/profile/supporter/postagens-salvas'
-                      : '/profile/financeiro'
+                      ? '/profile/supporter/saved-posts'
+                      : '/profile/financial-settings'
                   }
                   tone="primarySoftOutline"
                   fullWidth
@@ -1302,7 +1302,7 @@ export default function NavigationPageContent({
       </Container>
 
       {/* Minimalist Mobile Navigation Bar: Dynamically switches among 3 views (Visitor: 3 icons, Missionary: 4 icons, Supporter: 4 icons) */}
-      <MobileNavigationBar viewMode={activeViewMode} searchHref="/navegacao" />
+      <MobileNavigationBar viewMode={activeViewMode} searchHref="/explore" />
     </Box>
   );
 }

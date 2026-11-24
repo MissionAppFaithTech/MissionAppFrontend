@@ -3,7 +3,7 @@ import { homePathForRole, postLoginPath, safeNextPath } from './redirect';
 
 describe('safeNextPath', () => {
   it.each([
-    ['/profile/sobre', '/profile/sobre'],
+    ['/profile/about', '/profile/about'],
     ['/profile?tab=1', '/profile?tab=1'],
     [null, null],
     ['', null],
@@ -27,18 +27,18 @@ describe('postLoginPath', () => {
   });
 
   it('keeps next inside the role area', () => {
-    expect(postLoginPath('MISSIONARY', '/profile/sobre/edit')).toBe('/profile/sobre/edit');
-    expect(postLoginPath('SUPPORTER', '/profile/supporter/missionarios')).toBe(
-      '/profile/supporter/missionarios'
+    expect(postLoginPath('MISSIONARY', '/profile/about/edit')).toBe('/profile/about/edit');
+    expect(postLoginPath('SUPPORTER', '/profile/supporter/missionaries')).toBe(
+      '/profile/supporter/missionaries'
     );
-    expect(postLoginPath('SUPPORTER', '/profile/missionario/samuel')).toBe(
-      '/profile/missionario/samuel'
+    expect(postLoginPath('SUPPORTER', '/profile/missionary/samuel')).toBe(
+      '/profile/missionary/samuel'
     );
   });
 
   it('lets any role return to public pages outside /profile', () => {
-    expect(postLoginPath('SUPPORTER', '/campanha/1')).toBe('/campanha/1');
-    expect(postLoginPath('MISSIONARY', '/campanha/1')).toBe('/campanha/1');
+    expect(postLoginPath('SUPPORTER', '/campaign/1')).toBe('/campaign/1');
+    expect(postLoginPath('MISSIONARY', '/campaign/1')).toBe('/campaign/1');
   });
 
   it('does not send a user into the other role area', () => {
@@ -48,9 +48,9 @@ describe('postLoginPath', () => {
 
   it('applies the RBAC areas to admins and to visitors', () => {
     expect(postLoginPath('ADMIN', null)).toBe('/admin');
-    expect(postLoginPath('ADMIN', '/profile/sobre')).toBe('/admin');
+    expect(postLoginPath('ADMIN', '/profile/about')).toBe('/admin');
     expect(postLoginPath('MISSIONARY', '/admin')).toBe('/profile');
-    expect(postLoginPath('ADMIN', '/campanha/1')).toBe('/campanha/1');
+    expect(postLoginPath('ADMIN', '/campaign/1')).toBe('/campaign/1');
   });
 
   it('checks the path without its query string', () => {

@@ -15,12 +15,12 @@ const publicRoutes: Array<{
     images: ['/landing-page/landing-page.png', '/landing-page/background.png'],
   },
   {
-    path: '/leve-o-mission-app-para-sua-igreja',
+    path: '/bring-mission-app-to-your-church',
     changeFrequency: 'weekly',
     priority: 0.9,
   },
   {
-    path: '/conselho-missionario',
+    path: '/missionary-council',
     changeFrequency: 'monthly',
     priority: 0.8,
   },

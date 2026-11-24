@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 import { featuredCampaign } from '@/lib/campaigns/featured';
 import Home from './page';
 
-const BRING_PATH = '/leve-o-mission-app-para-sua-igreja';
+const BRING_PATH = '/bring-mission-app-to-your-church';
 
 describe('Home page (Landing Page route /)', () => {
   it('leads with recurring campaigns and still offers missionaries to explore', () => {
@@ -24,10 +24,10 @@ describe('Home page (Landing Page route /)', () => {
     expect(within(heroSection).getAllByRole('link')).toHaveLength(2);
     expect(
       within(heroSection).getByRole('link', { name: 'Explorar Campanha Missionária' })
-    ).toHaveAttribute('href', `/campanha/${featuredCampaign.id}`);
+    ).toHaveAttribute('href', `/campaign/${featuredCampaign.id}`);
     expect(screen.getByRole('link', { name: 'Explorar missionários e projetos' })).toHaveAttribute(
       'href',
-      '/navegacao'
+      '/explore'
     );
     expect(screen.getByRole('link', { name: /comece agora/i })).toHaveAttribute(
       'href',
@@ -60,7 +60,7 @@ describe('Home page (Landing Page route /)', () => {
     expect(within(campaign).getByText(new RegExp(featuredCampaign.churchDay))).toBeVisible();
     expect(within(campaign).getByRole('link', { name: 'Ver a campanha' })).toHaveAttribute(
       'href',
-      `/campanha/${featuredCampaign.id}`
+      `/campaign/${featuredCampaign.id}`
     );
 
     const adoption = screen.getByRole('region', {
@@ -87,7 +87,7 @@ describe('Home page (Landing Page route /)', () => {
     const footerNav = screen.getByRole('navigation', { name: 'Links do rodapé' });
     expect(within(footerNav).getByRole('link', { name: 'Conselho missionário' })).toHaveAttribute(
       'href',
-      '/conselho-missionario'
+      '/missionary-council'
     );
     expect(
       within(footerNav).getByRole('link', { name: 'Leve o Mission App para sua igreja' })

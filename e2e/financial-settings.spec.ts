@@ -11,7 +11,7 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
     page,
   }) => {
     // 1. Navigate directly to financial settings route
-    await page.goto('/profile/financeiro');
+    await page.goto('/profile/financial-settings');
 
     // 2. Check Header & Status Badge
     await expect(
@@ -83,21 +83,21 @@ test.describe('Missionary Financial Settings E2E Flow', () => {
   });
 
   test('navigates to financial settings from the account menu', async ({ page }) => {
-    await page.goto('/profile/projetos-de-impacto');
+    await page.goto('/profile/impact-projects');
 
     await page.getByRole('button', { name: /abrir menu do perfil/i }).click();
     await page.getByRole('link', { name: /configurações financeiras/i }).click();
 
-    await page.waitForURL('**/profile/financeiro');
+    await page.waitForURL('**/profile/financial-settings');
     await expect(
       page.getByRole('heading', { level: 1, name: /configurações financeiras/i })
     ).toBeVisible();
 
-    // Verify "Voltar" button returns to /profile/sobre
+    // Verify "Voltar" button returns to /profile/about
     const backBtn = page.getByRole('link', { name: /voltar para o perfil/i }).first();
     await expect(backBtn).toBeVisible();
     await backBtn.click();
-    await page.waitForURL('**/profile/sobre');
+    await page.waitForURL('**/profile/about');
     await expect(page).toHaveURL(/\/profile\/sobre/);
   });
 });

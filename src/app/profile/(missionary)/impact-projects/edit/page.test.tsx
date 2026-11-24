@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import EditImpactProjectPage from '@/app/profile/(missionary)/projetos-de-impacto/edit/page';
-import { buildUpdate } from '@/app/profile/(missionary)/projetos-de-impacto/edit/ImpactProjectEditPageContent';
-import ImpactProjectsPage from '@/app/profile/(missionary)/projetos-de-impacto/page';
+import EditImpactProjectPage from '@/app/profile/(missionary)/impact-projects/edit/page';
+import { buildUpdate } from '@/app/profile/(missionary)/impact-projects/edit/ImpactProjectEditPageContent';
+import ImpactProjectsPage from '@/app/profile/(missionary)/impact-projects/page';
 import * as service from '@/services/impactProject.service';
 import { useFeedbackStore } from '@/stores/feedbackStore';
 import { OwnerProfileProvider } from '@/components/profile/OwnerProfileProvider';
@@ -19,7 +19,7 @@ const renderPage = (ui: React.ReactElement) =>
   );
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push, replace: vi.fn(), prefetch: vi.fn() }),
-  usePathname: () => '/profile/projetos-de-impacto',
+  usePathname: () => '/profile/impact-projects',
 }));
 
 vi.mock('@/services/impactProject.service', async (importOriginal) => ({
@@ -131,7 +131,7 @@ describe('EditImpactProjectPage', () => {
       })
     );
     expect(service.uploadCoverImage).toHaveBeenCalledWith(file);
-    expect(push).toHaveBeenCalledWith('/profile/projetos-de-impacto');
+    expect(push).toHaveBeenCalledWith('/profile/impact-projects');
     expect(useFeedbackStore.getState().current).toMatchObject({ severity: 'success' });
   });
 
@@ -181,7 +181,7 @@ describe('EditImpactProjectPage', () => {
     await user.click(await screen.findByRole('button', { name: /^excluir$/i }));
 
     await waitFor(() => expect(service.deleteImpactProject).toHaveBeenCalledWith('p-1'));
-    expect(push).toHaveBeenCalledWith('/profile/projetos-de-impacto');
+    expect(push).toHaveBeenCalledWith('/profile/impact-projects');
   });
 });
 

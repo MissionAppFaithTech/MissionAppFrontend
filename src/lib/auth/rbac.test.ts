@@ -17,13 +17,13 @@ describe('accessAreaFor', () => {
   it.each([
     ['/', 'public'],
     ['/login', 'public'],
-    ['/campanha/1', 'public'],
+    ['/campaign/1', 'public'],
     ['/profile', 'missionary'],
-    ['/profile/sobre/edit', 'missionary'],
+    ['/profile/about/edit', 'missionary'],
     ['/profile/supporter', 'supporter'],
-    ['/profile/supporter/missionarios', 'supporter'],
-    ['/profile/missionario/samuel', 'public'],
-    ['/profile/missionario', 'public'],
+    ['/profile/supporter/missionaries', 'supporter'],
+    ['/profile/missionary/samuel', 'public'],
+    ['/profile/missionary', 'public'],
     ['/profile/supporterx', 'missionary'],
     ['/admin', 'admin'],
     ['/admin/denuncias', 'admin'],
@@ -94,8 +94,8 @@ describe('accessDecision', () => {
   });
 
   it('allows a role inside its area and anyone on public pages', () => {
-    expect(accessDecision('MISSIONARY', '/profile/sobre')).toEqual({ allow: true });
-    expect(accessDecision(null, '/profile/missionario/samuel')).toEqual({ allow: true });
+    expect(accessDecision('MISSIONARY', '/profile/about')).toEqual({ allow: true });
+    expect(accessDecision(null, '/profile/missionary/samuel')).toEqual({ allow: true });
   });
 
   it('sends visitors to login with just the path when there is no query', () => {
@@ -106,14 +106,14 @@ describe('accessDecision', () => {
   });
 
   it('sends visitors to login, keeping the path and query in next', () => {
-    expect(accessDecision(null, '/profile/sobre', '?tab=1')).toEqual({
+    expect(accessDecision(null, '/profile/about', '?tab=1')).toEqual({
       allow: false,
-      redirectTo: `/login?next=${encodeURIComponent('/profile/sobre?tab=1')}`,
+      redirectTo: `/login?next=${encodeURIComponent('/profile/about?tab=1')}`,
     });
   });
 
   it('sends a role outside its area to its own home', () => {
-    expect(accessDecision('SUPPORTER', '/profile/financeiro')).toEqual({
+    expect(accessDecision('SUPPORTER', '/profile/financial-settings')).toEqual({
       allow: false,
       redirectTo: '/profile/supporter',
     });

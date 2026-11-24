@@ -13,7 +13,7 @@ const refresh = vi.fn();
 const router = { push, replace: vi.fn(), refresh, prefetch: vi.fn() };
 vi.mock('next/navigation', () => ({
   useRouter: () => router,
-  usePathname: () => '/profile/sobre/edit',
+  usePathname: () => '/profile/about/edit',
 }));
 
 vi.mock('@/services/profileSave.service', () => ({ saveProfileAbout: vi.fn() }));
@@ -50,7 +50,7 @@ describe('ProfileSobreEditContent', () => {
     await user.type(screen.getByLabelText(/versículo para a vida/i), '!');
     await user.click(screen.getByRole('button', { name: /salvar/i }));
 
-    await waitFor(() => expect(push).toHaveBeenCalledWith('/profile/sobre'));
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/profile/about'));
     expect(saveAbout).toHaveBeenCalledTimes(1);
     expect(saveAbout).toHaveBeenCalledWith({
       about: { lifeVerse: 'João 3:16!' },
@@ -66,14 +66,14 @@ describe('ProfileSobreEditContent', () => {
 
     expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
       'href',
-      '/profile/sobre'
+      '/profile/about'
     );
 
     await user.type(screen.getByLabelText(/versículo para a vida/i), '!');
     await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
     await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
 
-    expect(push).toHaveBeenCalledWith('/profile/sobre');
+    expect(push).toHaveBeenCalledWith('/profile/about');
     expect(saveAbout).not.toHaveBeenCalled();
     expect(refresh).not.toHaveBeenCalled();
     expect(useFeedbackStore.getState().current).toMatchObject({

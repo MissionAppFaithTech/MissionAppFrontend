@@ -23,8 +23,8 @@ describe('Logo', () => {
   });
 
   it('keeps an explicit destination without waiting for the session', async () => {
-    await renderWithSession(<Logo href="/navegacao" />, authenticatedSession('SUPPORTER'));
-    expect(screen.getByRole('link', { name: 'Mission App' })).toHaveAttribute('href', '/navegacao');
+    await renderWithSession(<Logo href="/explore" />, authenticatedSession('SUPPORTER'));
+    expect(screen.getByRole('link', { name: 'Mission App' })).toHaveAttribute('href', '/explore');
   });
 
   it('links to the landing page while the session is still streaming', () => {

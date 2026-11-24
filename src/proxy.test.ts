@@ -55,23 +55,23 @@ afterEach(() => {
 
 describe('proxy RBAC', () => {
   it('redirects logged-out visitors from private areas to login with next', async () => {
-    const res = await proxy(request('/profile/sobre/edit?tab=1'));
+    const res = await proxy(request('/profile/about/edit?tab=1'));
     expect(res.status).toBe(307);
     const target = new URL(res.headers.get('location') ?? '');
     expect(target.pathname).toBe('/login');
-    expect(target.searchParams.get('next')).toBe('/profile/sobre/edit?tab=1');
+    expect(target.searchParams.get('next')).toBe('/profile/about/edit?tab=1');
     expect(await redirectPath('/admin')).toBe('/login');
     expect(await redirectPath('/profile/supporter')).toBe('/login');
   });
 
   it('lets each role into its own area', async () => {
-    expect(await location('/profile/sobre', accessCookie('MISSIONARY'))).toBeNull();
-    expect(await location('/profile/supporter/missionarios', accessCookie('SUPPORTER'))).toBeNull();
+    expect(await location('/profile/about', accessCookie('MISSIONARY'))).toBeNull();
+    expect(await location('/profile/supporter/missionaries', accessCookie('SUPPORTER'))).toBeNull();
     expect(await location('/admin', accessCookie('ADMIN'))).toBeNull();
   });
 
   it('sends a role outside its area to its own home', async () => {
-    expect(await redirectPath('/profile/financeiro', accessCookie('SUPPORTER'))).toBe(
+    expect(await redirectPath('/profile/financial-settings', accessCookie('SUPPORTER'))).toBe(
       '/profile/supporter'
     );
     expect(await redirectPath('/profile/supporter', accessCookie('MISSIONARY'))).toBe('/profile');
@@ -85,8 +85,8 @@ describe('proxy RBAC', () => {
   });
 
   it('keeps public pages and BFF routes open', async () => {
-    expect(await location('/profile/missionario/samuel')).toBeNull();
-    expect(await location('/profile/missionario/samuel', accessCookie('SUPPORTER'))).toBeNull();
+    expect(await location('/profile/missionary/samuel')).toBeNull();
+    expect(await location('/profile/missionary/samuel', accessCookie('SUPPORTER'))).toBeNull();
     expect(await location('/')).toBeNull();
     expect(await location('/api/account/profile')).toBeNull();
   });
@@ -101,7 +101,7 @@ describe('proxy session refresh', () => {
   it('does nothing while the access token is still valid', async () => {
     const res = await proxy(
       request(
-        '/profile/sobre',
+        '/profile/about',
         `${accessCookie('MISSIONARY', valid())}; ${AUTH_COOKIE.refreshToken}=rt`
       )
     );
@@ -118,7 +118,7 @@ describe('proxy session refresh', () => {
     mockedRefresh.mockResolvedValue(NEW_TOKENS);
     const res = await proxy(
       request(
-        '/profile/sobre',
+        '/profile/about',
         `${accessCookie('MISSIONARY', expired())}; ${AUTH_COOKIE.refreshToken}=rt-old`
       )
     );
@@ -140,7 +140,9 @@ describe('proxy session refresh', () => {
       ...NEW_TOKENS,
       accessToken: token({ sub: 'u1', role: 'SUPPORTER', exp: valid() }),
     });
-    const res = await proxy(request('/profile/financeiro', `${AUTH_COOKIE.refreshToken}=rt-old`));
+    const res = await proxy(
+      request('/profile/financial-settings', `${AUTH_COOKIE.refreshToken}=rt-old`)
+    );
     expect(new URL(res.headers.get('location') ?? '').pathname).toBe('/profile/supporter');
     expect(res.headers.get('set-cookie')).toContain(`${AUTH_COOKIE.refreshToken}=rt-new`);
   });
@@ -156,7 +158,7 @@ describe('proxy session refresh', () => {
     mockedRefresh.mockRejectedValue(new BackendApiError('Refresh token inválido', 401));
     const res = await proxy(
       request(
-        '/profile/sobre',
+        '/profile/about',
         `${accessCookie('MISSIONARY', expired())}; ${AUTH_COOKIE.refreshToken}=rt-stolen`
       )
     );
@@ -183,7 +185,7 @@ describe('proxy session refresh', () => {
     );
     const expiredSession = () =>
       request(
-        '/profile/sobre',
+        '/profile/about',
         `${accessCookie('MISSIONARY', expired())}; ${AUTH_COOKIE.refreshToken}=rt-old`
       );
 
@@ -208,7 +210,7 @@ describe('proxy session refresh', () => {
     mockedRefresh.mockRejectedValue(new BackendApiError('Erro na API (503)', 503, {}));
     const expiredSession = () =>
       request(
-        '/profile/sobre',
+        '/profile/about',
         `${accessCookie('MISSIONARY', expired())}; ${AUTH_COOKIE.refreshToken}=rt-old`
       );
 
@@ -259,7 +261,7 @@ describe('proxy matcher', () => {
   const pattern = new RegExp(`^${config.matcher[0]}$`);
 
   it('runs on pages, Server Actions and BFF routes', () => {
-    for (const path of ['/', '/profile/sobre', '/api/auth/session', '/user/samuel']) {
+    for (const path of ['/', '/profile/about', '/api/auth/session', '/user/samuel']) {
       expect(pattern.test(path)).toBe(true);
     }
   });

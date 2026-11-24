@@ -26,10 +26,10 @@ describe('CampaignAdoptionGuide', () => {
     expect(within(region).getByText(/o mission app define o dia oficial/i)).toBeVisible();
     expect(
       within(region).getByRole('link', { name: 'Leve o Mission App para sua igreja' })
-    ).toHaveAttribute('href', '/leve-o-mission-app-para-sua-igreja');
+    ).toHaveAttribute('href', '/bring-mission-app-to-your-church');
     expect(
       within(region).getByRole('link', { name: 'Conhecer a campanha vigente' })
-    ).toHaveAttribute('href', `/campanha/${mockCampaign.id}`);
+    ).toHaveAttribute('href', `/campaign/${mockCampaign.id}`);
     // The summary keeps the kit and the QR code for the church guide.
     expect(within(region).queryByRole('img', { name: /QR Code/ })).not.toBeInTheDocument();
   });

@@ -63,7 +63,7 @@ describe('ProfileLayoutShell component', () => {
     });
 
     it('keeps the standard navbar on impact project edit page', () => {
-      mockPathname = '/profile/projetos-de-impacto/edit';
+      mockPathname = '/profile/impact-projects/edit';
       render(
         <ProfileLayoutShell profile={mockProfile} role="missionary">
           <div>Formulário de Edição de Projeto</div>
@@ -93,7 +93,7 @@ describe('ProfileLayoutShell component', () => {
     });
 
     it('keeps the standard navbar on financial settings page', () => {
-      mockPathname = '/profile/financeiro';
+      mockPathname = '/profile/financial-settings';
       render(
         <ProfileLayoutShell profile={mockProfile} role="missionary">
           <div>Formulário de Configurações Financeiras</div>

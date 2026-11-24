@@ -53,8 +53,8 @@ export type AccountSettingsViewProps = {
 
 /** Where "Voltar" leads: the user's own profile home. */
 const BACK_HREF: Record<AccountSettingsViewProps['role'], string> = {
-  missionary: '/profile/sobre',
-  supporter: '/profile/supporter/missionarios',
+  missionary: '/profile/about',
+  supporter: '/profile/supporter/missionaries',
 };
 
 /** Quick-nav chips: a control edge of ≥3:1 in both themes (WCAG 1.4.11). */

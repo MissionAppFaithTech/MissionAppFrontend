@@ -9,6 +9,6 @@ export default function ProfilePageContent() {
   const { about } = useOwnerProfile();
 
   return (
-    <ProfileAboutSection data={about} onEditAction={() => router.push('/profile/sobre/edit')} />
+    <ProfileAboutSection data={about} onEditAction={() => router.push('/profile/about/edit')} />
   );
 }

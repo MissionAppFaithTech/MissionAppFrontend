@@ -24,7 +24,7 @@ describe('MissionaryCampaignSection component', () => {
     // "Ver Página da Campanha" link
     expect(screen.getByRole('link', { name: /ver página da campanha/i })).toHaveAttribute(
       'href',
-      `/campanha/${mockCampaign.id}`
+      `/campaign/${mockCampaign.id}`
     );
   });
 

@@ -21,49 +21,46 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
 
   describe('View 1: Usuário Não Registrado / Visitante (3 ícones minimalistas)', () => {
     it('renders 3 minimalist navigation links: Explorar, Navegar e Entrar', () => {
-      render(<MobileNavigationBar isLoggedIn={false} searchHref="/navegacao" />);
+      render(<MobileNavigationBar isLoggedIn={false} searchHref="/explore" />);
 
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(3);
 
       expect(screen.getByRole('link', { name: /explorar/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/navegacao');
+      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/explore');
       expect(screen.getByRole('link', { name: /entrar/i })).toHaveAttribute('href', '/login');
     });
 
     it('renders visitor navigation links through VisitorBottomNav component', () => {
-      render(<VisitorBottomNav searchHref="/navegacao" searchLabel="Navegar" />);
+      render(<VisitorBottomNav searchHref="/explore" searchLabel="Navegar" />);
 
       expect(screen.getByRole('link', { name: /explorar/i })).toHaveAttribute('href', '/');
-      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/navegacao');
+      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/explore');
       expect(screen.getByRole('link', { name: /entrar/i })).toHaveAttribute('href', '/login');
     });
   });
 
   describe('View 2: Missionário (4 ícones: Perfil, Navegar, Projeto, Feed)', () => {
     it('renders 4 missionary navigation items with Projeto button and without Explorar', () => {
-      render(<MobileNavigationBar isLoggedIn={true} role="missionary" searchHref="/navegacao" />);
+      render(<MobileNavigationBar isLoggedIn={true} role="missionary" searchHref="/explore" />);
 
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(4);
 
       expect(screen.getByRole('link', { name: /^perfil$/i })).toHaveAttribute('href', '/profile');
-      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/navegacao');
+      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/explore');
       expect(screen.getByRole('link', { name: /^projeto$/i })).toHaveAttribute(
         'href',
-        '/profile/projetos-de-impacto'
+        '/profile/impact-projects'
       );
-      expect(screen.getByRole('link', { name: /feed/i })).toHaveAttribute(
-        'href',
-        '/profile/postagens'
-      );
+      expect(screen.getByRole('link', { name: /feed/i })).toHaveAttribute('href', '/profile/posts');
       expect(screen.queryByRole('link', { name: /explorar/i })).not.toBeInTheDocument();
     });
   });
 
   describe('View 3: Usuário Comum / Apoiador (4 ícones: Feed, Navegar, Campanha, Meu Perfil)', () => {
     it('renders 4 supporter navigation items with Campanha button and without Explorar', () => {
-      render(<MobileNavigationBar isLoggedIn={true} role="supporter" searchHref="/navegacao" />);
+      render(<MobileNavigationBar isLoggedIn={true} role="supporter" searchHref="/explore" />);
 
       const links = screen.getAllByRole('link');
       expect(links).toHaveLength(4);
@@ -72,10 +69,10 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
         'href',
         '/profile/supporter'
       );
-      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/navegacao');
-      expect(screen.getByRole('link', { name: /campanha/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/explore');
+      expect(screen.getByRole('link', { name: /campaign/i })).toHaveAttribute(
         'href',
-        '/campanha/campanha-educacao-esperanca'
+        '/campaign/campanha-educacao-esperanca'
       );
       expect(screen.getByRole('link', { name: /meu perfil/i })).toHaveAttribute(
         'href',
@@ -88,12 +85,12 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
       render(
         <MobileNavigationBar
           viewMode="supporter"
-          campaignHref="/campanha/campanha-esperanca-mocambique"
+          campaignHref="/campaign/campanha-esperanca-mocambique"
         />
       );
-      expect(screen.getByRole('link', { name: /campanha/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /campaign/i })).toHaveAttribute(
         'href',
-        '/campanha/campanha-esperanca-mocambique'
+        '/campaign/campanha-esperanca-mocambique'
       );
     });
   });
@@ -106,7 +103,7 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
     });
 
     it('does not render bottom nav bar on impact project edit page', () => {
-      mockCurrentPathname = '/profile/projetos-de-impacto/edit';
+      mockCurrentPathname = '/profile/impact-projects/edit';
       const { container } = render(<MobileNavigationBar viewMode="missionary" />);
       expect(container.firstChild).toBeNull();
     });
@@ -117,8 +114,8 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it('does not render bottom nav bar on missionary financial settings page (/profile/financeiro)', () => {
-      mockCurrentPathname = '/profile/financeiro';
+    it('does not render bottom nav bar on missionary financial settings page (/profile/financial-settings)', () => {
+      mockCurrentPathname = '/profile/financial-settings';
       const { container } = render(<MobileNavigationBar viewMode="missionary" />);
       expect(container.firstChild).toBeNull();
     });
@@ -144,7 +141,7 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
 
       rerender(<MobileNavigationBar viewMode="supporter" />);
       expect(screen.getAllByRole('link')).toHaveLength(4);
-      expect(screen.getByRole('link', { name: /campanha/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /campaign/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /meu perfil/i })).toBeInTheDocument();
     });
   });

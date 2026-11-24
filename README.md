@@ -295,21 +295,21 @@ Antes de abrir PR: `pnpm lint`, `pnpm format:check`, `pnpm typecheck`, `pnpm tes
 
 ## 🧭 Rotas principais
 
-| Rota                              | Descrição                                                                |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| `/`                               | Landing page                                                             |
-| `/select-role`                    | Escolha de perfil para cadastro                                          |
-| `/register/missionaries`          | Cadastro de missionário                                                  |
-| `/register/supporters`            | Cadastro de apoiador                                                     |
-| `/login`                          | Entrada na plataforma                                                    |
-| `/forgot-password`                | Solicitar link de redefinição                                            |
-| `/reset-password`                 | Definir nova senha (link do e-mail)                                      |
-| `/profile/sobre`                  | Área do missionário (perfil, "Sobre", projetos, campanha, configurações) |
-| `/profile/supporter`              | Área do apoiador                                                         |
-| `/user/[username]`                | Perfil público do missionário (dados da API; 404 se não aprovado/ativo)  |
-| `/profile/missionario/[username]` | Perfil do missionário visto pelo apoiador                                |
-| `/campanha/[id]`                  | Página de campanha (dados de exemplo)                                    |
-| `/conselho-missionario`           | Guia do conselho missionário                                             |
+| Rota                             | Descrição                                                                |
+| -------------------------------- | ------------------------------------------------------------------------ |
+| `/`                              | Landing page                                                             |
+| `/select-role`                   | Escolha de perfil para cadastro                                          |
+| `/register/missionaries`         | Cadastro de missionário                                                  |
+| `/register/supporters`           | Cadastro de apoiador                                                     |
+| `/login`                         | Entrada na plataforma                                                    |
+| `/forgot-password`               | Solicitar link de redefinição                                            |
+| `/reset-password`                | Definir nova senha (link do e-mail)                                      |
+| `/profile/about`                 | Área do missionário (perfil, "Sobre", projetos, campanha, configurações) |
+| `/profile/supporter`             | Área do apoiador                                                         |
+| `/user/[username]`               | Perfil público do missionário (dados da API; 404 se não aprovado/ativo)  |
+| `/profile/missionary/[username]` | Perfil do missionário visto pelo apoiador                                |
+| `/campaign/[id]`                 | Página de campanha (dados de exemplo)                                    |
+| `/missionary-council`            | Guia do conselho missionário                                             |
 
 ---
 

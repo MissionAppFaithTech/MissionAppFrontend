@@ -23,7 +23,7 @@ test('post CRUD through the BFF, real signed uploads and media processing', asyn
     .fill(backendEnvFile().SEED_USER_PASSWORD ?? 'password123');
   await page.getByRole('button', { name: 'Entrar', exact: true }).click();
   await expect(page).toHaveURL(/\/profile\//);
-  await page.goto('/profile/postagens');
+  await page.goto('/profile/posts');
   await page.getByRole('button', { name: 'Postar', exact: true }).click();
   await page.getByRole('textbox', { name: /legenda/i }).fill(caption);
   await page.getByRole('textbox', { name: 'Link opcional' }).fill('https://example.org/mission');

@@ -75,27 +75,27 @@ async function settleForScan(page: Page) {
 test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () => {
   const publicRoutes = [
     { name: 'Landing Page', path: '/' },
-    { name: 'Bring the Mission App to your church', path: '/leve-o-mission-app-para-sua-igreja' },
-    { name: 'Church Guide (Para Igrejas)', path: '/conselho-missionario' },
+    { name: 'Bring the Mission App to your church', path: '/bring-mission-app-to-your-church' },
+    { name: 'Church Guide (Para Igrejas)', path: '/missionary-council' },
     { name: 'Login Page', path: '/login' },
     { name: 'Forgot Password Page', path: '/forgot-password' },
     { name: 'Role Selection Page', path: '/select-role' },
     { name: 'Supporters Registration Page', path: '/register/supporters' },
     { name: 'Missionaries Registration Page', path: '/register/missionaries' },
-    { name: 'Missionary Profile (Sobre)', path: '/profile/sobre' },
+    { name: 'Missionary Profile (Sobre)', path: '/profile/about' },
     { name: 'Missionary Profile (Edit header)', path: '/profile/edit-profile' },
-    { name: 'Missionary Profile (Edit Sobre)', path: '/profile/sobre/edit' },
-    { name: 'Missionary Profile (Postagens)', path: '/profile/postagens' },
-    { name: 'Missionary Profile (Campanha)', path: '/profile/campanha' },
-    { name: 'Missionary Profile (Projetos de Impacto)', path: '/profile/projetos-de-impacto' },
+    { name: 'Missionary Profile (Edit Sobre)', path: '/profile/about/edit' },
+    { name: 'Missionary Profile (Postagens)', path: '/profile/posts' },
+    { name: 'Missionary Profile (Campanha)', path: '/profile/campaign' },
+    { name: 'Missionary Profile (Projetos de Impacto)', path: '/profile/impact-projects' },
     {
       name: 'Missionary Profile (Projeto de Impacto - criar/editar)',
-      path: '/profile/projetos-de-impacto/edit',
+      path: '/profile/impact-projects/edit',
     },
-    { name: 'Missionary Profile (Financial Settings)', path: '/profile/financeiro' },
-    { name: 'Account Settings (Sessões ativas)', path: '/profile/configuracoes' },
-    { name: 'Supporter Profile (Following)', path: '/profile/supporter/missionarios' },
-    { name: 'Supporter Profile (Saved Posts)', path: '/profile/supporter/postagens-salvas' },
+    { name: 'Missionary Profile (Financial Settings)', path: '/profile/financial-settings' },
+    { name: 'Account Settings (Sessões ativas)', path: '/profile/settings' },
+    { name: 'Supporter Profile (Following)', path: '/profile/supporter/missionaries' },
+    { name: 'Supporter Profile (Saved Posts)', path: '/profile/supporter/saved-posts' },
   ];
 
   // Owner pages need a session since src/proxy.ts; the BFF is mocked with fixtures.
@@ -153,7 +153,7 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   test('DonationModal open dialog satisfies WCAG 2.2 AA accessibility standards', async ({
     page,
   }) => {
-    await page.goto('/profile/campanha', { waitUntil: 'domcontentloaded' });
+    await page.goto('/profile/campaign', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(300);
 
     await openDialog(page, page.getByRole('button', { name: /ofertar/i }).first());
@@ -177,7 +177,7 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   test('ContactModal open dialog satisfies WCAG 2.2 AA accessibility standards', async ({
     page,
   }) => {
-    await page.goto('/profile/sobre', { waitUntil: 'domcontentloaded' });
+    await page.goto('/profile/about', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(300);
 
     await openDialog(page, page.getByRole('button', { name: /contato/i }));
@@ -199,7 +199,7 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
   });
 
   test('accessibility preferences dialog satisfies WCAG 2.2 AA', async ({ page }) => {
-    await page.goto('/profile/sobre', { waitUntil: 'domcontentloaded' });
+    await page.goto('/profile/about', { waitUntil: 'domcontentloaded' });
     await openDialog(
       page,
       page.getByRole('button', { name: /preferências de acessibilidade/i }).first()
@@ -226,7 +226,7 @@ test.describe('Automated Accessibility (a11y) Verification - WCAG 2.2 AA', () =>
         },
         { theme: scheme }
       );
-      await page.goto('/profile/sobre', { waitUntil: 'domcontentloaded' });
+      await page.goto('/profile/about', { waitUntil: 'domcontentloaded' });
       await expect(page.locator('html')).toHaveAttribute('data-a11y-contrast', 'high');
       await expect(page.locator('html')).toHaveAttribute('data-a11y-font-scale', '130');
       await page.getByRole('heading', { name: 'Sobre', exact: true }).waitFor();
@@ -248,7 +248,7 @@ test.describe('Keyboard and motion', () => {
   });
 
   test('the skip link is the first tab stop and moves focus to main content', async ({ page }) => {
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
     await page.getByRole('heading', { name: 'Sobre', exact: true }).waitFor();
     // NOTE: the Suspense fallback renders its own shell (and <main>) until the
     // profile streams in; test the keyboard once the page has settled on one.
@@ -268,7 +268,7 @@ test.describe('Keyboard and motion', () => {
   test('Escape closes the preferences dialog and returns focus to its trigger', async ({
     page,
   }) => {
-    await page.goto('/profile/sobre');
+    await page.goto('/profile/about');
     const trigger = page.getByRole('button', { name: /preferências de acessibilidade/i }).first();
     await openDialog(page, trigger);
 
@@ -281,7 +281,7 @@ test.describe('Keyboard and motion', () => {
   test('the Sobre edit form shows errors next to the fields and focuses the first one', async ({
     page,
   }) => {
-    await page.goto('/profile/sobre/edit');
+    await page.goto('/profile/about/edit');
     const city = page.getByLabel(/^cidade$/i).filter({ visible: true });
     await city.fill('');
     await page.getByRole('button', { name: /^salvar$/i }).click();
@@ -295,7 +295,7 @@ test.describe('Keyboard and motion', () => {
 
   test('reduce motion stops the campaign carousel from advancing on its own', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/profile/campanha');
+    await page.goto('/profile/campaign');
     const zoom = page.getByRole('button', { name: /ampliar imagem 1 de/i });
     await zoom.waitFor();
 

@@ -20,7 +20,7 @@ export const mockCampaign: CampaignData = {
   startDate: '2026-09-01',
   endDate: '2026-11-30',
   redirectUrl: 'https://github.com/MissionAppFaithTech',
-  shareUrl: '/campanha/campanha-educacao-esperanca',
+  shareUrl: '/campaign/campanha-educacao-esperanca',
   status: 'publicada',
   missionaryName: 'Samuel Mendonça',
   associatedImpactProjects: [
@@ -58,7 +58,7 @@ export const mockCampaignMaria: CampaignData = {
   startDate: '2026-09-01',
   endDate: '2026-12-15',
   redirectUrl: 'https://github.com/MissionAppFaithTech',
-  shareUrl: '/campanha/campanha-esperanca-mocambique',
+  shareUrl: '/campaign/campanha-esperanca-mocambique',
   status: 'publicada',
   missionaryName: 'Maria Silva',
   associatedImpactProjects: [
@@ -96,7 +96,7 @@ export const mockCampaignLucas: CampaignData = {
   startDate: '2026-10-01',
   endDate: '2026-12-31',
   redirectUrl: 'https://github.com/MissionAppFaithTech',
-  shareUrl: '/campanha/campanha-alento-nepal',
+  shareUrl: '/campaign/campanha-alento-nepal',
   status: 'publicada',
   missionaryName: 'Lucas Moreira',
   associatedImpactProjects: [

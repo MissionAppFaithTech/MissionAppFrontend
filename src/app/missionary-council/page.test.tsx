@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import ChurchCouncilGuidePage from './page';
 
-describe('ChurchCouncilGuidePage (/conselho-missionario)', () => {
+describe('ChurchCouncilGuidePage (/missionary-council)', () => {
   it('renders page layout with main landmark and guide view content', () => {
     render(<ChurchCouncilGuidePage />);
 

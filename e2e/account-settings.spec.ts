@@ -9,7 +9,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   });
 
   test('"Voltar" opens the profile', async ({ page }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     const back = page.getByRole('link', { name: 'Voltar para o perfil' }).filter({ visible: true });
     await expect(back).toHaveCount(2);
@@ -19,7 +19,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   });
 
   test('"Cancelar" restores the ecclesiastical data without leaving the page', async ({ page }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     const community = page
       .getByRole('combobox', { name: /Comunidade de Fé \(Igreja\)/ })
@@ -44,7 +44,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   });
 
   test('updates the login email with current password confirmation', async ({ page }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     await page.getByLabel('Novo E-mail').fill('samuel.novo@privado.test');
     await page.getByLabel('Senha Atual (para confirmar)').fill('Senha@123');
@@ -56,7 +56,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   test('displays API validation errors when changing email with wrong password or taken email', async ({
     page,
   }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     await page.getByLabel('Novo E-mail').fill('usado@missionapp.test');
     await page.getByLabel('Senha Atual (para confirmar)').fill('Senha@123');
@@ -74,7 +74,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   test('triggers password reset email link and displays confirmation feedback', async ({
     page,
   }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     await page.getByRole('button', { name: 'Enviar Link de Redefinição para meu E-mail' }).click();
 
@@ -82,7 +82,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   });
 
   test('edits the linked faith community details in the modal', async ({ page }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     await page.getByRole('button', { name: 'Editar dados da comunidade' }).click();
     const dialog = page.getByRole('dialog');
@@ -99,7 +99,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
   });
 
   test('changes the password directly and redirects to login', async ({ page }) => {
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     await page.getByLabel('Senha Atual', { exact: true }).fill('Senha@123');
     await page.getByLabel('Nova Senha', { exact: true }).fill('NovaSenha@123');
@@ -113,7 +113,7 @@ test.describe('Configurações de Conta — Voltar e Cancelar', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
 
     const save = page
       .getByRole('button', { name: 'Salvar Dados Eclesiásticos' })

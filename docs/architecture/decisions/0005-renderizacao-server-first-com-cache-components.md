@@ -22,7 +22,7 @@ O Next.js 16.4 instalado oferece **Cache Components** (`cacheComponents: true`),
 - `use cache: private` para dados por usuário: pode ler `cookies()`, mas não é guardado no servidor, só na memória do navegador pelo tempo `stale` (`03-api-reference/01-directives/use-cache-private.md`);
 - uma regra estrita: leitura de dados de runtime (`cookies()`, `headers()`, `searchParams`) fora de `use cache` precisa estar sob `<Suspense>`, senão o build falha (`02-guides/authentication-with-cache-components.md`).
 
-Ativar a flag quebra as **9 exportações `revalidate`** atuais (`app/page.tsx`, `campanha/[id]`, `navegacao`, `login`, `conselho-missionario`, `user/[username]`, `register/missionaries`, `register/supporters`, `select-role`).
+Ativar a flag quebra as **9 exportações `revalidate`** atuais (`app/page.tsx`, `campanha/[id]`, `explore`, `login`, `missionary-council`, `user/[username]`, `register/missionaries`, `register/supporters`, `select-role`).
 
 A questão central é: **como renderizar no servidor as páginas autenticadas e públicas, com cache onde ele cabe, sem tornar a árvore inteira dinâmica?**
 

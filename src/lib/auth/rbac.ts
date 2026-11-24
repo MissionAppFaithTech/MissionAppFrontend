@@ -36,7 +36,7 @@ export function homePathForRole(role: BackendRole | null | undefined): string {
 /** Which area a path belongs to. Public missionary profiles stay open to everyone. */
 export function accessAreaFor(pathname: string): AccessArea {
   if (isUnder(pathname, '/admin')) return 'admin';
-  if (isUnder(pathname, '/profile/missionario')) return 'public';
+  if (isUnder(pathname, '/profile/missionary')) return 'public';
   if (isUnder(pathname, '/profile/supporter')) return 'supporter';
   if (isUnder(pathname, '/profile')) return 'missionary';
   return 'public';

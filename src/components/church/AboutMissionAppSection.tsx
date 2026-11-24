@@ -53,7 +53,7 @@ const HOW_STEPS: HowStep[] = [
   {
     title: 'Fortaleça o conselho missionário',
     text: 'Siga o guia com o passo a passo, as funções, o curso em vídeo e os modelos para estruturar o conselho missionário.',
-    href: '/conselho-missionario#checklist',
+    href: '/missionary-council#checklist',
     linkLabel: 'Aprender a fundar o conselho missionário',
   },
 ];

@@ -33,7 +33,7 @@ type SupporterEditFormProps = {
   profile: ProfileData;
 };
 
-const BACK_HREF = '/profile/supporter/missionarios';
+const BACK_HREF = '/profile/supporter/missionaries';
 
 function toFormValues(profile: ProfileData): SupporterEditFormData {
   return {

@@ -78,7 +78,7 @@ describe('SupporterEditForm Component', () => {
     // Action Buttons
     expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
       'href',
-      '/profile/supporter/missionarios'
+      '/profile/supporter/missionaries'
     );
     expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
@@ -169,7 +169,7 @@ describe('SupporterEditForm Component', () => {
     const dialog = screen.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
     await user.click(within(dialog).getByRole('button', { name: 'Descartar e voltar' }));
 
-    expect(push).toHaveBeenCalledWith('/profile/supporter/missionarios');
+    expect(push).toHaveBeenCalledWith('/profile/supporter/missionaries');
   });
 
   it('shows a failed photo send in the dialog', async () => {

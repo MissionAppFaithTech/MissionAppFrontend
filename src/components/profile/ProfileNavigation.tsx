@@ -11,28 +11,28 @@ const missionarySections = [
   {
     label: 'Sobre',
     mobileLabel: 'Sobre',
-    href: '/profile/sobre',
+    href: '/profile/about',
   },
   {
     label: 'Projetos de Impacto',
     mobileLabel: 'Projetos',
-    href: '/profile/projetos-de-impacto',
+    href: '/profile/impact-projects',
   },
   {
     label: 'Postagens',
     mobileLabel: 'Postagens',
-    href: '/profile/postagens',
+    href: '/profile/posts',
   },
   {
     label: 'Campanha',
     mobileLabel: 'Campanha',
-    href: '/profile/campanha',
+    href: '/profile/campaign',
   },
 ] as const;
 
 const supporterSections = [
-  { label: 'Seguindo', mobileLabel: 'Seguindo', href: '/profile/supporter/missionarios' },
-  { label: 'Salvos', mobileLabel: 'Salvos', href: '/profile/supporter/postagens-salvas' },
+  { label: 'Seguindo', mobileLabel: 'Seguindo', href: '/profile/supporter/missionaries' },
+  { label: 'Salvos', mobileLabel: 'Salvos', href: '/profile/supporter/saved-posts' },
 ] as const;
 
 type ProfileNavigationProps = {

@@ -25,32 +25,32 @@ describe('ProfileSearchField component', () => {
     expect(input).toHaveAttribute('readonly');
   });
 
-  it('navigates to /navegacao on mouse click', async () => {
+  it('navigates to /explore on mouse click', async () => {
     const user = userEvent.setup();
     render(<ProfileSearchField />);
 
     const input = screen.getByPlaceholderText('Pesquisar missionário');
     await user.click(input);
 
-    expect(mockPush).toHaveBeenCalledWith('/navegacao');
+    expect(mockPush).toHaveBeenCalledWith('/explore');
   });
 
-  it('navigates to /navegacao on Enter key press', () => {
+  it('navigates to /explore on Enter key press', () => {
     render(<ProfileSearchField />);
 
     const input = screen.getByPlaceholderText('Pesquisar missionário');
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
-    expect(mockPush).toHaveBeenCalledWith('/navegacao');
+    expect(mockPush).toHaveBeenCalledWith('/explore');
   });
 
-  it('navigates to /navegacao on Space key press', () => {
+  it('navigates to /explore on Space key press', () => {
     render(<ProfileSearchField />);
 
     const input = screen.getByPlaceholderText('Pesquisar missionário');
     fireEvent.keyDown(input, { key: ' ', code: 'Space' });
 
-    expect(mockPush).toHaveBeenCalledWith('/navegacao');
+    expect(mockPush).toHaveBeenCalledWith('/explore');
   });
 
   it('navigates to custom href when provided', async () => {

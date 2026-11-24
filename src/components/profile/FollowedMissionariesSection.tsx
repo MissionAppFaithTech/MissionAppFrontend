@@ -52,7 +52,7 @@ export default function FollowedMissionariesSection({
               <Box
                 key={missionary.id}
                 component={Link}
-                href={`/profile/missionario/${missionary.username}`}
+                href={`/profile/missionary/${missionary.username}`}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',

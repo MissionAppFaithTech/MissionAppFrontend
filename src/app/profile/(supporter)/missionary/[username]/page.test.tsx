@@ -10,7 +10,7 @@ vi.mock('./MissionaryProfileContent', () => ({
   MissionaryProfileBody: () => <div data-testid="missionary-profile-body" />,
 }));
 
-describe('Supporter Missionary Route (/profile/supporter/missionario/[username])', () => {
+describe('Supporter Missionary Route (/profile/missionary/[username])', () => {
   it('generates proper title metadata for missionary', async () => {
     vi.mocked(getPublicProfile).mockResolvedValue(publicProfileFixture);
     const meta = await generateMetadata({

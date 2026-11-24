@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import FinancialSettingsPage from './page';
 
-describe('FinancialSettingsPage (/profile/financeiro)', () => {
+describe('FinancialSettingsPage (/profile/financial-settings)', () => {
   it('renders financial configuration page with title, methods and save button', () => {
     render(<FinancialSettingsPage />);
 

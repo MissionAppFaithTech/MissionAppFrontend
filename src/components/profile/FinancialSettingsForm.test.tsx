@@ -49,7 +49,7 @@ describe('FinancialSettingsForm Component', () => {
 
     const backButtons = screen.getAllByRole('link', { name: /voltar/i });
     expect(backButtons.length).toBeGreaterThanOrEqual(1);
-    expect(backButtons[0]).toHaveAttribute('href', '/profile/sobre');
+    expect(backButtons[0]).toHaveAttribute('href', '/profile/about');
   });
 
   it('updates supporter message and character counter dynamically', async () => {

@@ -200,7 +200,7 @@ test.describe('Configurações — cadastrar agência que falta', () => {
     // One user per test: the specs run in parallel and save links.
     const user = `e2e-catalog-${testInfo.title}-${testInfo.project.name}-${testInfo.repeatEachIndex}`;
     await mockMissionarySession(page, page.context(), user.replace(/\W+/g, '-'));
-    await page.goto('/profile/configuracoes');
+    await page.goto('/profile/settings');
     // Type only after hydration, or React puts the saved name back.
     await page.waitForLoadState('networkidle');
   });

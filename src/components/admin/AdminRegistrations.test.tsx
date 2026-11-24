@@ -21,7 +21,7 @@ describe('AdminRegistrations', () => {
     const table = screen.getByRole('table');
     expect(
       within(table).getByRole('link', { name: 'Ver cadastro de Ana Carolina Silva' })
-    ).toHaveAttribute('href', '/admin/missionarios/1');
+    ).toHaveAttribute('href', '/admin/missionaries/1');
     expect(within(table).getAllByRole('row')).toHaveLength(9);
     expect(screen.getByText('Exibindo 1–8 de 12 missionários')).toBeInTheDocument();
   });

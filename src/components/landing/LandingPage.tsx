@@ -90,7 +90,7 @@ const footerLinks = [
   { label: 'Leve o Mission App para sua igreja', href: BRING_MISSION_APP_PATH },
   { label: 'Conselho missionário', href: CHURCH_COUNCIL_PATH },
   { label: 'Campanha vigente', href: campaignPath(featuredCampaign) },
-  { label: 'Explorar missionários', href: '/navegacao' },
+  { label: 'Explorar missionários', href: '/explore' },
   { label: 'Perguntas frequentes', href: '/#faq' },
   { label: 'Entrar', href: '/login' },
 ];
@@ -679,7 +679,7 @@ export default function LandingPage() {
                 sx={{ flexShrink: 0, '& > *': { width: { xs: '100%', sm: 'auto', md: '100%' } } }}
               >
                 <PillButton
-                  href="/navegacao"
+                  href="/explore"
                   tone="softBlue"
                   sx={{ minHeight: 48, px: 3.5, fontWeight: 700, justifyContent: 'center' }}
                 >
