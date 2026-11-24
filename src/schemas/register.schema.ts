@@ -14,9 +14,7 @@ export const missionaryStep1Schema = z.object({
     .trim()
     .min(1, 'Informe seu nome completo')
     .max(255, 'Use no máximo 255 caracteres'),
-  birthDate: z
-    .string()
-    .min(1, 'Informe sua data de nascimento'),
+  birthDate: z.string().min(1, 'Informe sua data de nascimento'),
   gender: z.enum(['feminino', 'masculino'], {
     message: 'Selecione o gênero',
   }),
@@ -97,9 +95,7 @@ export const supporterStep1Schema = z
       .trim()
       .min(1, 'Informe seu nome completo')
       .max(255, 'Use no máximo 255 caracteres'),
-    birthDate: z
-      .string()
-      .min(1, 'Informe sua data de nascimento'),
+    birthDate: z.string().min(1, 'Informe sua data de nascimento'),
     gender: z.enum(['feminino', 'masculino'], {
       message: 'Selecione o gênero',
     }),
