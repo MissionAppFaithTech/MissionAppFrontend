@@ -680,7 +680,7 @@ export default function LandingPage() {
               >
                 <PillButton
                   href="/navegacao"
-                  tone="missionFilled"
+                  tone="softBlue"
                   sx={{ minHeight: 48, px: 3.5, fontWeight: 700, justifyContent: 'center' }}
                 >
                   Explorar missionários e projetos
@@ -944,7 +944,7 @@ export default function LandingPage() {
                     </Typography>
                     <PillButton
                       href="/select-role"
-                      tone="missionFlat"
+                      tone="cta"
                       size="small"
                       sx={{
                         py: 0.5,

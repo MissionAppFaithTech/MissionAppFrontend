@@ -32,7 +32,7 @@ export default function EmptyState({
   actionLabel,
   actionHref,
   onAction,
-  actionTone = 'missionFlat',
+  actionTone = 'cta',
   children,
 }: EmptyStateProps) {
   return (

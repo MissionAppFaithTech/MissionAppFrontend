@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import CollectionsOutlinedIcon from '@mui/icons-material/CollectionsOutlined';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
@@ -15,8 +14,6 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PhotoLightbox from '@/components/common/PhotoLightbox';
@@ -24,6 +21,7 @@ import PillButton from '@/components/common/PillButton';
 import DonationModal from '@/components/profile/DonationModal';
 import ReportKebabMenu from '@/components/report/ReportKebabMenu';
 import { getVideoEmbedUrl, getYouTubeEmbedUrl } from '@/lib/youtube';
+import { BUTTON_BORDER_RADIUS } from '@/theme/theme';
 import type { ImpactProjectData } from '@/types/profile';
 
 type ImpactProjectCardProps = {
@@ -57,18 +55,9 @@ export default function ImpactProjectCard({
   missionaryName = 'Samuel Mendonça',
   onEdit,
 }: ImpactProjectCardProps) {
-  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [donationModalOpen, setDonationModalOpen] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setMenuAnchor(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setMenuAnchor(null);
-  };
 
   const bannerImage = project.bannerUrl || project.imageUrl;
   const galleryPhotos = project.galleryImages ?? project.images ?? [];
@@ -135,6 +124,38 @@ export default function ImpactProjectCard({
             </Box>
           )}
 
+          {/* Editar (dono): sobre a capa, como o "Editar" do Sobre. */}
+          {isOwnProfile ? (
+            <Box
+              sx={{
+                position: 'absolute',
+                top: { xs: 12, sm: 16 },
+                right: { xs: 12, sm: 16 },
+                // Solid ground under the soft outline so it reads over any photo, in both schemes.
+                bgcolor: 'background.paper',
+                borderRadius: BUTTON_BORDER_RADIUS,
+              }}
+            >
+              <PillButton
+                href="/profile/projetos-de-impacto/edit"
+                tone="primarySoftOutline"
+                size="small"
+                aria-label="Editar projeto de impacto"
+                onClick={onEdit}
+                startIcon={<EditOutlinedIcon aria-hidden />}
+                sx={{
+                  minWidth: 44,
+                  px: { xs: 1, sm: 1.75 },
+                  '& .MuiButton-startIcon': { mr: { xs: 0, sm: 0.5 }, ml: 0 },
+                }}
+              >
+                <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                  Editar
+                </Box>
+              </PillButton>
+            </Box>
+          ) : null}
+
           {/* Selos / Badges sobrepostos ao banner */}
           <Box
             sx={{
@@ -184,7 +205,7 @@ export default function ImpactProjectCard({
           }}
         >
           <Stack spacing={{ xs: 2.5, sm: 3 }}>
-            {/* 2. Cabeçalho do Card: Título e Kebab Menu */}
+            {/* 2. Cabeçalho do Card: Título */}
             <Stack
               direction="row"
               sx={{ alignItems: 'flex-start', justifyContent: 'space-between', gap: 1 }}
@@ -217,48 +238,11 @@ export default function ImpactProjectCard({
                 </Typography>
               </Box>
 
-              {/* Kebab Menu (3 pontos): editar (dono) ou denunciar (visitante, RF 16.2) */}
-              {isOwnProfile ? (
-                <>
-                  <IconButton
-                    aria-label="Mais opções do projeto"
-                    size="small"
-                    onClick={handleOpenMenu}
-                    sx={{
-                      color: 'text.secondary',
-                      minWidth: 44,
-                      minHeight: 44,
-                      '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' },
-                    }}
-                  >
-                    <MoreVertIcon />
-                  </IconButton>
-                </>
-              ) : (
+              {/* Visitante: denunciar (RF 16.2). O dono edita pelo botão sobre a capa. */}
+              {!isOwnProfile ? (
                 <ReportKebabMenu targetType="project" targetId={project.id} />
-              )}
+              ) : null}
             </Stack>
-
-            {isOwnProfile ? (
-              <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={handleCloseMenu}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              >
-                <MenuItem
-                  component={Link}
-                  href="/profile/projetos-de-impacto/edit"
-                  onClick={() => {
-                    handleCloseMenu();
-                    onEdit?.();
-                  }}
-                >
-                  Editar projeto
-                </MenuItem>
-              </Menu>
-            ) : null}
 
             {/* 3. Descrição do Projeto */}
             <Typography
@@ -321,7 +305,7 @@ export default function ImpactProjectCard({
             {/* 6. Ação de Ofertar (Movida para cima, entre vídeo e fotos) */}
             <Box sx={{ pt: 1, pb: 1, display: 'flex', justifyContent: 'center' }}>
               <PillButton
-                tone="missionFilled"
+                tone="softBlue"
                 size="medium"
                 onClick={() => setDonationModalOpen(true)}
                 sx={{
@@ -331,17 +315,6 @@ export default function ImpactProjectCard({
                   px: 4,
                   fontSize: '0.95rem',
                   fontWeight: 700,
-                  bgcolor: (theme) =>
-                    theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                  color: 'mission.contrastText',
-                  '&:hover': {
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
-                  },
-                  boxShadow: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'var(--app-shadow-accent)'
-                      : 'var(--app-shadow-accent)',
                 }}
               >
                 <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />

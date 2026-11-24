@@ -75,7 +75,7 @@ export default function LockedContentNotice({
             </PillButton>
             <PillButton
               href={registerHref}
-              tone="missionFilled"
+              tone="primaryFilled"
               size="small"
               sx={{ px: 2.5, py: 0.75, minHeight: 38 }}
             >

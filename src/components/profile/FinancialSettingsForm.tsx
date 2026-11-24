@@ -681,7 +681,7 @@ export default function FinancialSettingsForm({
                   Visualizar Prévia
                 </PillButton>
 
-                <PillButton type="submit" tone="missionFilled" size="medium" sx={{ px: 4 }}>
+                <PillButton type="submit" tone="primaryFilled" size="medium" sx={{ px: 4 }}>
                   <SaveOutlinedIcon sx={{ fontSize: 18, mr: 0.75 }} />
                   Salvar Configurações
                 </PillButton>

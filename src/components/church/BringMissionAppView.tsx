@@ -89,7 +89,7 @@ export default function BringMissionAppView() {
             <PillButton
               href="#campanha-recorrente"
               onClick={scrollTo('campanha-recorrente')}
-              tone="missionFilled"
+              tone="primaryFilled"
               sx={{ minHeight: 48, px: 3, fontWeight: 700, justifyContent: 'center' }}
             >
               Adotar a campanha vigente

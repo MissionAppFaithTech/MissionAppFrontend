@@ -278,7 +278,7 @@ CPF/CNPJ: ${bankData.documento}`;
                       {pixKey}
                     </Typography>
                     <PillButton
-                      tone="missionFilled"
+                      tone="primaryFilled"
                       size="small"
                       onClick={() => handleCopy(pixKey, 'Chave Pix')}
                       sx={{
@@ -334,7 +334,7 @@ CPF/CNPJ: ${bankData.documento}`;
 
                 <Box sx={{ pt: 1 }}>
                   <PillButton
-                    tone="missionFilled"
+                    tone="primaryFilled"
                     size="medium"
                     onClick={handleCopyAllBank}
                     sx={{ width: '100%', minHeight: 44, fontSize: '0.875rem' }}

@@ -19,7 +19,7 @@ export default function BringMissionAppButton({
   return (
     <PillButton
       href={BRING_MISSION_APP_PATH}
-      tone="missionFilled"
+      tone="softBlue"
       startIcon={<ChurchIcon aria-hidden />}
       // NOTE: one object, so PillButton can lift the scalar minHeight over its own
       sx={{
@@ -29,7 +29,6 @@ export default function BringMissionAppButton({
         fontSize: { xs: '0.9375rem', md: '1rem' },
         justifyContent: 'center',
         width: { xs: '100%', sm: 'auto' },
-        boxShadow: 'var(--app-shadow-accent)',
         ...(sx as object),
       }}
       {...props}

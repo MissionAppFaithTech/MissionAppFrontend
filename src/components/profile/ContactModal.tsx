@@ -163,7 +163,7 @@ export default function ContactModal({
                   ) : null}
                   {allowWhatsapp ? (
                     <PillButton
-                      tone="missionFilled"
+                      tone="primaryFilled"
                       size="small"
                       href={waLink}
                       target="_blank"

@@ -31,6 +31,27 @@ describe('ImpactProjectCard Component', () => {
     expect(screen.getByRole('radiogroup', { name: /denunciando este projeto/ })).toBeVisible();
   });
 
+  it('gives the owner an "Editar" button over the cover instead of the kebab', () => {
+    render(<ImpactProjectCard project={mockProject} isOwnProfile />);
+
+    const edit = screen.getByRole('link', { name: 'Editar projeto de impacto' });
+    expect(edit).toHaveAttribute('href', '/profile/projetos-de-impacto/edit');
+    expect(
+      screen.queryByRole('button', { name: 'Mais opções do projeto' })
+    ).not.toBeInTheDocument();
+    // Sits in the cover area, before the title.
+    const title = screen.getByRole('heading', { name: /projeto social na favela do lixão/i });
+    expect(edit.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('does not offer "Editar" to a visitor', () => {
+    render(<ImpactProjectCard project={mockProject} isOwnProfile={false} />);
+
+    expect(
+      screen.queryByRole('link', { name: 'Editar projeto de impacto' })
+    ).not.toBeInTheDocument();
+  });
+
   it('renders project title, campaign badge, description, and Ofertar button', () => {
     render(
       <ImpactProjectCard

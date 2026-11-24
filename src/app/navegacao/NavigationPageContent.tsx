@@ -999,7 +999,7 @@ export default function NavigationPageContent({
                             isMissionaryType
                               ? 'primaryFilled'
                               : item.type === 'campanha'
-                                ? 'missionFilled'
+                                ? 'primaryFilled'
                                 : 'primarySoftOutline'
                           }
                           size="small"
@@ -1083,7 +1083,7 @@ export default function NavigationPageContent({
                   </Box>
                   <PillButton
                     href="/select-role"
-                    tone="missionFilled"
+                    tone="primaryFilled"
                     fullWidth
                     sx={{ minHeight: 44, fontWeight: 700 }}
                   >

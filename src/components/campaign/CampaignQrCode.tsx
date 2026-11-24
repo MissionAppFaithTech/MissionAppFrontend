@@ -104,7 +104,7 @@ export default function CampaignQrCode({ campaign }: CampaignQrCodeProps) {
         >
           <PillButton
             onClick={download}
-            tone="missionFilled"
+            tone="primaryFilled"
             startIcon={<DownloadIcon aria-hidden />}
             sx={{ minHeight: 44, justifyContent: 'center' }}
           >

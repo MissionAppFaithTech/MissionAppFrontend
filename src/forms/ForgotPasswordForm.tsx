@@ -138,7 +138,7 @@ export default function ForgotPasswordForm() {
 
         <PillButton
           href="/select-role"
-          tone="missionFlat"
+          tone="cta"
           fullWidth
           sx={FORM_ACTION_BUTTON_SX}
           startIcon={<PersonAddIcon />}

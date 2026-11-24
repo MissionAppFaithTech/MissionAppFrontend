@@ -378,7 +378,7 @@ export default function ProfileSummaryCard({
                   )}
                   <PillButton
                     href={supportHref && viewerRole === 'visitor' ? supportHref : undefined}
-                    tone="missionFilled"
+                    tone="softBlue"
                     size="small"
                     onClick={
                       supportHref && viewerRole === 'visitor'

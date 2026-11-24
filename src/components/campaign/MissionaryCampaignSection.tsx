@@ -225,7 +225,7 @@ export default function MissionaryCampaignSection({
               >
                 {/* Botão OFERTAR */}
                 <PillButton
-                  tone="missionFilled"
+                  tone="softBlue"
                   size="medium"
                   onClick={() => setDonationModalOpen(true)}
                   aria-label="Ofertar na campanha"
@@ -235,17 +235,6 @@ export default function MissionaryCampaignSection({
                     width: { xs: '100%', sm: 'auto' },
                     fontSize: '0.95rem',
                     fontWeight: 700,
-                    bgcolor: (theme) =>
-                      theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                    color: 'mission.contrastText',
-                    '&:hover': {
-                      bgcolor: (theme) =>
-                        theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
-                    },
-                    boxShadow: (theme) =>
-                      theme.palette.mode === 'dark'
-                        ? 'var(--app-shadow-accent)'
-                        : 'var(--app-shadow-accent)',
                   }}
                 >
                   <VolunteerActivismIcon sx={{ fontSize: 20, mr: 1 }} />

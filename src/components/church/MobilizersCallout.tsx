@@ -130,7 +130,7 @@ export default function MobilizersCallout() {
         <Box>
           <PillButton
             href={CHURCH_COUNCIL_PATH}
-            tone="missionFilled"
+            tone="softBlue"
             startIcon={<GroupsIcon aria-hidden />}
             sx={{
               minHeight: 48,

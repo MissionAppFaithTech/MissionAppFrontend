@@ -99,7 +99,7 @@ export default function AppTopNavbar({
 
             <PillButton
               href="/select-role"
-              tone="missionFlat"
+              tone="softBlue"
               size="small"
               sx={{
                 display: { xs: 'none', sm: 'inline-flex' },

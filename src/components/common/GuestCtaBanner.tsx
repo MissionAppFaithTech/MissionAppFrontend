@@ -98,7 +98,7 @@ export default function GuestCtaBanner({
 
           <PillButton
             href={buttonHref}
-            tone="missionFilled"
+            tone="primaryFilled"
             size="medium"
             sx={{
               px: 3,

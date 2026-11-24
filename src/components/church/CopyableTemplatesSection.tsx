@@ -128,7 +128,7 @@ export default function CopyableTemplatesSection() {
                   sx={{ alignItems: 'center', width: { xs: '100%', sm: 'auto' } }}
                 >
                   <PillButton
-                    tone={isCopied ? 'missionFilled' : 'primaryOutline'}
+                    tone={isCopied ? 'primaryFilled' : 'primaryOutline'}
                     size="small"
                     onClick={() => handleCopy(template)}
                     startIcon={isCopied ? <CheckIcon /> : <ContentCopyIcon fontSize="small" />}

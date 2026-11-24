@@ -353,7 +353,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                       sx={{ pt: 0.5, alignItems: { xs: 'stretch', sm: 'center' } }}
                                     >
                                       <PillButton
-                                        tone="missionFilled"
+                                        tone="softBlue"
                                         size="small"
                                         onClick={() => {
                                           if (project.missionaryName) {
@@ -367,17 +367,6 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                                           minHeight: 44,
                                           py: 0.5,
                                           px: 2,
-                                          bgcolor: (theme) =>
-                                            theme.palette.mode === 'dark'
-                                              ? 'accent.main'
-                                              : 'mission.main',
-                                          color: 'mission.contrastText',
-                                          '&:hover': {
-                                            bgcolor: (theme) =>
-                                              theme.palette.mode === 'dark'
-                                                ? 'mission.main'
-                                                : 'mission.dark',
-                                          },
                                           justifyContent: 'center',
                                         }}
                                       >
@@ -548,7 +537,7 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                     <Stack spacing={1.5}>
                       {/* Botão OFERTAR */}
                       <PillButton
-                        tone="missionFilled"
+                        tone="softBlue"
                         size="medium"
                         onClick={() => {
                           setSelectedMissionary(campaign.title || 'Campanha Oficial');
@@ -559,17 +548,6 @@ export default function CampaignDetailView({ campaign }: CampaignDetailViewProps
                           minHeight: 48,
                           fontSize: '1rem',
                           fontWeight: 700,
-                          bgcolor: (theme) =>
-                            theme.palette.mode === 'dark' ? 'accent.main' : 'mission.main',
-                          color: 'mission.contrastText',
-                          '&:hover': {
-                            bgcolor: (theme) =>
-                              theme.palette.mode === 'dark' ? 'mission.main' : 'mission.dark',
-                          },
-                          boxShadow: (theme) =>
-                            theme.palette.mode === 'dark'
-                              ? 'var(--app-shadow-accent)'
-                              : 'var(--app-shadow-accent)',
                         }}
                       >
                         <VolunteerActivismIcon sx={{ fontSize: 22, mr: 1 }} />

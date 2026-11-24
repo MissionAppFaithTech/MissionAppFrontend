@@ -24,6 +24,7 @@ type PillButtonTone =
   | 'outline'
   | 'ghost'
   | 'primarySoftOutline'
+  | 'softBlue'
   | 'primaryFilled'
   | 'missionFilled'
   | 'danger'
@@ -77,21 +78,21 @@ const figmaActionBase = {
  */
 const darkPrimaryFill: ToneEntry = (theme) =>
   theme.applyStyles('dark', {
-    backgroundColor: v(theme, 'palette.mission.main'),
-    borderColor: v(theme, 'palette.mission.main'),
-    color: v(theme, 'palette.mission.contrastText'),
-    '--pill-fg': v(theme, 'palette.mission.contrastText'),
-    '--pill-bg': v(theme, 'palette.mission.main'),
-    '--pill-bd': v(theme, 'palette.mission.main'),
+    backgroundColor: v(theme, 'palette.missionFill.main'),
+    borderColor: v(theme, 'palette.missionFill.main'),
+    color: v(theme, 'palette.missionFill.contrastText'),
+    '--pill-fg': v(theme, 'palette.missionFill.contrastText'),
+    '--pill-bg': v(theme, 'palette.missionFill.main'),
+    '--pill-bd': v(theme, 'palette.missionFill.main'),
     '&:hover': {
-      backgroundColor: v(theme, 'palette.mission.dark'),
-      borderColor: v(theme, 'palette.mission.dark'),
-      color: v(theme, 'palette.mission.contrastText'),
+      backgroundColor: v(theme, 'palette.missionFill.dark'),
+      borderColor: v(theme, 'palette.missionFill.dark'),
+      color: v(theme, 'palette.missionFill.contrastText'),
       boxShadow: 'none',
     },
     '&:active': {
-      backgroundColor: v(theme, 'palette.mission.dark'),
-      borderColor: v(theme, 'palette.mission.dark'),
+      backgroundColor: v(theme, 'palette.missionFill.dark'),
+      borderColor: v(theme, 'palette.missionFill.dark'),
     },
   });
 
@@ -169,16 +170,16 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
   mission: [
     () => ({
       border: '2px solid',
-      borderColor: 'mission.dark',
-      bgcolor: 'mission.main',
-      color: 'mission.contrastText',
-      '--pill-fg': 'var(--mui-palette-mission-contrastText)',
-      '--pill-bg': 'var(--mui-palette-mission-main)',
-      '--pill-bd': 'var(--mui-palette-mission-dark)',
+      borderColor: 'missionFill.dark',
+      bgcolor: 'missionFill.main',
+      color: 'missionFill.contrastText',
+      '--pill-fg': 'var(--mui-palette-missionFill-contrastText)',
+      '--pill-bg': 'var(--mui-palette-missionFill-main)',
+      '--pill-bd': 'var(--mui-palette-missionFill-dark)',
       '&:hover': {
-        bgcolor: 'mission.dark',
-        borderColor: 'mission.dark',
-        color: 'mission.contrastText',
+        bgcolor: 'missionFill.dark',
+        borderColor: 'missionFill.dark',
+        color: 'missionFill.contrastText',
         boxShadow: 'none',
       },
     }),
@@ -187,16 +188,16 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
   missionFlat: [
     () => ({
       border: '2px solid',
-      borderColor: 'mission.dark',
-      bgcolor: 'mission.main',
-      color: 'mission.contrastText',
-      '--pill-fg': 'var(--mui-palette-mission-contrastText)',
-      '--pill-bg': 'var(--mui-palette-mission-main)',
-      '--pill-bd': 'var(--mui-palette-mission-dark)',
+      borderColor: 'missionFill.dark',
+      bgcolor: 'missionFill.main',
+      color: 'missionFill.contrastText',
+      '--pill-fg': 'var(--mui-palette-missionFill-contrastText)',
+      '--pill-bg': 'var(--mui-palette-missionFill-main)',
+      '--pill-bd': 'var(--mui-palette-missionFill-dark)',
       '&:hover': {
-        bgcolor: 'mission.dark',
-        borderColor: 'mission.dark',
-        color: 'mission.contrastText',
+        bgcolor: 'missionFill.dark',
+        borderColor: 'missionFill.dark',
+        color: 'missionFill.contrastText',
         boxShadow: 'none',
       },
     }),
@@ -318,6 +319,45 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
       },
     }),
   ],
+  /** Light-blue action: alternative, exploration and "Ofertar"; also reads on the navy bars. */
+  softBlue: [
+    (theme) => ({
+      ...figmaActionBase,
+      // `&&` beats MUI `variant="text"`, which sets `border: 0`.
+      //
+      // `applyStyles` has to be nested *inside* this block, not alongside it:
+      // its selector uses `:where()`, which contributes no specificity, so a
+      // sibling dark rule would tie with `&&` and lose on source order — which
+      // is what kept these buttons white in dark mode.
+      '&&': {
+        border: '2px solid',
+        borderColor: v(theme, 'palette.action2.softBorder'),
+        backgroundColor: v(theme, 'palette.action2.softFill'),
+        color: v(theme, 'palette.action2.softInk'),
+        '--pill-fg': v(theme, 'palette.action2.softInk'),
+        '--pill-bg': v(theme, 'palette.action2.softFill'),
+        '--pill-bd': v(theme, 'palette.action2.softBorder'),
+        ...theme.applyStyles('dark', {
+          borderColor: v(theme, 'palette.action2.controlBorder'),
+          backgroundColor: 'transparent',
+          color: v(theme, 'palette.text.primary'),
+          '--pill-fg': v(theme, 'palette.text.primary'),
+          '--pill-bg': 'transparent',
+          '--pill-bd': v(theme, 'palette.action2.controlBorder'),
+        }),
+      },
+      // Light: no hover shift for now (fill and edge stay as at rest).
+      '&&:hover': {
+        backgroundColor: v(theme, 'palette.action2.softFill'),
+        borderColor: v(theme, 'palette.action2.softBorder'),
+        boxShadow: 'none',
+        ...theme.applyStyles('dark', {
+          backgroundColor: v(theme, 'palette.action2.secondaryHoverWash'),
+          borderColor: v(theme, 'palette.connection.main'),
+        }),
+      },
+    }),
+  ],
   primaryFilled: [
     () => ({
       ...figmaActionBase,
@@ -338,13 +378,13 @@ const toneSx: Record<PillButtonTone, ToneEntry[]> = {
     () => ({
       ...figmaActionBase,
       border: 'none',
-      bgcolor: 'mission.main',
-      color: 'mission.contrastText',
-      '--pill-fg': 'var(--mui-palette-mission-contrastText)',
-      '--pill-bg': 'var(--mui-palette-mission-main)',
-      '--pill-bd': 'var(--mui-palette-mission-main)',
+      bgcolor: 'missionFill.main',
+      color: 'missionFill.contrastText',
+      '--pill-fg': 'var(--mui-palette-missionFill-contrastText)',
+      '--pill-bg': 'var(--mui-palette-missionFill-main)',
+      '--pill-bd': 'var(--mui-palette-missionFill-main)',
       '&:hover': {
-        bgcolor: 'mission.dark',
+        bgcolor: 'missionFill.dark',
         boxShadow: 'none',
       },
     }),

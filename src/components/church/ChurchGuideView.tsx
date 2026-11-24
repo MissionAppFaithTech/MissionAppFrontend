@@ -145,7 +145,7 @@ export default function ChurchGuideView() {
                 document.getElementById('checklist')?.scrollIntoView({ behavior: 'smooth' });
                 setActiveTab(tabOf('checklist'));
               }}
-              tone="missionFilled"
+              tone="primaryFilled"
               sx={{ minHeight: 44, px: 3, fontWeight: 700 }}
             >
               Começar Checklist
@@ -348,7 +348,7 @@ export default function ChurchGuideView() {
             >
               <PillButton
                 href="/select-role"
-                tone="missionFilled"
+                tone="primaryFilled"
                 sx={{ minHeight: 44, px: 3.5, fontWeight: 700 }}
               >
                 Cadastre sua igreja ou missionários

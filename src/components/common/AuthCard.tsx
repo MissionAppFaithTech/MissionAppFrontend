@@ -1,7 +1,7 @@
 'use client';
 
 import Card, { type CardProps } from '@mui/material/Card';
-import { colors, lightTokens, roleColors } from '@/theme/theme';
+import { colors, lightTokens, roleColors, shades } from '@/theme/theme';
 
 type AuthCardProps = CardProps & {
   /** Footer / secondary card — lighter shadow. */
@@ -42,6 +42,9 @@ export default function AuthCard({ muted = false, sx, children, ...props }: Auth
           '--mui-palette-mission-main': roleColors.mission,
           '--mui-palette-mission-dark': roleColors.mission,
           '--mui-palette-mission-contrastText': colors.surface,
+          '--mui-palette-missionFill-main': shades.missionFill,
+          '--mui-palette-missionFill-dark': shades.missionFill,
+          '--mui-palette-missionFill-contrastText': colors.textPrimary,
           '--mui-palette-action2-fieldBg': lightTokens.fieldBg,
           '--mui-palette-action2-fieldBgDisabled': lightTokens.fieldBgDisabled,
           '--mui-palette-action2-borderSubtle': lightTokens.borderSubtle,
@@ -53,6 +56,9 @@ export default function AuthCard({ muted = false, sx, children, ...props }: Auth
           '--mui-palette-action2-focusRing': lightTokens.focusRing,
           '--mui-palette-action2-fieldBorder': lightTokens.fieldBorder,
           '--mui-palette-action2-controlBorder': lightTokens.controlBorder,
+          '--mui-palette-action2-softFill': lightTokens.softFill,
+          '--mui-palette-action2-softInk': lightTokens.softInk,
+          '--mui-palette-action2-softBorder': lightTokens.softBorder,
           '--mui-palette-action2-linkHover': lightTokens.linkHover,
           '--mui-palette-divider': lightTokens.borderSubtle,
           '--mui-palette-action-active': lightTokens.textSecondary,

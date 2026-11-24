@@ -262,7 +262,7 @@ export default function SiteHeader() {
         <Stack spacing={1.5} sx={{ mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
           <PillButton
             href="/select-role"
-            tone="missionFilled"
+            tone="primaryFilled"
             fullWidth
             onClick={closeMobileMenu}
             sx={{

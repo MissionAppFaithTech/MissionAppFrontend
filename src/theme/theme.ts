@@ -37,12 +37,17 @@ export const FORM_ACTION_BUTTON_SX = {
 } as const;
 
 /** Derived shades for MUI palette variants */
-const shades = {
+export const shades = {
   primaryLight: '#1A3D6E',
   supporterLight: '#93C5FD',
   supporterDark: '#4F8FE6',
   intermediateLight: '#3B82F6',
   intermediateDark: '#1D4ED8',
+  /**
+   * Orange for the *fill* of orange buttons with navy ink (4.6:1). Orange text
+   * keeps `roleColors.mission`: this bright tone only reaches 2.8:1 on white.
+   */
+  missionFill: '#DD5F14',
   missionLight: '#EA580C',
   missionDark: '#9A3412',
   surfaceMuted: '#EAF1FA',
@@ -71,6 +76,10 @@ export type ModeTokens = {
   borderStrong: string;
   /** Outline of buttons and clickable chips — ≥3:1 on canvas and paper (WCAG 1.4.11). */
   controlBorder: string;
+  /** Soft secondary button: light-blue fill, navy ink (10.9:1), 2px edge (4.1:1 on white). */
+  softFill: string;
+  softInk: string;
+  softBorder: string;
   textPrimary: string;
   textSecondary: string;
   textDisabled: string;
@@ -116,6 +125,9 @@ export const lightTokens: ModeTokens = {
   borderStrong: colors.border,
   /* Navy: 14:1 on white */
   controlBorder: colors.primary,
+  softFill: '#DCEBFF',
+  softInk: '#102F60',
+  softBorder: '#4F7FC4',
   textPrimary: colors.textPrimary,
   textSecondary: colors.textSecondary,
   textDisabled: 'rgba(8, 28, 58, 0.38)',
@@ -156,6 +168,10 @@ export const darkTokens: ModeTokens = {
   borderStrong: 'rgba(147, 197, 253, 0.35)',
   /* 3.8:1 on paper (#1A3D6E), 5.2:1 on the canvas */
   controlBorder: 'rgba(147, 197, 253, 0.7)',
+  /* Dark keeps the quiet outline: no fill, light ink */
+  softFill: 'transparent',
+  softInk: colors.surface,
+  softBorder: 'rgba(147, 197, 253, 0.7)',
   textPrimary: colors.surface,
   /* Slate-300 — ≥4.5:1 on paper (#1A3D6E) and field wash (#284977) */
   textSecondary: '#CBD5E1',
@@ -197,6 +213,8 @@ declare module '@mui/material/styles' {
     connection: Palette['primary'];
     supporter: Palette['primary'];
     mission: Palette['primary'];
+    /** Fill of the orange buttons: logo orange, navy ink. Not for text. */
+    missionFill: Palette['primary'];
     surface: Palette['primary'];
     /** Orange emphasis: indicators, focus, active state. */
     accent: Palette['primary'];
@@ -215,6 +233,9 @@ declare module '@mui/material/styles' {
       borderSubtle: string;
       borderStrong: string;
       controlBorder: string;
+      softFill: string;
+      softInk: string;
+      softBorder: string;
       focusRing: string;
       linkHover: string;
       disabledFill: string;
@@ -232,6 +253,7 @@ declare module '@mui/material/styles' {
     connection?: PaletteOptions['primary'];
     supporter?: PaletteOptions['primary'];
     mission?: PaletteOptions['primary'];
+    missionFill?: PaletteOptions['primary'];
     surface?: PaletteOptions['primary'];
     accent?: PaletteOptions['primary'];
     brandFill?: PaletteOptions['primary'];
@@ -406,6 +428,13 @@ function buildPalette(mode: 'light' | 'dark') {
       dark: shades.missionDark,
       contrastText: colors.surface,
     },
+    missionFill: {
+      main: shades.missionFill,
+      light: '#FF8A4C',
+      // Same as `main`: the hover keeps the resting fill (no hover shift, for now).
+      dark: shades.missionFill,
+      contrastText: colors.textPrimary,
+    },
     brandFill: {
       main: t.brandFill,
       light: t.surface2,
@@ -501,6 +530,9 @@ function buildPalette(mode: 'light' | 'dark') {
       borderSubtle: t.borderSubtle,
       borderStrong: t.borderStrong,
       controlBorder: t.controlBorder,
+      softFill: t.softFill,
+      softInk: t.softInk,
+      softBorder: t.softBorder,
       focusRing: t.focusRing,
       linkHover: t.linkHover,
       disabledFill: t.disabledFill,

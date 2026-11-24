@@ -158,7 +158,7 @@ export default function ChurchVideoPlaylistSection() {
                   href={COUNCIL_PLAYLIST.playlistUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  tone="missionFilled"
+                  tone="primaryFilled"
                   endIcon={<OpenInNewIcon fontSize="small" />}
                   aria-label="Assistir Playlist no YouTube (abre em nova aba)"
                   sx={{
