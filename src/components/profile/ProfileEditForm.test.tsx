@@ -86,11 +86,12 @@ describe('ProfileEditForm', () => {
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
     expect(screen.getByLabelText(/adicionar foto de perfil/i)).toBeInTheDocument();
     expect(screen.getByText(/a foto é salva assim que você confirma/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
-    // "Voltar" at the top and next to the actions.
-    const back = screen.getAllByRole('link', { name: 'Voltar para o perfil' });
-    expect(back).toHaveLength(2);
-    for (const link of back) expect(link).toHaveAttribute('href', '/profile/sobre');
+    // One "Voltar" next to Salvar; there is no "Cancelar".
+    expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
+      'href',
+      '/profile/sobre'
+    );
   });
 
   it('limits the mini-bio to 70 characters', async () => {
@@ -141,7 +142,7 @@ describe('ProfileEditForm', () => {
     expect(push).not.toHaveBeenCalled();
     expect(refresh).toHaveBeenCalledTimes(1);
     expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel M.');
-    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(1);
   });
 
   it('does not report success before the save resolves', async () => {
@@ -155,7 +156,7 @@ describe('ProfileEditForm', () => {
 
     await waitFor(() => expect(saveHeader).toHaveBeenCalled());
     expect(toast()).toBeNull();
-    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Voltar para o perfil' })).toBeDisabled();
 
     resolveSave();
     await waitFor(() => expect(toast()?.severity).toBe('success'));
@@ -272,7 +273,7 @@ describe('ProfileEditForm', () => {
   });
 });
 
-describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
+describe('ProfileEditForm – photo and Voltar', () => {
   beforeEach(() => {
     push.mockClear();
     refresh.mockClear();
@@ -386,41 +387,12 @@ describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('"Cancelar" undoes the fields, with a blue toast, and stays', async () => {
-    const user = userEvent.setup();
-    renderWithQuery(<ProfileEditForm profile={withPhoto} />);
-
-    await user.type(screen.getByLabelText(/nome completo/i), ' Jr.');
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
-
-    expect(screen.getByLabelText(/nome completo/i)).toHaveValue('Samuel Mendonça');
-    expect(avatar()).toHaveAttribute('src', 'https://cdn.test/old.webp');
-    expect(toast()).toMatchObject({ message: 'Alterações descartadas.', severity: 'info' });
-    expect(saveHeader).not.toHaveBeenCalled();
-    expect(push).not.toHaveBeenCalled();
-    // Nothing pending: "Voltar" is a plain link again.
-    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
-  });
-
-  it('"Cancelar" without changes says there is nothing to discard', async () => {
-    const user = userEvent.setup();
-    renderWithQuery(<ProfileEditForm profile={profile} />);
-
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
-
-    expect(toast()).toMatchObject({
-      message: 'Nenhuma alteração para descartar.',
-      severity: 'info',
-    });
-  });
-
   it('"Voltar" with unsaved changes asks first and keeps editing on request', async () => {
     const user = userEvent.setup();
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
-    const [topBack] = screen.getAllByRole('button', { name: 'Voltar para o perfil' });
-    await user.click(topBack);
+    await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
 
     const dialog = screen.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
     expect(dialog).toHaveAccessibleDescription(/se voltar agora, elas serão perdidas/i);
@@ -433,7 +405,7 @@ describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it('a saved photo is not an unsaved change: "Voltar" stays a link and "Cancelar" has nothing to discard', async () => {
+  it('a saved photo is not an unsaved change: "Voltar" stays a link', async () => {
     const user = userEvent.setup();
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
@@ -441,12 +413,7 @@ describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
     await user.click(screen.getByRole('button', { name: 'Usar esta foto' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
-    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
-    expect(toast()).toMatchObject({
-      message: 'Nenhuma alteração para descartar.',
-      severity: 'info',
-    });
+    expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toBeInTheDocument();
     expect(avatar()).toHaveAttribute('src', 'https://cdn.test/new.webp');
   });
 
@@ -455,8 +422,7 @@ describe('ProfileEditForm – photo, Cancelar and Voltar', () => {
     renderWithQuery(<ProfileEditForm profile={profile} />);
 
     await user.type(screen.getByLabelText(/nome completo/i), '!');
-    const backButtons = screen.getAllByRole('button', { name: 'Voltar para o perfil' });
-    await user.click(backButtons[backButtons.length - 1]);
+    await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
     await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
 
     expect(push).toHaveBeenCalledWith('/profile/sobre');

@@ -61,17 +61,35 @@ describe('ImpactProjectsPage', () => {
     expect(service.getMissionaryImpactProject).toHaveBeenCalledWith('m-1');
   });
 
-  it('invites the missionary to create a project when there is none', async () => {
-    vi.mocked(service.getMissionaryImpactProject).mockResolvedValue(null);
+  it('shows the creation form in the tab, then the project once it is created', async () => {
+    vi.mocked(service.getMissionaryImpactProject)
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce(project);
+    vi.mocked(service.uploadCoverImage).mockResolvedValue('asset-1');
+    vi.mocked(service.createImpactProject).mockResolvedValue(project);
+    const user = userEvent.setup();
     renderPage(<ImpactProjectsPage />);
 
     expect(
-      await screen.findByRole('heading', { name: /ainda não tem um projeto de impacto/i })
+      await screen.findByRole('heading', { name: /criar projeto de impacto/i })
     ).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /criar projeto de impacto/i })).toHaveAttribute(
-      'href',
-      '/profile/projetos-de-impacto/edit'
+    expect(
+      screen.queryByRole('link', { name: /criar projeto de impacto/i })
+    ).not.toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/título do projeto/i), 'Escola');
+    await user.type(screen.getByLabelText(/descrição detalhada/i), 'Descrição');
+    await user.upload(
+      screen.getByLabelText(/upload de foto de capa/i),
+      new File(['x'], 'capa.jpg', { type: 'image/jpeg' })
     );
+    await user.click(screen.getByRole('button', { name: /criar projeto/i }));
+
+    await waitFor(() => expect(service.createImpactProject).toHaveBeenCalled());
+    expect(
+      await screen.findByRole('heading', { name: /escola na comunidade/i })
+    ).toBeInTheDocument();
+    expect(push).not.toHaveBeenCalled();
   });
 
   it('offers a retry when loading fails', async () => {

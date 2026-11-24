@@ -55,7 +55,6 @@ const data: ProfileAboutData = {
 
 const onSave = vi.fn();
 const onDone = vi.fn();
-const onCancel = vi.fn();
 const onDiscard = vi.fn();
 
 function renderSection(about: ProfileAboutData = data) {
@@ -64,7 +63,6 @@ function renderSection(about: ProfileAboutData = data) {
       data={about}
       onSave={onSave}
       onDone={onDone}
-      onCancel={onCancel}
       backHref="/profile/sobre"
       onDiscard={onDiscard}
     />
@@ -75,17 +73,18 @@ describe('ProfileAboutEditSection', () => {
   beforeEach(() => {
     onSave.mockReset();
     onDone.mockReset();
-    onCancel.mockReset();
     onDiscard.mockReset();
     vi.mocked(useRouter().push).mockClear();
   });
 
-  it('offers "Voltar" at the top and next to the actions, as plain links when nothing changed', () => {
+  it('offers a single "Voltar" next to the actions, as a plain link when nothing changed', () => {
     renderSection();
 
-    const back = screen.getAllByRole('link', { name: 'Voltar para o perfil' });
-    expect(back).toHaveLength(2);
-    for (const link of back) expect(link).toHaveAttribute('href', '/profile/sobre');
+    expect(screen.queryByRole('button', { name: /cancelar/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
+      'href',
+      '/profile/sobre'
+    );
   });
 
   it('"Voltar" with unsaved changes asks first; "Continuar editando" keeps the text', async () => {
@@ -93,7 +92,7 @@ describe('ProfileAboutEditSection', () => {
     renderSection();
 
     await user.type(screen.getByLabelText(/versículo para a vida/i), ' extra');
-    await user.click(screen.getAllByRole('button', { name: 'Voltar para o perfil' })[0]);
+    await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
 
     const dialog = screen.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
     await user.click(within(dialog).getByRole('button', { name: 'Continuar editando' }));
@@ -109,8 +108,7 @@ describe('ProfileAboutEditSection', () => {
     renderSection();
 
     await user.type(screen.getByLabelText(/versículo para a vida/i), ' extra');
-    const back = screen.getAllByRole('button', { name: 'Voltar para o perfil' });
-    await user.click(back[back.length - 1]);
+    await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
     await user.click(screen.getByRole('button', { name: 'Descartar e voltar' }));
 
     expect(onDiscard).toHaveBeenCalledTimes(1);
@@ -380,16 +378,6 @@ describe('ProfileAboutEditSection', () => {
 
     expect(await screen.findByText('Use no máximo 255 caracteres.')).toBeInTheDocument();
     expect(verse).toHaveAttribute('aria-invalid', 'true');
-  });
-
-  it('cancels without saving', async () => {
-    const user = userEvent.setup();
-    renderSection();
-
-    await user.click(screen.getByRole('button', { name: /cancelar/i }));
-
-    expect(onCancel).toHaveBeenCalled();
-    expect(onSave).not.toHaveBeenCalled();
   });
 });
 

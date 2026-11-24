@@ -35,16 +35,23 @@ export function buildUpdate(
   return update;
 }
 
-export default function ImpactProjectEditPageContent() {
-  const router = useRouter();
+type ImpactProjectEditorProps = {
+  /** The missionary's project, or `null` to create it. */
+  project: ImpactProjectData | null;
+  /** Called after a save or delete; the host decides where to go next. */
+  onDone: () => void;
+};
+
+/** Create / edit / delete flow around the form, shared by the tab and the edit page. */
+export function ImpactProjectEditor({ project, onDone }: ImpactProjectEditorProps) {
   const notify = useFeedbackStore((state) => state.notify);
 
   const finish = (message: string) => {
     notify(message);
-    router.push(LIST_HREF);
+    onDone();
   };
 
-  const save = async (project: ImpactProjectData | null, values: ImpactProjectFormValues) => {
+  const save = async (values: ImpactProjectFormValues) => {
     const coverImageAssetId = values.coverFile
       ? await uploadCoverImage(values.coverFile)
       : undefined;
@@ -65,7 +72,7 @@ export default function ImpactProjectEditPageContent() {
     const update = buildUpdate(project, values, coverImageAssetId);
     if (Object.keys(update).length === 0) {
       notify('Nenhuma alteração para salvar.', 'info');
-      router.push(LIST_HREF);
+      onDone();
       return;
     }
     await updateImpactProject(project.id, update);
@@ -73,21 +80,27 @@ export default function ImpactProjectEditPageContent() {
   };
 
   return (
+    <ImpactProjectEditForm
+      project={project}
+      onSubmit={save}
+      onDelete={
+        project
+          ? async () => {
+              await deleteImpactProject(project.id);
+              finish('Projeto de impacto excluído.');
+            }
+          : undefined
+      }
+    />
+  );
+}
+
+export default function ImpactProjectEditPageContent() {
+  const router = useRouter();
+
+  return (
     <ImpactProjectStateGate loadingLabel="Carregando projeto de impacto" skeletonHeight={720}>
-      {(project) => (
-        <ImpactProjectEditForm
-          project={project}
-          onSubmit={(values) => save(project, values)}
-          onDelete={
-            project
-              ? async () => {
-                  await deleteImpactProject(project.id);
-                  finish('Projeto de impacto excluído.');
-                }
-              : undefined
-          }
-        />
-      )}
+      {(project) => <ImpactProjectEditor project={project} onDone={() => router.push(LIST_HREF)} />}
     </ImpactProjectStateGate>
   );
 }

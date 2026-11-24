@@ -10,7 +10,8 @@ import type { ImpactProjectData } from '@/types/profile';
 type ImpactProjectStateGateProps = {
   loadingLabel: string;
   skeletonHeight: number;
-  children: (project: ImpactProjectData | null) => ReactNode;
+  /** `reload` fetches the project again (after creating, editing or deleting it). */
+  children: (project: ImpactProjectData | null, reload: () => void) => ReactNode;
 };
 
 /** Shows a skeleton / retryable error until the missionary's project is known. */
@@ -21,7 +22,7 @@ export default function ImpactProjectStateGate({
 }: ImpactProjectStateGateProps) {
   const state = useMyImpactProject();
 
-  if (state.status === 'ready') return children(state.project);
+  if (state.status === 'ready') return children(state.project, state.reload);
 
   if (state.status === 'error') {
     return (

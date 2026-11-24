@@ -37,7 +37,7 @@ test.describe('Impact project (owner) E2E', () => {
 
     await page.goto('/profile/projetos-de-impacto/edit');
     await expect(page.getByRole('heading', { name: /editar projeto de impacto/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /alterar foto de capa/i })).toBeVisible();
+    await expect(page.getByText(/alterar foto de capa/i)).toBeVisible();
     await expect(page.getByRole('button', { name: /excluir projeto/i })).toBeVisible();
   });
 
@@ -98,6 +98,16 @@ test.describe('Impact project (owner) E2E', () => {
       coverImageAssetId: ASSET_ID,
       videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
     });
+    await expect(page).toHaveURL(/\/profile\/projetos-de-impacto$/);
+  });
+
+  test('shows the creation form in the tab when there is no project yet', async ({ page }) => {
+    await mockProjectList(page, []);
+    await page.goto('/profile/projetos-de-impacto');
+
+    await expect(page.getByRole('heading', { name: /criar projeto de impacto/i })).toBeVisible();
+    await expect(page.getByLabel(/título do projeto/i)).toBeVisible();
+    await expect(page.getByRole('link', { name: /criar projeto de impacto/i })).toHaveCount(0);
     await expect(page).toHaveURL(/\/profile\/projetos-de-impacto$/);
   });
 

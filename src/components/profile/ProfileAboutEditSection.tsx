@@ -41,7 +41,6 @@ type ProfileAboutEditSectionProps = {
   onSave: (input: SaveAboutInput) => Promise<void>;
   /** Called after a successful save, or with `saved: false` when nothing changed. */
   onDone: (saved: boolean) => void;
-  onCancel: () => void;
   /** Where "Voltar" leads (the profile's "Sobre"). */
   backHref: string;
   /** "Voltar" with unsaved changes, after the user confirms discarding them. */
@@ -215,7 +214,6 @@ export default function ProfileAboutEditSection({
   data,
   onSave,
   onDone,
-  onCancel,
   backHref,
   onDiscard,
 }: ProfileAboutEditSectionProps) {
@@ -335,9 +333,6 @@ export default function ProfileAboutEditSection({
 
   return (
     <Stack spacing={2}>
-      <Box sx={{ display: 'flex' }}>
-        <EditBackButton href={backHref} dirty={dirty} onDiscard={onDiscard} disabled={saving} />
-      </Box>
       <Card
         component="section"
         aria-labelledby="profile-about-edit-title"
@@ -537,23 +532,12 @@ export default function ProfileAboutEditSection({
                   },
                 }}
               >
-                <Box sx={{ mr: { sm: 'auto' }, display: 'flex' }}>
-                  <EditBackButton
-                    href={backHref}
-                    dirty={dirty}
-                    onDiscard={onDiscard}
-                    disabled={saving}
-                  />
-                </Box>
-                <PillButton
-                  type="button"
-                  tone="primarySoftOutline"
-                  size="medium"
-                  onClick={onCancel}
+                <EditBackButton
+                  href={backHref}
+                  dirty={dirty}
+                  onDiscard={onDiscard}
                   disabled={saving}
-                >
-                  Cancelar
-                </PillButton>
+                />
                 <PillButton
                   type="submit"
                   tone="primaryFilled"

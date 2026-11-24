@@ -180,24 +180,8 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
     notify('Alterações descartadas.', 'info');
   };
 
-  const handleCancel = () => {
-    if (!dirty) {
-      notify('Nenhuma alteração para descartar.', 'info');
-      return;
-    }
-    discardChanges();
-  };
-
   return (
     <Stack spacing={2}>
-      <Box sx={{ display: 'flex' }}>
-        <EditBackButton
-          href={BACK_HREF}
-          dirty={dirty}
-          onDiscard={discardChanges}
-          disabled={isSubmitting}
-        />
-      </Box>
       <Card
         component="section"
         aria-labelledby="profile-edit-title"
@@ -355,23 +339,12 @@ export default function ProfileEditForm({ profile }: ProfileEditFormProps) {
                   },
                 }}
               >
-                <Box sx={{ mr: { sm: 'auto' }, display: 'flex' }}>
-                  <EditBackButton
-                    href={BACK_HREF}
-                    dirty={dirty}
-                    onDiscard={discardChanges}
-                    disabled={isSubmitting}
-                  />
-                </Box>
-                <PillButton
-                  type="button"
-                  tone="primarySoftOutline"
-                  size="medium"
-                  onClick={handleCancel}
+                <EditBackButton
+                  href={BACK_HREF}
+                  dirty={dirty}
+                  onDiscard={discardChanges}
                   disabled={isSubmitting}
-                >
-                  Cancelar
-                </PillButton>
+                />
                 <PillButton
                   type="submit"
                   tone="primaryFilled"

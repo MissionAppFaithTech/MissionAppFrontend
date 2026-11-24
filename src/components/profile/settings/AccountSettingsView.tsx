@@ -19,7 +19,6 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
@@ -389,7 +388,6 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
           href={BACK_HREF[role]}
           tone="primarySoftOutline"
           size="medium"
-          startIcon={<ArrowBackIcon />}
           aria-label="Voltar para o perfil"
           sx={{
             ...FORM_ACTION_BUTTON_SX,
@@ -991,7 +989,6 @@ export default function AccountSettingsView({ role, initialEmail }: AccountSetti
             href={BACK_HREF[role]}
             tone="primarySoftOutline"
             size="medium"
-            startIcon={<ArrowBackIcon />}
             aria-label="Voltar para o perfil"
             sx={{
               ...FORM_ACTION_BUTTON_SX,

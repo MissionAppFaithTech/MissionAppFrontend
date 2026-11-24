@@ -76,11 +76,11 @@ describe('SupporterEditForm Component', () => {
     ).toBeChecked();
 
     // Action Buttons
-    const back = screen.getAllByRole('link', { name: 'Voltar para o perfil' });
-    expect(back).toHaveLength(2);
-    for (const link of back)
-      expect(link).toHaveAttribute('href', '/profile/supporter/missionarios');
-    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Voltar para o perfil' })).toHaveAttribute(
+      'href',
+      '/profile/supporter/missionarios'
+    );
+    expect(screen.queryByRole('button', { name: 'Cancelar' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
   });
 
@@ -126,7 +126,7 @@ describe('SupporterEditForm Component', () => {
     );
     expect(refresh).toHaveBeenCalledTimes(1);
     // Not an unsaved change of the form.
-    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(2);
+    expect(screen.getAllByRole('link', { name: 'Voltar para o perfil' })).toHaveLength(1);
   });
 
   it('removes the photo right away once confirmed', async () => {
@@ -160,31 +160,12 @@ describe('SupporterEditForm Component', () => {
     );
   });
 
-  it('"Cancelar" undoes the changes with a blue toast and stays', async () => {
-    const user = userEvent.setup();
-    renderWithQuery(<SupporterEditForm profile={mockProfile} />);
-
-    const bio = screen.getByLabelText(/bio \/ papel/i);
-    await user.type(bio, ' extra');
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
-
-    expect(bio).toHaveValue(mockProfile.roleDescription);
-    expect(toast()).toMatchObject({ message: 'Alterações descartadas.', severity: 'info' });
-    expect(push).not.toHaveBeenCalled();
-
-    await user.click(screen.getByRole('button', { name: 'Cancelar' }));
-    expect(toast()).toMatchObject({
-      message: 'Nenhuma alteração para descartar.',
-      severity: 'info',
-    });
-  });
-
   it('"Voltar" with unsaved changes asks before leaving', async () => {
     const user = userEvent.setup();
     renderWithQuery(<SupporterEditForm profile={mockProfile} />);
 
     await user.type(screen.getByLabelText(/bio \/ papel/i), '!');
-    await user.click(screen.getAllByRole('button', { name: 'Voltar para o perfil' })[0]);
+    await user.click(screen.getByRole('button', { name: 'Voltar para o perfil' }));
     const dialog = screen.getByRole('dialog', { name: 'Descartar alterações não salvas?' });
     await user.click(within(dialog).getByRole('button', { name: 'Descartar e voltar' }));
 

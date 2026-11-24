@@ -2,7 +2,6 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import VerifiedUserOutlinedIcon from '@mui/icons-material/VerifiedUserOutlined';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import PillButton from '@/components/common/PillButton';
 
 export default function AdminPageHeading({ detail = false }: { detail?: boolean }) {
@@ -31,7 +30,6 @@ export default function AdminPageHeading({ detail = false }: { detail?: boolean 
         <PillButton
           href="/admin"
           tone="primaryOutline"
-          startIcon={<ArrowBackIcon aria-hidden />}
           sx={{
             border: 0,
             px: 0,

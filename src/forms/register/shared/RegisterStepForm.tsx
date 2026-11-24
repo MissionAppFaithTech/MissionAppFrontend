@@ -118,15 +118,8 @@ export default function RegisterStepForm({
             ) : null}
             {sectionTitle}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Campos marcados com{' '}
-            <Box component="span" aria-hidden>
-              *
-            </Box>
-            <Box component="span" sx={visuallyHiddenSx}>
-              asterisco
-            </Box>{' '}
-            são obrigatórios.
+          <Typography variant="h5" color="text.secondary">
+            Campos marcados com * são obrigatórios.
           </Typography>
         </Box>
       ) : null}

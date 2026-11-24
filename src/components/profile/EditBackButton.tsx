@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import PillButton from '@/components/common/PillButton';
 import { FORM_ACTION_BUTTON_SX } from '@/theme/theme';
@@ -37,7 +36,6 @@ export default function EditBackButton({ href, dirty, onDiscard, disabled }: Edi
         {...(dirty ? { type: 'button' as const, onClick: () => setConfirming(true) } : { href })}
         tone="primarySoftOutline"
         size="medium"
-        startIcon={<ArrowBackIcon />}
         aria-label="Voltar para o perfil"
         disabled={disabled}
         sx={sx}

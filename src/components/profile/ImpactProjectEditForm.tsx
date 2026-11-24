@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useId, useState, type ChangeEvent } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import CampaignIcon from '@mui/icons-material/Campaign';
-import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
 import VerifiedIcon from '@mui/icons-material/Verified';
@@ -22,7 +21,7 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import Image from 'next/image';
+import ImageDropzone from '@/components/common/ImageDropzone';
 import PillButton from '@/components/common/PillButton';
 import StyledTextArea from '@/components/common/StyledTextArea';
 import { ApiError } from '@/lib/api/client';
@@ -57,9 +56,6 @@ export default function ImpactProjectEditForm({
   onDelete,
 }: ImpactProjectEditFormProps) {
   const isEditing = Boolean(project);
-  const coverInputId = useId();
-  const coverHelpId = useId();
-  const coverErrorId = useId();
 
   const {
     register,
@@ -98,10 +94,7 @@ export default function ImpactProjectEditForm({
   const currentCover = coverPreview ?? (project?.imageUrl || null);
   const isLinkedWithCampaign = Boolean(project?.campaignBadge && project?.campaignTitle);
 
-  const handleCoverChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
-    if (!file) return;
+  const handleCoverSelect = (file: File) => {
     const problem = validateCoverFile(file);
     if (problem) {
       setCoverError(problem);
@@ -175,10 +168,6 @@ export default function ImpactProjectEditForm({
               >
                 {isEditing ? 'Editar Projeto de Impacto' : 'Criar Projeto de Impacto'}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Envie a capa, descreva o projeto e, se quiser, adicione um vídeo de apresentação.
-                Cada missionário pode ter um projeto de impacto.
-              </Typography>
             </Box>
 
             {formError && (
@@ -193,107 +182,22 @@ export default function ImpactProjectEditForm({
                 Imagem de capa (obrigatória)
               </Typography>
 
-              {currentCover ? (
-                <Box
-                  sx={{
-                    position: 'relative',
-                    width: '100%',
-                    height: { xs: 180, sm: 240, md: 280 },
-                    borderRadius: 2,
-                    overflow: 'hidden',
-                    border: '1px solid',
-                    borderColor: 'divider',
-                    boxShadow: 1,
-                  }}
-                >
-                  <Image
-                    src={currentCover}
-                    alt="Prévia da capa do projeto"
-                    fill
-                    unoptimized
-                    sizes="(max-width: 600px) 100vw, 800px"
-                    style={{ objectFit: 'cover' }}
-                  />
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: { xs: 140, sm: 180 },
-                    borderRadius: 2,
-                    border: '2px dashed',
-                    borderColor: coverError ? 'error.main' : 'divider',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: 'action.hover',
-                    px: 2,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {isEditing && project?.coverStatus === 'PROCESSING'
-                      ? 'A capa atual ainda está sendo processada.'
-                      : 'Nenhuma imagem de capa selecionada.'}
-                  </Typography>
-                </Box>
-              )}
-
-              <Box>
-                <PillButton
-                  component="label"
-                  tone="primarySoftOutline"
-                  size="small"
-                  sx={{
-                    minHeight: 44,
-                    px: 2.5,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    width: { xs: '100%', sm: 'auto' },
-                    justifyContent: 'center',
-                    '&:focus-within': { outline: '3px solid', outlineOffset: 2 },
-                  }}
-                >
-                  <CloudUploadOutlinedIcon sx={{ fontSize: 20, mr: 1 }} />
-                  {currentCover ? 'Alterar foto de capa' : 'Selecionar foto de capa'}
-                  <Box
-                    component="input"
-                    id={coverInputId}
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    aria-label="Upload de foto de capa"
-                    aria-invalid={coverError ? true : undefined}
-                    aria-describedby={coverError ? `${coverHelpId} ${coverErrorId}` : coverHelpId}
-                    sx={{
-                      position: 'absolute',
-                      width: 1,
-                      height: 1,
-                      opacity: 0,
-                      overflow: 'hidden',
-                    }}
-                    onChange={handleCoverChange}
-                  />
-                </PillButton>
-                <Typography
-                  id={coverHelpId}
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ display: 'block', mt: 0.75 }}
-                >
-                  JPG, PNG ou WebP, até 10 MB
-                </Typography>
-                {coverError && (
-                  <Typography
-                    id={coverErrorId}
-                    role="alert"
-                    variant="caption"
-                    color="error"
-                    sx={{ display: 'block', mt: 0.5, fontWeight: 600 }}
-                  >
-                    {coverError}
-                  </Typography>
-                )}
-              </Box>
+              <ImageDropzone
+                inputLabel="Upload de foto de capa"
+                onSelect={handleCoverSelect}
+                previewUrl={currentCover}
+                previewAlt="Prévia da capa do projeto"
+                emptyTitle="Clique para selecionar a foto de capa"
+                changeLabel="Alterar foto de capa"
+                emptyNotice={
+                  isEditing && project?.coverStatus === 'PROCESSING'
+                    ? 'A capa atual ainda está sendo processada.'
+                    : undefined
+                }
+                helperText="JPG, PNG ou WebP, até 10 MB"
+                error={coverError}
+                disabled={isSubmitting}
+              />
             </Stack>
 
             <Divider />

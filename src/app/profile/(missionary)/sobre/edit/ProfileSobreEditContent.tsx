@@ -25,7 +25,6 @@ export default function ProfileSobreEditContent() {
         // The save action already re-rendered the profile with the new data (ADR-0006).
         router.push(ABOUT_HREF);
       }}
-      onCancel={() => router.push(ABOUT_HREF)}
       backHref={ABOUT_HREF}
       onDiscard={() => notify('Alterações descartadas.', 'info')}
     />

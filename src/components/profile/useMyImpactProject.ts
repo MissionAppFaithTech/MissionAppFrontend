@@ -8,7 +8,7 @@ import type { ImpactProjectData } from '@/types/profile';
 export type MyImpactProjectState =
   | { status: 'loading' }
   | { status: 'error'; message: string; retry: () => void }
-  | { status: 'ready'; project: ImpactProjectData | null };
+  | { status: 'ready'; project: ImpactProjectData | null; reload: () => void };
 
 /**
  * Loads the logged-in missionary's impact project (at most one). The profile,
@@ -49,8 +49,8 @@ export function useMyImpactProject(): MyImpactProjectState {
     setAttempt((value) => value + 1);
   }, []);
 
-  if (!missionaryId) return { status: 'ready', project: null };
+  if (!missionaryId) return { status: 'ready', project: null, reload: retry };
   if (!result || result.key !== key) return { status: 'loading' };
   if ('error' in result) return { status: 'error', message: result.error, retry };
-  return { status: 'ready', project: result.project };
+  return { status: 'ready', project: result.project, reload: retry };
 }
