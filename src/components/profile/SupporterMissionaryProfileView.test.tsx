@@ -124,7 +124,7 @@ describe('SupporterMissionaryProfileView Component', () => {
     expect(screen.getByText(mockProfile.impactProject!.title)).toBeInTheDocument();
 
     // Switch to Campanha
-    const campanhaTab = screen.getByRole('tab', { name: /campaign/i });
+    const campanhaTab = screen.getByRole('tab', { name: /campanha/i });
     await user.click(campanhaTab);
     expect(screen.getByRole('heading', { name: mockCampaign.title })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /ofertar na campanha/i })).toBeInTheDocument();

@@ -70,7 +70,7 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
         '/profile/supporter'
       );
       expect(screen.getByRole('link', { name: /navegar/i })).toHaveAttribute('href', '/explore');
-      expect(screen.getByRole('link', { name: /campaign/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /campanha/i })).toHaveAttribute(
         'href',
         '/campaign/campanha-educacao-esperanca'
       );
@@ -88,7 +88,7 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
           campaignHref="/campaign/campanha-esperanca-mocambique"
         />
       );
-      expect(screen.getByRole('link', { name: /campaign/i })).toHaveAttribute(
+      expect(screen.getByRole('link', { name: /campanha/i })).toHaveAttribute(
         'href',
         '/campaign/campanha-esperanca-mocambique'
       );
@@ -141,7 +141,7 @@ describe('VisitorBottomNav and MobileNavigationBar components', () => {
 
       rerender(<MobileNavigationBar viewMode="supporter" />);
       expect(screen.getAllByRole('link')).toHaveLength(4);
-      expect(screen.getByRole('link', { name: /campaign/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /campanha/i })).toBeInTheDocument();
       expect(screen.getByRole('link', { name: /meu perfil/i })).toBeInTheDocument();
     });
   });

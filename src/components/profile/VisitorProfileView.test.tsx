@@ -19,7 +19,7 @@ describe('VisitorProfileView component', () => {
     expect(screen.getByRole('tab', { name: /sobre/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /projetos/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /postagens/i })).toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: /campaign/i })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /campanha/i })).toBeInTheDocument();
   });
 
   it('switches between tabs on click and renders corresponding sections', async () => {
@@ -45,7 +45,7 @@ describe('VisitorProfileView component', () => {
     expect(screen.getByText(/veja todas as postagens e orações/i)).toBeInTheDocument();
 
     // Switch to 'Campanha'
-    const campanhaTab = screen.getByRole('tab', { name: /campaign/i });
+    const campanhaTab = screen.getByRole('tab', { name: /campanha/i });
     await user.click(campanhaTab);
 
     expect(screen.getByRole('heading', { name: mockCampaign.title })).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('VisitorProfileView component', () => {
     for (const [tab, subject] of [
       [/projetos/i, 'projetos de impacto'],
       [/postagens/i, 'postagens'],
-      [/campaign/i, 'campanha'],
+      [/campanha/i, 'campanha'],
     ] as const) {
       await user.click(screen.getByRole('tab', { name: tab }));
       expect(

@@ -44,7 +44,7 @@ test.describe('Visitor Profile E2E', () => {
     // Tabs without an API yet say their content is an example.
     await expect(page.getByText('Dados de exemplo').filter({ visible: true })).toBeVisible();
 
-    const campanhaTab = page.getByRole('tab', { name: /campaign/i });
+    const campanhaTab = page.getByRole('tab', { name: /campanha/i });
     await campanhaTab.click();
     await expect(page.getByRole('button', { name: /ofertar na campanha/i })).toBeVisible();
   });

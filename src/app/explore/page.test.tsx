@@ -198,7 +198,7 @@ describe('NavigationPage route (/explore)', () => {
       'href',
       '/profile/supporter'
     );
-    expect(within(supporterNav).getByRole('link', { name: /campaign/i })).toHaveAttribute(
+    expect(within(supporterNav).getByRole('link', { name: /campanha/i })).toHaveAttribute(
       'href',
       '/campaign/campanha-educacao-esperanca'
     );

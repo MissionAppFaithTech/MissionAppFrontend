@@ -106,6 +106,26 @@ export default function ForgotPasswordForm() {
             </Typography>
           </Box>
         ) : null}
+
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} useFlexGap>
+          <PillButton
+            href="/login"
+            tone="primarySoftOutline"
+            fullWidth
+            sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+          >
+            Voltar
+          </PillButton>
+          <PillButton
+            onClick={startOver}
+            tone="primaryOutline"
+            fullWidth
+            sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+            startIcon={<EmailOutlinedIcon />}
+          >
+            Enviar para outro e-mail
+          </PillButton>
+        </Stack>
       </Stack>
     );
   }
@@ -144,6 +164,15 @@ export default function ForgotPasswordForm() {
           startIcon={<PersonAddIcon />}
         >
           Criar uma conta
+        </PillButton>
+
+        <PillButton
+          href="/login"
+          tone="primarySoftOutline"
+          fullWidth
+          sx={{ ...FORM_ACTION_BUTTON_SX, fontWeight: 600 }}
+        >
+          Voltar
         </PillButton>
       </Stack>
     );
